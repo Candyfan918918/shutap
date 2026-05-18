@@ -1,209 +1,223 @@
-# Divorce Rank · 婚姻比惨榜 — Build Plan
+# Post Creation & Viral Distribution Engine
 
-## Scope reality check (please read)
+A 6-screen flow that fires the moment a user receives their **Marriage Drama Score™**, turning each result into a memeable, shareable story card with one-tap distribution to 8+ platforms.
 
-You picked "Everything in v1" + all 4 AI providers + full localization + moderation/leads/trends. That's a **3–6 month engineering project** at production quality. I will build it, but in **6 sequenced phases** so each is reviewable and deployable. After each phase the app works end-to-end at that level of completeness — you can stop, iterate, or continue.
-
-A few firm constraints upfront:
-
-- **Stack swap**: Next.js 15 → **TanStack Start + React 19 + Vite** (same SSR/server-fn/Postgres/pgvector capabilities). All your URL/i18n/SEO requirements still met.
-- **Backend**: Lovable Cloud (Supabase under the hood — Postgres, pgvector, Storage, Auth).
-- **AI providers**:
-  - **Gemini + GPT** → via Lovable AI Gateway, no keys needed, works day 1.
-  - **DeepSeek + ERNIE** → require your API keys. I'll wire stub providers that fall back to Gemini/GPT until you add the keys, so nothing blocks the build.
-- **Apple Sign-In**: architected for (provider abstraction), enabled later — Lovable Cloud auth supports email OTP + Google natively.
-- **Trend ingestion**: X/Twitter and Reddit APIs require paid keys; I'll ship the ingestion framework + admin UI and use Google Trends + a free news API by default.
-- **Legal disclaimer** rendered globally in footer + score result + lead CTA, in current locale.
+This is a growth system, not a CMS. Every screen is mobile-first, emotional, and addictive.
 
 ---
 
-## Phase 1 — Foundation (i18n, design system, auth, schema)
-
-**Goal**: Logged-in user lands on a localized dark "doom-scroll" home with seeded champion-wall cards.
-
-1. **Design system** — dark base, bold display type, oklch tokens in `src/styles.css`; Framer Motion; mobile-first; shadcn/ui themed.
-2. **i18n** — locale-prefixed routes `/$lang/...` where `$lang ∈ {en,zh,es,pt,ja,ko}`; detect via cookie → browser → IP (Cloudflare header) → fallback `en`; JSON message catalogs per locale; `useT()` hook; localized SEO `head()` per route.
-3. **Lovable Cloud enabled**; auth = email OTP + Google (Apple stubbed behind provider interface).
-4. **Auto-nickname system** — `nicknames` table seeded per-locale (200/locale to start); trigger assigns on signup; "Regenerate" button.
-5. **DB schema (migrations)** — see Technical Architecture below.
-6. **Global legal disclaimer** component + footer.
-7. **Homepage v1** — Champion Wall (seeded), CTA section, category chips, trending placeholder. No real stories yet.
-
-**Deliverable**: deployable, multilingual, signed-in users see an emotional home.
-
----
-
-## Phase 2 — Storytelling core loop
-
-**Goal**: Submit story → AI score → personal result page → appears on leaderboard.
-
-1. **Story composer** — title, body, media upload to Cloud Storage (image/video/carousel), tag picker, location (auto from IP, editable).
-2. **AI pipeline** (server functions, one per stage, all written to `story_ai_runs` for replay):
-   - **Rewrite & title** — GPT-5-mini (via gateway).
-   - **Tag detection + structured extraction** — Gemini 3 Flash structured output → `{betrayal, custody, finance, trauma, in_laws, legal_complexity}` 0–100 each.
-   - **Marriage Breakdown Score** — deterministic weighted formula over extracted subscores → 0–1000 + category label; AI generates 1-sentence "verdict".
-   - **Embedding** — Gemini embedding → `vector(768)` in pgvector.
-   - **Chinese semantic pass** — ERNIE if key present, else Gemini with CN-specific prompt (彩礼/婆媳/冷暴力/房产纠纷 detectors).
-   - **DeepSeek** — secondary structured re-scoring if key present (ensemble averaging).
-3. **Score reveal screen** — dramatic Framer Motion animation, subscore bars, "more tragic than X% of users" percentile, **share card generator** (canvas → PNG, 3 templates: score / ranking / story preview, optimized 1080×1350 + 1080×1920).
-4. **Leaderboards** — materialized views: city / state / country / global × daily/weekly/all-time + category-specific (cheating/custody/finance/in-laws). Server-fn refresh on new score; cron-style refresh every 10 min via `pg_cron`.
-
-**Deliverable**: complete viral loop works.
-
----
-
-## Phase 3 — Feed + recommendations
-
-**Goal**: TikTok-style vertical feed with real personalization.
-
-1. **Feed UI** — full-screen swipeable cards, video autoplay, like / save / comment / share / "Been through this" / "Worse than mine" / report.
-2. **Tabs** — For You · Similar To Me · Near You · Trending · Recovery · Legendary Disasters.
-3. **Recommendation engine** (server function `getFeed`):
-   - Candidate generation: pgvector kNN on user's emotional embedding (avg of liked + own stories) + geo + trending pool.
-   - Scoring: `0.4·cosine_sim + 0.2·behavior_sim + 0.15·geo + 0.15·trending + 0.10·engagement_pred`.
-   - Gemini re-rank pass on top 50 → final 20 (uses session signals for retention optimization).
-   - Updates user embedding on every meaningful action (like, save, dwell>3s, comment).
-4. **Comments** — threaded, AI-moderated on submit.
-
-**Deliverable**: doom-scroll feed feels personalized after a few interactions.
-
----
-
-## Phase 4 — Moderation + safety
-
-**Goal**: No PII ships, harassment auto-handled.
-
-1. **PII redaction** — regex sweep (phones, emails, addresses, IDs) + Gemini NER pass (names, employers, schools) → masked tokens before publish.
-2. **Tri-state classifier** (`safe` / `sensitive` / `dangerous`) — Gemini structured output; dangerous → reject; sensitive → manual queue.
-3. **Comment moderation** — same pipeline, sync.
-4. **Report flow** + admin queue.
-
-**Deliverable**: every published post is screened; nothing identifying leaks.
-
----
-
-## Phase 5 — Law firm leads + admin dashboard
-
-**Goal**: Soft monetization + operator tooling.
-
-1. **Lead capture** — triggered when score > 700 OR specific tags (custody/finance/abuse); modal collects optional email/phone/WeChat + case type/urgency; writes to `leads` table.
-2. **Admin** (gated by `user_roles.role = 'admin'`):
-   - Moderation queue (sensitive / reported).
-   - Lead CRM (filter by country/city/case type/urgency, export CSV).
-   - Nickname list upload (CSV per locale).
-   - Trend manager (see Phase 6).
-   - Ranking overrides (pin / unfeature).
-   - Analytics: DAU/WAU, retention cohorts, shares per story, leaderboard engagement, story upload rate, lead conversion.
-
-**Deliverable**: you can operate the product.
-
----
-
-## Phase 6 — Trend ingestion + polish
-
-**Goal**: Daily trending topics drive content, share funnels work everywhere.
-
-1. **Trend ingestion** — server functions hitting Google Trends (free), GDELT/NewsAPI for news, with adapter slots for X & Reddit (activate when keys added). Admin reviews → publishes as "Today's tragic theme" banner with bilingual AI-generated framing.
-2. **Deep links + Open Graph** — per-story share URLs with localized OG cards (server-rendered with @vercel/og-equivalent via canvas server fn).
-3. **Performance pass** — ISR-style cached leaderboards, image optimization, lazy media, Lighthouse > 90.
-4. **Push notifications** — web push opt-in for: someone ranked higher than you, daily trending, your story trending.
-
-**Deliverable**: launch-ready.
-
----
-
-## Technical Architecture
-
-### Database (Supabase / Postgres + pgvector)
+## 1. UX Flow (6 stages)
 
 ```text
-profiles(id pk → auth.users, nickname, locale, country, region, city, created_at)
-user_roles(user_id, role enum['admin','moderator','user'])  -- separate table, has_role() SECURITY DEFINER
-nicknames(id, locale, text, used_count)
-stories(id, author_id, locale, country, region, city,
-        title, body_original, body_rewritten, media jsonb,
-        tags text[], status enum['draft','published','sensitive','removed'],
-        score int, score_category text, subscores jsonb,
-        embedding vector(768), created_at, published_at)
-story_ai_runs(id, story_id, stage, provider, model, input, output, cost_ms, created_at)
-story_interactions(id, user_id, story_id, kind enum['view','like','save','share','been_through','worse','report'], dwell_ms, created_at)
-comments(id, story_id, user_id, body, status, created_at)
-leaderboards_mv (materialized: scope, scope_id, period, category, story_id, rank, score)
-leads(id, user_id, story_id, case_type, urgency, country, city, contact jsonb, status, created_at)
-trends(id, source, topic, locale, raw jsonb, ai_framing jsonb, status, scheduled_for)
-notifications(id, user_id, kind, payload, read_at, created_at)
+[Drama Scan complete]
+        │
+        ▼
+┌──────────────────────────┐
+│ 1. Score Reveal          │  (already exists — entry point)
+│    742 / 1000            │
+│    "Netflix Original™"   │
+│   [Turn this into a post]│
+└──────────────────────────┘
+        │
+        ▼
+┌──────────────────────────┐
+│ 2. AI Draft (auto-gen)   │  spinner: "Writing your story…"
+│   Title + Story + Badges │  ~2s
+└──────────────────────────┘
+        │
+        ▼
+┌──────────────────────────┐
+│ 3. Composer / Preview    │  ← editable
+│   Title (tap to edit)    │
+│   Score Card Visual      │
+│   AI Story (tap to edit) │
+│   [+ Add photo/video]    │
+│                          │
+│  Tone chips:             │
+│  [Funny][Serious]        │
+│  [Chaotic][Soft]         │
+│                          │
+│  [Regenerate]            │
+│  [Approve & Post]   ←CTA │
+└──────────────────────────┘
+        │
+        ▼
+┌──────────────────────────┐
+│ 4. Publish               │  status: draft → published
+│  - insert into feed      │
+│  - assign tags/locale    │
+│  - mint /post/{id}       │
+│  - render share images   │
+└──────────────────────────┘
+        │
+        ▼
+┌──────────────────────────┐
+│ 5. Viral Share Popup     │  full-screen, confetti
+│  "Ready to go viral"     │
+│  ┌──┐┌──┐┌──┐┌──┐        │
+│  │X ││XHS││TT││IG│       │
+│  ┌──┐┌──┐┌──┐┌──┐        │
+│  │FB││iMsg││WA││Copy│    │
+│  Preview card image      │
+└──────────────────────────┘
+        │
+        ▼
+┌──────────────────────────┐
+│ 6. Reaction Loop         │  returns user to /post/{id}
+│  live likes/comments     │
+│  rank delta badge        │
+│  "+12 reactions in 1m"   │
+└──────────────────────────┘
 ```
 
-RLS: stories readable when `status='published'`; writable by author; admin via `has_role()`. Leads readable only by admins. Interactions write-own-only.
+---
 
-### Server functions (`src/lib/*.functions.ts`)
+## 2. AI Generation System
 
-`auth`, `nicknames`, `stories.submit / publish / get / feed`, `ai.score / rewrite / extract / embed / moderate`, `rankings.get / refresh`, `interactions.log`, `comments.*`, `leads.submit / list`, `trends.ingest / publish`, `admin.*`. All AI calls go through one `aiGateway.ts` helper that picks provider per stage with graceful fallback.
+**Server function:** `generateStoryDraft` (Lovable AI Gateway, `google/gemini-3-flash-preview` default, GPT/DeepSeek fallback).
 
-### File layout
+Input:
+- `score` (0–1000), `category` (Netflix Original™ / Romcom / Sitcom / Indie Drama / Sweet™)
+- `subscores` JSON (twist, damage, money, family, comms, love)
+- `tags[]`, `locale`, optional `raw_answers`
+- `tone`: `funny | serious | chaotic | soft` (default `funny`)
+- `regenerate_seed` (rotates wording)
 
-```text
-src/
-  routes/
-    __root.tsx
-    $lang/
-      index.tsx               # home (champion wall + CTA + feed preview)
-      feed.tsx                # vertical doom-scroll
-      story.$id.tsx           # story detail + share OG
-      submit.tsx              # composer
-      rankings.tsx            # leaderboards browser
-      profile.$id.tsx
-      login.tsx
-      _authenticated/
-        me.tsx
-        admin/...             # gated by role
-    api/public/
-      og.$storyId.ts          # OG image server route
-      webhooks/...
-  lib/
-    i18n/                     # detect, messages/{en,zh,es,pt,ja,ko}.json, useT
-    ai/                       # gateway, prompts, providers (gemini/gpt/deepseek/ernie)
-    *.functions.ts            # server fns
-    *.server.ts               # server-only helpers
-  components/
-    feed/ ranking/ story/ share-card/ ui/
-  styles.css
+Output (Zod-validated):
+```ts
+{
+  title: string,           // viral hook ≤ 80 chars
+  story: string,           // 60–180 chars, memeable
+  badges: string[],        // 2–3 (e.g. "Plot Twist: High")
+  hashtags: string[],      // 3–5 locale-aware
+  platform_captions: {     // pre-formatted, per platform
+    x, tiktok, instagram, xiaohongshu, facebook, imessage, whatsapp
+  }
+}
 ```
 
-### AI provider strategy
+Guardrails: empathy-first, never judgmental, light dark-humor. Strip names, addresses, numbers via PII redaction before model call.
 
-Single `pickModel(stage, locale)` resolver:
+---
 
-| Stage | Primary | Fallback |
+## 3. Share Card Image Engine
+
+Server route `POST /api/share-card` — uses `satori` + `resvg-wasm` (edge-safe) to render SVG → PNG.
+
+Three formats per post, rendered on publish and cached in `story-media` bucket:
+- `square_1080.png` — IG/X feed
+- `vertical_1920.png` — TikTok / IG Story
+- `xhs_1242x1660.png` — Xiaohongshu cover
+
+Layout: huge score in tier color, category banner, AI title (text-balance), 2–3 badges, watermark `marriagedrama.app/post/{id}` + QR.
+
+If user uploaded media → composited as background with dark overlay; else gradient based on score tier (legendary/high/mid/low/sweet).
+
+---
+
+## 4. Multi-platform Share Formatter
+
+`buildShareIntent(platform, post)` returns `{ url, text, image }`.
+
+| Platform | Channel | Caption shape |
 |---|---|---|
-| Rewrite/title | `openai/gpt-5-mini` | `google/gemini-3-flash-preview` |
-| Tag + subscore extraction | `google/gemini-3-flash-preview` (structured) | — |
-| Embedding | Gemini embedding | — |
-| CN nuance | ERNIE (if key) | Gemini w/ CN prompt |
-| Ensemble re-score | DeepSeek (if key) | skip |
-| Feed re-rank | `google/gemini-3-flash-preview` | — |
-| Moderation | `google/gemini-3-flash-preview` structured | — |
-| Share-card copy | `openai/gpt-5-mini` | Gemini |
+| X | `https://x.com/intent/tweet?...` | hook + score + link + 2 hashtags |
+| Facebook | `sharer.php?u=` | link only (FB scrapes OG) |
+| WhatsApp | `wa.me/?text=` | one-liner + link |
+| iMessage | `sms:&body=` | casual one-liner + link |
+| Copy Link | clipboard | `/post/{id}` |
+| TikTok | "Save video → open TikTok" modal (no web intent) | caption pre-copied + vertical PNG downloaded |
+| Instagram | Same (no web share intent) | square PNG downloaded + caption to clipboard |
+| Xiaohongshu | Same (no web intent) | XHS cover PNG + long-form caption to clipboard |
 
-### Localization
-
-Locale catalogs as JSON, type-safe `t('key', vars)`; locale is the first URL segment; all server-fn outputs (titles, summaries, verdicts, nicknames, push copy) generated **in the request locale**; `head()` per route emits localized title/description/og.
-
-### Security & safety
-
-- `user_roles` table + `has_role()` SECURITY DEFINER (per Lovable rules).
-- All AI keys server-side only; `LOVABLE_API_KEY` via `process.env` inside handlers.
-- Zod validation on every server-fn input with length/format limits.
-- PII redaction before insert.
-- Disclaimer rendered on home footer, every story page, score reveal, lead modal, in current locale.
-- Rate limiting on submit/comment via a Postgres token-bucket function.
+Every caption ends with localized deep-link CTA: **"See your own Marriage Drama Score → marriagedrama.app"** / **"测一下你的婚姻戏剧值"**.
 
 ---
 
-## What I need from you before Phase 1
+## 5. Backend Data Model (migration)
 
-1. **Confirm**: proceed with Phase 1 now (foundation + seeded home + auth + i18n + dark design system)? After it deploys you review and we proceed to Phase 2.
-2. **DeepSeek + ERNIE keys**: provide later when ready (I'll add stubs now). Confirm OK.
-3. **Domain for share cards / deep links**: use the default `*.lovable.app` for now, custom domain later?
+New tables (RLS enforced):
 
-When you say "go", I start Phase 1.
+- **`posts`** — `id, story_id (fk stories), author_id, status (draft|published|removed), title, story_text, tone, badges[], hashtags[], media_url, share_card_square, share_card_vertical, share_card_xhs, platform_captions jsonb, locale, score, score_category, created_at, published_at`
+- **`post_approvals`** — `id, post_id, user_id, approved_at, version_snapshot jsonb` (audit trail for "user explicitly approved")
+- **`post_shares`** — `id, post_id, user_id, platform, shared_at, referrer_clicks int default 0`
+- **`post_reactions`** — `id, post_id, user_id, kind (been_there|worse|hug|laugh|drama), created_at`
+
+Extend `stories` with `post_id` back-pointer for the feed-side query.
+
+RLS:
+- `posts`: published readable to all; author or admin can update; insert by owner only.
+- `post_approvals` / `post_shares`: owner insert + admin read.
+- `post_reactions`: any authenticated user insert; everyone reads aggregates via view.
+
+Indexes: `posts(status, published_at desc)`, `post_shares(post_id)`, `post_reactions(post_id, kind)`.
+
+---
+
+## 6. Server functions (`src/lib/posts.functions.ts`)
+
+- `generateStoryDraft({ scoreContext, tone, seed })` — AI draft, no DB write
+- `createDraftPost({ storyId, draft })` — insert `posts` row status=`draft`
+- `updateDraftPost({ postId, patch })`
+- `regenerateCaption({ postId, tone })`
+- `approveAndPublish({ postId })` — flips status, inserts `post_approvals`, kicks off `renderShareCards` (awaited), returns `{ url, captions, cards }`
+- `recordShare({ postId, platform })`
+- `getPostReactions({ postId })` — for the reaction loop polling
+
+All protected with `requireSupabaseAuth` except `getPostReactions` (public, admin-elevated read on published posts).
+
+---
+
+## 7. Frontend components (`src/components/post-engine/`)
+
+- `ScoreRevealCTA.tsx` — "Turn this into a post" button on score screen
+- `DraftComposer.tsx` — full preview/edit screen (steps 2–3)
+- `ToneSwitcher.tsx` — pill chips, triggers regenerate
+- `MediaUploader.tsx` — image/short video to `story-media` bucket
+- `ApprovalBar.tsx` — sticky bottom: [Regenerate] [Approve & Post]
+- `ViralSharePopup.tsx` — full-screen modal, confetti, 8 platform buttons, preview card
+- `PlatformShareButton.tsx` — handles intent vs download-and-copy
+- `ReactionPulse.tsx` — live reaction counter on /post/{id}
+
+New route: `src/routes/post.$postId.tsx` — public shareable page with OG/Twitter meta from post data, share card as `og:image`.
+
+---
+
+## 8. Growth loop & deep links
+
+Every share card watermark + every platform caption + every OG image footer includes:
+- localized CTA "See your own score"
+- short link `marriagedrama.app/s/{postId}` → 302 to `/post/{postId}?ref={platform}`
+- `?ref=` increments `post_shares.referrer_clicks` (server route `/api/public/s/$postId`)
+- New visitors landing on a post see floating "Get your score" CTA after 5s scroll
+
+```text
+User A scans → posts → shares to X
+   ↓
+User B sees tweet → clicks link → /post/abc?ref=x
+   ↓
+B reads card → sees CTA → starts own scan
+   ↓
+B posts → shares → loop
+```
+
+---
+
+## 9. Implementation order
+
+1. **DB migration** — `posts`, `post_approvals`, `post_shares`, `post_reactions` + RLS
+2. **i18n keys** — composer, tone chips, share popup, captions (en + zh first; es/pt/ja/ko fallback)
+3. **Server functions** — draft generation (AI), CRUD, approve+publish, share recording
+4. **Share-card renderer** — `satori` + `resvg-wasm` server route, 3 sizes, write to `story-media`
+5. **Composer UI** — `DraftComposer` + `ToneSwitcher` + `MediaUploader` + `ApprovalBar`
+6. **Viral popup** — `ViralSharePopup` with 8 platform buttons + platform formatter
+7. **Public post page** — `/post/$postId` with OG/Twitter meta + reaction loop
+8. **Deep link redirect** — `/api/public/s/$postId` with ref tracking
+9. **Wire entry point** — "Turn this into a post" button on existing score reveal
+10. **Polish** — confetti, framer-motion transitions, haptics on mobile, copy-to-clipboard toasts
+
+---
+
+## Confirm to proceed
+
+I'll start with **steps 1–3** (migration + AI server functions + i18n) in the next turn. Steps 4–10 follow once the data and AI layer are live. The existing homepage stays untouched; this engine plugs into the (still-to-build) score-reveal screen.
