@@ -70,6 +70,36 @@ function QuestionStep() {
     },
   });
 
+  const answers = scan?.answers ?? {};
+  const locale: ScanLocale = (isLocale(scan?.locale) ? (scan!.locale as Locale) : "en") as Locale;
+  const q = scan ? questionByStep(stepIdx, answers) : null;
+  const isCompleted = scan?.status === "completed";
+  const pathExhausted = scan && !isCompleted && !q;
+
+  // Side-effect: redirect when already completed
+  useEffect(() => {
+    if (isCompleted) {
+      navigate({ to: "/scan/result/$scanId", params: { scanId }, replace: true });
+    }
+  }, [isCompleted, navigate, scanId]);
+
+  // Side-effect: complete scan when path is exhausted
+  useEffect(() => {
+    if (!pathExhausted) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await completeFn({ data: { scanId } });
+        if (cancelled) return;
+        qc.invalidateQueries({ queryKey: ["scan", scanId] });
+        navigate({ to: "/scan/result/$scanId", params: { scanId }, replace: true });
+      } catch (e) {
+        if (!cancelled) toast.error(e instanceof Error ? e.message : "Could not finish scan");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [pathExhausted, completeFn, qc, navigate, scanId]);
+
   if (isLoading || !scan) {
     return (
       <div className="min-h-screen grid place-items-center text-muted-foreground">
@@ -78,32 +108,14 @@ function QuestionStep() {
     );
   }
 
-  if (scan.status === "completed") {
-    navigate({ to: "/scan/result/$scanId", params: { scanId } });
-    return null;
-  }
-
-  const answers = scan.answers;
-  const locale: ScanLocale = (isLocale(scan.locale) ? scan.locale : "en") as Locale;
-  const q = questionByStep(stepIdx, answers);
-
-  if (!q) {
-    // Path exhausted — complete the scan
-    void (async () => {
-      try {
-        await completeFn({ data: { scanId } });
-        qc.invalidateQueries({ queryKey: ["scan", scanId] });
-        navigate({ to: "/scan/result/$scanId", params: { scanId }, replace: true });
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Could not finish scan");
-      }
-    })();
+  if (isCompleted || pathExhausted || !q) {
     return (
       <div className="min-h-screen grid place-items-center text-muted-foreground">
         Calculating your drama score…
       </div>
     );
   }
+
 
   const prog = progressInfo(stepIdx, answers);
 
