@@ -18,7 +18,7 @@ const TIER_GRADIENTS: Record<Tier, [string, string]> = {
   high:      ["#ff5a3c", "#ff9a3c"],
   mid:       ["#ffb547", "#ff6a3d"],
   low:       ["#3dbbff", "#7c6aff"],
-  soft:      ["#ff9ec7", "#c084fc"],
+  sweet:     ["#ff9ec7", "#c084fc"],
 };
 
 function escapeXml(s: string): string {
