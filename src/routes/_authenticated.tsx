@@ -7,8 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) {
+    // Use getSession() (local, no network) instead of getUser() to avoid
+    // network-blip false negatives that would bounce signed-in users to /enter.
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
       throw redirect({
         to: "/enter",
         search: { redirect: location.href },

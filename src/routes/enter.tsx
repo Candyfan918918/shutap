@@ -45,7 +45,10 @@ function EnterPage() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/welcome`,
+        },
       });
       if (error) throw error;
       sessionStorage.setItem("md.otpEmail", email);
