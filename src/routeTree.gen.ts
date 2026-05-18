@@ -11,10 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as EnterRouteImport } from './routes/enter'
-import { Route as ComposeRouteImport } from './routes/compose'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
 
@@ -28,9 +29,8 @@ const EnterRoute = EnterRouteImport.update({
   path: '/enter',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ComposeRoute = ComposeRouteImport.update({
-  id: '/compose',
-  path: '/compose',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -48,6 +48,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => EnterRoute,
 } as any)
+const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
+  id: '/compose',
+  path: '/compose',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const ApiPublicShareCardPostIdRoute =
   ApiPublicShareCardPostIdRouteImport.update({
     id: '/api/public/share-card/$postId',
@@ -62,9 +67,9 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/compose': typeof ComposeRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
+  '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
@@ -72,9 +77,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/compose': typeof ComposeRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
+  '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
@@ -83,9 +88,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/compose': typeof ComposeRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
+  '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
@@ -95,9 +101,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/compose'
     | '/enter'
     | '/welcome'
+    | '/compose'
     | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
@@ -105,9 +111,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/compose'
     | '/enter'
     | '/welcome'
+    | '/compose'
     | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
@@ -115,9 +121,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/compose'
+    | '/_authenticated'
     | '/enter'
     | '/welcome'
+    | '/_authenticated/compose'
     | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
@@ -126,7 +133,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ComposeRoute: typeof ComposeRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   EnterRoute: typeof EnterRouteWithChildren
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
@@ -150,11 +157,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/compose': {
-      id: '/compose'
-      path: '/compose'
-      fullPath: '/compose'
-      preLoaderRoute: typeof ComposeRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -178,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
     }
+    '/_authenticated/compose': {
+      id: '/_authenticated/compose'
+      path: '/compose'
+      fullPath: '/compose'
+      preLoaderRoute: typeof AuthenticatedComposeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/share-card/$postId': {
       id: '/api/public/share-card/$postId'
       path: '/api/public/share-card/$postId'
@@ -195,6 +209,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 interface EnterRouteChildren {
   EnterVerifyRoute: typeof EnterVerifyRoute
 }
@@ -207,7 +233,7 @@ const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ComposeRoute: ComposeRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   EnterRoute: EnterRouteWithChildren,
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,

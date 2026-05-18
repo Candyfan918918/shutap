@@ -14,7 +14,7 @@ import {
 } from "@/lib/posts.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 
-export const Route = createFileRoute("/compose")({
+export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
   validateSearch: (s: Record<string, unknown>) => ({
     score: Number(s.score ?? 742),
