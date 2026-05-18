@@ -9,12 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as EnterRouteImport } from './routes/enter'
 import { Route as ComposeRouteImport } from './routes/compose'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
+import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnterRoute = EnterRouteImport.update({
+  id: '/enter',
+  path: '/enter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComposeRoute = ComposeRouteImport.update({
   id: '/compose',
   path: '/compose',
@@ -29,6 +42,11 @@ const PostPostIdRoute = PostPostIdRouteImport.update({
   id: '/post/$postId',
   path: '/post/$postId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const EnterVerifyRoute = EnterVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => EnterRoute,
 } as any)
 const ApiPublicShareCardPostIdRoute =
   ApiPublicShareCardPostIdRouteImport.update({
@@ -45,6 +63,9 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/compose': typeof ComposeRoute
+  '/enter': typeof EnterRouteWithChildren
+  '/welcome': typeof WelcomeRoute
+  '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -52,6 +73,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compose': typeof ComposeRoute
+  '/enter': typeof EnterRouteWithChildren
+  '/welcome': typeof WelcomeRoute
+  '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -60,6 +84,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/compose': typeof ComposeRoute
+  '/enter': typeof EnterRouteWithChildren
+  '/welcome': typeof WelcomeRoute
+  '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -69,6 +96,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/compose'
+    | '/enter'
+    | '/welcome'
+    | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -76,6 +106,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/compose'
+    | '/enter'
+    | '/welcome'
+    | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -83,6 +116,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/compose'
+    | '/enter'
+    | '/welcome'
+    | '/enter/verify'
     | '/post/$postId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -91,6 +127,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComposeRoute: typeof ComposeRoute
+  EnterRoute: typeof EnterRouteWithChildren
+  WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
   ApiPublicShareCardPostIdRoute: typeof ApiPublicShareCardPostIdRoute
@@ -98,6 +136,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enter': {
+      id: '/enter'
+      path: '/enter'
+      fullPath: '/enter'
+      preLoaderRoute: typeof EnterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compose': {
       id: '/compose'
       path: '/compose'
@@ -119,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/enter/verify': {
+      id: '/enter/verify'
+      path: '/verify'
+      fullPath: '/enter/verify'
+      preLoaderRoute: typeof EnterVerifyRouteImport
+      parentRoute: typeof EnterRoute
+    }
     '/api/public/share-card/$postId': {
       id: '/api/public/share-card/$postId'
       path: '/api/public/share-card/$postId'
@@ -136,9 +195,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface EnterRouteChildren {
+  EnterVerifyRoute: typeof EnterVerifyRoute
+}
+
+const EnterRouteChildren: EnterRouteChildren = {
+  EnterVerifyRoute: EnterVerifyRoute,
+}
+
+const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComposeRoute: ComposeRoute,
+  EnterRoute: EnterRouteWithChildren,
+  WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
   ApiPublicShareCardPostIdRoute: ApiPublicShareCardPostIdRoute,

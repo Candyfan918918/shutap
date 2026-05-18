@@ -1,223 +1,144 @@
-# Post Creation & Viral Distribution Engine
+# Identity & Login System — "You've been assigned a character"
 
-A 6-screen flow that fires the moment a user receives their **Marriage Drama Score™**, turning each result into a memeable, shareable story card with one-tap distribution to 8+ platforms.
+A login flow that doesn't feel like signup. Three taps, an IP-aware reveal animation, and the user lands in `/{locale}/home` already a named character.
 
-This is a growth system, not a CMS. Every screen is mobile-first, emotional, and addictive.
+## 1. Auth methods (no passwords)
 
----
+- **Email OTP** (primary) — `supabase.auth.signInWithOtp({ email })` → 6-digit code screen → `verifyOtp`. No password fields, anywhere.
+- **Google** — via Lovable broker `lovable.auth.signInWithOAuth("google", …)`.
+- **Apple** — via Lovable broker `lovable.auth.signInWithOAuth("apple", …)`.
+- Backend toggles: enable Google + Apple via the social-auth config, disable password sign-in, keep email enabled for OTP, do NOT auto-confirm.
 
-## 1. UX Flow (6 stages)
-
-```text
-[Drama Scan complete]
-        │
-        ▼
-┌──────────────────────────┐
-│ 1. Score Reveal          │  (already exists — entry point)
-│    742 / 1000            │
-│    "Netflix Original™"   │
-│   [Turn this into a post]│
-└──────────────────────────┘
-        │
-        ▼
-┌──────────────────────────┐
-│ 2. AI Draft (auto-gen)   │  spinner: "Writing your story…"
-│   Title + Story + Badges │  ~2s
-└──────────────────────────┘
-        │
-        ▼
-┌──────────────────────────┐
-│ 3. Composer / Preview    │  ← editable
-│   Title (tap to edit)    │
-│   Score Card Visual      │
-│   AI Story (tap to edit) │
-│   [+ Add photo/video]    │
-│                          │
-│  Tone chips:             │
-│  [Funny][Serious]        │
-│  [Chaotic][Soft]         │
-│                          │
-│  [Regenerate]            │
-│  [Approve & Post]   ←CTA │
-└──────────────────────────┘
-        │
-        ▼
-┌──────────────────────────┐
-│ 4. Publish               │  status: draft → published
-│  - insert into feed      │
-│  - assign tags/locale    │
-│  - mint /post/{id}       │
-│  - render share images   │
-└──────────────────────────┘
-        │
-        ▼
-┌──────────────────────────┐
-│ 5. Viral Share Popup     │  full-screen, confetti
-│  "Ready to go viral"     │
-│  ┌──┐┌──┐┌──┐┌──┐        │
-│  │X ││XHS││TT││IG│       │
-│  ┌──┐┌──┐┌──┐┌──┐        │
-│  │FB││iMsg││WA││Copy│    │
-│  Preview card image      │
-└──────────────────────────┘
-        │
-        ▼
-┌──────────────────────────┐
-│ 6. Reaction Loop         │  returns user to /post/{id}
-│  live likes/comments     │
-│  rank delta badge        │
-│  "+12 reactions in 1m"   │
-└──────────────────────────┘
-```
-
----
-
-## 2. AI Generation System
-
-**Server function:** `generateStoryDraft` (Lovable AI Gateway, `google/gemini-3-flash-preview` default, GPT/DeepSeek fallback).
-
-Input:
-- `score` (0–1000), `category` (Netflix Original™ / Romcom / Sitcom / Indie Drama / Sweet™)
-- `subscores` JSON (twist, damage, money, family, comms, love)
-- `tags[]`, `locale`, optional `raw_answers`
-- `tone`: `funny | serious | chaotic | soft` (default `funny`)
-- `regenerate_seed` (rotates wording)
-
-Output (Zod-validated):
-```ts
-{
-  title: string,           // viral hook ≤ 80 chars
-  story: string,           // 60–180 chars, memeable
-  badges: string[],        // 2–3 (e.g. "Plot Twist: High")
-  hashtags: string[],      // 3–5 locale-aware
-  platform_captions: {     // pre-formatted, per platform
-    x, tiktok, instagram, xiaohongshu, facebook, imessage, whatsapp
-  }
-}
-```
-
-Guardrails: empathy-first, never judgmental, light dark-humor. Strip names, addresses, numbers via PII redaction before model call.
-
----
-
-## 3. Share Card Image Engine
-
-Server route `POST /api/share-card` — uses `satori` + `resvg-wasm` (edge-safe) to render SVG → PNG.
-
-Three formats per post, rendered on publish and cached in `story-media` bucket:
-- `square_1080.png` — IG/X feed
-- `vertical_1920.png` — TikTok / IG Story
-- `xhs_1242x1660.png` — Xiaohongshu cover
-
-Layout: huge score in tier color, category banner, AI title (text-balance), 2–3 badges, watermark `marriagedrama.app/post/{id}` + QR.
-
-If user uploaded media → composited as background with dark overlay; else gradient based on score tier (legendary/high/mid/low/sweet).
-
----
-
-## 4. Multi-platform Share Formatter
-
-`buildShareIntent(platform, post)` returns `{ url, text, image }`.
-
-| Platform | Channel | Caption shape |
-|---|---|---|
-| X | `https://x.com/intent/tweet?...` | hook + score + link + 2 hashtags |
-| Facebook | `sharer.php?u=` | link only (FB scrapes OG) |
-| WhatsApp | `wa.me/?text=` | one-liner + link |
-| iMessage | `sms:&body=` | casual one-liner + link |
-| Copy Link | clipboard | `/post/{id}` |
-| TikTok | "Save video → open TikTok" modal (no web intent) | caption pre-copied + vertical PNG downloaded |
-| Instagram | Same (no web share intent) | square PNG downloaded + caption to clipboard |
-| Xiaohongshu | Same (no web intent) | XHS cover PNG + long-form caption to clipboard |
-
-Every caption ends with localized deep-link CTA: **"See your own Marriage Drama Score → marriagedrama.app"** / **"测一下你的婚姻戏剧值"**.
-
----
-
-## 5. Backend Data Model (migration)
-
-New tables (RLS enforced):
-
-- **`posts`** — `id, story_id (fk stories), author_id, status (draft|published|removed), title, story_text, tone, badges[], hashtags[], media_url, share_card_square, share_card_vertical, share_card_xhs, platform_captions jsonb, locale, score, score_category, created_at, published_at`
-- **`post_approvals`** — `id, post_id, user_id, approved_at, version_snapshot jsonb` (audit trail for "user explicitly approved")
-- **`post_shares`** — `id, post_id, user_id, platform, shared_at, referrer_clicks int default 0`
-- **`post_reactions`** — `id, post_id, user_id, kind (been_there|worse|hug|laugh|drama), created_at`
-
-Extend `stories` with `post_id` back-pointer for the feed-side query.
-
-RLS:
-- `posts`: published readable to all; author or admin can update; insert by owner only.
-- `post_approvals` / `post_shares`: owner insert + admin read.
-- `post_reactions`: any authenticated user insert; everyone reads aggregates via view.
-
-Indexes: `posts(status, published_at desc)`, `post_shares(post_id)`, `post_reactions(post_id, kind)`.
-
----
-
-## 6. Server functions (`src/lib/posts.functions.ts`)
-
-- `generateStoryDraft({ scoreContext, tone, seed })` — AI draft, no DB write
-- `createDraftPost({ storyId, draft })` — insert `posts` row status=`draft`
-- `updateDraftPost({ postId, patch })`
-- `regenerateCaption({ postId, tone })`
-- `approveAndPublish({ postId })` — flips status, inserts `post_approvals`, kicks off `renderShareCards` (awaited), returns `{ url, captions, cards }`
-- `recordShare({ postId, platform })`
-- `getPostReactions({ postId })` — for the reaction loop polling
-
-All protected with `requireSupabaseAuth` except `getPostReactions` (public, admin-elevated read on published posts).
-
----
-
-## 7. Frontend components (`src/components/post-engine/`)
-
-- `ScoreRevealCTA.tsx` — "Turn this into a post" button on score screen
-- `DraftComposer.tsx` — full preview/edit screen (steps 2–3)
-- `ToneSwitcher.tsx` — pill chips, triggers regenerate
-- `MediaUploader.tsx` — image/short video to `story-media` bucket
-- `ApprovalBar.tsx` — sticky bottom: [Regenerate] [Approve & Post]
-- `ViralSharePopup.tsx` — full-screen modal, confetti, 8 platform buttons, preview card
-- `PlatformShareButton.tsx` — handles intent vs download-and-copy
-- `ReactionPulse.tsx` — live reaction counter on /post/{id}
-
-New route: `src/routes/post.$postId.tsx` — public shareable page with OG/Twitter meta from post data, share card as `og:image`.
-
----
-
-## 8. Growth loop & deep links
-
-Every share card watermark + every platform caption + every OG image footer includes:
-- localized CTA "See your own score"
-- short link `marriagedrama.app/s/{postId}` → 302 to `/post/{postId}?ref={platform}`
-- `?ref=` increments `post_shares.referrer_clicks` (server route `/api/public/s/$postId`)
-- New visitors landing on a post see floating "Get your score" CTA after 5s scroll
+## 2. Routes (mobile-first)
 
 ```text
-User A scans → posts → shares to X
-   ↓
-User B sees tweet → clicks link → /post/abc?ref=x
-   ↓
-B reads card → sees CTA → starts own scan
-   ↓
-B posts → shares → loop
+/enter                      single-screen auth (email field + Google + Apple)
+/enter/verify               6-digit OTP entry (auto-advance, paste-friendly)
+/welcome                    cinematic identity-reveal animation (one-time)
+/{locale}                   localized home (zh, en, ja, es, pt, fr)
+/_authenticated/*           anything that requires a session
 ```
 
----
+The auth gate is the existing `_authenticated` pathless layout — public routes (`/`, `/post/:id`, `/enter*`) stay outside it.
 
-## 9. Implementation order
+## 3. IP + geo localization engine
 
-1. **DB migration** — `posts`, `post_approvals`, `post_shares`, `post_reactions` + RLS
-2. **i18n keys** — composer, tone chips, share popup, captions (en + zh first; es/pt/ja/ko fallback)
-3. **Server functions** — draft generation (AI), CRUD, approve+publish, share recording
-4. **Share-card renderer** — `satori` + `resvg-wasm` server route, 3 sizes, write to `story-media`
-5. **Composer UI** — `DraftComposer` + `ToneSwitcher` + `MediaUploader` + `ApprovalBar`
-6. **Viral popup** — `ViralSharePopup` with 8 platform buttons + platform formatter
-7. **Public post page** — `/post/$postId` with OG/Twitter meta + reaction loop
-8. **Deep link redirect** — `/api/public/s/$postId` with ref tracking
-9. **Wire entry point** — "Turn this into a post" button on existing score reveal
-10. **Polish** — confetti, framer-motion transitions, haptics on mobile, copy-to-clipboard toasts
+Server function `resolveGeoFromRequest()` reads the `cf-ipcountry`, `cf-ipcity`, `cf-region`, `accept-language` headers (Cloudflare Workers populates these for free) and falls back to a free IP lookup if missing. Returns `{ country, region, city, locale }`. The locale is derived as: city-country map → preferred language; overridden by stored `profiles.locale` once the user exists.
 
----
+On first login this geo blob is persisted to `profiles` and used to seed the display name. On every visit it's also used to:
+- pick the default `/{locale}/home` redirect,
+- boost local leaderboard rows in `getLocalLeaderboard()`,
+- tag new posts with `country/region/city`.
 
-## Confirm to proceed
+## 4. Auto display-name generator
 
-I'll start with **steps 1–3** (migration + AI server functions + i18n) in the next turn. Steps 4–10 follow once the data and AI layer are live. The existing homepage stays untouched; this engine plugs into the (still-to-build) score-reveal screen.
+```text
+Display name = [Localized city]  ·  [Localized descriptor]
+```
+
+- `src/lib/identity/city-pools.ts` — curated per-country city pools written in the country's native script (北京 / Tokyo / Paris / Miami).
+- `src/lib/identity/descriptor-pools.ts` — descriptor pools per language (zh / en / ja / es / pt / fr). Each descriptor carries a `vibe` tag (`elegant | wild | soft | sharp | dreamy | royal | playful`) that drives avatar colors.
+- `generateDisplayName(geo)` picks city by country, descriptor by locale, joins with locale-aware separator (`·` for CJK, ` · ` for Latin), and re-rolls up to 5× if the result already exists in `profiles.nickname`.
+
+## 5. Procedural avatar generator (no external image call)
+
+Avatars are SVG data-URIs generated client + server side from a seed derived from `userId + descriptor.vibe`:
+- vibe → 2-stop gradient palette (e.g. `wild` → crimson/violet, `elegant` → ink/champagne),
+- seeded geometric ornament (rings, blobs, or sparkles),
+- 2-character monogram from the city in the native script (北 / NY / 東 / PA).
+
+Result: a 512×512 SVG stored as `profiles.avatar_url` (data URL kept short; ~2 KB). Zero AI cost, instant, theme-consistent, and easy to re-roll. A "Re-roll my character" button on the welcome screen regenerates name+avatar+vibe.
+
+## 6. Database changes (single migration)
+
+Extend `profiles` to capture the new identity fields and store one identity record per user. Existing rows are backfilled with safe defaults so RLS keeps working.
+
+Added columns on `public.profiles`:
+- `email text` — mirrored from `auth.users.email` via the existing `handle_new_user` trigger.
+- `display_name text` — the generated "City · Descriptor".
+- `avatar_url text` — SVG data URI.
+- `vibe text` — descriptor vibe tag (drives avatar/UI accents).
+- `descriptor text`, `city_label text` — raw parts for re-roll.
+- `country_code text` — ISO 3166-1 alpha-2 (already had `country` text; this normalizes it).
+- `onboarded_at timestamptz` — null until the welcome reveal is dismissed.
+- `last_seen_at timestamptz`.
+
+The existing `handle_new_user` trigger is replaced with a new version that:
+1. inserts `profiles` with locale from `raw_user_meta_data`,
+2. copies email,
+3. picks a temporary nickname from the `nicknames` table so RLS-dependent code stays green,
+4. leaves `display_name`/`avatar_url`/`onboarded_at` null — filled by the welcome screen via a `finalizeIdentity` server function so geo headers are available.
+
+No new tables required (the `profiles` table already exists and is referenced everywhere).
+
+## 7. Server functions
+
+- `resolveGeoFromRequest()` — reads CF headers, returns `{country, region, city, locale}`. Used during OTP verify and welcome screen.
+- `finalizeIdentity({ rerollSeed? })` — protected. Looks up profile, calls `generateDisplayName(geo)` + `generateAvatar(seed)`, writes the four identity fields, sets `onboarded_at` if first run, returns the full identity payload.
+- `getMyIdentity()` — protected. Returns the current profile's identity block; used by `_authenticated` root to render the avatar in the top bar.
+
+## 8. UI components
+
+```text
+src/routes/enter.tsx                  single-screen auth (email + Google + Apple)
+src/routes/enter.verify.tsx           OTP entry with auto-advance inputs
+src/routes/welcome.tsx                identity-reveal animation + re-roll + CTA
+src/components/auth/EnterCard.tsx
+src/components/auth/OtpInput.tsx
+src/components/identity/AvatarSvg.tsx          renders SVG from vibe + seed
+src/components/identity/IdentityReveal.tsx     framer-motion reveal sequence
+src/components/identity/IdentityBadge.tsx      avatar + name pill for headers
+src/lib/identity/city-pools.ts
+src/lib/identity/descriptor-pools.ts
+src/lib/identity/generate-name.ts
+src/lib/identity/generate-avatar.ts            pure, seedable, returns SVG string
+src/lib/geo/resolve.server.ts                  reads CF headers
+src/lib/identity.functions.ts                  finalizeIdentity, getMyIdentity
+```
+
+Welcome screen sequence (≈3.5 s):
+1. Black screen → spinning sigil while `finalizeIdentity` runs.
+2. Avatar scales in with blur-out + drop shadow (spring).
+3. Display name types in character-by-character.
+4. Country flag + city label fade in below.
+5. CTA pill "Enter the Marriage Drama Universe →" pulses.
+6. Tiny "🎲 re-roll my character" link at the bottom calls `finalizeIdentity({rerollSeed})` again.
+
+## 9. Localization wiring
+
+Existing `I18nProvider` + `messages.ts` already covers 6 locales. We:
+- add `enter.*`, `welcome.*`, and `identity.vibes.*` keys for all locales,
+- detect locale via geo → stored profile locale → browser → `en`,
+- after welcome, navigate to `/${locale}` (existing home is `/`; add a passthrough `/{locale}` route that renders the home and sets the I18n locale).
+
+## 10. Security
+
+- Email OTP rate-limited by Supabase Auth; we additionally short-circuit repeated sends from the same IP within 30 s in the server function.
+- `finalizeIdentity` is idempotent: re-roll allowed, but `onboarded_at` only set once; cannot overwrite another user's row (`auth.uid()` enforced via RLS on `profiles`).
+- Geo headers are server-only; client never receives the raw IP.
+- No PII beyond email is stored. OAuth `name` and `picture` are deliberately discarded — the assigned identity is the only identity.
+- Enable Supabase HIBP password check is moot (no passwords), but we still flip `disable_signup=false`, `auto_confirm_email=false`, `external_anonymous_users_enabled=false`.
+
+## 11. Build order
+
+1. Migration: extend `profiles`, update `handle_new_user` trigger.
+2. `supabase--configure_social_auth` for Google + Apple; `configure_auth` to lock down policy.
+3. Geo resolver + identity pools + pure generators (city/descriptor/avatar/name).
+4. Server functions `finalizeIdentity` / `getMyIdentity` / geo helper.
+5. `/enter` + `/enter/verify` screens with OTP flow.
+6. `/welcome` cinematic reveal.
+7. Wire `IdentityBadge` into existing top bar; redirect signed-in users from `/enter` → `/welcome` (if `onboarded_at` null) or `/{locale}` (otherwise).
+8. i18n keys for all 6 locales.
+9. Replace any "sign up / sign in" copy in existing screens with "Enter".
+
+## Technical details
+
+- **Geo source**: Cloudflare Workers headers (`cf-ipcountry`, `cf-region`, `cf-ipcity`, `cf-iplongitude`, `cf-iplatitude`). No external API call, no extra latency, no key to manage. Falls back to `accept-language` for locale and `'XX'` country if missing (local dev).
+- **OTP UI**: 6 numeric inputs with `inputMode="numeric"`, auto-advance on key, paste-distribute on paste, auto-submit on 6th digit.
+- **Welcome animation**: framer-motion + a tiny custom typewriter hook. No external libs.
+- **Avatar SVG**: pure function `generateAvatar({seed, vibe, monogram}) → string`. Stored as `data:image/svg+xml;base64,...`. Average size 1.8–2.2 KB; well under any column limits and cacheable in `<img src>`.
+- **Re-roll**: client passes `rerollSeed = Date.now()` so the server picks fresh descriptor + avatar; the city stays (city is geo, not random).
+- **Locale routing**: `/` already renders the home; we add an optional `/{locale}` passthrough so deep-linked OG share URLs remain `/post/:id` (locale-free) while the post-welcome navigation hits `/zh`, `/en`, etc.
+- **Cost**: zero per-user AI spend. If you later want AI portraits, swap `generateAvatar` for a Lovable AI image call — the rest of the system stays identical.
+
+Shall I start with steps 1–4 (migration + auth config + pools + server functions) and then ping you before building the screens?
