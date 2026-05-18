@@ -12,12 +12,14 @@ import {
   updateDraftPost,
   approveAndPublish,
 } from "@/lib/posts.functions";
+import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
   validateSearch: (s: Record<string, unknown>) => ({
     score: Number(s.score ?? 742),
+    scanId: typeof s.scanId === "string" ? s.scanId : undefined,
   }),
   head: () => ({ meta: [{ title: "Compose your Marriage Drama post" }] }),
 });
@@ -38,13 +40,14 @@ function ComposeShell() {
 function Composer() {
   const { t, locale } = useT();
   const navigate = useNavigate();
-  const { score } = Route.useSearch();
+  const { score, scanId } = Route.useSearch();
   const category = scoreCategoryLabel(score);
 
   const genDraft = useServerFn(generateStoryDraft);
   const createDraft = useServerFn(createDraftPost);
   const updateDraft = useServerFn(updateDraftPost);
   const publish = useServerFn(approveAndPublish);
+  const linkScan = useServerFn(linkScanToPost);
 
   const [tone, setTone] = useState<PostTone>("funny");
   const [draft, setDraft] = useState<DraftPayload | null>(null);
@@ -113,6 +116,13 @@ function Composer() {
         },
       });
       await publish({ data: { postId } });
+      if (scanId) {
+        try {
+          await linkScan({ data: { scanId, postId } });
+        } catch {
+          /* non-fatal — the post is published either way */
+        }
+      }
       navigate({ to: "/post/$postId", params: { postId }, search: { shared: 0 } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Publish failed");

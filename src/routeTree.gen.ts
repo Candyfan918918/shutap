@@ -16,8 +16,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
+import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
+import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
+import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
+import { Route as AuthenticatedScanResultScanIdRouteImport } from './routes/_authenticated/scan/result.$scanId'
+import { Route as AuthenticatedScanQuestionStepRouteImport } from './routes/_authenticated/scan/question.$step'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -53,6 +58,22 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
+  id: '/scan/',
+  path: '/scan/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedScanStartRoute = AuthenticatedScanStartRouteImport.update({
+  id: '/scan/start',
+  path: '/scan/start',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProfileScansRoute =
+  AuthenticatedProfileScansRouteImport.update({
+    id: '/profile/scans',
+    path: '/profile/scans',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiPublicShareCardPostIdRoute =
   ApiPublicShareCardPostIdRouteImport.update({
     id: '/api/public/share-card/$postId',
@@ -64,6 +85,18 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
   path: '/api/public/s/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedScanResultScanIdRoute =
+  AuthenticatedScanResultScanIdRouteImport.update({
+    id: '/scan/result/$scanId',
+    path: '/scan/result/$scanId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedScanQuestionStepRoute =
+  AuthenticatedScanQuestionStepRouteImport.update({
+    id: '/scan/question/$step',
+    path: '/scan/question/$step',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,6 +105,11 @@ export interface FileRoutesByFullPath {
   '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/profile/scans': typeof AuthenticatedProfileScansRoute
+  '/scan/start': typeof AuthenticatedScanStartRoute
+  '/scan/': typeof AuthenticatedScanIndexRoute
+  '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
+  '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -82,6 +120,11 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/profile/scans': typeof AuthenticatedProfileScansRoute
+  '/scan/start': typeof AuthenticatedScanStartRoute
+  '/scan': typeof AuthenticatedScanIndexRoute
+  '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
+  '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -94,6 +137,11 @@ export interface FileRoutesById {
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
+  '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
+  '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
+  '/_authenticated/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
+  '/_authenticated/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -106,6 +154,11 @@ export interface FileRouteTypes {
     | '/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/profile/scans'
+    | '/scan/start'
+    | '/scan/'
+    | '/scan/question/$step'
+    | '/scan/result/$scanId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   fileRoutesByTo: FileRoutesByTo
@@ -116,6 +169,11 @@ export interface FileRouteTypes {
     | '/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/profile/scans'
+    | '/scan/start'
+    | '/scan'
+    | '/scan/question/$step'
+    | '/scan/result/$scanId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   id:
@@ -127,6 +185,11 @@ export interface FileRouteTypes {
     | '/_authenticated/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/_authenticated/profile/scans'
+    | '/_authenticated/scan/start'
+    | '/_authenticated/scan/'
+    | '/_authenticated/scan/question/$step'
+    | '/_authenticated/scan/result/$scanId'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   fileRoutesById: FileRoutesById
@@ -192,6 +255,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/scan/': {
+      id: '/_authenticated/scan/'
+      path: '/scan'
+      fullPath: '/scan/'
+      preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/scan/start': {
+      id: '/_authenticated/scan/start'
+      path: '/scan/start'
+      fullPath: '/scan/start'
+      preLoaderRoute: typeof AuthenticatedScanStartRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile/scans': {
+      id: '/_authenticated/profile/scans'
+      path: '/profile/scans'
+      fullPath: '/profile/scans'
+      preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/share-card/$postId': {
       id: '/api/public/share-card/$postId'
       path: '/api/public/share-card/$postId'
@@ -206,15 +290,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/scan/result/$scanId': {
+      id: '/_authenticated/scan/result/$scanId'
+      path: '/scan/result/$scanId'
+      fullPath: '/scan/result/$scanId'
+      preLoaderRoute: typeof AuthenticatedScanResultScanIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/scan/question/$step': {
+      id: '/_authenticated/scan/question/$step'
+      path: '/scan/question/$step'
+      fullPath: '/scan/question/$step'
+      preLoaderRoute: typeof AuthenticatedScanQuestionStepRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+  AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
+  AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
+  AuthenticatedScanIndexRoute: typeof AuthenticatedScanIndexRoute
+  AuthenticatedScanQuestionStepRoute: typeof AuthenticatedScanQuestionStepRoute
+  AuthenticatedScanResultScanIdRoute: typeof AuthenticatedScanResultScanIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+  AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
+  AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
+  AuthenticatedScanIndexRoute: AuthenticatedScanIndexRoute,
+  AuthenticatedScanQuestionStepRoute: AuthenticatedScanQuestionStepRoute,
+  AuthenticatedScanResultScanIdRoute: AuthenticatedScanResultScanIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -243,13 +351,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
