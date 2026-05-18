@@ -40,13 +40,14 @@ function ComposeShell() {
 function Composer() {
   const { t, locale } = useT();
   const navigate = useNavigate();
-  const { score } = Route.useSearch();
+  const { score, scanId } = Route.useSearch();
   const category = scoreCategoryLabel(score);
 
   const genDraft = useServerFn(generateStoryDraft);
   const createDraft = useServerFn(createDraftPost);
   const updateDraft = useServerFn(updateDraftPost);
   const publish = useServerFn(approveAndPublish);
+  const linkScan = useServerFn(linkScanToPost);
 
   const [tone, setTone] = useState<PostTone>("funny");
   const [draft, setDraft] = useState<DraftPayload | null>(null);
