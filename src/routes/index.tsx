@@ -234,12 +234,14 @@ function MainCTA() {
         {t("cta.headline")}
       </motion.h2>
       <p className="mt-4 text-muted-foreground text-balance">{t("cta.sub")}</p>
-      <motion.button
-        whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-        className="mt-8 inline-flex items-center gap-2 px-7 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-base sm:text-lg ring-danger shadow-xl"
-      >
-        🎬 {t("cta.button")} →
-      </motion.button>
+      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-8 inline-block">
+        <Link
+          to="/scan"
+          className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-base sm:text-lg ring-danger shadow-xl"
+        >
+          🎬 {t("cta.button")} →
+        </Link>
+      </motion.div>
       <p className="mt-3 text-xs text-muted-foreground">{t("cta.hint")}</p>
     </section>
   );
