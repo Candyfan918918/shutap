@@ -18,7 +18,7 @@ export const en = {
   appName: "Marriage Drama",
   tagline: "The truth about marriage. Funny. Real. Unfiltered.",
   disclaimer: "For entertainment only. Not therapy, not legal advice — but maybe better than both.",
-  nav: { feed: "Feed", rankings: "Rankings", submit: "Share", language: "Language" },
+  nav: { feed: "Feed", rankings: "Rankings", submit: "Share", language: "Language", enter: "Enter", finishOnboarding: "Finish onboarding" },
   wall: {
     title: "🌍 The Truth of Marriage Around the World",
     subtitle: "Love. Chaos. Plot twists. We've seen everything.",
@@ -190,7 +190,7 @@ const zh: Messages = {
   appName: "婚姻真相局",
   tagline: "婚姻的真相。好笑。真实。零滤镜。",
   disclaimer: "仅供娱乐，不是心理咨询也不是法律建议——但可能比两者都管用。",
-  nav: { feed: "信息流", rankings: "榜单", submit: "投稿", language: "语言" },
+  nav: { feed: "信息流", rankings: "榜单", submit: "投稿", language: "语言", enter: "进入", finishOnboarding: "完成入场" },
   wall: {
     title: "🌍 全世界婚姻真相现场",
     subtitle: "爱情、狗血、反转，我们什么都见过。",

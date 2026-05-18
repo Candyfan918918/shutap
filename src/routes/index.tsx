@@ -9,6 +9,7 @@ import {
   SUPPORTED_LOCALES,
   type Locale,
 } from "@/lib/i18n";
+import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
@@ -127,27 +128,30 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
           </div>
           <span className="font-semibold tracking-tight">{t("appName")}</span>
         </div>
-        <div className="relative">
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border hover:border-primary/50 transition"
-            aria-label={t("nav.language")}
-          >
-            🌐 {LOCALE_LABELS[locale]}
-          </button>
-          {open && (
-            <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1 shadow-xl">
-              {SUPPORTED_LOCALES.map((l) => (
-                <button
-                  key={l}
-                  onClick={() => { onChange(l); setOpen(false); }}
-                  className={`w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition ${l === locale ? "text-primary" : ""}`}
-                >
-                  {LOCALE_LABELS[l]}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <IdentityHeaderSlot />
+          <div className="relative">
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border hover:border-primary/50 transition"
+              aria-label={t("nav.language")}
+            >
+              🌐 {LOCALE_LABELS[locale]}
+            </button>
+            {open && (
+              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1 shadow-xl">
+                {SUPPORTED_LOCALES.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => { onChange(l); setOpen(false); }}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition ${l === locale ? "text-primary" : ""}`}
+                  >
+                    {LOCALE_LABELS[l]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
