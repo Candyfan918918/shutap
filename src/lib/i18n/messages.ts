@@ -1,4 +1,4 @@
-// Centralized i18n message catalogs. Type-safe via `keyof typeof en`.
+// Centralized i18n message catalogs. Type-safe via deep keyof.
 // Add new keys to `en` first; other locales fall back to `en` when missing.
 
 export const SUPPORTED_LOCALES = ["en", "zh", "es", "pt", "ja", "ko"] as const;
@@ -14,276 +14,211 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   ko: "한국어",
 };
 
-export const en: Messages = {
-  appName: "Divorce Rank",
-  tagline: "How tragic is your marriage?",
-  disclaimer: "For entertainment and informational purposes only. Not legal advice.",
+export const en = {
+  appName: "Marriage Drama",
+  tagline: "The truth about marriage. Funny. Real. Unfiltered.",
+  disclaimer: "For entertainment only. Not therapy, not legal advice — but maybe better than both.",
   nav: {
-    home: "Home",
     feed: "Feed",
     rankings: "Rankings",
-    submit: "Tell My Story",
-    profile: "Me",
-    login: "Sign in",
-    logout: "Sign out",
+    submit: "Share",
+    language: "Language",
   },
-  home: {
-    championWallTitle: "🏆 Global Champion Wall",
-    championWallSubtitle: "The most tragic marriage in every country, ranked.",
-    ctaHeadline: "How tragic is your marriage?",
-    ctaSub: "Submit your story. Our AI scores 0–1000. See where you rank.",
-    ctaButton: "Calculate My Marriage Score",
-    categoriesTitle: "Trending categories",
-    trendingTitle: "Trending stories",
+  wall: {
+    title: "🌍 The Truth of Marriage Around the World",
+    subtitle: "Love. Chaos. Plot twists. We've seen everything.",
+    chips: { global: "Global #1", country: "Country #1", city: "City #1", trending: "🔥 Trending" },
     readStory: "Read story",
-    score: "Score",
-    rank: "#",
+    dramaScore: "Drama Score",
   },
-  categories: {
-    cheating: "Cheating",
-    custody: "Custody War",
-    money: "Hidden Debt",
-    toxic: "Toxic Marriage",
-    in_laws: "Mother-in-law Drama",
-    neglect: "Emotional Neglect",
-    recovery: "Divorce Recovery",
+  cta: {
+    headline: "How dramatic is your marriage?",
+    sub: "Be honest. We've definitely seen worse.",
+    button: "Start Drama Scan",
+    hint: "Takes 60 seconds. Anonymous. Surprisingly accurate.",
   },
-  auth: {
-    title: "Welcome",
-    subtitle: "Sign in anonymously. We auto-assign you a nickname.",
-    email: "Email",
-    sendCode: "Send code",
-    code: "Verification code",
-    verify: "Verify & sign in",
+  cats: {
+    title: "Pick your flavor of chaos",
+    items: {
+      cheating: "💔 Cheating",
+      debt: "💸 Hidden Debt",
+      mil: "👵 Mother-in-law Drama",
+      neglect: "😶 Emotional Neglect",
+      divorce: "⚖️ Divorce War",
+      custody: "👶 Custody Battle",
+      romance: "❤️ Unexpected Romance",
+      healing: "🥹 Healing Stories",
+    },
+  },
+  feed: {
+    title: "🔥 Trending today",
+    sub: "What the internet's marriages are doing right now.",
+    been: "Been there",
+    worse: "Worse than mine",
+    loadMore: "Load more drama",
+  },
+  boards: {
+    title: "🏆 The Marriage Drama Awards",
+    sub: "Weekly rankings. Updated every Monday. Cried over every Tuesday.",
+    items: {
+      chaotic: { emoji: "🌋", title: "Most Chaotic Marriage", copy: "Volcano-level energy, daily." },
+      sweet: { emoji: "💖", title: "Sweetest Marriage Moments", copy: "The ones that restore faith." },
+      twist: { emoji: "🤡", title: "Wildest Plot Twist", copy: "M. Night Shyamalan is taking notes." },
+      money: { emoji: "💸", title: "Biggest Financial Shock", copy: "Joint account: empty. Trust: also empty." },
+      mil: { emoji: "👵", title: "Mother-in-law Olympics", copy: "Gold medal in passive aggression." },
+      recovery: { emoji: "🥹", title: "Recovery Champions", copy: "They survived. They thrived. They posted." },
+    },
+  },
+  how: {
+    title: "What exactly are we judging?",
+    sub: "Our scoring is scientific*. *Not actually scientific.",
+    dims: {
+      twist: { name: "Plot Twist Index", copy: "Did anyone see this coming? Did YOU?" },
+      damage: { name: "Emotional Damage", copy: "On a scale from 'fine' to 'in therapy'." },
+      money: { name: "Financial Chaos", copy: "Hidden cards, secret accounts, mystery debts." },
+      family: { name: "Family Drama", copy: "How many relatives have opinions? All of them." },
+      comms: { name: "Communication Disaster", copy: "Read receipts as a weapon of war." },
+      love: { name: "Love Bonus", copy: "Yes — being adored can boost your score. ❤️" },
+    },
+  },
+  proof: {
+    title: "Some numbers we're weirdly proud of",
+    items: {
+      stories: { n: "1.8M", label: "stories shared" },
+      countries: { n: "327", label: "countries & regions" },
+      points: { n: "12M", label: "drama points calculated" },
+      survived: { n: "45K", label: "marriages somehow survived" },
+    },
+  },
+  signup: {
+    title: "Got a story?",
+    sub: "Anonymous-ish. Funny. No judgement. (Okay, a little judgement.)",
+    email: "Continue with Email",
     google: "Continue with Google",
-    codeSent: "We sent a 6-digit code to {email}.",
-    or: "or",
-    privacyNote: "No real names. No phone numbers. Anonymous by default.",
+    skip: "Just let me lurk →",
   },
-  profile: {
-    yourNickname: "Your nickname",
-    regenerate: "Generate another",
-    regenerated: "New nickname assigned.",
-  },
-  toast: {
-    error: "Something went wrong.",
-    signedIn: "Signed in.",
-    signedOut: "Signed out.",
+  footer: {
+    made: "Made with caffeine and cautionary tales.",
   },
 };
 
-export type Messages = {
-  appName: string;
-  tagline: string;
-  disclaimer: string;
-  nav: { home: string; feed: string; rankings: string; submit: string; profile: string; login: string; logout: string };
-  home: {
-    championWallTitle: string; championWallSubtitle: string;
-    ctaHeadline: string; ctaSub: string; ctaButton: string;
-    categoriesTitle: string; trendingTitle: string;
-    readStory: string; score: string; rank: string;
-  };
-  categories: { cheating: string; custody: string; money: string; toxic: string; in_laws: string; neglect: string; recovery: string };
-  auth: {
-    title: string; subtitle: string; email: string; sendCode: string;
-    code: string; verify: string; google: string; codeSent: string; or: string; privacyNote: string;
-  };
-  profile: { yourNickname: string; regenerate: string; regenerated: string };
-  toast: { error: string; signedIn: string; signedOut: string };
-};
+export type Messages = typeof en;
 
 const zh: Messages = {
-  appName: "婚姻比惨榜",
-  tagline: "测测你的婚姻到底有多惨",
-  disclaimer: "本产品仅供娱乐与信息参考，不构成法律建议或律师意见。",
-  nav: {
-    home: "首页",
-    feed: "信息流",
-    rankings: "排行榜",
-    submit: "讲述我的故事",
-    profile: "我的",
-    login: "登录",
-    logout: "退出登录",
+  appName: "婚姻真相局",
+  tagline: "婚姻的真相。好笑。真实。零滤镜。",
+  disclaimer: "仅供娱乐，不是心理咨询也不是法律建议——但可能比两者都管用。",
+  nav: { feed: "信息流", rankings: "榜单", submit: "投稿", language: "语言" },
+  wall: {
+    title: "🌍 全世界婚姻真相现场",
+    subtitle: "爱情、狗血、反转，我们什么都见过。",
+    chips: { global: "全球第一", country: "国家第一", city: "城市第一", trending: "🔥 实时热点" },
+    readStory: "看故事",
+    dramaScore: "狗血指数",
   },
-  home: {
-    championWallTitle: "🏆 全球比惨榜",
-    championWallSubtitle: "每个国家最惨的婚姻故事，实时排名。",
-    ctaHeadline: "测测你的婚姻到底有多惨",
-    ctaSub: "提交你的故事，AI 评分 0–1000，看看你的排名。",
-    ctaButton: "立刻测一测",
-    categoriesTitle: "热门话题",
-    trendingTitle: "热门故事",
-    readStory: "阅读故事",
-    score: "得分",
-    rank: "第",
+  cta: {
+    headline: "测测你的婚姻到底有多像连续剧？",
+    sub: "说实话，我们真的见过更离谱的。",
+    button: "开始婚姻体检",
+    hint: "60秒搞定。匿名。准得离谱。",
   },
-  categories: {
-    cheating: "出轨",
-    custody: "抚养权大战",
-    money: "隐藏债务",
-    toxic: "有毒婚姻",
-    in_laws: "婆媳大战",
-    neglect: "冷暴力",
-    recovery: "离婚重生",
+  cats: {
+    title: "选一个你的剧本流派",
+    items: {
+      cheating: "💔 出轨",
+      debt: "💸 隐藏债务",
+      mil: "👵 婆媳大战",
+      neglect: "😶 冷暴力",
+      divorce: "⚖️ 离婚战争",
+      custody: "👶 抚养权大战",
+      romance: "❤️ 意外的浪漫",
+      healing: "🥹 治愈故事",
+    },
   },
-  auth: {
-    title: "欢迎",
-    subtitle: "匿名登录。我们会自动为你分配一个昵称。",
-    email: "邮箱",
-    sendCode: "发送验证码",
-    code: "验证码",
-    verify: "验证并登录",
-    google: "使用 Google 登录",
-    codeSent: "我们已向 {email} 发送 6 位验证码。",
-    or: "或",
-    privacyNote: "禁止真实姓名与手机号。默认匿名。",
+  feed: {
+    title: "🔥 今日上热搜",
+    sub: "全网的婚姻此刻正在发生什么。",
+    been: "我也经历过",
+    worse: "比我惨",
+    loadMore: "加载更多狗血",
   },
-  profile: {
-    yourNickname: "你的昵称",
-    regenerate: "换一个",
-    regenerated: "已换上新昵称。",
+  boards: {
+    title: "🏆 婚姻真相局年度大赏",
+    sub: "每周一更新榜单。每周二有人哭。",
+    items: {
+      chaotic: { emoji: "🌋", title: "年度最炸裂婚姻", copy: "火山级别的日常爆点。" },
+      sweet: { emoji: "💖", title: "年度最甜婚姻瞬间", copy: "看完想恋爱的那种。" },
+      twist: { emoji: "🤡", title: "年度最离谱反转", copy: "编剧都不敢这么写。" },
+      money: { emoji: "💸", title: "年度财务暴击", copy: "联名账户：空。信任：也空。" },
+      mil: { emoji: "👵", title: "婆媳大战奥运会", copy: "阴阳怪气项目金牌。" },
+      recovery: { emoji: "🥹", title: "年度治愈冠军", copy: "他们扛过来了，活得更好了，还发帖了。" },
+    },
   },
-  toast: {
-    error: "出错了。",
-    signedIn: "已登录。",
-    signedOut: "已退出。",
+  how: {
+    title: "我们的评分标准到底有多离谱？",
+    sub: "我们的算法非常科学*。*其实并不科学。",
+    dims: {
+      twist: { name: "反转指数", copy: "有人猜到了吗？你猜到了吗？" },
+      damage: { name: "情感伤害值", copy: "从『还好』到『已经在心理咨询』。" },
+      money: { name: "财务混乱度", copy: "隐藏的卡、秘密账户、神秘债务。" },
+      family: { name: "家庭戏份", copy: "多少亲戚要发表意见？全员发言。" },
+      comms: { name: "沟通灾难等级", copy: "已读不回是一种战略武器。" },
+      love: { name: "甜蜜加分", copy: "对，被深爱可以加分。❤️" },
+    },
   },
+  proof: {
+    title: "一些我们莫名其妙很自豪的数字",
+    items: {
+      stories: { n: "180万", label: "条故事被分享" },
+      countries: { n: "327", label: "个国家和地区" },
+      points: { n: "1200万", label: "狗血指数被计算" },
+      survived: { n: "4.5万", label: "对婚姻奇迹般幸存" },
+    },
+  },
+  signup: {
+    title: "你也有故事？",
+    sub: "半匿名。好笑。不评判。（好吧，稍微评判一下。）",
+    email: "用邮箱继续",
+    google: "用 Google 继续",
+    skip: "我先逛逛 →",
+  },
+  footer: { made: "由咖啡因与教训共同制作。" },
 };
 
 const es: Messages = {
-  appName: "Divorce Rank",
-  tagline: "¿Qué tan trágico es tu matrimonio?",
-  disclaimer: "Solo con fines de entretenimiento e informativos. No es asesoría legal.",
-  nav: { home: "Inicio", feed: "Feed", rankings: "Rankings", submit: "Mi historia", profile: "Yo", login: "Entrar", logout: "Salir" },
-  home: {
-    championWallTitle: "🏆 Muro de Campeones",
-    championWallSubtitle: "El matrimonio más trágico de cada país.",
-    ctaHeadline: "¿Qué tan trágico es tu matrimonio?",
-    ctaSub: "Envía tu historia. Nuestra IA califica 0–1000. Mira tu ranking.",
-    ctaButton: "Calcular mi puntaje",
-    categoriesTitle: "Categorías en tendencia",
-    trendingTitle: "Historias en tendencia",
-    readStory: "Leer historia",
-    score: "Puntaje",
-    rank: "#",
-  },
-  categories: { cheating: "Infidelidad", custody: "Custodia", money: "Deuda oculta", toxic: "Matrimonio tóxico", in_laws: "Suegros", neglect: "Negligencia emocional", recovery: "Recuperación" },
-  auth: {
-    title: "Bienvenido",
-    subtitle: "Inicia sesión de forma anónima. Te asignamos un apodo automáticamente.",
-    email: "Correo",
-    sendCode: "Enviar código",
-    code: "Código de verificación",
-    verify: "Verificar e iniciar sesión",
-    google: "Continuar con Google",
-    codeSent: "Enviamos un código de 6 dígitos a {email}.",
-    or: "o",
-    privacyNote: "Sin nombres reales. Sin teléfonos. Anónimo por defecto.",
-  },
-  profile: { yourNickname: "Tu apodo", regenerate: "Generar otro", regenerated: "Nuevo apodo asignado." },
-  toast: { error: "Algo salió mal.", signedIn: "Sesión iniciada.", signedOut: "Sesión cerrada." },
+  ...en,
+  appName: "Marriage Drama",
+  tagline: "La verdad sobre el matrimonio. Divertida. Real. Sin filtros.",
+  cta: { ...en.cta, headline: "¿Qué tan dramático es tu matrimonio?", sub: "Sé honesto. Hemos visto cosas peores.", button: "Iniciar escáner de drama" },
+  wall: { ...en.wall, title: "🌍 La verdad del matrimonio alrededor del mundo", subtitle: "Amor. Caos. Giros inesperados. Lo hemos visto todo." },
+  signup: { ...en.signup, title: "¿Tienes una historia?", sub: "Casi anónimo. Divertido. Sin juicios." },
 };
 
 const pt: Messages = {
-  appName: "Divorce Rank",
-  tagline: "Quão trágico é o seu casamento?",
-  disclaimer: "Apenas para fins de entretenimento e informação. Não é aconselhamento jurídico.",
-  nav: { home: "Início", feed: "Feed", rankings: "Rankings", submit: "Minha história", profile: "Eu", login: "Entrar", logout: "Sair" },
-  home: {
-    championWallTitle: "🏆 Mural de Campeões",
-    championWallSubtitle: "O casamento mais trágico de cada país.",
-    ctaHeadline: "Quão trágico é o seu casamento?",
-    ctaSub: "Envie sua história. Nossa IA pontua 0–1000. Veja seu ranking.",
-    ctaButton: "Calcular minha pontuação",
-    categoriesTitle: "Categorias em alta",
-    trendingTitle: "Histórias em alta",
-    readStory: "Ler história",
-    score: "Pontuação",
-    rank: "#",
-  },
-  categories: { cheating: "Traição", custody: "Guarda dos filhos", money: "Dívidas ocultas", toxic: "Casamento tóxico", in_laws: "Sogros", neglect: "Negligência emocional", recovery: "Recuperação" },
-  auth: {
-    title: "Bem-vindo",
-    subtitle: "Entre anonimamente. Atribuímos um apelido automaticamente.",
-    email: "E-mail",
-    sendCode: "Enviar código",
-    code: "Código de verificação",
-    verify: "Verificar e entrar",
-    google: "Continuar com Google",
-    codeSent: "Enviamos um código de 6 dígitos para {email}.",
-    or: "ou",
-    privacyNote: "Sem nomes reais. Sem telefones. Anônimo por padrão.",
-  },
-  profile: { yourNickname: "Seu apelido", regenerate: "Gerar outro", regenerated: "Novo apelido atribuído." },
-  toast: { error: "Algo deu errado.", signedIn: "Sessão iniciada.", signedOut: "Sessão encerrada." },
+  ...en,
+  appName: "Marriage Drama",
+  tagline: "A verdade sobre o casamento. Engraçada. Real. Sem filtros.",
+  cta: { ...en.cta, headline: "Quão dramático é o seu casamento?", sub: "Seja honesto. Já vimos coisas piores.", button: "Iniciar scanner de drama" },
+  wall: { ...en.wall, title: "🌍 A verdade do casamento ao redor do mundo", subtitle: "Amor. Caos. Reviravoltas. Já vimos de tudo." },
+  signup: { ...en.signup, title: "Tem uma história?", sub: "Quase anônimo. Engraçado. Sem julgamentos." },
 };
 
 const ja: Messages = {
-  appName: "離婚ランク",
-  tagline: "あなたの結婚はどれほど悲惨？",
-  disclaimer: "本サービスは娯楽および情報提供のみを目的としており、法的助言ではありません。",
-  nav: { home: "ホーム", feed: "フィード", rankings: "ランキング", submit: "投稿する", profile: "マイ", login: "ログイン", logout: "ログアウト" },
-  home: {
-    championWallTitle: "🏆 グローバル王者の壁",
-    championWallSubtitle: "国ごとに最も悲惨な結婚物語をランキング。",
-    ctaHeadline: "あなたの結婚はどれほど悲惨？",
-    ctaSub: "ストーリーを投稿。AIが0〜1000で採点。あなたの順位は？",
-    ctaButton: "結婚スコアを計算",
-    categoriesTitle: "急上昇カテゴリ",
-    trendingTitle: "急上昇ストーリー",
-    readStory: "ストーリーを読む",
-    score: "スコア",
-    rank: "第",
-  },
-  categories: { cheating: "浮気", custody: "親権争い", money: "隠れ借金", toxic: "毒婚", in_laws: "義実家トラブル", neglect: "情緒的ネグレクト", recovery: "離婚から再起" },
-  auth: {
-    title: "ようこそ",
-    subtitle: "匿名でログイン。ニックネームを自動で割り当てます。",
-    email: "メール",
-    sendCode: "コード送信",
-    code: "認証コード",
-    verify: "認証してログイン",
-    google: "Googleで続行",
-    codeSent: "{email} に6桁のコードを送信しました。",
-    or: "または",
-    privacyNote: "実名・電話番号は不可。デフォルトで匿名。",
-  },
-  profile: { yourNickname: "あなたのニックネーム", regenerate: "別のを生成", regenerated: "新しいニックネームを割り当てました。" },
-  toast: { error: "問題が発生しました。", signedIn: "ログインしました。", signedOut: "ログアウトしました。" },
+  ...en,
+  appName: "婚姻ドラマ局",
+  tagline: "結婚のリアル。笑える。生々しい。フィルター無し。",
+  cta: { ...en.cta, headline: "あなたの結婚はどれくらいドラマ？", sub: "正直に。もっとヤバいのを見てきた。", button: "ドラマ診断を始める" },
+  wall: { ...en.wall, title: "🌍 世界の結婚リアル現場", subtitle: "愛、修羅場、どんでん返し。全部見てきた。" },
+  signup: { ...en.signup, title: "あなたの話、ある？", sub: "ほぼ匿名。笑える。ジャッジしない。" },
 };
 
 const ko: Messages = {
-  appName: "이혼 랭크",
-  tagline: "당신의 결혼은 얼마나 비극적인가요?",
-  disclaimer: "본 서비스는 오락 및 정보 제공 목적이며, 법률 자문이 아닙니다.",
-  nav: { home: "홈", feed: "피드", rankings: "랭킹", submit: "내 이야기", profile: "나", login: "로그인", logout: "로그아웃" },
-  home: {
-    championWallTitle: "🏆 글로벌 챔피언 월",
-    championWallSubtitle: "나라별 가장 비극적인 결혼 이야기 랭킹.",
-    ctaHeadline: "당신의 결혼은 얼마나 비극적인가요?",
-    ctaSub: "이야기를 제출하세요. AI가 0–1000으로 채점. 당신의 순위는?",
-    ctaButton: "내 결혼 점수 계산",
-    categoriesTitle: "인기 카테고리",
-    trendingTitle: "인기 이야기",
-    readStory: "이야기 읽기",
-    score: "점수",
-    rank: "#",
-  },
-  categories: { cheating: "외도", custody: "양육권 분쟁", money: "숨겨진 빚", toxic: "독성 결혼", in_laws: "고부 갈등", neglect: "정서적 방치", recovery: "이혼 회복" },
-  auth: {
-    title: "환영합니다",
-    subtitle: "익명으로 로그인. 닉네임이 자동 부여됩니다.",
-    email: "이메일",
-    sendCode: "코드 보내기",
-    code: "인증 코드",
-    verify: "인증 후 로그인",
-    google: "Google로 계속하기",
-    codeSent: "{email}로 6자리 코드를 보냈습니다.",
-    or: "또는",
-    privacyNote: "실명·전화번호 금지. 기본 익명.",
-  },
-  profile: { yourNickname: "닉네임", regenerate: "새로 생성", regenerated: "새 닉네임이 부여되었습니다." },
-  toast: { error: "문제가 발생했습니다.", signedIn: "로그인했습니다.", signedOut: "로그아웃했습니다." },
+  ...en,
+  appName: "결혼 드라마국",
+  tagline: "결혼의 진실. 웃기고. 진짜고. 필터 없음.",
+  cta: { ...en.cta, headline: "당신의 결혼은 얼마나 드라마틱?", sub: "솔직히. 더한 것도 봤어요.", button: "드라마 스캔 시작" },
+  wall: { ...en.wall, title: "🌍 전 세계 결혼의 진실", subtitle: "사랑. 혼돈. 반전. 다 봤습니다." },
+  signup: { ...en.signup, title: "당신의 이야기, 있나요?", sub: "거의 익명. 웃김. 판단 없음." },
 };
 
 export const MESSAGES: Record<Locale, Messages> = { en, zh, es, pt, ja, ko };
