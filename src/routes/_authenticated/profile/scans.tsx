@@ -46,37 +46,43 @@ function ScansHistoryPage() {
         ) : (
           scans.map((s) => {
             const band = s.score !== null ? bandForScore(s.score) : null;
-            return (
-              <Link
-                key={s.id}
-                to={
-                  s.status === "completed"
-                    ? "/scan/result/$scanId"
-                    : "/scan/question/$step"
-                }
-                params={
-                  s.status === "completed"
-                    ? { scanId: s.id }
-                    : { step: String(s.current_step) }
-                }
-                search={s.status === "completed" ? undefined : { scanId: s.id }}
-                className="block rounded-2xl border border-border bg-surface-elevated p-4 hover:border-primary/40 transition"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(s.created_at).toLocaleDateString()}
-                    </div>
-                    <div className="font-bold mt-0.5">
-                      {s.status === "completed"
-                        ? `${band?.emoji ?? ""} ${s.category ?? "—"}`
-                        : "⏳ In progress"}
-                    </div>
+            const body = (
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(s.created_at).toLocaleDateString()}
                   </div>
-                  <div className="text-3xl font-black tabular-nums">
-                    {s.score ?? "—"}
+                  <div className="font-bold mt-0.5">
+                    {s.status === "completed"
+                      ? `${band?.emoji ?? ""} ${s.category ?? "—"}`
+                      : "⏳ In progress"}
                   </div>
                 </div>
+                <div className="text-3xl font-black tabular-nums">
+                  {s.score ?? "—"}
+                </div>
+              </div>
+            );
+            const cls =
+              "block rounded-2xl border border-border bg-surface-elevated p-4 hover:border-primary/40 transition";
+            return s.status === "completed" ? (
+              <Link
+                key={s.id}
+                to="/scan/result/$scanId"
+                params={{ scanId: s.id }}
+                className={cls}
+              >
+                {body}
+              </Link>
+            ) : (
+              <Link
+                key={s.id}
+                to="/scan/question/$step"
+                params={{ step: String(s.current_step) }}
+                search={{ scanId: s.id }}
+                className={cls}
+              >
+                {body}
               </Link>
             );
           })
