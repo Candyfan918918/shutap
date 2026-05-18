@@ -153,6 +153,182 @@ export type Database = {
         }
         Relationships: []
       }
+      post_approvals: {
+        Row: {
+          approved_at: string
+          id: string
+          post_id: string
+          user_id: string
+          version_snapshot: Json
+        }
+        Insert: {
+          approved_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+          version_snapshot?: Json
+        }
+        Update: {
+          approved_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+          version_snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_approvals_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["reaction_kind"]
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["reaction_kind"]
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["reaction_kind"]
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_shares: {
+        Row: {
+          id: string
+          platform: Database["public"]["Enums"]["share_platform"]
+          post_id: string
+          referrer_clicks: number
+          shared_at: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          platform: Database["public"]["Enums"]["share_platform"]
+          post_id: string
+          referrer_clicks?: number
+          shared_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          platform?: Database["public"]["Enums"]["share_platform"]
+          post_id?: string
+          referrer_clicks?: number
+          shared_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          badges: string[]
+          created_at: string
+          hashtags: string[]
+          id: string
+          locale: string
+          media_url: string | null
+          platform_captions: Json
+          published_at: string | null
+          score: number | null
+          score_category: string | null
+          share_card_square: string | null
+          share_card_vertical: string | null
+          share_card_xhs: string | null
+          status: Database["public"]["Enums"]["post_status"]
+          story_id: string | null
+          story_text: string
+          title: string
+          tone: Database["public"]["Enums"]["post_tone"]
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          badges?: string[]
+          created_at?: string
+          hashtags?: string[]
+          id?: string
+          locale?: string
+          media_url?: string | null
+          platform_captions?: Json
+          published_at?: string | null
+          score?: number | null
+          score_category?: string | null
+          share_card_square?: string | null
+          share_card_vertical?: string | null
+          share_card_xhs?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          story_id?: string | null
+          story_text: string
+          title: string
+          tone?: Database["public"]["Enums"]["post_tone"]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          badges?: string[]
+          created_at?: string
+          hashtags?: string[]
+          id?: string
+          locale?: string
+          media_url?: string | null
+          platform_captions?: Json
+          published_at?: string | null
+          score?: number | null
+          score_category?: string | null
+          share_card_square?: string | null
+          share_card_vertical?: string | null
+          share_card_xhs?: string | null
+          status?: Database["public"]["Enums"]["post_status"]
+          story_id?: string | null
+          story_text?: string
+          title?: string
+          tone?: Database["public"]["Enums"]["post_tone"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           city: string | null
@@ -405,7 +581,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      post_reaction_counts: {
+        Row: {
+          count: number | null
+          kind: Database["public"]["Enums"]["reaction_kind"] | null
+          post_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
@@ -428,6 +619,18 @@ export type Database = {
         | "report"
         | "comment"
       lead_status: "new" | "contacted" | "converted" | "closed"
+      post_status: "draft" | "published" | "removed"
+      post_tone: "funny" | "serious" | "chaotic" | "soft"
+      reaction_kind: "been_there" | "worse" | "hug" | "laugh" | "drama"
+      share_platform:
+        | "x"
+        | "tiktok"
+        | "instagram"
+        | "xiaohongshu"
+        | "facebook"
+        | "imessage"
+        | "whatsapp"
+        | "copy_link"
       story_status: "draft" | "pending" | "published" | "sensitive" | "removed"
       trend_status: "ingested" | "approved" | "published" | "rejected"
     }
@@ -569,6 +772,19 @@ export const Constants = {
         "comment",
       ],
       lead_status: ["new", "contacted", "converted", "closed"],
+      post_status: ["draft", "published", "removed"],
+      post_tone: ["funny", "serious", "chaotic", "soft"],
+      reaction_kind: ["been_there", "worse", "hug", "laugh", "drama"],
+      share_platform: [
+        "x",
+        "tiktok",
+        "instagram",
+        "xiaohongshu",
+        "facebook",
+        "imessage",
+        "whatsapp",
+        "copy_link",
+      ],
       story_status: ["draft", "pending", "published", "sensitive", "removed"],
       trend_status: ["ingested", "approved", "published", "rejected"],
     },
