@@ -17,7 +17,7 @@ export const Route = createFileRoute("/api/public/s/$postId")({
             .from("post_shares")
             .select("id, referrer_clicks")
             .eq("post_id", postId)
-            .eq("platform", ref)
+            .eq("platform", ref as never)
             .order("shared_at", { ascending: false })
             .limit(1)
             .maybeSingle();
