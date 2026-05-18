@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "story media object read" ON storage.objects;
