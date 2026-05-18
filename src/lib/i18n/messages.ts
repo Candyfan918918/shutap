@@ -120,6 +120,11 @@ export const en = {
       cta: "See your own Marriage Drama Score",
       copied: "Link copied!",
       captionCopied: "Caption copied — paste into the app!",
+      native: "Share via…",
+      nativePreparing: "Preparing image…",
+      nativeFallback: "Native share unavailable — pick a platform below.",
+      downloadCard: "Download card",
+      downloaded: "Saved to your device",
       close: "I'll share later",
       platforms: {
         x: "X",
@@ -253,6 +258,11 @@ const zh: Messages = {
       cta: "测一下你的婚姻戏剧值",
       copied: "链接已复制！",
       captionCopied: "文案已复制——粘贴到 App 里就行！",
+      native: "通过…分享",
+      nativePreparing: "正在准备图片…",
+      nativeFallback: "系统分享不可用——请在下方选择平台。",
+      downloadCard: "下载图片",
+      downloaded: "已保存到本地",
       close: "晚点再分享",
       platforms: {
         x: "X",
