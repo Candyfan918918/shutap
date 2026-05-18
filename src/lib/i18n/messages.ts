@@ -14,7 +14,7 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   ko: "한국어",
 };
 
-export const en = {
+export const en: Messages = {
   appName: "Divorce Rank",
   tagline: "How tragic is your marriage?",
   disclaimer: "For entertainment and informational purposes only. Not legal advice.",
@@ -70,9 +70,27 @@ export const en = {
     signedIn: "Signed in.",
     signedOut: "Signed out.",
   },
-} as const;
+};
 
-export type Messages = typeof en;
+export type Messages = {
+  appName: string;
+  tagline: string;
+  disclaimer: string;
+  nav: { home: string; feed: string; rankings: string; submit: string; profile: string; login: string; logout: string };
+  home: {
+    championWallTitle: string; championWallSubtitle: string;
+    ctaHeadline: string; ctaSub: string; ctaButton: string;
+    categoriesTitle: string; trendingTitle: string;
+    readStory: string; score: string; rank: string;
+  };
+  categories: { cheating: string; custody: string; money: string; toxic: string; in_laws: string; neglect: string; recovery: string };
+  auth: {
+    title: string; subtitle: string; email: string; sendCode: string;
+    code: string; verify: string; google: string; codeSent: string; or: string; privacyNote: string;
+  };
+  profile: { yourNickname: string; regenerate: string; regenerated: string };
+  toast: { error: string; signedIn: string; signedOut: string };
+};
 
 const zh: Messages = {
   appName: "婚姻比惨榜",
