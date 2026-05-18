@@ -331,37 +331,64 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           city: string | null
+          city_label: string | null
           country: string | null
+          country_code: string | null
           created_at: string
+          descriptor: string | null
+          display_name: string | null
+          email: string | null
           emotional_embedding: string | null
           id: string
+          last_seen_at: string | null
           locale: string
           nickname: string
+          onboarded_at: string | null
           region: string | null
           updated_at: string
+          vibe: string | null
         }
         Insert: {
+          avatar_url?: string | null
           city?: string | null
+          city_label?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
+          descriptor?: string | null
+          display_name?: string | null
+          email?: string | null
           emotional_embedding?: string | null
           id: string
+          last_seen_at?: string | null
           locale?: string
           nickname: string
+          onboarded_at?: string | null
           region?: string | null
           updated_at?: string
+          vibe?: string | null
         }
         Update: {
+          avatar_url?: string | null
           city?: string | null
+          city_label?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
+          descriptor?: string | null
+          display_name?: string | null
+          email?: string | null
           emotional_embedding?: string | null
           id?: string
+          last_seen_at?: string | null
           locale?: string
           nickname?: string
+          onboarded_at?: string | null
           region?: string | null
           updated_at?: string
+          vibe?: string | null
         }
         Relationships: []
       }
