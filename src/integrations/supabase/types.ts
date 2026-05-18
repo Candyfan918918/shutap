@@ -392,6 +392,66 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_results: {
+        Row: {
+          answers: Json
+          badges: string[]
+          category: string | null
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          flow_path: Json
+          id: string
+          locale: string
+          percentile: number | null
+          post_id: string | null
+          score: number | null
+          status: string
+          subscores: Json | null
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          badges?: string[]
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          flow_path?: Json
+          id?: string
+          locale?: string
+          percentile?: number | null
+          post_id?: string | null
+          score?: number | null
+          status?: string
+          subscores?: Json | null
+          tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          badges?: string[]
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          flow_path?: Json
+          id?: string
+          locale?: string
+          percentile?: number | null
+          post_id?: string | null
+          score?: number | null
+          status?: string
+          subscores?: Json | null
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       stories: {
         Row: {
           ai_verdict: string | null

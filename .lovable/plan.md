@@ -1,144 +1,151 @@
-# Identity & Login System — "You've been assigned a character"
+# Marriage Drama Scan™ — Full Build Plan
 
-A login flow that doesn't feel like signup. Three taps, an IP-aware reveal animation, and the user lands in `/{locale}/home` already a named character.
+Build the complete quiz → score → reveal → draft post → share flow as the app's P0 product feature. Everything below ships in one implementation pass.
 
-## 1. Auth methods (no passwords)
+## 1. Database (one migration)
 
-- **Email OTP** (primary) — `supabase.auth.signInWithOtp({ email })` → 6-digit code screen → `verifyOtp`. No password fields, anywhere.
-- **Google** — via Lovable broker `lovable.auth.signInWithOAuth("google", …)`.
-- **Apple** — via Lovable broker `lovable.auth.signInWithOAuth("apple", …)`.
-- Backend toggles: enable Google + Apple via the social-auth config, disable password sign-in, keep email enabled for OTP, do NOT auto-confirm.
+New table `scan_results` (RLS on):
+- `id`, `user_id`, `locale`, `status` (`in_progress` | `completed`)
+- `current_step` (int), `answers` (jsonb), `flow_path` (jsonb — ordered question ids actually shown)
+- `score` (int 0–1000), `subscores` (jsonb), `category` (text), `percentile` (int), `tags` (text[]), `badges` (text[])
+- `post_id` (uuid, nullable — link to generated post)
+- `created_at`, `updated_at`, `completed_at`
 
-## 2. Routes (mobile-first)
+RLS:
+- owner full CRUD on own rows
+- completed rows readable by anyone with the id (for share links) — `status = 'completed'` OR `auth.uid() = user_id`
 
-```text
-/enter                      single-screen auth (email field + Google + Apple)
-/enter/verify               6-digit OTP entry (auto-advance, paste-friendly)
-/welcome                    cinematic identity-reveal animation (one-time)
-/{locale}                   localized home (zh, en, ja, es, pt, fr)
-/_authenticated/*           anything that requires a session
+Index on `(user_id, created_at desc)` for history.
+
+## 2. Question Bank (`src/lib/scan/question-bank.ts`)
+
+~26 questions across 7 categories: `foundation`, `plot_twists`, `emotional`, `communication`, `financial`, `family`, `love_bonus`.
+
+Each question:
+```
+{ id, category, type, weight, scoreMap, localized: { en, zh, ja, ko, es, pt } { title, subtitle?, helper?, options[]{ id, label, value, score? } }, conditional? }
 ```
 
-The auth gate is the existing `_authenticated` pathless layout — public routes (`/`, `/post/:id`, `/enter*`) stay outside it.
+Types: `single`, `multi`, `slider`, `emoji_scale`, `cards`, `text` (text not scored — used for free-text "plot twist" capture).
 
-## 3. IP + geo localization engine
-
-Server function `resolveGeoFromRequest()` reads the `cf-ipcountry`, `cf-ipcity`, `cf-region`, `accept-language` headers (Cloudflare Workers populates these for free) and falls back to a free IP lookup if missing. Returns `{ country, region, city, locale }`. The locale is derived as: city-country map → preferred language; overridden by stored `profiles.locale` once the user exists.
-
-On first login this geo blob is persisted to `profiles` and used to seed the display name. On every visit it's also used to:
-- pick the default `/{locale}/home` redirect,
-- boost local leaderboard rows in `getLocalLeaderboard()`,
-- tag new posts with `country/region/city`.
-
-## 4. Auto display-name generator
-
-```text
-Display name = [Localized city]  ·  [Localized descriptor]
+Conditional rules use a tiny predicate DSL:
+```
+conditional: { showIf: { all: [{ q: "has_kids", eq: "yes" }] } }
 ```
 
-- `src/lib/identity/city-pools.ts` — curated per-country city pools written in the country's native script (北京 / Tokyo / Paris / Miami).
-- `src/lib/identity/descriptor-pools.ts` — descriptor pools per language (zh / en / ja / es / pt / fr). Each descriptor carries a `vibe` tag (`elegant | wild | soft | sharp | dreamy | royal | playful`) that drives avatar colors.
-- `generateDisplayName(geo)` picks city by country, descriptor by locale, joins with locale-aware separator (`·` for CJK, ` · ` for Latin), and re-rolls up to 5× if the result already exists in `profiles.nickname`.
+Each question contributes to ONE subscore via `scoreMap` (option → points) or `weight × normalized slider value`.
 
-## 5. Procedural avatar generator (no external image call)
+## 3. Question Engine (`src/lib/scan/question-engine.ts`)
 
-Avatars are SVG data-URIs generated client + server side from a seed derived from `userId + descriptor.vibe`:
-- vibe → 2-stop gradient palette (e.g. `wild` → crimson/violet, `elegant` → ink/champagne),
-- seeded geometric ornament (rings, blobs, or sparkles),
-- 2-character monogram from the city in the native script (北 / NY / 東 / PA).
+Pure functions:
+- `getInitialFlow(locale)` → ordered base ids
+- `nextQuestion(answers, flowPath)` → next id or `null`
+- `evaluateConditional(rule, answers)` → boolean
+- `injectFollowUps(answers)` → dynamically append plot-twist follow-ups and healing questions if emotional damage > threshold
+- `progress(flowPath, currentIdx)` → `{ step, total, percent, etaSeconds }`
 
-Result: a 512×512 SVG stored as `profiles.avatar_url` (data URL kept short; ~2 KB). Zero AI cost, instant, theme-consistent, and easy to re-roll. A "Re-roll my character" button on the welcome screen regenerates name+avatar+vibe.
+## 4. Scoring Engine (`src/lib/scan/drama-score.ts`)
 
-## 6. Database changes (single migration)
+`calculateDramaScore(answers)` → `{ totalScore, subscores, category, percentile, tags, badges }`
 
-Extend `profiles` to capture the new identity fields and store one identity record per user. Existing rows are backfilled with safe defaults so RLS keeps working.
+Subscore caps: Plot Twist 200, Emotional 200, Financial 150, Family 150, Communication 150, Love Bonus -200…0.
+Total = clamp(sum, 0, 1000).
+Category bands per spec (Disney → Legendary Chaos).
+Tags: derived from which questions hit (e.g. `cheating`, `in-laws`, `silent-treatment`).
+Badges: ≥3 derived from subscore peaks ("Plot Twist Royalty", "Wallet Needs Therapy", "Still Romantic Somehow").
+Percentile: simple deterministic curve over total (placeholder — real percentile later from DB aggregate).
 
-Added columns on `public.profiles`:
-- `email text` — mirrored from `auth.users.email` via the existing `handle_new_user` trigger.
-- `display_name text` — the generated "City · Descriptor".
-- `avatar_url text` — SVG data URI.
-- `vibe text` — descriptor vibe tag (drives avatar/UI accents).
-- `descriptor text`, `city_label text` — raw parts for re-roll.
-- `country_code text` — ISO 3166-1 alpha-2 (already had `country` text; this normalizes it).
-- `onboarded_at timestamptz` — null until the welcome reveal is dismissed.
-- `last_seen_at timestamptz`.
+## 5. Server functions (`src/lib/scan.functions.ts`, auth-protected)
 
-The existing `handle_new_user` trigger is replaced with a new version that:
-1. inserts `profiles` with locale from `raw_user_meta_data`,
-2. copies email,
-3. picks a temporary nickname from the `nicknames` table so RLS-dependent code stays green,
-4. leaves `display_name`/`avatar_url`/`onboarded_at` null — filled by the welcome screen via a `finalizeIdentity` server function so geo headers are available.
+- `startScan({ locale })` → creates `in_progress` row, returns `{ scanId, firstQuestionId, flowPath }`
+- `saveAnswer({ scanId, questionId, answer })` → upserts into `answers`, recomputes `flow_path`, returns `nextQuestionId | null` + `progress`
+- `completeScan({ scanId })` → runs `calculateDramaScore`, persists score/subscores/category/tags/badges, sets `completed_at`, returns full result payload
+- `getScan({ scanId })` → returns scan (owner or completed)
+- `listMyScans()` → history
+- `generatePostDraft({ scanId })` → calls Lovable AI Gateway (`google/gemini-2.5-flash`) with score context to produce `{ title, story, badges, hashtags, platform_captions }`; returns draft (does NOT publish)
+- `publishScanPost({ scanId, draft, mediaUrl })` → inserts `posts` row (status=`published`), links `scan_results.post_id`
 
-No new tables required (the `profiles` table already exists and is referenced everywhere).
+Wire `attachSupabaseAuth` already present in `src/start.ts` — verify.
 
-## 7. Server functions
+## 6. Routes (`src/routes/scan/*`)
 
-- `resolveGeoFromRequest()` — reads CF headers, returns `{country, region, city, locale}`. Used during OTP verify and welcome screen.
-- `finalizeIdentity({ rerollSeed? })` — protected. Looks up profile, calls `generateDisplayName(geo)` + `generateAvatar(seed)`, writes the four identity fields, sets `onboarded_at` if first run, returns the full identity payload.
-- `getMyIdentity()` — protected. Returns the current profile's identity block; used by `_authenticated` root to render the avatar in the top bar.
+All gated under `_authenticated`. Move to `src/routes/_authenticated/scan/`:
+- `index.tsx` — Splash + "Start Drama Scan" CTA. Explains 3-min, fun copy.
+- `start.tsx` — Calls `startScan`, redirects to first question.
+- `question.$step.tsx` — Renders one `<DramaQuestion>` for the current step. Reads scan from server, hydrates `answers`, calls `saveAnswer` on submit, navigates to next step or `/scan/result/$scanId`. Supports back nav (undo).
+- `result.$scanId.tsx` — Cinematic reveal: animated number count-up, category, subscore bars, badges, funny commentary. CTAs: "Turn this into a post" → draft, "Share my score" → share screen, "See my history".
+- `share.$scanId.tsx` — Compose preview: AI draft (editable title/story), required media uploader, "Publish" → calls `publishScanPost`, then opens share popup using existing `native-share` + share-card endpoint.
 
-## 8. UI components
+Homepage button (`src/routes/index.tsx`) gets `<Link to="/scan">`.
+
+History: `src/routes/_authenticated/profile/scans.tsx`.
+
+Locale prefix routing already handled by existing i18n setup — no per-locale duplicate route files needed (locale is part of context, not URL segment in current architecture).
+
+## 7. Components (`src/components/drama/`)
+
+- `DramaQuestion.tsx` — switches on `question.type`, renders the right input (cards, slider, emoji row, multi-chip, text). Big touch targets, swipe + tap, framer-motion enter/exit (visible-by-default initial state to avoid the SSR-hidden bug from earlier).
+- `ScanProgress.tsx` — sticky top bar with `████░░`, "Question X / Y", rotating status messages from a localized pool ("Scanning for plot twists…").
+- `OptionCard.tsx`, `EmojiScale.tsx`, `DramaSlider.tsx`, `CardPicker.tsx` — primitives.
+- `ScoreReveal.tsx` — count-up animation, gradient backdrop tied to tier, subscore bar chart, badge chips, commentary lines.
+- `DraftEditor.tsx` — title/story editing + media upload (reuses storage bucket `story-media`).
+
+## 8. State / persistence
+
+Server-truth + optimistic local cache via React Query:
+- `useScanQuery(scanId)` — `getScan`
+- `useSaveAnswer()` — mutation that optimistically updates answers, on success navigates to next step
+- Autosave per step (each `saveAnswer` is the save)
+- Resume = navigating to `/scan/question/{current_step}` of latest `in_progress` row (homepage CTA checks for existing in-progress scan and offers resume).
+
+## 9. Post + Share integration
+
+After `completeScan`, reveal screen shows "Turn into a post" → `share.$scanId`:
+1. Calls `generatePostDraft` (AI) → fills editor.
+2. User edits + uploads required image/video.
+3. `publishScanPost` writes to `posts`, links scan, redirects to `/post/{postId}`.
+4. Existing native-share + `/api/public/share-card/{postId}` pipeline handles share.
+
+## 10. i18n
+
+Add `scan.*` keys to `src/lib/i18n/messages.ts` for: CTAs, progress labels, status rotations, category labels, commentary templates, reveal copy, share copy — for `en` and `zh` minimum (other locales fall back to en).
+
+Question bank ships `en` + `zh` fully; `ja/ko/es/pt` fall back to `en` (extendable later).
+
+## 11. Technical notes
 
 ```text
-src/routes/enter.tsx                  single-screen auth (email + Google + Apple)
-src/routes/enter.verify.tsx           OTP entry with auto-advance inputs
-src/routes/welcome.tsx                identity-reveal animation + re-roll + CTA
-src/components/auth/EnterCard.tsx
-src/components/auth/OtpInput.tsx
-src/components/identity/AvatarSvg.tsx          renders SVG from vibe + seed
-src/components/identity/IdentityReveal.tsx     framer-motion reveal sequence
-src/components/identity/IdentityBadge.tsx      avatar + name pill for headers
-src/lib/identity/city-pools.ts
-src/lib/identity/descriptor-pools.ts
-src/lib/identity/generate-name.ts
-src/lib/identity/generate-avatar.ts            pure, seedable, returns SVG string
-src/lib/geo/resolve.server.ts                  reads CF headers
-src/lib/identity.functions.ts                  finalizeIdentity, getMyIdentity
+src/
+├─ lib/scan/
+│  ├─ question-bank.ts        // localized question definitions
+│  ├─ question-engine.ts      // flow + conditional + progress
+│  ├─ drama-score.ts          // scoring + categories + badges + tags
+│  ├─ conditional-routing.ts  // predicate DSL evaluator
+│  └─ post-generator.ts       // prompt builder for AI draft
+├─ lib/scan.functions.ts      // all server fns (createServerFn + requireSupabaseAuth)
+├─ components/drama/
+│  ├─ DramaQuestion.tsx
+│  ├─ ScanProgress.tsx
+│  ├─ ScoreReveal.tsx
+│  ├─ DraftEditor.tsx
+│  └─ inputs/{OptionCard,EmojiScale,DramaSlider,CardPicker}.tsx
+└─ routes/_authenticated/scan/
+   ├─ index.tsx
+   ├─ start.tsx
+   ├─ question.$step.tsx
+   ├─ result.$scanId.tsx
+   └─ share.$scanId.tsx
++ routes/_authenticated/profile/scans.tsx
++ migration: scan_results table + RLS
 ```
 
-Welcome screen sequence (≈3.5 s):
-1. Black screen → spinning sigil while `finalizeIdentity` runs.
-2. Avatar scales in with blur-out + drop shadow (spring).
-3. Display name types in character-by-character.
-4. Country flag + city label fade in below.
-5. CTA pill "Enter the Marriage Drama Universe →" pulses.
-6. Tiny "🎲 re-roll my character" link at the bottom calls `finalizeIdentity({rerollSeed})` again.
+AI: `google/gemini-2.5-flash` via existing `src/lib/ai/gateway.ts`.
+SSR safety: all framer-motion in question/reveal uses `initial={false}` or visible-by-default; protected server-fn loaders only under `_authenticated` (prerender-safe).
 
-## 9. Localization wiring
+## 12. Out of scope (called out)
 
-Existing `I18nProvider` + `messages.ts` already covers 6 locales. We:
-- add `enter.*`, `welcome.*`, and `identity.vibes.*` keys for all locales,
-- detect locale via geo → stored profile locale → browser → `en`,
-- after welcome, navigate to `/${locale}` (existing home is `/`; add a passthrough `/{locale}` route that renders the home and sets the I18n locale).
+- Real percentile from DB aggregates (uses deterministic curve for now; can be replaced by a nightly job later).
+- Localized question text beyond `en` + `zh` (others fall back).
+- A/B variations of question copy.
 
-## 10. Security
-
-- Email OTP rate-limited by Supabase Auth; we additionally short-circuit repeated sends from the same IP within 30 s in the server function.
-- `finalizeIdentity` is idempotent: re-roll allowed, but `onboarded_at` only set once; cannot overwrite another user's row (`auth.uid()` enforced via RLS on `profiles`).
-- Geo headers are server-only; client never receives the raw IP.
-- No PII beyond email is stored. OAuth `name` and `picture` are deliberately discarded — the assigned identity is the only identity.
-- Enable Supabase HIBP password check is moot (no passwords), but we still flip `disable_signup=false`, `auto_confirm_email=false`, `external_anonymous_users_enabled=false`.
-
-## 11. Build order
-
-1. Migration: extend `profiles`, update `handle_new_user` trigger.
-2. `supabase--configure_social_auth` for Google + Apple; `configure_auth` to lock down policy.
-3. Geo resolver + identity pools + pure generators (city/descriptor/avatar/name).
-4. Server functions `finalizeIdentity` / `getMyIdentity` / geo helper.
-5. `/enter` + `/enter/verify` screens with OTP flow.
-6. `/welcome` cinematic reveal.
-7. Wire `IdentityBadge` into existing top bar; redirect signed-in users from `/enter` → `/welcome` (if `onboarded_at` null) or `/{locale}` (otherwise).
-8. i18n keys for all 6 locales.
-9. Replace any "sign up / sign in" copy in existing screens with "Enter".
-
-## Technical details
-
-- **Geo source**: Cloudflare Workers headers (`cf-ipcountry`, `cf-region`, `cf-ipcity`, `cf-iplongitude`, `cf-iplatitude`). No external API call, no extra latency, no key to manage. Falls back to `accept-language` for locale and `'XX'` country if missing (local dev).
-- **OTP UI**: 6 numeric inputs with `inputMode="numeric"`, auto-advance on key, paste-distribute on paste, auto-submit on 6th digit.
-- **Welcome animation**: framer-motion + a tiny custom typewriter hook. No external libs.
-- **Avatar SVG**: pure function `generateAvatar({seed, vibe, monogram}) → string`. Stored as `data:image/svg+xml;base64,...`. Average size 1.8–2.2 KB; well under any column limits and cacheable in `<img src>`.
-- **Re-roll**: client passes `rerollSeed = Date.now()` so the server picks fresh descriptor + avatar; the city stays (city is geo, not random).
-- **Locale routing**: `/` already renders the home; we add an optional `/{locale}` passthrough so deep-linked OG share URLs remain `/post/:id` (locale-free) while the post-welcome navigation hits `/zh`, `/en`, etc.
-- **Cost**: zero per-user AI spend. If you later want AI portraits, swap `generateAvatar` for a Lovable AI image call — the rest of the system stays identical.
-
-Shall I start with steps 1–4 (migration + auth config + pools + server functions) and then ping you before building the screens?
+Once you approve, I'll implement everything above in one pass: migration → libs → server fns → components → routes → homepage wiring.
