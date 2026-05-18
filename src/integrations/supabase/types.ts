@@ -14,16 +14,422 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["story_status"]
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["story_status"]
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["story_status"]
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          case_type: string | null
+          city: string | null
+          contact: Json
+          country: string | null
+          created_at: string
+          emotional_intensity: number | null
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          story_id: string | null
+          urgency: number | null
+          user_id: string | null
+        }
+        Insert: {
+          case_type?: string | null
+          city?: string | null
+          contact?: Json
+          country?: string | null
+          created_at?: string
+          emotional_intensity?: number | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          story_id?: string | null
+          urgency?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          case_type?: string | null
+          city?: string | null
+          contact?: Json
+          country?: string | null
+          created_at?: string
+          emotional_intensity?: number | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          story_id?: string | null
+          urgency?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nicknames: {
+        Row: {
+          created_at: string
+          id: string
+          locale: string
+          text: string
+          used_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          locale: string
+          text: string
+          used_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          locale?: string
+          text?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          emotional_embedding: string | null
+          id: string
+          locale: string
+          nickname: string
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          emotional_embedding?: string | null
+          id: string
+          locale?: string
+          nickname: string
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          emotional_embedding?: string | null
+          id?: string
+          locale?: string
+          nickname?: string
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          ai_verdict: string | null
+          author_id: string
+          body_original: string
+          body_rewritten: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          embedding: string | null
+          id: string
+          like_count: number
+          locale: string
+          media: Json
+          published_at: string | null
+          region: string | null
+          score: number | null
+          score_category: string | null
+          share_count: number
+          status: Database["public"]["Enums"]["story_status"]
+          subscores: Json | null
+          tags: string[]
+          title: string | null
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          ai_verdict?: string | null
+          author_id: string
+          body_original: string
+          body_rewritten?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          like_count?: number
+          locale?: string
+          media?: Json
+          published_at?: string | null
+          region?: string | null
+          score?: number | null
+          score_category?: string | null
+          share_count?: number
+          status?: Database["public"]["Enums"]["story_status"]
+          subscores?: Json | null
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          ai_verdict?: string | null
+          author_id?: string
+          body_original?: string
+          body_rewritten?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          like_count?: number
+          locale?: string
+          media?: Json
+          published_at?: string | null
+          region?: string | null
+          score?: number | null
+          score_category?: string | null
+          share_count?: number
+          status?: Database["public"]["Enums"]["story_status"]
+          subscores?: Json | null
+          tags?: string[]
+          title?: string | null
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      story_ai_runs: {
+        Row: {
+          cost_ms: number | null
+          created_at: string
+          id: string
+          input: Json | null
+          model: string
+          output: Json | null
+          provider: string
+          stage: string
+          story_id: string | null
+        }
+        Insert: {
+          cost_ms?: number | null
+          created_at?: string
+          id?: string
+          input?: Json | null
+          model: string
+          output?: Json | null
+          provider: string
+          stage: string
+          story_id?: string | null
+        }
+        Update: {
+          cost_ms?: number | null
+          created_at?: string
+          id?: string
+          input?: Json | null
+          model?: string
+          output?: Json | null
+          provider?: string
+          stage?: string
+          story_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_ai_runs_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_interactions: {
+        Row: {
+          created_at: string
+          dwell_ms: number | null
+          id: string
+          kind: Database["public"]["Enums"]["interaction_kind"]
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dwell_ms?: number | null
+          id?: string
+          kind: Database["public"]["Enums"]["interaction_kind"]
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dwell_ms?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["interaction_kind"]
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_interactions_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trends: {
+        Row: {
+          ai_framing: Json | null
+          created_at: string
+          id: string
+          locale: string
+          raw: Json | null
+          scheduled_for: string | null
+          source: string
+          status: Database["public"]["Enums"]["trend_status"]
+          topic: string
+        }
+        Insert: {
+          ai_framing?: Json | null
+          created_at?: string
+          id?: string
+          locale?: string
+          raw?: Json | null
+          scheduled_for?: string | null
+          source: string
+          status?: Database["public"]["Enums"]["trend_status"]
+          topic: string
+        }
+        Update: {
+          ai_framing?: Json | null
+          created_at?: string
+          id?: string
+          locale?: string
+          raw?: Json | null
+          scheduled_for?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["trend_status"]
+          topic?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      interaction_kind:
+        | "view"
+        | "like"
+        | "save"
+        | "share"
+        | "been_through"
+        | "worse"
+        | "report"
+        | "comment"
+      lead_status: "new" | "contacted" | "converted" | "closed"
+      story_status: "draft" | "pending" | "published" | "sensitive" | "removed"
+      trend_status: "ingested" | "approved" | "published" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +556,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      interaction_kind: [
+        "view",
+        "like",
+        "save",
+        "share",
+        "been_through",
+        "worse",
+        "report",
+        "comment",
+      ],
+      lead_status: ["new", "contacted", "converted", "closed"],
+      story_status: ["draft", "pending", "published", "sensitive", "removed"],
+      trend_status: ["ingested", "approved", "published", "rejected"],
+    },
   },
 } as const
