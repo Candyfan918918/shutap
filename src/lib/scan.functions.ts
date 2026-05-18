@@ -96,7 +96,6 @@ export const getScan = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<ScanRow | null> => {
     // Use admin client because completed scans should be publicly viewable
     // (for share links), and RLS already enforces "completed OR owner".
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("scan_results")
       .select(SCAN_COLS)
