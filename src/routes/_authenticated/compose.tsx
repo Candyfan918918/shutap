@@ -116,6 +116,13 @@ function Composer() {
         },
       });
       await publish({ data: { postId } });
+      if (scanId) {
+        try {
+          await linkScan({ data: { scanId, postId } });
+        } catch {
+          /* non-fatal — the post is published either way */
+        }
+      }
       navigate({ to: "/post/$postId", params: { postId }, search: { shared: 0 } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Publish failed");
