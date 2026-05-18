@@ -17,6 +17,7 @@ import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
+import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
 
@@ -59,6 +60,11 @@ const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   path: '/scan/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedScanStartRoute = AuthenticatedScanStartRouteImport.update({
+  id: '/scan/start',
+  path: '/scan/start',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const ApiPublicShareCardPostIdRoute =
   ApiPublicShareCardPostIdRouteImport.update({
     id: '/api/public/share-card/$postId',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/scan/start': typeof AuthenticatedScanStartRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/scan/start': typeof AuthenticatedScanStartRoute
   '/scan': typeof AuthenticatedScanIndexRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/scan/start'
     | '/scan/'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/scan/start'
     | '/scan'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/compose'
     | '/enter/verify'
     | '/post/$postId'
+    | '/_authenticated/scan/start'
     | '/_authenticated/scan/'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
@@ -211,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/scan/start': {
+      id: '/_authenticated/scan/start'
+      path: '/scan/start'
+      fullPath: '/scan/start'
+      preLoaderRoute: typeof AuthenticatedScanStartRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/share-card/$postId': {
       id: '/api/public/share-card/$postId'
       path: '/api/public/share-card/$postId'
@@ -230,11 +249,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+  AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedScanIndexRoute: typeof AuthenticatedScanIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+  AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedScanIndexRoute: AuthenticatedScanIndexRoute,
 }
 
