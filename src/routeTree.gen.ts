@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ComposeRouteImport } from './routes/compose'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
+import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
 
 const ComposeRoute = ComposeRouteImport.update({
@@ -29,6 +30,12 @@ const PostPostIdRoute = PostPostIdRouteImport.update({
   path: '/post/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicShareCardPostIdRoute =
+  ApiPublicShareCardPostIdRouteImport.update({
+    id: '/api/public/share-card/$postId',
+    path: '/api/public/share-card/$postId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
   id: '/api/public/s/$postId',
   path: '/api/public/s/$postId',
@@ -40,12 +47,14 @@ export interface FileRoutesByFullPath {
   '/compose': typeof ComposeRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
+  '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compose': typeof ComposeRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
+  '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +62,30 @@ export interface FileRoutesById {
   '/compose': typeof ComposeRoute
   '/post/$postId': typeof PostPostIdRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
+  '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/compose' | '/post/$postId' | '/api/public/s/$postId'
+  fullPaths:
+    | '/'
+    | '/compose'
+    | '/post/$postId'
+    | '/api/public/s/$postId'
+    | '/api/public/share-card/$postId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/compose' | '/post/$postId' | '/api/public/s/$postId'
-  id: '__root__' | '/' | '/compose' | '/post/$postId' | '/api/public/s/$postId'
+  to:
+    | '/'
+    | '/compose'
+    | '/post/$postId'
+    | '/api/public/s/$postId'
+    | '/api/public/share-card/$postId'
+  id:
+    | '__root__'
+    | '/'
+    | '/compose'
+    | '/post/$postId'
+    | '/api/public/s/$postId'
+    | '/api/public/share-card/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +93,7 @@ export interface RootRouteChildren {
   ComposeRoute: typeof ComposeRoute
   PostPostIdRoute: typeof PostPostIdRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
+  ApiPublicShareCardPostIdRoute: typeof ApiPublicShareCardPostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/share-card/$postId': {
+      id: '/api/public/share-card/$postId'
+      path: '/api/public/share-card/$postId'
+      fullPath: '/api/public/share-card/$postId'
+      preLoaderRoute: typeof ApiPublicShareCardPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/s/$postId': {
       id: '/api/public/s/$postId'
       path: '/api/public/s/$postId'
@@ -107,7 +141,18 @@ const rootRouteChildren: RootRouteChildren = {
   ComposeRoute: ComposeRoute,
   PostPostIdRoute: PostPostIdRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
+  ApiPublicShareCardPostIdRoute: ApiPublicShareCardPostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
