@@ -18,9 +18,10 @@ export const Route = createFileRoute("/post/$postId")({
   },
   validateSearch: (s: Record<string, unknown>) => ({ shared: Number(s.shared ?? 0) }),
   component: PostPageShell,
-  head: ({ loaderData }) => {
+  head: ({ loaderData, params }) => {
     const p = loaderData?.post;
     if (!p) return { meta: [{ title: "Marriage Drama" }] };
+    const ogImage = p.share_card_square ?? `/api/public/share-card/${params.postId}?format=square`;
     return {
       meta: [
         { title: `${p.title} — Marriage Drama` },
@@ -28,8 +29,9 @@ export const Route = createFileRoute("/post/$postId")({
         { property: "og:title", content: p.title },
         { property: "og:description", content: p.story_text.slice(0, 200) },
         { property: "og:type", content: "article" },
-        ...(p.share_card_square ? [{ property: "og:image", content: p.share_card_square }] : []),
+        { property: "og:image", content: ogImage },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: ogImage },
       ],
     };
   },
