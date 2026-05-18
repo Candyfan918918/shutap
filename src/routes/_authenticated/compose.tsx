@@ -12,12 +12,14 @@ import {
   updateDraftPost,
   approveAndPublish,
 } from "@/lib/posts.functions";
+import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
   validateSearch: (s: Record<string, unknown>) => ({
     score: Number(s.score ?? 742),
+    scanId: typeof s.scanId === "string" ? s.scanId : undefined,
   }),
   head: () => ({ meta: [{ title: "Compose your Marriage Drama post" }] }),
 });
