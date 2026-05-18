@@ -97,9 +97,10 @@ export const Route = createFileRoute("/api/public/share-card/$postId")({
         if (!upErr) {
           const { data: pub } = supabaseAdmin.storage.from("story-media").getPublicUrl(path);
           if (pub?.publicUrl) {
+            const patch: Record<string, string> = { [col]: pub.publicUrl };
             await supabaseAdmin
               .from("posts")
-              .update({ [col]: pub.publicUrl })
+              .update(patch as never)
               .eq("id", postId);
           }
         }
