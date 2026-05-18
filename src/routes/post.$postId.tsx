@@ -9,6 +9,7 @@ import { ScoreCard } from "@/components/post-engine/ScoreCard";
 import { getPublishedPost, getPostReactionCounts } from "@/lib/posts-public.functions";
 import { recordShare, reactToPost } from "@/lib/posts.functions";
 import { buildShareIntent } from "@/lib/share/platforms";
+import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
@@ -176,12 +177,51 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
   const { t } = useT();
   const recordSh = useServerFn(recordShare);
   const origin = typeof window !== "undefined" ? window.location.origin : "https://marriagedrama.app";
+  const postUrl = `${origin}/s/${post.id}?ref=native`;
+  const [busy, setBusy] = useState<"idle" | "native" | "download">("idle");
+  const [nativeReady, setNativeReady] = useState(false);
+  useEffect(() => setNativeReady(canNativeShare()), []);
+
   const PLATFORMS: SharePlatform[] = [
     "x", "tiktok", "instagram", "xiaohongshu", "facebook", "imessage", "whatsapp", "copy_link",
   ];
   const EMOJI: Record<SharePlatform, string> = {
     x: "𝕏", tiktok: "🎵", instagram: "📷", xiaohongshu: "📕",
     facebook: "📘", imessage: "💬", whatsapp: "💚", copy_link: "🔗",
+  };
+
+  const onNativeShare = async () => {
+    if (busy !== "idle") return;
+    setBusy("native");
+    const shareText = post.platform_captions?.x ?? post.title;
+    const result = await nativeShareCard({
+      postId: post.id,
+      title: post.title,
+      text: `${shareText}\n\n${t("post.share.cta")}`,
+      url: postUrl,
+    });
+    setBusy("idle");
+    if (result.ok) {
+      try { await recordSh({ data: { postId: post.id, platform: "copy_link" } }); } catch { /* ignore */ }
+      toast.success(t("post.share.done"));
+    } else if (result.reason === "unsupported") {
+      toast.message(t("post.share.nativeFallback"));
+    } else if (result.reason === "error") {
+      toast.error(result.error instanceof Error ? result.error.message : "Share failed");
+    }
+  };
+
+  const onDownload = async () => {
+    if (busy !== "idle") return;
+    setBusy("download");
+    try {
+      await downloadShareCard(post.id, "square");
+      toast.success(t("post.share.downloaded"));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setBusy("idle");
+    }
   };
 
   const onPick = async (p: SharePlatform) => {
@@ -228,6 +268,27 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
             badges={post.badges}
             mediaUrl={post.media_url}
           />
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2">
+          {nativeReady && (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={onNativeShare}
+              disabled={busy !== "idle"}
+              className="w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg disabled:opacity-60"
+            >
+              {busy === "native" ? t("post.share.nativePreparing") : `📤 ${t("post.share.native")}`}
+            </motion.button>
+          )}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={onDownload}
+            disabled={busy !== "idle"}
+            className="w-full py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm disabled:opacity-60"
+          >
+            {busy === "download" ? t("post.share.nativePreparing") : `⬇ ${t("post.share.downloadCard")}`}
+          </motion.button>
         </div>
 
         <div className="mt-8 grid grid-cols-4 gap-3">
