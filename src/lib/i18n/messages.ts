@@ -320,6 +320,36 @@ const zh: Messages = {
     notFound: "这个帖子消失了。",
     landingCta: "测一下你自己的婚姻狗血指数 →",
   },
+  enter: {
+    title: "进入婚姻真相宇宙",
+    sub: "无密码、无表单。系统会给你分配一个角色。",
+    emailPlaceholder: "你的邮箱",
+    emailCta: "发送验证码",
+    sending: "发送中…",
+    google: "用 Google 继续",
+    apple: "用 Apple 继续",
+    or: "或",
+    legal: "进入即表示愿意被娱乐。",
+    rateLimited: "太快啦，稍等一下再试。",
+    failed: "出了点状况，再试一次？",
+  },
+  verify: {
+    title: "查收你的邮箱",
+    sub: "我们把 6 位验证码发到了 {email}。",
+    cta: "验证",
+    verifying: "验证中…",
+    resend: "重新发送验证码",
+    back: "← 用另一个邮箱",
+    invalid: "验证码无效，再试一次。",
+  },
+  welcome: {
+    summoning: "正在生成你的角色…",
+    title: "你的婚姻宇宙身份已生成",
+    subtitle: "欢迎你，{name}。",
+    cta: "进入婚姻真相宇宙 →",
+    reroll: "🎲 重新分配角色",
+    rerolling: "重新分配中…",
+  },
 };
 
 const es: Messages = {
