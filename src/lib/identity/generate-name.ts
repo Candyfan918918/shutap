@@ -1,5 +1,5 @@
 import type { Locale } from "@/lib/i18n";
-import { pickCity, type } from "@/lib/identity/city-pools";
+import { pickCity } from "@/lib/identity/city-pools";
 import { pickDescriptor, nameSeparator, type Descriptor, type Vibe } from "@/lib/identity/descriptor-pools";
 
 export interface GeneratedIdentity {
