@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           body: string
@@ -48,6 +66,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          requester_id: string
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          requester_id: string
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          requester_id?: string
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {
@@ -185,6 +245,30 @@ export type Database = {
           },
         ]
       }
+      post_forwards: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          post_id: string
+          sender_id: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          post_id: string
+          sender_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          sender_id?: string | null
+        }
+        Relationships: []
+      }
       post_reactions: {
         Row: {
           created_at: string
@@ -252,72 +336,120 @@ export type Database = {
           },
         ]
       }
+      post_views: {
+        Row: {
+          country: string | null
+          id: string
+          post_id: string
+          session_hash: string
+          viewed_at: string
+          viewer_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          id?: string
+          post_id: string
+          session_hash: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          id?: string
+          post_id?: string
+          session_hash?: string
+          viewed_at?: string
+          viewer_id?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author_id: string
           badges: string[]
           created_at: string
+          deleted_at: string | null
+          forward_count: number
           hashtags: string[]
           id: string
+          like_count: number
           locale: string
           media_url: string | null
           platform_captions: Json
           published_at: string | null
+          save_count: number
           score: number | null
           score_category: string | null
           share_card_square: string | null
           share_card_vertical: string | null
           share_card_xhs: string | null
+          share_count: number
           status: Database["public"]["Enums"]["post_status"]
           story_id: string | null
           story_text: string
           title: string
           tone: Database["public"]["Enums"]["post_tone"]
           updated_at: string
+          view_count: number
+          visibility: string
         }
         Insert: {
           author_id: string
           badges?: string[]
           created_at?: string
+          deleted_at?: string | null
+          forward_count?: number
           hashtags?: string[]
           id?: string
+          like_count?: number
           locale?: string
           media_url?: string | null
           platform_captions?: Json
           published_at?: string | null
+          save_count?: number
           score?: number | null
           score_category?: string | null
           share_card_square?: string | null
           share_card_vertical?: string | null
           share_card_xhs?: string | null
+          share_count?: number
           status?: Database["public"]["Enums"]["post_status"]
           story_id?: string | null
           story_text: string
           title: string
           tone?: Database["public"]["Enums"]["post_tone"]
           updated_at?: string
+          view_count?: number
+          visibility?: string
         }
         Update: {
           author_id?: string
           badges?: string[]
           created_at?: string
+          deleted_at?: string | null
+          forward_count?: number
           hashtags?: string[]
           id?: string
+          like_count?: number
           locale?: string
           media_url?: string | null
           platform_captions?: Json
           published_at?: string | null
+          save_count?: number
           score?: number | null
           score_category?: string | null
           share_card_square?: string | null
           share_card_vertical?: string | null
           share_card_xhs?: string | null
+          share_count?: number
           status?: Database["public"]["Enums"]["post_status"]
           story_id?: string | null
           story_text?: string
           title?: string
           tone?: Database["public"]["Enums"]["post_tone"]
           updated_at?: string
+          view_count?: number
+          visibility?: string
         }
         Relationships: [
           {
@@ -331,7 +463,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          anonymous_mode: boolean
+          avatar_kind: string
           avatar_url: string | null
+          bio: string | null
           city: string | null
           city_label: string | null
           country: string | null
@@ -341,17 +476,23 @@ export type Database = {
           display_name: string | null
           email: string | null
           emotional_embedding: string | null
+          handle: string
           id: string
           last_seen_at: string | null
           locale: string
           nickname: string
+          notif_prefs: Json
           onboarded_at: string | null
+          privacy: Json
           region: string | null
           updated_at: string
           vibe: string | null
         }
         Insert: {
+          anonymous_mode?: boolean
+          avatar_kind?: string
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           city_label?: string | null
           country?: string | null
@@ -361,17 +502,23 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           emotional_embedding?: string | null
+          handle: string
           id: string
           last_seen_at?: string | null
           locale?: string
           nickname: string
+          notif_prefs?: Json
           onboarded_at?: string | null
+          privacy?: Json
           region?: string | null
           updated_at?: string
           vibe?: string | null
         }
         Update: {
+          anonymous_mode?: boolean
+          avatar_kind?: string
           avatar_url?: string | null
+          bio?: string | null
           city?: string | null
           city_label?: string | null
           country?: string | null
@@ -381,14 +528,35 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           emotional_embedding?: string | null
+          handle?: string
           id?: string
           last_seen_at?: string | null
           locale?: string
           nickname?: string
+          notif_prefs?: Json
           onboarded_at?: string | null
+          privacy?: Json
           region?: string | null
           updated_at?: string
           vibe?: string | null
+        }
+        Relationships: []
+      }
+      saved_posts: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -764,6 +932,11 @@ export type Database = {
       }
     }
     Functions: {
+      _bump_post_counter: {
+        Args: { _col: string; _delta: number; _post_id: string }
+        Returns: undefined
+      }
+      _slugify_handle: { Args: { _text: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -771,6 +944,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_post_view: {
+        Args: { _post_id: string; _session_hash: string; _viewer_id: string }
+        Returns: boolean
+      }
+      is_friend: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_handle_available: { Args: { _handle: string }; Returns: boolean }
+      suggest_handles: { Args: { _base: string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
