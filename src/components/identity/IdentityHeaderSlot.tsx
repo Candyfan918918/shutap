@@ -51,7 +51,7 @@ export function IdentityHeaderSlot() {
       <IdentityBadge
         displayName={identity.displayName}
         avatarUrl={identity.avatarUrl}
-        onClick={() => navigate({ to: "/welcome" })}
+        onClick={() => navigate({ to: "/me" })}
       />
     );
   }
