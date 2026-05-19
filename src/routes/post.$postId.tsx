@@ -8,8 +8,10 @@ import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { ScoreCard } from "@/components/post-engine/ScoreCard";
 import { getPublishedPost, getPostReactionCounts } from "@/lib/posts-public.functions";
 import { recordShare, reactToPost } from "@/lib/posts.functions";
+import { recordPostView } from "@/lib/post-analytics.functions";
 import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
+import { supabase } from "@/integrations/supabase/client";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
@@ -70,6 +72,27 @@ function PostPage() {
   const { post } = Route.useLoaderData();
   const { shared } = Route.useSearch();
   const [showShare, setShowShare] = useState(shared === 0);
+  const recordView = useServerFn(recordPostView);
+
+  // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
+  useEffect(() => {
+    if (!post) return;
+    const key = `mv:${post.id}`;
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    let sid = localStorage.getItem("md.sid");
+    if (!sid) {
+      sid = (crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)).replace(/-/g, "");
+      localStorage.setItem("md.sid", sid);
+    }
+    (async () => {
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        await recordView({ data: { postId: post.id, sessionId: sid!, viewerId: u.user?.id ?? null } });
+      } catch { /* ignore */ }
+    })();
+  }, [post, recordView]);
 
   if (!post) {
     return (
