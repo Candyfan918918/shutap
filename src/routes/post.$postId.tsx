@@ -256,9 +256,11 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
           initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           className="text-2xl sm:text-3xl font-bold text-center text-balance"
         >
-          {t("post.share.title")}
+          👀 Be honest…
         </motion.h2>
-        <p className="mt-2 text-center text-sm text-muted-foreground">{t("post.share.sub")}</p>
+        <p className="mt-2 text-center text-base text-balance">
+          Is your friend's relationship messier? <span className="text-muted-foreground">Send this and find out.</span>
+        </p>
 
         <div className="mt-6 max-w-[280px] mx-auto w-full">
           <ScoreCard

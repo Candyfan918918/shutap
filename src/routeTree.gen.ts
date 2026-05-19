@@ -16,11 +16,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
+import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authenticated/spill/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
+import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
+import { Route as AuthenticatedSpillDraftIdScoringRouteImport } from './routes/_authenticated/spill/$draftId/scoring'
+import { Route as AuthenticatedSpillDraftIdScoreRouteImport } from './routes/_authenticated/spill/$draftId/score'
+import { Route as AuthenticatedSpillDraftIdDraftRouteImport } from './routes/_authenticated/spill/$draftId/draft'
+import { Route as AuthenticatedSpillDraftIdChatRouteImport } from './routes/_authenticated/spill/$draftId/chat'
 import { Route as AuthenticatedScanResultScanIdRouteImport } from './routes/_authenticated/scan/result.$scanId'
 import { Route as AuthenticatedScanQuestionStepRouteImport } from './routes/_authenticated/scan/question.$step'
 
@@ -58,9 +64,19 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSpillIndexRoute = AuthenticatedSpillIndexRouteImport.update({
+  id: '/spill/',
+  path: '/spill/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   id: '/scan/',
   path: '/scan/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSpillStartRoute = AuthenticatedSpillStartRouteImport.update({
+  id: '/spill/start',
+  path: '/spill/start',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedScanStartRoute = AuthenticatedScanStartRouteImport.update({
@@ -85,6 +101,30 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
   path: '/api/public/s/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSpillDraftIdScoringRoute =
+  AuthenticatedSpillDraftIdScoringRouteImport.update({
+    id: '/spill/$draftId/scoring',
+    path: '/spill/$draftId/scoring',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSpillDraftIdScoreRoute =
+  AuthenticatedSpillDraftIdScoreRouteImport.update({
+    id: '/spill/$draftId/score',
+    path: '/spill/$draftId/score',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSpillDraftIdDraftRoute =
+  AuthenticatedSpillDraftIdDraftRouteImport.update({
+    id: '/spill/$draftId/draft',
+    path: '/spill/$draftId/draft',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSpillDraftIdChatRoute =
+  AuthenticatedSpillDraftIdChatRouteImport.update({
+    id: '/spill/$draftId/chat',
+    path: '/spill/$draftId/chat',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedScanResultScanIdRoute =
   AuthenticatedScanResultScanIdRouteImport.update({
     id: '/scan/result/$scanId',
@@ -107,9 +147,15 @@ export interface FileRoutesByFullPath {
   '/post/$postId': typeof PostPostIdRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
+  '/spill/start': typeof AuthenticatedSpillStartRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
+  '/spill/': typeof AuthenticatedSpillIndexRoute
   '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
+  '/spill/$draftId/chat': typeof AuthenticatedSpillDraftIdChatRoute
+  '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
+  '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
+  '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -122,9 +168,15 @@ export interface FileRoutesByTo {
   '/post/$postId': typeof PostPostIdRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
+  '/spill/start': typeof AuthenticatedSpillStartRoute
   '/scan': typeof AuthenticatedScanIndexRoute
+  '/spill': typeof AuthenticatedSpillIndexRoute
   '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
+  '/spill/$draftId/chat': typeof AuthenticatedSpillDraftIdChatRoute
+  '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
+  '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
+  '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -139,9 +191,15 @@ export interface FileRoutesById {
   '/post/$postId': typeof PostPostIdRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
+  '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
+  '/_authenticated/spill/': typeof AuthenticatedSpillIndexRoute
   '/_authenticated/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/_authenticated/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
+  '/_authenticated/spill/$draftId/chat': typeof AuthenticatedSpillDraftIdChatRoute
+  '/_authenticated/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
+  '/_authenticated/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
+  '/_authenticated/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
 }
@@ -156,9 +214,15 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/profile/scans'
     | '/scan/start'
+    | '/spill/start'
     | '/scan/'
+    | '/spill/'
     | '/scan/question/$step'
     | '/scan/result/$scanId'
+    | '/spill/$draftId/chat'
+    | '/spill/$draftId/draft'
+    | '/spill/$draftId/score'
+    | '/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   fileRoutesByTo: FileRoutesByTo
@@ -171,9 +235,15 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/profile/scans'
     | '/scan/start'
+    | '/spill/start'
     | '/scan'
+    | '/spill'
     | '/scan/question/$step'
     | '/scan/result/$scanId'
+    | '/spill/$draftId/chat'
+    | '/spill/$draftId/draft'
+    | '/spill/$draftId/score'
+    | '/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   id:
@@ -187,9 +257,15 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
+    | '/_authenticated/spill/start'
     | '/_authenticated/scan/'
+    | '/_authenticated/spill/'
     | '/_authenticated/scan/question/$step'
     | '/_authenticated/scan/result/$scanId'
+    | '/_authenticated/spill/$draftId/chat'
+    | '/_authenticated/spill/$draftId/draft'
+    | '/_authenticated/spill/$draftId/score'
+    | '/_authenticated/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
   fileRoutesById: FileRoutesById
@@ -255,11 +331,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/spill/': {
+      id: '/_authenticated/spill/'
+      path: '/spill'
+      fullPath: '/spill/'
+      preLoaderRoute: typeof AuthenticatedSpillIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/scan/': {
       id: '/_authenticated/scan/'
       path: '/scan'
       fullPath: '/scan/'
       preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/spill/start': {
+      id: '/_authenticated/spill/start'
+      path: '/spill/start'
+      fullPath: '/spill/start'
+      preLoaderRoute: typeof AuthenticatedSpillStartRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/scan/start': {
@@ -290,6 +380,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/spill/$draftId/scoring': {
+      id: '/_authenticated/spill/$draftId/scoring'
+      path: '/spill/$draftId/scoring'
+      fullPath: '/spill/$draftId/scoring'
+      preLoaderRoute: typeof AuthenticatedSpillDraftIdScoringRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/spill/$draftId/score': {
+      id: '/_authenticated/spill/$draftId/score'
+      path: '/spill/$draftId/score'
+      fullPath: '/spill/$draftId/score'
+      preLoaderRoute: typeof AuthenticatedSpillDraftIdScoreRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/spill/$draftId/draft': {
+      id: '/_authenticated/spill/$draftId/draft'
+      path: '/spill/$draftId/draft'
+      fullPath: '/spill/$draftId/draft'
+      preLoaderRoute: typeof AuthenticatedSpillDraftIdDraftRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/spill/$draftId/chat': {
+      id: '/_authenticated/spill/$draftId/chat'
+      path: '/spill/$draftId/chat'
+      fullPath: '/spill/$draftId/chat'
+      preLoaderRoute: typeof AuthenticatedSpillDraftIdChatRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/scan/result/$scanId': {
       id: '/_authenticated/scan/result/$scanId'
       path: '/scan/result/$scanId'
@@ -311,18 +429,30 @@ interface AuthenticatedRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
+  AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
   AuthenticatedScanIndexRoute: typeof AuthenticatedScanIndexRoute
+  AuthenticatedSpillIndexRoute: typeof AuthenticatedSpillIndexRoute
   AuthenticatedScanQuestionStepRoute: typeof AuthenticatedScanQuestionStepRoute
   AuthenticatedScanResultScanIdRoute: typeof AuthenticatedScanResultScanIdRoute
+  AuthenticatedSpillDraftIdChatRoute: typeof AuthenticatedSpillDraftIdChatRoute
+  AuthenticatedSpillDraftIdDraftRoute: typeof AuthenticatedSpillDraftIdDraftRoute
+  AuthenticatedSpillDraftIdScoreRoute: typeof AuthenticatedSpillDraftIdScoreRoute
+  AuthenticatedSpillDraftIdScoringRoute: typeof AuthenticatedSpillDraftIdScoringRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
+  AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,
   AuthenticatedScanIndexRoute: AuthenticatedScanIndexRoute,
+  AuthenticatedSpillIndexRoute: AuthenticatedSpillIndexRoute,
   AuthenticatedScanQuestionStepRoute: AuthenticatedScanQuestionStepRoute,
   AuthenticatedScanResultScanIdRoute: AuthenticatedScanResultScanIdRoute,
+  AuthenticatedSpillDraftIdChatRoute: AuthenticatedSpillDraftIdChatRoute,
+  AuthenticatedSpillDraftIdDraftRoute: AuthenticatedSpillDraftIdDraftRoute,
+  AuthenticatedSpillDraftIdScoreRoute: AuthenticatedSpillDraftIdScoreRoute,
+  AuthenticatedSpillDraftIdScoringRoute: AuthenticatedSpillDraftIdScoringRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

@@ -248,8 +248,7 @@ function MainCTA() {
             <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.spill.title")}</div>
             <p className="mt-2 text-sm text-muted-foreground">{t("cta.spill.desc")}</p>
             <Link
-              to="/compose"
-              search={{ score: 0 }}
+              to="/spill"
               className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm shadow-lg"
             >
               {t("cta.spill.cta")}
