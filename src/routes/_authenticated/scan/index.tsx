@@ -44,33 +44,28 @@ function ScanIntro() {
           Judge My Relationship™
         </div>
         <h1 className="text-4xl sm:text-5xl font-black leading-tight text-balance">
-          Okay… let me ask you a few things.
+          90 seconds. mostly tapping.
         </h1>
         <p className="mt-4 text-base text-muted-foreground max-w-md text-balance">
-          Like a nosy best friend, not a therapist. ~26 questions. About 3 minutes.
-          We'll score the chaos at the end.
+          Like your funniest smartest friend asking questions over wine.
+          We score the chaos at the end.
         </p>
 
         <div className="mt-10 w-full space-y-3">
           {active && !isLoading ? (
             <>
-              <button
-                onClick={() =>
-                  navigate({
-                    to: "/scan/question/$step",
-                    params: { step: String(active.current_step) },
-                    search: { scanId: active.id },
-                  })
-                }
-                className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
+              <Link
+                to="/scan/result/$scanId"
+                params={{ scanId: active.id }}
+                className="block w-full px-6 py-4 rounded-full bg-surface-elevated border border-border font-semibold text-base"
               >
-                Pick up where we left off →
-              </button>
+                see your last score →
+              </Link>
               <Link
                 to="/scan/start"
-                className="block text-sm text-muted-foreground underline"
+                className="block w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
               >
-                Nope, start fresh
+                start a new one →
               </Link>
             </>
           ) : (
@@ -78,7 +73,7 @@ function ScanIntro() {
               to="/scan/start"
               className="block w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
             >
-              Fine, ask me. →
+              👀 okay let's go →
             </Link>
           )}
         </div>
