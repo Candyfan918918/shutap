@@ -249,7 +249,7 @@ const zh: Messages = {
     loadMore: "加载更多狗血",
   },
   boards: {
-    title: "🏆 婚姻真相局年度大赏",
+    title: "👑 混乱锦标赛",
     sub: "每周一更新榜单。每周二有人哭。",
     items: {
       chaotic: { emoji: "🌋", title: "年度最炸裂婚姻", copy: "火山级别的日常爆点。" },
