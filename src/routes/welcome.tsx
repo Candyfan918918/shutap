@@ -147,12 +147,24 @@ function WelcomePage() {
               transition={{ delay: 1.2 }}
               className="mt-10 space-y-3"
             >
-              <Link
-                to="/"
-                className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
-              >
-                {t("welcome.cta")}
-              </Link>
+              {redirectTo ? (
+                <a
+                  href={redirectTo}
+                  onClick={() => {
+                    try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+                  }}
+                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                >
+                  Continue →
+                </a>
+              ) : (
+                <Link
+                  to="/"
+                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                >
+                  {t("welcome.cta")}
+                </Link>
+              )}
               <button
                 onClick={onReroll}
                 disabled={rolling}
