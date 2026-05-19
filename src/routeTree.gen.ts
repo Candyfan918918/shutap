@@ -13,14 +13,17 @@ import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as EnterRouteImport } from './routes/enter'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authenticated/spill/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
 import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
+import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
 import { Route as AuthenticatedSpillDraftIdScoringRouteImport } from './routes/_authenticated/spill/$draftId/scoring'
@@ -29,6 +32,8 @@ import { Route as AuthenticatedSpillDraftIdDraftRouteImport } from './routes/_au
 import { Route as AuthenticatedSpillDraftIdChatRouteImport } from './routes/_authenticated/spill/$draftId/chat'
 import { Route as AuthenticatedScanResultScanIdRouteImport } from './routes/_authenticated/scan/result.$scanId'
 import { Route as AuthenticatedScanQuestionStepRouteImport } from './routes/_authenticated/scan/question.$step'
+import { Route as AuthenticatedMePostsPostIdIndexRouteImport } from './routes/_authenticated/me/posts/$postId/index'
+import { Route as AuthenticatedMePostsPostIdEditRouteImport } from './routes/_authenticated/me/posts/$postId/edit'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -49,6 +54,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UHandleRoute = UHandleRouteImport.update({
+  id: '/u/$handle',
+  path: '/u/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostPostIdRoute = PostPostIdRouteImport.update({
   id: '/post/$postId',
   path: '/post/$postId',
@@ -58,6 +68,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => EnterRoute,
+} as any)
+const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   id: '/compose',
@@ -89,6 +104,12 @@ const AuthenticatedProfileScansRoute =
     id: '/profile/scans',
     path: '/profile/scans',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMePostsIndexRoute =
+  AuthenticatedMePostsIndexRouteImport.update({
+    id: '/posts/',
+    path: '/posts/',
+    getParentRoute: () => AuthenticatedMeRoute,
   } as any)
 const ApiPublicShareCardPostIdRoute =
   ApiPublicShareCardPostIdRouteImport.update({
@@ -137,14 +158,28 @@ const AuthenticatedScanQuestionStepRoute =
     path: '/scan/question/$step',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMePostsPostIdIndexRoute =
+  AuthenticatedMePostsPostIdIndexRouteImport.update({
+    id: '/posts/$postId/',
+    path: '/posts/$postId/',
+    getParentRoute: () => AuthenticatedMeRoute,
+  } as any)
+const AuthenticatedMePostsPostIdEditRoute =
+  AuthenticatedMePostsPostIdEditRouteImport.update({
+    id: '/posts/$postId/edit',
+    path: '/posts/$postId/edit',
+    getParentRoute: () => AuthenticatedMeRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/me': typeof AuthenticatedMeRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
@@ -158,14 +193,19 @@ export interface FileRoutesByFullPath {
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
+  '/me/posts/': typeof AuthenticatedMePostsIndexRoute
+  '/me/posts/$postId/edit': typeof AuthenticatedMePostsPostIdEditRoute
+  '/me/posts/$postId/': typeof AuthenticatedMePostsPostIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/me': typeof AuthenticatedMeRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
@@ -179,6 +219,9 @@ export interface FileRoutesByTo {
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
+  '/me/posts': typeof AuthenticatedMePostsIndexRoute
+  '/me/posts/$postId/edit': typeof AuthenticatedMePostsPostIdEditRoute
+  '/me/posts/$postId': typeof AuthenticatedMePostsPostIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -187,8 +230,10 @@ export interface FileRoutesById {
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
+  '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
@@ -202,6 +247,9 @@ export interface FileRoutesById {
   '/_authenticated/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
+  '/_authenticated/me/posts/': typeof AuthenticatedMePostsIndexRoute
+  '/_authenticated/me/posts/$postId/edit': typeof AuthenticatedMePostsPostIdEditRoute
+  '/_authenticated/me/posts/$postId/': typeof AuthenticatedMePostsPostIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -210,8 +258,10 @@ export interface FileRouteTypes {
     | '/enter'
     | '/welcome'
     | '/compose'
+    | '/me'
     | '/enter/verify'
     | '/post/$postId'
+    | '/u/$handle'
     | '/profile/scans'
     | '/scan/start'
     | '/spill/start'
@@ -225,14 +275,19 @@ export interface FileRouteTypes {
     | '/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
+    | '/me/posts/'
+    | '/me/posts/$postId/edit'
+    | '/me/posts/$postId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/enter'
     | '/welcome'
     | '/compose'
+    | '/me'
     | '/enter/verify'
     | '/post/$postId'
+    | '/u/$handle'
     | '/profile/scans'
     | '/scan/start'
     | '/spill/start'
@@ -246,6 +301,9 @@ export interface FileRouteTypes {
     | '/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
+    | '/me/posts'
+    | '/me/posts/$postId/edit'
+    | '/me/posts/$postId'
   id:
     | '__root__'
     | '/'
@@ -253,8 +311,10 @@ export interface FileRouteTypes {
     | '/enter'
     | '/welcome'
     | '/_authenticated/compose'
+    | '/_authenticated/me'
     | '/enter/verify'
     | '/post/$postId'
+    | '/u/$handle'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/spill/start'
@@ -268,6 +328,9 @@ export interface FileRouteTypes {
     | '/_authenticated/spill/$draftId/scoring'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
+    | '/_authenticated/me/posts/'
+    | '/_authenticated/me/posts/$postId/edit'
+    | '/_authenticated/me/posts/$postId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,6 +339,7 @@ export interface RootRouteChildren {
   EnterRoute: typeof EnterRouteWithChildren
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
+  UHandleRoute: typeof UHandleRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
   ApiPublicShareCardPostIdRoute: typeof ApiPublicShareCardPostIdRoute
 }
@@ -310,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$handle': {
+      id: '/u/$handle'
+      path: '/u/$handle'
+      fullPath: '/u/$handle'
+      preLoaderRoute: typeof UHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/post/$postId': {
       id: '/post/$postId'
       path: '/post/$postId'
@@ -323,6 +394,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/enter/verify'
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
+    }
+    '/_authenticated/me': {
+      id: '/_authenticated/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/compose': {
       id: '/_authenticated/compose'
@@ -365,6 +443,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/scans'
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/me/posts/': {
+      id: '/_authenticated/me/posts/'
+      path: '/posts'
+      fullPath: '/me/posts/'
+      preLoaderRoute: typeof AuthenticatedMePostsIndexRouteImport
+      parentRoute: typeof AuthenticatedMeRoute
     }
     '/api/public/share-card/$postId': {
       id: '/api/public/share-card/$postId'
@@ -422,11 +507,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScanQuestionStepRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/me/posts/$postId/': {
+      id: '/_authenticated/me/posts/$postId/'
+      path: '/posts/$postId'
+      fullPath: '/me/posts/$postId/'
+      preLoaderRoute: typeof AuthenticatedMePostsPostIdIndexRouteImport
+      parentRoute: typeof AuthenticatedMeRoute
+    }
+    '/_authenticated/me/posts/$postId/edit': {
+      id: '/_authenticated/me/posts/$postId/edit'
+      path: '/posts/$postId/edit'
+      fullPath: '/me/posts/$postId/edit'
+      preLoaderRoute: typeof AuthenticatedMePostsPostIdEditRouteImport
+      parentRoute: typeof AuthenticatedMeRoute
+    }
   }
 }
 
+interface AuthenticatedMeRouteChildren {
+  AuthenticatedMePostsIndexRoute: typeof AuthenticatedMePostsIndexRoute
+  AuthenticatedMePostsPostIdEditRoute: typeof AuthenticatedMePostsPostIdEditRoute
+  AuthenticatedMePostsPostIdIndexRoute: typeof AuthenticatedMePostsPostIdIndexRoute
+}
+
+const AuthenticatedMeRouteChildren: AuthenticatedMeRouteChildren = {
+  AuthenticatedMePostsIndexRoute: AuthenticatedMePostsIndexRoute,
+  AuthenticatedMePostsPostIdEditRoute: AuthenticatedMePostsPostIdEditRoute,
+  AuthenticatedMePostsPostIdIndexRoute: AuthenticatedMePostsPostIdIndexRoute,
+}
+
+const AuthenticatedMeRouteWithChildren = AuthenticatedMeRoute._addFileChildren(
+  AuthenticatedMeRouteChildren,
+)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+  AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
@@ -442,6 +558,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+  AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,
@@ -475,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnterRoute: EnterRouteWithChildren,
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
+  UHandleRoute: UHandleRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
   ApiPublicShareCardPostIdRoute: ApiPublicShareCardPostIdRoute,
 }
