@@ -38,14 +38,17 @@ function ScanIntro() {
           animate={{ opacity: 1, y: 0 }}
           className="text-7xl mb-6"
         >
-          🎬
+          👀
         </motion.div>
+        <div className="text-xs font-bold tracking-wider text-accent uppercase mb-3">
+          Judge My Relationship™
+        </div>
         <h1 className="text-4xl sm:text-5xl font-black leading-tight text-balance">
-          How dramatic is your marriage?
+          Okay… let me ask you a few things.
         </h1>
         <p className="mt-4 text-base text-muted-foreground max-w-md text-balance">
-          ~26 questions. About 3 minutes. Anonymous. Surprisingly accurate.
-          We've definitely seen worse.
+          Like a nosy best friend, not a therapist. ~26 questions. About 3 minutes.
+          We'll score the chaos at the end.
         </p>
 
         <div className="mt-10 w-full space-y-3">
@@ -61,13 +64,13 @@ function ScanIntro() {
                 }
                 className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
               >
-                Resume your scan →
+                Pick up where we left off →
               </button>
               <Link
                 to="/scan/start"
                 className="block text-sm text-muted-foreground underline"
               >
-                Or start a new one
+                Nope, start fresh
               </Link>
             </>
           ) : (
@@ -75,13 +78,13 @@ function ScanIntro() {
               to="/scan/start"
               className="block w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
             >
-              🎬 Start Drama Scan
+              Fine, ask me. →
             </Link>
           )}
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Your answers are private until you choose to share.
+          Anonymous. We hide names. Your secrets are safe.
         </p>
       </main>
     </div>
