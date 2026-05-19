@@ -11,6 +11,9 @@ import { AvatarSvg } from "@/components/identity/AvatarSvg";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Marriage Drama" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: WelcomeShell,
 });
 
@@ -30,9 +33,20 @@ function WelcomeShell() {
 function WelcomePage() {
   const { t } = useT();
   const navigate = useNavigate();
+  const { redirect: redirectSearch } = Route.useSearch();
   const finalize = useServerFn(finalizeIdentity);
   const [identity, setIdentity] = useState<IdentityPayload | null>(null);
   const [rolling, setRolling] = useState(true);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
+  // Resolve intended post-auth destination. Prefer search param; fall back
+  // to sessionStorage (set by /enter) so OAuth round-trips still work.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("md.postAuthRedirect");
+    const target = redirectSearch || stored || null;
+    setRedirectTo(target);
+  }, [redirectSearch]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,12 +147,24 @@ function WelcomePage() {
               transition={{ delay: 1.2 }}
               className="mt-10 space-y-3"
             >
-              <Link
-                to="/"
-                className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
-              >
-                {t("welcome.cta")}
-              </Link>
+              {redirectTo ? (
+                <a
+                  href={redirectTo}
+                  onClick={() => {
+                    try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+                  }}
+                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                >
+                  Continue →
+                </a>
+              ) : (
+                <Link
+                  to="/"
+                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                >
+                  {t("welcome.cta")}
+                </Link>
+              )}
               <button
                 onClick={onReroll}
                 disabled={rolling}

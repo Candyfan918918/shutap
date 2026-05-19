@@ -9,6 +9,9 @@ import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 
 export const Route = createFileRoute("/enter")({
   head: () => ({ meta: [{ title: "Enter — Marriage Drama" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: EnterShell,
 });
 
@@ -28,15 +31,25 @@ function EnterShell() {
 function EnterPage() {
   const { t } = useT();
   const navigate = useNavigate();
+  const { redirect: redirectTo } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState<"idle" | "email" | "google" | "apple">("idle");
 
-  // Already signed in? Skip to /welcome
+  // Persist intended destination so verify + welcome can resume it.
+  useEffect(() => {
+    if (redirectTo && typeof window !== "undefined") {
+      try { sessionStorage.setItem("md.postAuthRedirect", redirectTo); } catch {}
+    }
+  }, [redirectTo]);
+
+  // Already signed in? Skip to /welcome (preserving redirect).
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/welcome" });
+      if (data.session) {
+        navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
+      }
     });
-  }, [navigate]);
+  }, [navigate, redirectTo]);
 
   const onEmail = async (e: React.FormEvent) => {
     e.preventDefault();

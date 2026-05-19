@@ -45,7 +45,8 @@ function VerifyPage() {
       const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
       if (error) throw error;
       sessionStorage.removeItem("md.otpEmail");
-      navigate({ to: "/welcome" });
+      const redirectTo = sessionStorage.getItem("md.postAuthRedirect") || undefined;
+      navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
     } catch {
       toast.error(t("verify.invalid"));
       setBusy(false);
