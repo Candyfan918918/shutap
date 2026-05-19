@@ -27,10 +27,22 @@ export const en = {
     dramaScore: "Drama Score",
   },
   cta: {
-    headline: "How dramatic is your marriage?",
-    sub: "Be honest. We've definitely seen worse.",
+    headline: "👀 Girl… what happened?",
+    sub: "Relationship drama? Plot twist? Sweet moment? Family chaos? We listen. We judge a little. We score it.",
     button: "Start Drama Scan",
-    hint: "Takes 60 seconds. Anonymous. Surprisingly accurate.",
+    hint: "Anonymous. We hide names. Your secrets are safe.",
+    spill: {
+      tag: "☕ Spill The Tea™",
+      title: "Okay so basically…",
+      desc: "Start from the beginning. Or the worst part. Drop receipts — texts, screenshots, voice notes. We're listening.",
+      cta: "Okay so basically… →",
+    },
+    judge: {
+      tag: "👀 Judge My Relationship™",
+      title: "Fine, ask me.",
+      desc: "We'll ask nosy questions and rate how chaotic this relationship actually is. No therapist vibes. Promise.",
+      cta: "Fine, ask me. →",
+    },
   },
   cats: {
     title: "Pick your flavor of chaos",
@@ -53,7 +65,7 @@ export const en = {
     loadMore: "Load more drama",
   },
   boards: {
-    title: "🏆 The Marriage Drama Awards",
+    title: "👑 Chaos Championship",
     sub: "Weekly rankings. Updated every Monday. Cried over every Tuesday.",
     items: {
       chaotic: { emoji: "🌋", title: "Most Chaotic Marriage", copy: "Volcano-level energy, daily." },
@@ -199,10 +211,22 @@ const zh: Messages = {
     dramaScore: "狗血指数",
   },
   cta: {
-    headline: "测测你的婚姻到底有多像连续剧？",
-    sub: "说实话，我们真的见过更离谱的。",
+    headline: "👀 姐妹…到底发生什么事了？",
+    sub: "感情狗血？意外反转？甜蜜瞬间？家庭混战？我们听，会小小评判一下，然后给你打分。",
     button: "开始婚姻体检",
-    hint: "60秒搞定。匿名。准得离谱。",
+    hint: "匿名。我们隐去名字。你的秘密安全。",
+    spill: {
+      tag: "☕ 倾诉时间™",
+      title: "好吧反正就是…",
+      desc: "从头讲，或者直接讲最糟的。截图、聊天记录、语音也行——我们在听。",
+      cta: "好吧反正就是… →",
+    },
+    judge: {
+      tag: "👀 评一下我的感情™",
+      title: "行，你问吧。",
+      desc: "我们会问几个八卦问题，给你这段感情的混乱程度打个分。不是心理咨询。真的。",
+      cta: "行，你问吧。 →",
+    },
   },
   cats: {
     title: "选一个你的剧本流派",
@@ -225,7 +249,7 @@ const zh: Messages = {
     loadMore: "加载更多狗血",
   },
   boards: {
-    title: "🏆 婚姻真相局年度大赏",
+    title: "👑 混乱锦标赛",
     sub: "每周一更新榜单。每周二有人哭。",
     items: {
       chaotic: { emoji: "🌋", title: "年度最炸裂婚姻", copy: "火山级别的日常爆点。" },

@@ -95,7 +95,7 @@ function ResultPage() {
           <Link to="/scan" className="text-sm text-muted-foreground">
             ← New scan
           </Link>
-          <span className="font-semibold">Your Score</span>
+          <span className="font-semibold">Chaos Score™</span>
           <span className="w-12" />
         </div>
       </header>

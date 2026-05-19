@@ -58,7 +58,7 @@ export function ScoreReveal({
         <div className="absolute inset-0 bg-black/20" />
         <div className="relative text-center">
           <div className="text-xs uppercase tracking-[0.3em] opacity-80">
-            Marriage Drama Score™
+            {locale === "zh" ? "关系狗血指数™" : "Relationship Chaos Score™"}
           </div>
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
