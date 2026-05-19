@@ -11,6 +11,9 @@ import { AvatarSvg } from "@/components/identity/AvatarSvg";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Marriage Drama" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: WelcomeShell,
 });
 
