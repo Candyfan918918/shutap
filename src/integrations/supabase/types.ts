@@ -609,6 +609,84 @@ export type Database = {
           },
         ]
       }
+      tea_drafts: {
+        Row: {
+          category: string | null
+          category_key: string | null
+          chat_messages: Json
+          cover_kind: string | null
+          cover_url: string | null
+          created_at: string
+          draft_variants: Json | null
+          extracted: Json
+          final_post_id: string | null
+          id: string
+          locale: string
+          media: Json
+          rankings: Json | null
+          raw_dump: string | null
+          ready_for_score: boolean
+          score: number | null
+          selected_story: string | null
+          selected_title: string | null
+          selected_tone: string | null
+          status: Database["public"]["Enums"]["tea_status"]
+          subscores: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          category_key?: string | null
+          chat_messages?: Json
+          cover_kind?: string | null
+          cover_url?: string | null
+          created_at?: string
+          draft_variants?: Json | null
+          extracted?: Json
+          final_post_id?: string | null
+          id?: string
+          locale?: string
+          media?: Json
+          rankings?: Json | null
+          raw_dump?: string | null
+          ready_for_score?: boolean
+          score?: number | null
+          selected_story?: string | null
+          selected_title?: string | null
+          selected_tone?: string | null
+          status?: Database["public"]["Enums"]["tea_status"]
+          subscores?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          category_key?: string | null
+          chat_messages?: Json
+          cover_kind?: string | null
+          cover_url?: string | null
+          created_at?: string
+          draft_variants?: Json | null
+          extracted?: Json
+          final_post_id?: string | null
+          id?: string
+          locale?: string
+          media?: Json
+          rankings?: Json | null
+          raw_dump?: string | null
+          ready_for_score?: boolean
+          score?: number | null
+          selected_story?: string | null
+          selected_title?: string | null
+          selected_tone?: string | null
+          status?: Database["public"]["Enums"]["tea_status"]
+          subscores?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trends: {
         Row: {
           ai_framing: Json | null
@@ -719,6 +797,13 @@ export type Database = {
         | "whatsapp"
         | "copy_link"
       story_status: "draft" | "pending" | "published" | "sensitive" | "removed"
+      tea_status:
+        | "chatting"
+        | "scoring"
+        | "drafting"
+        | "previewing"
+        | "published"
+        | "abandoned"
       trend_status: "ingested" | "approved" | "published" | "rejected"
     }
     CompositeTypes: {
@@ -873,6 +958,14 @@ export const Constants = {
         "copy_link",
       ],
       story_status: ["draft", "pending", "published", "sensitive", "removed"],
+      tea_status: [
+        "chatting",
+        "scoring",
+        "drafting",
+        "previewing",
+        "published",
+        "abandoned",
+      ],
       trend_status: ["ingested", "approved", "published", "rejected"],
     },
   },
