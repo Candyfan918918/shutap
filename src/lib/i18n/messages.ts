@@ -27,10 +27,22 @@ export const en = {
     dramaScore: "Drama Score",
   },
   cta: {
-    headline: "How dramatic is your marriage?",
-    sub: "Be honest. We've definitely seen worse.",
+    headline: "👀 Girl… what happened?",
+    sub: "Relationship drama? Plot twist? Sweet moment? Family chaos? We listen. We judge a little. We score it.",
     button: "Start Drama Scan",
-    hint: "Takes 60 seconds. Anonymous. Surprisingly accurate.",
+    hint: "Anonymous. We hide names. Your secrets are safe.",
+    spill: {
+      tag: "☕ Spill The Tea™",
+      title: "Okay so basically…",
+      desc: "Start from the beginning. Or the worst part. Drop receipts — texts, screenshots, voice notes. We're listening.",
+      cta: "Okay so basically… →",
+    },
+    judge: {
+      tag: "👀 Judge My Relationship™",
+      title: "Fine, ask me.",
+      desc: "We'll ask nosy questions and rate how chaotic this relationship actually is. No therapist vibes. Promise.",
+      cta: "Fine, ask me. →",
+    },
   },
   cats: {
     title: "Pick your flavor of chaos",
