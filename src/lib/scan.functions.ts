@@ -205,6 +205,45 @@ export const saveAnswer = createServerFn({ method: "POST" })
     };
   });
 
+// ---------- saveAnswersBatch ----------
+// Merge many answers in one update — used by the quick viral flow so we don't
+// pay N round-trips for N screens.
+export const saveAnswersBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        scanId: z.string().uuid(),
+        answers: z.record(z.string().min(1).max(64), answerValueSchema),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: existing, error: loadErr } = await supabase
+      .from("scan_results")
+      .select(SCAN_COLS)
+      .eq("id", data.scanId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (loadErr) throw new Error(loadErr.message);
+    if (!existing) throw new Error("Scan not found");
+    const row = rowToScan(existing as Record<string, unknown>);
+    const nextAnswers: AnswerMap = { ...row.answers, ...data.answers };
+    const nextFlow = computeFlowPath(nextAnswers);
+    const { error: updErr } = await supabase
+      .from("scan_results")
+      .update({
+        answers: nextAnswers,
+        flow_path: nextFlow,
+        current_step: nextFlow.length,
+      } as never)
+      .eq("id", data.scanId)
+      .eq("user_id", userId);
+    if (updErr) throw new Error(updErr.message);
+    return { ok: true };
+  });
+
 // ---------- completeScan ----------
 
 export const completeScan = createServerFn({ method: "POST" })
