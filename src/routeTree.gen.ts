@@ -16,11 +16,21 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authenticated/spill/index'
+import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
 import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
+import { Route as AuthenticatedSettingsSafetyRouteImport } from './routes/_authenticated/settings/safety'
+import { Route as AuthenticatedSettingsPrivacyRouteImport } from './routes/_authenticated/settings/privacy'
+import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
+import { Route as AuthenticatedSettingsLanguageRouteImport } from './routes/_authenticated/settings/language'
+import { Route as AuthenticatedSettingsIdentityRouteImport } from './routes/_authenticated/settings/identity'
+import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authenticated/settings/data'
+import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
@@ -69,9 +79,19 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => EnterRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
@@ -84,6 +104,12 @@ const AuthenticatedSpillIndexRoute = AuthenticatedSpillIndexRouteImport.update({
   path: '/spill/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSettingsIndexRoute =
+  AuthenticatedSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
 const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   id: '/scan/',
   path: '/scan/',
@@ -94,6 +120,48 @@ const AuthenticatedSpillStartRoute = AuthenticatedSpillStartRouteImport.update({
   path: '/spill/start',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSettingsSafetyRoute =
+  AuthenticatedSettingsSafetyRouteImport.update({
+    id: '/safety',
+    path: '/safety',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsPrivacyRoute =
+  AuthenticatedSettingsPrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsNotificationsRoute =
+  AuthenticatedSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsLanguageRoute =
+  AuthenticatedSettingsLanguageRouteImport.update({
+    id: '/language',
+    path: '/language',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsIdentityRoute =
+  AuthenticatedSettingsIdentityRouteImport.update({
+    id: '/identity',
+    path: '/identity',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsDataRoute =
+  AuthenticatedSettingsDataRouteImport.update({
+    id: '/data',
+    path: '/data',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
+const AuthenticatedSettingsAccountRoute =
+  AuthenticatedSettingsAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
 const AuthenticatedScanStartRoute = AuthenticatedScanStartRouteImport.update({
   id: '/scan/start',
   path: '/scan/start',
@@ -176,14 +244,24 @@ export interface FileRoutesByFullPath {
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
+  '/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/settings/data': typeof AuthenticatedSettingsDataRoute
+  '/settings/identity': typeof AuthenticatedSettingsIdentityRoute
+  '/settings/language': typeof AuthenticatedSettingsLanguageRoute
+  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
+  '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
+  '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/spill/': typeof AuthenticatedSpillIndexRoute
   '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
@@ -202,14 +280,23 @@ export interface FileRoutesByTo {
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
+  '/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/settings/data': typeof AuthenticatedSettingsDataRoute
+  '/settings/identity': typeof AuthenticatedSettingsIdentityRoute
+  '/settings/language': typeof AuthenticatedSettingsLanguageRoute
+  '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
+  '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/scan': typeof AuthenticatedScanIndexRoute
+  '/settings': typeof AuthenticatedSettingsIndexRoute
   '/spill': typeof AuthenticatedSpillIndexRoute
   '/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
@@ -230,14 +317,24 @@ export interface FileRoutesById {
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
+  '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
+  '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
+  '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
+  '/_authenticated/settings/data': typeof AuthenticatedSettingsDataRoute
+  '/_authenticated/settings/identity': typeof AuthenticatedSettingsIdentityRoute
+  '/_authenticated/settings/language': typeof AuthenticatedSettingsLanguageRoute
+  '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_authenticated/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
+  '/_authenticated/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
+  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/spill/': typeof AuthenticatedSpillIndexRoute
   '/_authenticated/scan/question/$step': typeof AuthenticatedScanQuestionStepRoute
   '/_authenticated/scan/result/$scanId': typeof AuthenticatedScanResultScanIdRoute
@@ -258,14 +355,24 @@ export interface FileRouteTypes {
     | '/enter'
     | '/welcome'
     | '/compose'
+    | '/friends'
     | '/me'
+    | '/settings'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
     | '/profile/scans'
     | '/scan/start'
+    | '/settings/account'
+    | '/settings/data'
+    | '/settings/identity'
+    | '/settings/language'
+    | '/settings/notifications'
+    | '/settings/privacy'
+    | '/settings/safety'
     | '/spill/start'
     | '/scan/'
+    | '/settings/'
     | '/spill/'
     | '/scan/question/$step'
     | '/scan/result/$scanId'
@@ -284,14 +391,23 @@ export interface FileRouteTypes {
     | '/enter'
     | '/welcome'
     | '/compose'
+    | '/friends'
     | '/me'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
     | '/profile/scans'
     | '/scan/start'
+    | '/settings/account'
+    | '/settings/data'
+    | '/settings/identity'
+    | '/settings/language'
+    | '/settings/notifications'
+    | '/settings/privacy'
+    | '/settings/safety'
     | '/spill/start'
     | '/scan'
+    | '/settings'
     | '/spill'
     | '/scan/question/$step'
     | '/scan/result/$scanId'
@@ -311,14 +427,24 @@ export interface FileRouteTypes {
     | '/enter'
     | '/welcome'
     | '/_authenticated/compose'
+    | '/_authenticated/friends'
     | '/_authenticated/me'
+    | '/_authenticated/settings'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
+    | '/_authenticated/settings/account'
+    | '/_authenticated/settings/data'
+    | '/_authenticated/settings/identity'
+    | '/_authenticated/settings/language'
+    | '/_authenticated/settings/notifications'
+    | '/_authenticated/settings/privacy'
+    | '/_authenticated/settings/safety'
     | '/_authenticated/spill/start'
     | '/_authenticated/scan/'
+    | '/_authenticated/settings/'
     | '/_authenticated/spill/'
     | '/_authenticated/scan/question/$step'
     | '/_authenticated/scan/result/$scanId'
@@ -395,11 +521,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/friends': {
+      id: '/_authenticated/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AuthenticatedFriendsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/compose': {
@@ -416,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSpillIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/settings/': {
+      id: '/_authenticated/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
     '/_authenticated/scan/': {
       id: '/_authenticated/scan/'
       path: '/scan'
@@ -429,6 +576,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/spill/start'
       preLoaderRoute: typeof AuthenticatedSpillStartRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings/safety': {
+      id: '/_authenticated/settings/safety'
+      path: '/safety'
+      fullPath: '/settings/safety'
+      preLoaderRoute: typeof AuthenticatedSettingsSafetyRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/privacy': {
+      id: '/_authenticated/settings/privacy'
+      path: '/privacy'
+      fullPath: '/settings/privacy'
+      preLoaderRoute: typeof AuthenticatedSettingsPrivacyRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/notifications': {
+      id: '/_authenticated/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof AuthenticatedSettingsNotificationsRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/language': {
+      id: '/_authenticated/settings/language'
+      path: '/language'
+      fullPath: '/settings/language'
+      preLoaderRoute: typeof AuthenticatedSettingsLanguageRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/identity': {
+      id: '/_authenticated/settings/identity'
+      path: '/identity'
+      fullPath: '/settings/identity'
+      preLoaderRoute: typeof AuthenticatedSettingsIdentityRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/data': {
+      id: '/_authenticated/settings/data'
+      path: '/data'
+      fullPath: '/settings/data'
+      preLoaderRoute: typeof AuthenticatedSettingsDataRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
+    '/_authenticated/settings/account': {
+      id: '/_authenticated/settings/account'
+      path: '/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof AuthenticatedSettingsAccountRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
     }
     '/_authenticated/scan/start': {
       id: '/_authenticated/scan/start'
@@ -540,9 +736,39 @@ const AuthenticatedMeRouteWithChildren = AuthenticatedMeRoute._addFileChildren(
   AuthenticatedMeRouteChildren,
 )
 
+interface AuthenticatedSettingsRouteChildren {
+  AuthenticatedSettingsAccountRoute: typeof AuthenticatedSettingsAccountRoute
+  AuthenticatedSettingsDataRoute: typeof AuthenticatedSettingsDataRoute
+  AuthenticatedSettingsIdentityRoute: typeof AuthenticatedSettingsIdentityRoute
+  AuthenticatedSettingsLanguageRoute: typeof AuthenticatedSettingsLanguageRoute
+  AuthenticatedSettingsNotificationsRoute: typeof AuthenticatedSettingsNotificationsRoute
+  AuthenticatedSettingsPrivacyRoute: typeof AuthenticatedSettingsPrivacyRoute
+  AuthenticatedSettingsSafetyRoute: typeof AuthenticatedSettingsSafetyRoute
+  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
+}
+
+const AuthenticatedSettingsRouteChildren: AuthenticatedSettingsRouteChildren = {
+  AuthenticatedSettingsAccountRoute: AuthenticatedSettingsAccountRoute,
+  AuthenticatedSettingsDataRoute: AuthenticatedSettingsDataRoute,
+  AuthenticatedSettingsIdentityRoute: AuthenticatedSettingsIdentityRoute,
+  AuthenticatedSettingsLanguageRoute: AuthenticatedSettingsLanguageRoute,
+  AuthenticatedSettingsNotificationsRoute:
+    AuthenticatedSettingsNotificationsRoute,
+  AuthenticatedSettingsPrivacyRoute: AuthenticatedSettingsPrivacyRoute,
+  AuthenticatedSettingsSafetyRoute: AuthenticatedSettingsSafetyRoute,
+  AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
+}
+
+const AuthenticatedSettingsRouteWithChildren =
+  AuthenticatedSettingsRoute._addFileChildren(
+    AuthenticatedSettingsRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
+  AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
@@ -558,7 +784,9 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
+  AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,
