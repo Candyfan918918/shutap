@@ -229,20 +229,57 @@ function MainCTA() {
     <section className="mx-auto max-w-3xl px-4 py-16 sm:py-20 text-center">
       <motion.h2
         initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-        className="text-3xl sm:text-5xl font-bold tracking-tight text-balance"
+        className="text-4xl sm:text-6xl font-black tracking-tight text-balance"
       >
         {t("cta.headline")}
       </motion.h2>
-      <p className="mt-4 text-muted-foreground text-balance">{t("cta.sub")}</p>
-      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="mt-8 inline-block">
-        <Link
-          to="/scan"
-          className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-base sm:text-lg ring-danger shadow-xl"
+      <p className="mt-4 text-muted-foreground text-balance max-w-xl mx-auto">{t("cta.sub")}</p>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 text-left">
+        {/* Spill The Tea */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          whileHover={{ y: -4 }}
+          className="group rounded-3xl border border-border bg-gradient-to-br from-card to-surface p-6 hover:border-primary/60 transition relative overflow-hidden"
         >
-          🎬 {t("cta.button")} →
-        </Link>
-      </motion.div>
-      <p className="mt-3 text-xs text-muted-foreground">{t("cta.hint")}</p>
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/20 transition" />
+          <div className="relative">
+            <div className="text-xs font-bold tracking-wider text-primary">{t("cta.spill.tag")}</div>
+            <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.spill.title")}</div>
+            <p className="mt-2 text-sm text-muted-foreground">{t("cta.spill.desc")}</p>
+            <Link
+              to="/compose"
+              search={{ score: 0 }}
+              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm shadow-lg"
+            >
+              {t("cta.spill.cta")}
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Judge My Relationship */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ delay: 0.06 }}
+          whileHover={{ y: -4 }}
+          className="group rounded-3xl border border-border bg-gradient-to-br from-card to-surface p-6 hover:border-accent/60 transition relative overflow-hidden"
+        >
+          <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-accent/10 blur-2xl group-hover:bg-accent/20 transition" />
+          <div className="relative">
+            <div className="text-xs font-bold tracking-wider text-accent">{t("cta.judge.tag")}</div>
+            <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.judge.title")}</div>
+            <p className="mt-2 text-sm text-muted-foreground">{t("cta.judge.desc")}</p>
+            <Link
+              to="/scan"
+              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm hover:border-accent/60 transition"
+            >
+              {t("cta.judge.cta")}
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+
+      <p className="mt-6 text-xs text-muted-foreground">{t("cta.hint")}</p>
     </section>
   );
 }
