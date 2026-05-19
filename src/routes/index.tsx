@@ -269,7 +269,7 @@ function MainCTA() {
             <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.judge.title")}</div>
             <p className="mt-2 text-sm text-muted-foreground">{t("cta.judge.desc")}</p>
             <Link
-              to="/scan"
+              to="/scan/start"
               className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm hover:border-accent/60 transition"
             >
               {t("cta.judge.cta")}
