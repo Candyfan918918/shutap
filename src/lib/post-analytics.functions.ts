@@ -105,7 +105,7 @@ export const recordPostView = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.rpc("increment_post_view", {
       _post_id: data.postId,
       _session_hash: data.sessionId,
-      _viewer_id: data.viewerId ?? undefined,
+      _viewer_id: (data.viewerId ?? null) as unknown as string,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
