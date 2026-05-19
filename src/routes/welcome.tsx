@@ -33,9 +33,20 @@ function WelcomeShell() {
 function WelcomePage() {
   const { t } = useT();
   const navigate = useNavigate();
+  const { redirect: redirectSearch } = Route.useSearch();
   const finalize = useServerFn(finalizeIdentity);
   const [identity, setIdentity] = useState<IdentityPayload | null>(null);
   const [rolling, setRolling] = useState(true);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
+  // Resolve intended post-auth destination. Prefer search param; fall back
+  // to sessionStorage (set by /enter) so OAuth round-trips still work.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = sessionStorage.getItem("md.postAuthRedirect");
+    const target = redirectSearch || stored || null;
+    setRedirectTo(target);
+  }, [redirectSearch]);
 
   useEffect(() => {
     let cancelled = false;
