@@ -65,7 +65,7 @@ export const en = {
     loadMore: "Load more drama",
   },
   boards: {
-    title: "🏆 The Marriage Drama Awards",
+    title: "👑 Chaos Championship",
     sub: "Weekly rankings. Updated every Monday. Cried over every Tuesday.",
     items: {
       chaotic: { emoji: "🌋", title: "Most Chaotic Marriage", copy: "Volcano-level energy, daily." },
