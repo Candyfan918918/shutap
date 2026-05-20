@@ -8,7 +8,7 @@ import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { OtpInput } from "@/components/auth/OtpInput";
 
 export const Route = createFileRoute("/enter/verify")({
-  head: () => ({ meta: [{ title: "Verify — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Verify — Shutap" }] }),
   component: VerifyShell,
 });
 

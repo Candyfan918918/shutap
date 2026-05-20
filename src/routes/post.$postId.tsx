@@ -23,11 +23,11 @@ export const Route = createFileRoute("/post/$postId")({
   component: PostPageShell,
   head: ({ loaderData, params }) => {
     const p = loaderData?.post;
-    if (!p) return { meta: [{ title: "Marriage Drama" }] };
+    if (!p) return { meta: [{ title: "Shutap" }] };
     const ogImage = p.share_card_square ?? `/api/public/share-card/${params.postId}?format=square`;
     return {
       meta: [
-        { title: `${p.title} — Marriage Drama` },
+        { title: `${p.title} — Shutap` },
         { name: "description", content: p.story_text.slice(0, 160) },
         { property: "og:title", content: p.title },
         { property: "og:description", content: p.story_text.slice(0, 200) },

@@ -8,7 +8,7 @@ import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 
 export const Route = createFileRoute("/enter")({
-  head: () => ({ meta: [{ title: "Enter — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Enter — Shutap" }] }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
