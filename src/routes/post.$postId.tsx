@@ -68,7 +68,6 @@ function PostPageShell() {
 
 function PostPage() {
   const { t } = useT();
-  const navigate = useNavigate();
   const { post } = Route.useLoaderData();
   const { shared } = Route.useSearch();
   // shared === 1 means "just published, celebrate + nudge to share"
