@@ -182,7 +182,8 @@ export const saveAnswer = createServerFn({ method: "POST" })
       nextAnswers[data.questionId] = data.answer;
     }
 
-    const nextFlow = computeFlowPath(nextAnswers);
+    // Adaptive: re-rank remaining questions based on this fresh answer.
+    const nextFlow = computeAdaptiveFlow(nextAnswers, data.questionId);
     const nextStep = data.step + 1;
     const isDone = nextStep >= nextFlow.length;
 
