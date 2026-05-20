@@ -105,9 +105,9 @@ export const en = {
     google: "Continue with Google",
     skip: "Just let me lurk →",
   },
-  footer: { made: "Made with caffeine and cautionary tales." },
+  footer: { made: "Real people. Real stories. Real emotions. Anonymous, entertaining, unexpectedly healing. 😭" },
   enter: {
-    title: "Step into the Marriage Drama universe.",
+    title: "Step into Shutap.",
     sub: "No passwords. No forms. You'll be assigned a character.",
     emailPlaceholder: "your@email.com",
     emailCta: "Send me a code",
