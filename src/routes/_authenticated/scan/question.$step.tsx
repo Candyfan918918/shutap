@@ -17,7 +17,6 @@ import {
   progressInfo,
   questionByStepFromPath,
 } from "@/lib/scan/question-engine";
-import { getQuestion } from "@/lib/scan/question-bank";
 import { isLocale, type Locale } from "@/lib/i18n";
 import type { AnswerValue, ScanLocale } from "@/lib/scan/types";
 
