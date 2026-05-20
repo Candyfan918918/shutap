@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { calculateDramaScore } from "@/lib/scan/drama-score";
 import {
+  computeAdaptiveFlow,
   computeFlowPath,
   getInitialFlow,
   progressInfo,
