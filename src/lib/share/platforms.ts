@@ -27,7 +27,7 @@ function withCta(caption: string | undefined, link: string, cta: string, fallbac
 
 export function buildShareIntent(platform: SharePlatform, input: ShareInput): ShareIntent {
   const link = shortLink(input.origin, input.postId, platform);
-  const fallback = `${input.title} — ${input.score}/1000 Marriage Drama Score™`;
+  const fallback = `${input.title} — ${input.score}/1000 Shutap Score™`;
 
   switch (platform) {
     case "x": {

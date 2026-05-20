@@ -7,7 +7,7 @@ import { bandForScore } from "@/lib/scan/types";
 
 export const Route = createFileRoute("/_authenticated/profile/scans")({
   component: ScansHistoryPage,
-  head: () => ({ meta: [{ title: "Your Drama Scans — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Your Drama Scans — Shutap" }] }),
 });
 
 function ScansHistoryPage() {

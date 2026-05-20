@@ -15,35 +15,36 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 };
 
 export const en = {
-  appName: "Marriage Drama",
-  tagline: "The truth about marriage. Funny. Real. Unfiltered.",
-  disclaimer: "For entertainment only. Not therapy, not legal advice — but maybe better than both.",
+  appName: "Shutap",
+  tagline: "The internet's funniest anonymous community for real relationship stories.",
+  disclaimer: "For entertainment only. Not therapy, not legal advice — but unexpectedly healing. 😭",
   nav: { feed: "Feed", rankings: "Rankings", submit: "Share", language: "Language", enter: "Enter", finishOnboarding: "Finish onboarding" },
   wall: {
-    title: "🌍 The Truth of Marriage Around the World",
-    subtitle: "Love. Chaos. Plot twists. We've seen everything.",
+    title: "🌎 The World's Relationship Billboard™",
+    subtitle: "Every city. Every country. Every kind of love story.",
     chips: { global: "Global #1", country: "Country #1", city: "City #1", trending: "🔥 Trending" },
     readStory: "Read story",
-    dramaScore: "Drama Score",
+    dramaScore: "Chaos Score",
   },
   cta: {
-    headline: "👀 Girl… what happened?",
-    sub: "Relationship drama? Plot twist? Sweet moment? Family chaos? We listen. We judge a little. We score it.",
-    button: "Start Drama Scan",
-    hint: "Anonymous. We hide names. Your secrets are safe.",
+    headline: "👀 shutap… WHAT actually happened?",
+    sub: "Love. Chaos. Green flags. Red flags. Family drama. Unexpected happy endings. Tell the truth. Stay anonymous. Join the world's relationship lore.",
+    button: "Judge My Relationship",
+    hint: "🔒 Anonymous by default · 🌎 Real stories worldwide · ❤️ Zero fake perfection",
     spill: {
       tag: "☕ Spill The Tea™",
       title: "Okay so basically…",
-      desc: "Start from the beginning. Or the worst part. Drop receipts — texts, screenshots, voice notes. We're listening.",
-      cta: "Okay so basically… →",
+      desc: "Start anywhere. The beginning. The worst part. The text that ruined everything. Drop receipts — texts, screenshots, voice notes.",
+      cta: "☕ Spill The Tea →",
     },
     judge: {
       tag: "👀 Judge My Relationship™",
-      title: "Fine, ask me.",
-      desc: "We'll ask nosy questions and rate how chaotic this relationship actually is. No therapist vibes. Promise.",
-      cta: "Fine, ask me. →",
+      title: "How chaotic is it… really?",
+      desc: "Take the world's funniest relationship scan. Rank against your city, your region, the world. Top chaos? Welcome to the Chaos Championship™.",
+      cta: "👀 Judge My Relationship →",
     },
   },
+
   cats: {
     title: "Pick your flavor of chaos",
     items: {
@@ -104,9 +105,9 @@ export const en = {
     google: "Continue with Google",
     skip: "Just let me lurk →",
   },
-  footer: { made: "Made with caffeine and cautionary tales." },
+  footer: { made: "Real people. Real stories. Real emotions. Anonymous, entertaining, unexpectedly healing. 😭" },
   enter: {
-    title: "Step into the Marriage Drama universe.",
+    title: "Step into Shutap.",
     sub: "No passwords. No forms. You'll be assigned a character.",
     emailPlaceholder: "your@email.com",
     emailCta: "Send me a code",
@@ -131,7 +132,7 @@ export const en = {
     summoning: "Generating your character…",
     title: "You've been assigned your identity.",
     subtitle: "Welcome, {name}.",
-    cta: "Enter the Marriage Drama Universe →",
+    cta: "Enter Shutap →",
     reroll: "🎲 Re-roll my character",
     rerolling: "Rolling…",
   },
@@ -151,7 +152,7 @@ export const en = {
     backToScore: "← Back",
     badges: "Badges",
     composer: {
-      title: "Your Marriage Drama Card",
+      title: "Your Shutap Card",
       sub: "Tap to edit. Pick a vibe. Then unleash it.",
     },
     share: {
@@ -159,7 +160,7 @@ export const en = {
       sub: "Pick a platform. We'll handle the caption.",
       done: "✨ Posted!",
       preview: "Preview",
-      cta: "See your own Marriage Drama Score",
+      cta: "See your own Shutap Chaos Score",
       copied: "Link copied!",
       captionCopied: "Caption copied — paste into the app!",
       native: "Share via…",
@@ -192,7 +193,7 @@ export const en = {
       signIn: "Sign in to react",
     },
     notFound: "This post vanished into the void.",
-    landingCta: "Get your own Marriage Drama Score →",
+    landingCta: "Get your own Shutap Chaos Score →",
   },
 };
 
@@ -378,7 +379,7 @@ const zh: Messages = {
 
 const es: Messages = {
   ...en,
-  appName: "Marriage Drama",
+  appName: "Shutap",
   tagline: "La verdad sobre el matrimonio. Divertida. Real. Sin filtros.",
   cta: { ...en.cta, headline: "¿Qué tan dramático es tu matrimonio?", sub: "Sé honesto. Hemos visto cosas peores.", button: "Iniciar escáner de drama" },
   wall: { ...en.wall, title: "🌍 La verdad del matrimonio alrededor del mundo", subtitle: "Amor. Caos. Giros inesperados. Lo hemos visto todo." },
@@ -387,7 +388,7 @@ const es: Messages = {
 
 const pt: Messages = {
   ...en,
-  appName: "Marriage Drama",
+  appName: "Shutap",
   tagline: "A verdade sobre o casamento. Engraçada. Real. Sem filtros.",
   cta: { ...en.cta, headline: "Quão dramático é o seu casamento?", sub: "Seja honesto. Já vimos coisas piores.", button: "Iniciar scanner de drama" },
   wall: { ...en.wall, title: "🌍 A verdade do casamento ao redor do mundo", subtitle: "Amor. Caos. Reviravoltas. Já vimos de tudo." },

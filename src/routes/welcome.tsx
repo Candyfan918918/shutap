@@ -10,7 +10,7 @@ import { finalizeIdentity, type IdentityPayload } from "@/lib/identity.functions
 import { AvatarSvg } from "@/components/identity/AvatarSvg";
 
 export const Route = createFileRoute("/welcome")({
-  head: () => ({ meta: [{ title: "Welcome — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),

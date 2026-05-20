@@ -1,4 +1,4 @@
-// Marriage Drama Scan™ scoring engine.
+// Shutap Relationship Scan scoring engine.
 // Given a complete answer map, returns total score (0-1000), per-subscore
 // breakdown, category label, percentile, tags, and badges.
 import { QUESTION_BANK } from "./question-bank";

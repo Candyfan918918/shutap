@@ -22,7 +22,7 @@ const PLACEHOLDERS = [
 export const Route = createFileRoute("/_authenticated/spill/start")({
   component: SpillStart,
   validateSearch: (s: Record<string, unknown>) => ({ voice: Number(s.voice ?? 0) }),
-  head: () => ({ meta: [{ title: "Spill it — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Spill it — Shutap" }] }),
 });
 
 function SpillStart() {

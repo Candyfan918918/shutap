@@ -16,7 +16,7 @@ import type { ChatAttachment, ChatMessage, SpillDraftRow } from "@/lib/spill/typ
 
 export const Route = createFileRoute("/_authenticated/spill/$draftId/chat")({
   component: SpillChat,
-  head: () => ({ meta: [{ title: "Tell me everything — Marriage Drama" }] }),
+  head: () => ({ meta: [{ title: "Tell me everything — Shutap" }] }),
 });
 
 function SpillChat() {

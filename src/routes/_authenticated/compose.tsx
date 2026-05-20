@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/compose")({
     score: Number(s.score ?? 742),
     scanId: typeof s.scanId === "string" ? s.scanId : undefined,
   }),
-  head: () => ({ meta: [{ title: "Compose your Marriage Drama post" }] }),
+  head: () => ({ meta: [{ title: "Compose your Shutap post" }] }),
 });
 
 function ComposeShell() {

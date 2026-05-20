@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/scan/result/$scanId")({
   component: ResultPage,
   head: () => ({
     meta: [
-      { title: "Your Marriage Drama Score™" },
+      { title: "Your Shutap Chaos Score™" },
       {
         name: "description",
         content: "Cinematic reveal: total score, subscores, badges, and what it means.",

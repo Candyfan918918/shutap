@@ -1,4 +1,4 @@
-// Shared types for the Marriage Drama Scan™ engine.
+// Shared types for the Shutap Relationship Scan engine.
 // Safe to import from both client and server.
 
 export type ScanLocale = "en" | "zh" | "es" | "pt" | "ja" | "ko";

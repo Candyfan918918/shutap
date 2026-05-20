@@ -9,11 +9,11 @@ export const Route = createFileRoute("/_authenticated/scan/")({
   component: ScanIntro,
   head: () => ({
     meta: [
-      { title: "Marriage Drama Scan™ — How dramatic is your marriage?" },
+      { title: "Shutap Relationship Scan — How dramatic is your marriage?" },
       {
         name: "description",
         content:
-          "Take the 3-minute Marriage Drama Scan™. Anonymous, surprisingly accurate, slightly chaotic.",
+          "Take the 3-minute Shutap Relationship Scan. Anonymous, surprisingly accurate, slightly chaotic.",
       },
     ],
   }),

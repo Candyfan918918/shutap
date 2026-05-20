@@ -1,4 +1,4 @@
-// Marriage Drama Scan™ question bank.
+// Shutap Relationship Scan question bank.
 // ~26 questions across 7 categories. Localized for en + zh (other locales
 // fall back to en automatically via the i18n resolver in question-engine.ts).
 import type { Question } from "./types";

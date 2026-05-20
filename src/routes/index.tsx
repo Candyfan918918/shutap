@@ -15,14 +15,14 @@ export const Route = createFileRoute("/")({
   component: IndexShell,
   head: () => ({
     meta: [
-      { title: "Marriage Drama · 婚姻真相局 — The truth about marriage" },
+      { title: "Shutap — 👀 what actually happened?" },
       {
         name: "description",
         content:
-          "Love. Chaos. Plot twists. A funny, warm, anonymous-ish global community sharing the truth of marriage. Get your Drama Score.",
+          "The internet's funniest anonymous community for real relationship stories. Love. Chaos. Green flags. Red flags. Family drama. Unexpected happy endings.",
       },
-      { property: "og:title", content: "Marriage Drama · 婚姻真相局" },
-      { property: "og:description", content: "How dramatic is your marriage? Be honest." },
+      { property: "og:title", content: "Shutap — what actually happened?" },
+      { property: "og:description", content: "Anonymous. Authentic. Worldwide. Real relationship stories — no fake perfection." },
       { property: "og:type", content: "website" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
     ],
@@ -124,7 +124,7 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
       <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-sm">
-            💔
+            👀
           </div>
           <span className="font-semibold tracking-tight">{t("appName")}</span>
         </div>
