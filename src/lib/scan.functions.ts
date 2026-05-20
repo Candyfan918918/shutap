@@ -1,4 +1,4 @@
-// Server functions for the Marriage Drama Scan™ engine.
+// Server functions for the Shutap Relationship Scan engine.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";

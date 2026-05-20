@@ -38,7 +38,7 @@ export function ScoreCard({
       )}
       <div className="absolute inset-0 bg-black/30" />
       <div className="relative h-full flex flex-col justify-between">
-        <div className="text-xs uppercase tracking-widest opacity-80">Marriage Drama Score™</div>
+        <div className="text-xs uppercase tracking-widest opacity-80">Shutap Chaos Score™</div>
         <div className="text-center">
           <div className="text-7xl sm:text-8xl font-black tabular-nums drop-shadow-2xl">{score}</div>
           <div className="text-sm opacity-80 mt-1">/ 1000</div>

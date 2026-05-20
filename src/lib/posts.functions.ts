@@ -57,14 +57,14 @@ export const generateStoryDraft = createServerFn({ method: "POST" })
     const locale = scoreContext.locale || "en";
 
     const system = [
-      "You are the witty, empathetic editor of 'Marriage Drama', a fun social platform.",
+      "You are the witty, empathetic editor of 'Shutap', a fun social platform.",
       "You write SHORT, viral-style marriage story posts. Tone is warm, slightly dark-humored, never judgmental.",
       "NEVER include PII (real names, addresses, phone numbers).",
       "Output STRICT JSON only — no prose, no markdown fences.",
       `Write in locale: ${locale} (use the user's native language).`,
     ].join(" ");
 
-    const user = `Generate a Marriage Drama post draft.
+    const user = `Generate a Shutap post draft.
 
 Score: ${scoreContext.score} / 1000
 Category: ${category}

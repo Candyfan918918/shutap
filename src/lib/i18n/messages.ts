@@ -152,7 +152,7 @@ export const en = {
     backToScore: "← Back",
     badges: "Badges",
     composer: {
-      title: "Your Marriage Drama Card",
+      title: "Your Shutap Card",
       sub: "Tap to edit. Pick a vibe. Then unleash it.",
     },
     share: {
@@ -160,7 +160,7 @@ export const en = {
       sub: "Pick a platform. We'll handle the caption.",
       done: "✨ Posted!",
       preview: "Preview",
-      cta: "See your own Marriage Drama Score",
+      cta: "See your own Shutap Chaos Score",
       copied: "Link copied!",
       captionCopied: "Caption copied — paste into the app!",
       native: "Share via…",
@@ -193,7 +193,7 @@ export const en = {
       signIn: "Sign in to react",
     },
     notFound: "This post vanished into the void.",
-    landingCta: "Get your own Marriage Drama Score →",
+    landingCta: "Get your own Shutap Chaos Score →",
   },
 };
 
@@ -379,7 +379,7 @@ const zh: Messages = {
 
 const es: Messages = {
   ...en,
-  appName: "Marriage Drama",
+  appName: "Shutap",
   tagline: "La verdad sobre el matrimonio. Divertida. Real. Sin filtros.",
   cta: { ...en.cta, headline: "¿Qué tan dramático es tu matrimonio?", sub: "Sé honesto. Hemos visto cosas peores.", button: "Iniciar escáner de drama" },
   wall: { ...en.wall, title: "🌍 La verdad del matrimonio alrededor del mundo", subtitle: "Amor. Caos. Giros inesperados. Lo hemos visto todo." },
@@ -388,7 +388,7 @@ const es: Messages = {
 
 const pt: Messages = {
   ...en,
-  appName: "Marriage Drama",
+  appName: "Shutap",
   tagline: "A verdade sobre o casamento. Engraçada. Real. Sem filtros.",
   cta: { ...en.cta, headline: "Quão dramático é o seu casamento?", sub: "Seja honesto. Já vimos coisas piores.", button: "Iniciar scanner de drama" },
   wall: { ...en.wall, title: "🌍 A verdade do casamento ao redor do mundo", subtitle: "Amor. Caos. Reviravoltas. Já vimos de tudo." },
