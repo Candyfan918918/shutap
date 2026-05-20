@@ -147,9 +147,7 @@ function QuestionStep() {
 
   const onBack = stepIdx > 0
     ? () => {
-        // Recompute path from current answers to find previous visible q
-        const path = computeFlowPath(answers);
-        const prev = Math.max(0, Math.min(stepIdx - 1, path.length - 1));
+        const prev = Math.max(0, Math.min(stepIdx - 1, livePath.length - 1));
         navigate({
           to: "/scan/question/$step",
           params: { step: String(prev) },
