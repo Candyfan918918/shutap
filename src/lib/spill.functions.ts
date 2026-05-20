@@ -44,14 +44,14 @@ function chatToTranscript(messages: ChatMessage[]): string {
 // ---------- schemas ----------
 
 const aiQuestionSchema = z.union([
-  z.object({ type: z.literal("text"), placeholder: z.string().max(120).optional() }),
+  z.object({ type: z.literal("text"), placeholder: z.string().max(160).optional() }),
   z.object({
     type: z.literal("tap"),
-    options: z.array(z.object({ id: z.string().max(40), label: z.string().max(60) })).min(2).max(6),
+    options: z.array(z.object({ id: z.string().max(40), label: z.string().max(160) })).min(2).max(6),
   }),
   z.object({
     type: z.literal("multi"),
-    options: z.array(z.object({ id: z.string().max(40), label: z.string().max(60) })).min(2).max(10),
+    options: z.array(z.object({ id: z.string().max(40), label: z.string().max(160) })).min(2).max(10),
   }),
   z.object({
     type: z.literal("slider"),
@@ -64,15 +64,16 @@ const aiQuestionSchema = z.union([
 
 const extractedPatchSchema = z.object({
   relationship_type: z.enum(["marriage", "dating", "breakup", "situationship", "family", "other"]).optional(),
-  themes: z.array(z.string().max(40)).max(12).optional(),
+  themes: z.array(z.string().max(40)).max(20).optional(),
   emotion: z.enum(["sad", "angry", "confused", "hopeful", "numb", "shocked"]).optional(),
   intensity: z.number().min(0).max(100).optional(),
-  red_flags: z.array(z.string().max(80)).max(15).optional(),
-  green_flags: z.array(z.string().max(80)).max(15).optional(),
+  red_flags: z.array(z.string().max(140)).max(20).optional(),
+  green_flags: z.array(z.string().max(140)).max(20).optional(),
+  key_quotes: z.array(z.string().max(180)).max(8).optional(),
 }).partial();
 
 const aiReplySchema = z.object({
-  message: z.string().min(1).max(800),
+  message: z.string().min(1).max(1200),
   question: aiQuestionSchema,
   extracted_patch: extractedPatchSchema.default({}),
   ready_for_score: z.boolean().default(false),
@@ -93,6 +94,7 @@ function mergeExtracted(prev: SpillExtracted, patch: z.infer<typeof extractedPat
     themes: Array.from(new Set([...(prev.themes ?? []), ...(patch.themes ?? [])])),
     red_flags: Array.from(new Set([...(prev.red_flags ?? []), ...(patch.red_flags ?? [])])),
     green_flags: Array.from(new Set([...(prev.green_flags ?? []), ...(patch.green_flags ?? [])])),
+    key_quotes: Array.from(new Set([...(prev.key_quotes ?? []), ...(patch.key_quotes ?? [])])).slice(0, 8),
   };
 }
 

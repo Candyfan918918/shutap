@@ -31,11 +31,49 @@ function SpillChat() {
   const [aiThinking, setAiThinking] = useState(false);
   const [input, setInput] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
+  const recRef = useRef<unknown>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void supabase.auth.getUser().then((r) => setUserId(r.data.user?.id ?? null));
   }, []);
+
+  const startVoice = () => {
+    const SR =
+      (window as unknown as { SpeechRecognition?: new () => unknown }).SpeechRecognition ??
+      (window as unknown as { webkitSpeechRecognition?: new () => unknown }).webkitSpeechRecognition;
+    if (!SR) {
+      toast.message("Voice input isn't supported on this browser — type it 💛");
+      return;
+    }
+    const r = new (SR as unknown as new () => {
+      lang: string;
+      continuous: boolean;
+      interimResults: boolean;
+      onresult: (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void;
+      onend: () => void;
+      onerror: () => void;
+      start: () => void;
+      stop: () => void;
+    })();
+    r.lang = navigator.language || "en-US";
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = (e) => {
+      let chunk = "";
+      for (let i = 0; i < e.results.length; i++) chunk += e.results[i][0].transcript;
+      setInput(chunk);
+    };
+    r.onend = () => setListening(false);
+    r.onerror = () => setListening(false);
+    try { r.start(); recRef.current = r; setListening(true); } catch { /* ignore */ }
+  };
+  const stopVoice = () => {
+    const r = recRef.current as { stop?: () => void } | null;
+    r?.stop?.();
+    setListening(false);
+  };
 
   // Load draft, then fire first AI turn if no AI message yet.
   useEffect(() => {
@@ -189,6 +227,18 @@ function SpillChat() {
                 onUploaded={onUploaded}
               />
             )}
+            <button
+              onClick={listening ? stopVoice : startVoice}
+              type="button"
+              className={`shrink-0 grid place-items-center h-10 w-10 rounded-full border transition ${
+                listening
+                  ? "bg-primary text-primary-foreground border-primary animate-pulse"
+                  : "bg-surface-elevated border-border hover:border-primary/60"
+              }`}
+              title="Speak instead"
+            >
+              🎙
+            </button>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -199,9 +249,11 @@ function SpillChat() {
                 }
               }}
               placeholder={
-                currentQuestion?.type === "text"
+                listening
+                  ? "listening… keep talking 🎙"
+                  : currentQuestion?.type === "text"
                   ? (currentQuestion as { placeholder?: string }).placeholder ?? "say more…"
-                  : "type something…"
+                  : "type or tap 🎙 to speak…"
               }
               rows={1}
               className="flex-1 bg-surface-elevated border border-border rounded-3xl px-4 py-2.5 text-[15px] resize-none max-h-32 focus:outline-none focus:border-primary/60"

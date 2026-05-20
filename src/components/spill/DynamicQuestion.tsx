@@ -13,14 +13,14 @@ export function DynamicQuestion({
 }) {
   if (question.type === "tap") {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
         {question.options.map((o) => (
           <motion.button
             key={o.id}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.98 }}
             disabled={disabled}
             onClick={() => onAnswer(o.label)}
-            className="px-4 py-2.5 rounded-full bg-surface-elevated border border-border text-sm hover:border-primary/60 disabled:opacity-50 transition"
+            className="text-left px-4 py-3 rounded-2xl bg-surface-elevated border border-border text-sm leading-snug hover:border-primary/60 disabled:opacity-50 transition"
           >
             {o.label}
           </motion.button>
@@ -56,7 +56,7 @@ function MultiPicker({
     });
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
         {question.options.map((o) => {
           const on = picked.has(o.id);
           return (
@@ -64,14 +64,13 @@ function MultiPicker({
               key={o.id}
               disabled={disabled}
               onClick={() => toggle(o.id)}
-              className={`px-3.5 py-2 rounded-full border text-sm transition ${
+              className={`text-left px-4 py-3 rounded-2xl border text-sm leading-snug transition ${
                 on
                   ? "bg-primary/20 border-primary text-primary"
                   : "bg-surface-elevated border-border hover:border-primary/40"
               }`}
             >
-              {on ? "✓ " : ""}
-              {o.label}
+              <span className="mr-1">{on ? "✓" : "○"}</span> {o.label}
             </button>
           );
         })}
@@ -82,7 +81,7 @@ function MultiPicker({
           const labels = question.options
             .filter((o) => picked.has(o.id))
             .map((o) => o.label);
-          onAnswer(labels.join(", "));
+          onAnswer(labels.join(" • "));
         }}
         className="w-full mt-1 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm disabled:opacity-50"
       >
