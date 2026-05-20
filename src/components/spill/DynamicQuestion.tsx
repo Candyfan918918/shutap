@@ -13,14 +13,14 @@ export function DynamicQuestion({
 }) {
   if (question.type === "tap") {
     return (
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2">
         {question.options.map((o) => (
           <motion.button
             key={o.id}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.98 }}
             disabled={disabled}
             onClick={() => onAnswer(o.label)}
-            className="px-4 py-2.5 rounded-full bg-surface-elevated border border-border text-sm hover:border-primary/60 disabled:opacity-50 transition"
+            className="text-left px-4 py-3 rounded-2xl bg-surface-elevated border border-border text-sm leading-snug hover:border-primary/60 disabled:opacity-50 transition"
           >
             {o.label}
           </motion.button>
