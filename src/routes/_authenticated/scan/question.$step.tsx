@@ -13,9 +13,9 @@ import {
   completeScan,
 } from "@/lib/scan.functions";
 import {
-  computeFlowPath,
+  computeAdaptiveFlow,
   progressInfo,
-  questionByStep,
+  questionByStepFromPath,
 } from "@/lib/scan/question-engine";
 import { isLocale, type Locale } from "@/lib/i18n";
 import type { AnswerValue, ScanLocale } from "@/lib/scan/types";
@@ -72,7 +72,9 @@ function QuestionStep() {
 
   const answers = scan?.answers ?? {};
   const locale: ScanLocale = (isLocale(scan?.locale) ? (scan!.locale as Locale) : "en") as Locale;
-  const q = scan ? questionByStep(stepIdx, answers) : null;
+  // Prefer the persisted adaptive flow_path; fall back to live re-rank.
+  const livePath = scan ? (scan.flow_path?.length ? scan.flow_path : computeAdaptiveFlow(answers)) : [];
+  const q = scan ? questionByStepFromPath(stepIdx, livePath) : null;
   const isCompleted = scan?.status === "completed";
   const pathExhausted = scan && !isCompleted && !q;
 
@@ -144,9 +146,7 @@ function QuestionStep() {
 
   const onBack = stepIdx > 0
     ? () => {
-        // Recompute path from current answers to find previous visible q
-        const path = computeFlowPath(answers);
-        const prev = Math.max(0, Math.min(stepIdx - 1, path.length - 1));
+        const prev = Math.max(0, Math.min(stepIdx - 1, livePath.length - 1));
         navigate({
           to: "/scan/question/$step",
           params: { step: String(prev) },

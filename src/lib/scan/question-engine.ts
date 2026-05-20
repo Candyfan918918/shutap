@@ -86,6 +86,96 @@ export function computeFlowPath(answers: AnswerMap): string[] {
   });
 }
 
+// -------- Adaptive re-ranking --------
+// When a user answers a high-signal question, bump related follow-ups so the
+// scan "digs deeper" into the live thread instead of marching through a static
+// list. Already-answered questions stay frozen in the order they were taken.
+type BoostRule = {
+  when: (answers: AnswerMap) => boolean;
+  boost: string[];
+};
+
+const BOOST_RULES: BoostRule[] = [
+  {
+    when: (a) => {
+      const v = a["cheating"];
+      return typeof v === "string" && v !== "" && v !== "no" && v !== "never";
+    },
+    boost: ["secret_phone", "ghosting_moment", "trust_level", "divorce_threats", "emotional_safety"],
+  },
+  {
+    when: (a) => typeof a["trust_level"] === "number" && (a["trust_level"] as number) < 40,
+    boost: ["cheating", "secret_phone", "emotional_safety", "loneliness"],
+  },
+  {
+    when: (a) => {
+      const v = a["money_fights"];
+      return typeof v === "string" && ["often", "always", "weekly", "constant"].includes(v);
+    },
+    boost: ["hidden_debt", "joint_finances"],
+  },
+  {
+    when: (a) => {
+      const v = a["in_laws"];
+      return typeof v === "string" && ["nightmare", "toxic", "bad", "interfering"].includes(v);
+    },
+    boost: ["family_interference", "parenting_conflict"],
+  },
+  {
+    when: (a) => {
+      const v = a["conflict_style"];
+      return typeof v === "string" && ["explosive", "avoidant", "silent", "stonewall"].includes(v);
+    },
+    boost: ["resolution", "emotional_safety", "crying_frequency"],
+  },
+  {
+    when: (a) => typeof a["emotional_safety"] === "number" && (a["emotional_safety"] as number) < 40,
+    boost: ["loneliness", "crying_frequency", "would_choose_again", "healing_question"],
+  },
+  {
+    when: (a) => {
+      const v = a["crying_frequency"];
+      return typeof v === "string" && ["weekly", "daily", "often"].includes(v);
+    },
+    boost: ["healing_question", "loneliness", "emotional_safety"],
+  },
+];
+
+/**
+ * Adaptive flow: answered questions keep their historical order; unanswered
+ * questions are reshuffled so same-category follow-ups to the LAST answered
+ * question and rule-boosted follow-ups come first.
+ */
+export function computeAdaptiveFlow(
+  answers: AnswerMap,
+  lastAnsweredId?: string,
+): string[] {
+  const base = computeFlowPath(answers);
+  const answered = new Set(Object.keys(answers));
+  const answeredInOrder = base.filter((id) => answered.has(id));
+  const remaining = base.filter((id) => !answered.has(id));
+  if (remaining.length === 0) return answeredInOrder;
+
+  const boost = new Set<string>();
+  for (const rule of BOOST_RULES) {
+    if (rule.when(answers)) rule.boost.forEach((id) => boost.add(id));
+  }
+  if (lastAnsweredId) {
+    const lastQ = getQuestion(lastAnsweredId);
+    if (lastQ) {
+      for (const id of remaining) {
+        const q = getQuestion(id);
+        if (q && q.category === lastQ.category) boost.add(id);
+      }
+    }
+  }
+  for (const id of answered) boost.delete(id);
+
+  const priority = remaining.filter((id) => boost.has(id));
+  const rest = remaining.filter((id) => !boost.has(id));
+  return [...answeredInOrder, ...priority, ...rest];
+}
+
 export interface NextQuestionResult {
   nextId: string | null;
   nextIndex: number; // -1 when done
@@ -96,7 +186,7 @@ export function nextQuestionAfter(
   answeredId: string,
   answers: AnswerMap,
 ): NextQuestionResult {
-  const path = computeFlowPath(answers);
+  const path = computeAdaptiveFlow(answers, answeredId);
   const idx = path.indexOf(answeredId);
   const next = idx >= 0 && idx + 1 < path.length ? path[idx + 1] : null;
   return { nextId: next, nextIndex: next ? idx + 1 : -1, total: path.length };
@@ -104,6 +194,12 @@ export function nextQuestionAfter(
 
 export function questionByStep(step: number, answers: AnswerMap): Question | null {
   const path = computeFlowPath(answers);
+  const id = path[step];
+  if (!id) return null;
+  return getQuestion(id) ?? null;
+}
+
+export function questionByStepFromPath(step: number, path: string[]): Question | null {
   const id = path[step];
   if (!id) return null;
   return getQuestion(id) ?? null;
