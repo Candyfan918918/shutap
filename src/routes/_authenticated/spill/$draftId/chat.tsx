@@ -227,6 +227,18 @@ function SpillChat() {
                 onUploaded={onUploaded}
               />
             )}
+            <button
+              onClick={listening ? stopVoice : startVoice}
+              type="button"
+              className={`shrink-0 grid place-items-center h-10 w-10 rounded-full border transition ${
+                listening
+                  ? "bg-primary text-primary-foreground border-primary animate-pulse"
+                  : "bg-surface-elevated border-border hover:border-primary/60"
+              }`}
+              title="Speak instead"
+            >
+              🎙
+            </button>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -237,9 +249,11 @@ function SpillChat() {
                 }
               }}
               placeholder={
-                currentQuestion?.type === "text"
+                listening
+                  ? "listening… keep talking 🎙"
+                  : currentQuestion?.type === "text"
                   ? (currentQuestion as { placeholder?: string }).placeholder ?? "say more…"
-                  : "type something…"
+                  : "type or tap 🎙 to speak…"
               }
               rows={1}
               className="flex-1 bg-surface-elevated border border-border rounded-3xl px-4 py-2.5 text-[15px] resize-none max-h-32 focus:outline-none focus:border-primary/60"
