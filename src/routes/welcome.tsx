@@ -71,6 +71,19 @@ function WelcomePage() {
     return () => { cancelled = true; };
   }, [finalize, navigate]);
 
+  // Auto-continue to intended destination after identity has loaded so users
+  // don't have to manually re-tap a card to land where they wanted to go.
+  useEffect(() => {
+    if (!identity || !redirectTo) return;
+    const isSafe = redirectTo.startsWith("/") && !redirectTo.startsWith("//");
+    if (!isSafe) return;
+    const t = setTimeout(() => {
+      try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+      window.location.replace(redirectTo);
+    }, 900);
+    return () => clearTimeout(t);
+  }, [identity, redirectTo]);
+
   const onReroll = async () => {
     setRolling(true);
     try {
