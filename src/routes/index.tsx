@@ -124,7 +124,7 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
       <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-sm">
-            💔
+            👀
           </div>
           <span className="font-semibold tracking-tight">{t("appName")}</span>
         </div>
