@@ -423,6 +423,16 @@ export const generateThreeTones = createServerFn({ method: "POST" })
     const transcript = chatToTranscript(draft.chat_messages ?? []);
     const ex = draft.extracted ?? {};
 
+    // The user's own words — both the initial dump and everything they typed
+    // in chat. This is what the AI must preserve ~80% verbatim in the story body.
+    const userVerbatim = [
+      (draft.raw_dump ?? "").trim(),
+      ...(draft.chat_messages ?? [])
+        .filter((m) => m.role === "user")
+        .map((m) => m.text.trim())
+        .filter(Boolean),
+    ].filter(Boolean).join("\n\n");
+
     const prompt = `Locale: ${draft.locale}
 Chaos score: ${draft.score ?? "?"} / 1000 (${draft.category ?? ""})
 Relationship type: ${ex.relationship_type ?? "unknown"}
@@ -431,7 +441,12 @@ Red flags: ${(ex.red_flags ?? []).join(", ") || "(none)"}
 Green flags: ${(ex.green_flags ?? []).join(", ") || "(none)"}
 Emotion: ${ex.emotion ?? "unknown"}, intensity: ${ex.intensity ?? "?"}
 
-TRANSCRIPT (paraphrase, do NOT copy verbatim, hide all PII):
+USER'S OWN WORDS (this IS the story body — keep ~80% verbatim, only redact PII + light cleanup):
+"""
+${userVerbatim || "(user gave very little — lean on transcript context)"}
+"""
+
+FULL TRANSCRIPT (context only — do NOT copy AI lines into the story):
 ${transcript}
 
 ${SPILL_THREE_TONES_PROMPT}`;
