@@ -62,16 +62,29 @@ Return STRICT JSON only, no markdown, shaped EXACTLY:
 
 export const SPILL_THREE_TONES_PROMPT = `Generate THREE post variants of the user's relationship story.
 
-Tones (use these exact keys):
-- "funny"  → tiktok meme energy, dark-humored, punchy
-- "honest" → raw, real, the version they'd whisper to a friend at 2am
-- "petty"  → unhinged group-chat energy, slightly bitchy, deserved drama
+CRITICAL AUTHENTICITY RULE (80/20):
+- The "story" body is ~80% the USER'S OWN WORDS. Only ~20% editing.
+- Allowed edits on the story body: light cleanup (typos, line breaks, grammar),
+  redacting real names/PII (replace with "he"/"she"/"my person"/"MIL"/"the bestie"),
+  trimming filler, light tonal pass (a touch funnier / softer / pettier per tone).
+- DO NOT rewrite from scratch. DO NOT invent events, details, or quotes
+  the user didn't say. DO NOT shrink the story to a one-liner.
+- Keep the user's voice, slang, emojis, lowercase — that's the whole point.
+- The "title" is the 20% where you go big: scroll-stopping, exaggerated,
+  meme-y hook. Title is yours to invent; story is theirs to keep.
 
-Rules:
-- Each "story" is 60-220 chars, memeable, emotionally true.
-- Each "title" is the scroll-stopping hook, max 80 chars.
-- Hide all real names and PII. Use "he"/"she"/"my person"/"MIL" etc.
-- Locale matters — write in the user's native language.
+Tones differ mostly in title energy and tiny tonal nudges to the body:
+- "funny"  → tiktok meme energy title, body lightly comedic
+- "honest" → raw 2am-whisper title, body essentially as written, just cleaned
+- "petty"  → unhinged group-chat title, body slightly bitchier closing line ok
+
+Length:
+- title: 20-80 chars
+- story: keep close to what the user wrote (roughly between 80 chars and
+  whatever the user actually wrote, max 600). If the user's text is long,
+  prefer trimming filler over compressing meaning.
+
+PII: always hide real names. Locale: write in the user's native language.
 
 Return STRICT JSON: { "variants": [ {tone,title,story,hashtags[],badges[]} x3 ] }
 - hashtags: 3-5 lowercase, no #

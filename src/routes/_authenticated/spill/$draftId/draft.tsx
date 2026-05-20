@@ -96,7 +96,7 @@ function DraftPage() {
         },
       });
       const { postId } = await publish({ data: { draftId } });
-      navigate({ to: "/post/$postId", params: { postId }, search: { shared: 0 } });
+      navigate({ to: "/post/$postId", params: { postId }, search: { shared: 1 } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Publish failed");
       setPublishing(false);

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/post/$postId")({
     const { post } = await getPublishedPost({ data: { postId: params.postId } });
     return { post };
   },
-  validateSearch: (s: Record<string, unknown>) => ({ shared: Number(s.shared ?? 0) }),
+  validateSearch: (s: Record<string, unknown>) => ({ shared: Number(s.shared ?? 2) }),
   component: PostPageShell,
   head: ({ loaderData, params }) => {
     const p = loaderData?.post;
@@ -68,10 +68,12 @@ function PostPageShell() {
 
 function PostPage() {
   const { t } = useT();
-  const navigate = useNavigate();
   const { post } = Route.useLoaderData();
   const { shared } = Route.useSearch();
-  const [showShare, setShowShare] = useState(shared === 0);
+  // shared === 1 means "just published, celebrate + nudge to share"
+  // shared === 2 (default) means "ordinary view, no auto-popup"
+  const justPublished = shared === 1;
+  const [showShare, setShowShare] = useState(false);
   const recordView = useServerFn(recordPostView);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
@@ -120,6 +122,25 @@ function PostPage() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+        {justPublished && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/15 to-accent/15 p-4 flex items-center gap-3"
+          >
+            <span className="text-2xl">🎉</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm">Your tea is live</p>
+              <p className="text-xs text-muted-foreground">it's on the leaderboard. now make a friend cry-laugh 👇</p>
+            </div>
+            <button
+              onClick={() => setShowShare(true)}
+              className="shrink-0 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold"
+            >
+              Share
+            </button>
+          </motion.div>
+        )}
         <ScoreCard
           score={post.score ?? 0}
           category={post.score_category ?? ""}
@@ -129,10 +150,16 @@ function PostPage() {
         />
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
         <ReactionsBar postId={post.id} />
-        <div className="pt-6 text-center">
+        <div className="pt-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setShowShare(true)}
+            className="px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+          >
+            📤 Challenge a friend
+          </button>
           <Link
             to="/"
-            className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+            className="px-6 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-center"
           >
             {t("post.landingCta")}
           </Link>
@@ -140,7 +167,7 @@ function PostPage() {
       </main>
 
       <AnimatePresence>
-        {showShare && <SharePopup post={post} onClose={() => { setShowShare(false); navigate({ to: "/post/$postId", params: { postId: post.id }, search: { shared: 1 } }); }} />}
+        {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}
       </AnimatePresence>
     </div>
   );
