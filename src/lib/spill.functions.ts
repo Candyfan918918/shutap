@@ -199,12 +199,32 @@ export const sendChatTurn = createServerFn({ method: "POST" })
     }
 
     const transcript = chatToTranscript(messages);
-    const extractedSoFar = JSON.stringify(draft.extracted ?? {});
+    const ex = draft.extracted ?? {};
     const mediaCount = (draft.media ?? []).length + data.attachments.length;
+    const userTurns = messages.filter((m) => m.role === "user").length;
+
+    // Surface adaptive context explicitly so the AI re-ranks the NEXT
+    // question against what's already been mined — no repeat angles.
+    const adaptiveContext = `ADAPTIVE STATE (use this to pick the next angle):
+- relationship_type: ${ex.relationship_type ?? "unknown"}
+- emotion: ${ex.emotion ?? "?"} | intensity: ${ex.intensity ?? "?"}
+- themes already covered: ${(ex.themes ?? []).join(", ") || "(none yet)"}
+- red flags surfaced: ${(ex.red_flags ?? []).join(" | ") || "(none yet)"}
+- green flags surfaced: ${(ex.green_flags ?? []).join(" | ") || "(none yet)"}
+- key quotes from user (CALL BACK to one of these in your next reply if natural):
+${(ex.key_quotes ?? []).map((q) => `  • "${q}"`).join("\n") || "  (none yet)"}
+- user turns so far: ${userTurns}
+- media uploaded: ${mediaCount}
+
+RULES:
+- Pick a layer (origin / trigger / pattern / players / stakes / evidence / their_part / the_line) that is NOT already in "themes already covered".
+- If you reference something the user said, quote a fragment of one of their key_quotes — that proves you're listening.
+- If 2+ red flags exist but no green flag or "their_part", probe nuance next.
+- If origin + trigger + pattern are all known and userTurns >= 6, you probably have enough → set ready_for_score=true.`;
 
     const userPrompt = `Locale: ${draft.locale}
-So far extracted: ${extractedSoFar}
-Media uploaded so far: ${mediaCount} item(s)
+
+${adaptiveContext}
 
 TRANSCRIPT:
 ${transcript}
