@@ -15,35 +15,36 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 };
 
 export const en = {
-  appName: "Marriage Drama",
-  tagline: "The truth about marriage. Funny. Real. Unfiltered.",
-  disclaimer: "For entertainment only. Not therapy, not legal advice — but maybe better than both.",
+  appName: "Shutap",
+  tagline: "The internet's funniest anonymous community for real relationship stories.",
+  disclaimer: "For entertainment only. Not therapy, not legal advice — but unexpectedly healing. 😭",
   nav: { feed: "Feed", rankings: "Rankings", submit: "Share", language: "Language", enter: "Enter", finishOnboarding: "Finish onboarding" },
   wall: {
-    title: "🌍 The Truth of Marriage Around the World",
-    subtitle: "Love. Chaos. Plot twists. We've seen everything.",
+    title: "🌎 The World's Relationship Billboard™",
+    subtitle: "Every city. Every country. Every kind of love story.",
     chips: { global: "Global #1", country: "Country #1", city: "City #1", trending: "🔥 Trending" },
     readStory: "Read story",
-    dramaScore: "Drama Score",
+    dramaScore: "Chaos Score",
   },
   cta: {
-    headline: "👀 Girl… what happened?",
-    sub: "Relationship drama? Plot twist? Sweet moment? Family chaos? We listen. We judge a little. We score it.",
-    button: "Start Drama Scan",
-    hint: "Anonymous. We hide names. Your secrets are safe.",
+    headline: "👀 shutap… WHAT actually happened?",
+    sub: "Love. Chaos. Green flags. Red flags. Family drama. Unexpected happy endings. Tell the truth. Stay anonymous. Join the world's relationship lore.",
+    button: "Judge My Relationship",
+    hint: "🔒 Anonymous by default · 🌎 Real stories worldwide · ❤️ Zero fake perfection",
     spill: {
       tag: "☕ Spill The Tea™",
       title: "Okay so basically…",
-      desc: "Start from the beginning. Or the worst part. Drop receipts — texts, screenshots, voice notes. We're listening.",
-      cta: "Okay so basically… →",
+      desc: "Start anywhere. The beginning. The worst part. The text that ruined everything. Drop receipts — texts, screenshots, voice notes.",
+      cta: "☕ Spill The Tea →",
     },
     judge: {
       tag: "👀 Judge My Relationship™",
-      title: "Fine, ask me.",
-      desc: "We'll ask nosy questions and rate how chaotic this relationship actually is. No therapist vibes. Promise.",
-      cta: "Fine, ask me. →",
+      title: "How chaotic is it… really?",
+      desc: "Take the world's funniest relationship scan. Rank against your city, your region, the world. Top chaos? Welcome to the Chaos Championship™.",
+      cta: "👀 Judge My Relationship →",
     },
   },
+
   cats: {
     title: "Pick your flavor of chaos",
     items: {
