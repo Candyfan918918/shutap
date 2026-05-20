@@ -132,7 +132,7 @@ export const en = {
     summoning: "Generating your character…",
     title: "You've been assigned your identity.",
     subtitle: "Welcome, {name}.",
-    cta: "Enter the Marriage Drama Universe →",
+    cta: "Enter Shutap →",
     reroll: "🎲 Re-roll my character",
     rerolling: "Rolling…",
   },
