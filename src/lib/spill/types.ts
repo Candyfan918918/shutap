@@ -43,6 +43,7 @@ export type SpillExtracted = {
   intensity?: number; // 0..100 emotional exhaustion
   red_flags?: string[];
   green_flags?: string[];
+  key_quotes?: string[];
 };
 
 export type ToneVariant = {
