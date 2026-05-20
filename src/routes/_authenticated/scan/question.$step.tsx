@@ -73,7 +73,9 @@ function QuestionStep() {
 
   const answers = scan?.answers ?? {};
   const locale: ScanLocale = (isLocale(scan?.locale) ? (scan!.locale as Locale) : "en") as Locale;
-  const q = scan ? questionByStep(stepIdx, answers) : null;
+  // Prefer the persisted adaptive flow_path; fall back to live re-rank.
+  const livePath = scan ? (scan.flow_path?.length ? scan.flow_path : computeAdaptiveFlow(answers)) : [];
+  const q = scan ? questionByStepFromPath(stepIdx, livePath) : null;
   const isCompleted = scan?.status === "completed";
   const pathExhausted = scan && !isCompleted && !q;
 
