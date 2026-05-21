@@ -1,6 +1,6 @@
 // Grid of public stories on the profile.
 import { Link } from "@tanstack/react-router";
-import type { PublicPostRow } from "@/lib/posts-manage.functions";
+import type { PublicPostRow } from "@/lib/posts/public.functions";
 
 export function StoriesGrid({ posts, isMe }: { posts: PublicPostRow[]; isMe: boolean }) {
   if (!posts.length) {

@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { ScoreCard } from "@/components/post-engine/ScoreCard";
-import { getPublishedPost, getPostReactionCounts } from "@/lib/posts-public.functions";
-import { recordShare, reactToPost } from "@/lib/posts.functions";
+import { getPublishedPost, getPostReactionCounts } from "@/lib/posts/public.functions";
+import { recordShare, reactToPost } from "@/lib/posts/engagement.functions";
 import { recordPostView } from "@/lib/post-analytics.functions";
 import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
@@ -226,7 +226,7 @@ function ReactionsBar({ postId }: { postId: string }) {
 function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }) {
   const { t } = useT();
   const recordSh = useServerFn(recordShare);
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://marriagedrama.app";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://shutap.lovable.app";
   const postUrl = `${origin}/s/${post.id}?ref=native`;
   const [busy, setBusy] = useState<"idle" | "native" | "download">("idle");
   const [nativeReady, setNativeReady] = useState(false);

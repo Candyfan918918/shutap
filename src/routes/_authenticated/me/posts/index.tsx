@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
-import { listMyPosts, getMyPostCounts } from "@/lib/posts-manage.functions";
+import { listMyPosts, getMyPostCounts } from "@/lib/posts/manage.functions";
 import { PostRow } from "@/components/posts/PostRow";
 
 type Tab = "published" | "drafts" | "private";

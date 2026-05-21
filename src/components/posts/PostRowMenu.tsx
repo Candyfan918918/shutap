@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   setPostVisibility, softDeletePost, publishPost, unpublishPost, type MyPostRow,
-} from "@/lib/posts-manage.functions";
+} from "@/lib/posts/manage.functions";
 
 export function PostRowMenu({ post, onChanged }: { post: MyPostRow; onChanged: () => void }) {
   const navigate = useNavigate();

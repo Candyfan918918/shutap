@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { getPostAnalytics } from "@/lib/post-analytics.functions";
-import { editPost } from "@/lib/posts-manage.functions";
+import { editPost } from "@/lib/posts/manage.functions";
 
 export const Route = createFileRoute("/_authenticated/me/posts/$postId/edit")({
   component: EditPostPage,
