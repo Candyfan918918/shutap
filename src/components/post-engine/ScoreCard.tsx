@@ -58,7 +58,7 @@ export function ScoreCard({
               </span>
             ))}
           </div>
-          <div className="mt-3 text-[10px] opacity-70">marriagedrama.app</div>
+          <div className="mt-3 text-[10px] opacity-70">shutap.lovable.app</div>
         </div>
       </div>
     </div>
