@@ -1,176 +1,65 @@
+# Code Debt Cleanup Plan
 
-# Profile + Settings + Post Management System
+Moderate scope. No behavior changes — only renames, copy fixes, dead-code removal, and one targeted module consolidation. Each pass is independently verifiable.
 
-Goal: TikTok-style anonymous profile (`/u/$handle`) with identity customization, social graph, content tabs, full settings, and **per-post management with analytics** (publish/delete/visibility + views, likes, shares, forwards).
+## 1. Branding & copy sweep (Marriage Drama → Shutap)
 
-## Scope (in this build)
+Stale strings still leaking the old brand:
 
-1. Database schema — handles, bios, avatars, follows, friendships, saved posts, blocks, post visibility, view tracking
-2. Public profile route `/u/$handle` — header + 4 tabs (Stories, Chaos History, Saved Tea, Badges)
-3. Settings hub `/settings/*` (Account, Identity, Privacy, Notifications, Language, Safety, Data)
-4. Identity flows: edit display name, change @handle (live availability + suggestions), shuffle nickname, upload avatar, AI avatar generation, anonymous mode
-5. Social: Follow (one-way) + Friend request (mutual, accept/decline)
-6. **My Posts** dashboard `/me/posts` with tabs: Published · Drafts · Private
-7. **Per-post management**: publish, unpublish (→ private), make public, delete, edit, copy share link
-8. **Per-post analytics**: views, likes, comments, shares (per platform), saves, friend-forwards
-9. Anonymous view tracking (lightweight, deduped per session)
+- `src/routes/__root.tsx` — meta description / og:description / twitter:description still say "marriage and divorce stories".
+- `src/routes/index.tsx` line 22 — hero meta description still uses old framing.
+- `src/components/post-engine/ScoreCard.tsx` — footer reads `marriagedrama.app`.
+- `src/routes/post.$postId.tsx` — fallback origin URL `https://marriagedrama.app`.
+- `src/lib/i18n/messages.ts` — `wall.sub`, `wall.loadMore`, EN/ZH/ES/PT subtitles, "drama Olympics", "marriages somehow survived", "drama scanner" CTAs, "Your marriage story is ready to go viral".
+- `src/lib/posts.functions.ts` line 61 + 78 — AI system prompt still says "marriage story posts" and example title references marriages.
+- `src/routes/_authenticated/spill/$draftId/score.tsx` line 78 — "🌎 Drama Olympics".
+- `src/components/drama/ScoreReveal.tsx` line 97 — "marriages we've scanned".
 
-Deferred (called out so we don't regress):
-- DMs (spec says "later")
-- Real push notification delivery (only toggles persisted)
-- Full data export (button shows "coming soon")
-- Compare-scores friend feature
-- Multi-style AI avatar presets (one generic AI generate button)
+All replaced with Shutap-aligned wording (relationship stories, Chaos Score™, "Relationship Scan", etc). DB enum values (`reaction_kind.drama`) and translation keys stay as-is — those are stable identifiers.
 
-## Database changes (single migration)
+## 2. Rename legacy `drama/` folder → `scan/`
 
-### Extend `profiles`
-- `handle text UNIQUE` — lowercase `^[a-z0-9_]{3,24}$`
-- `bio text` (max 200)
-- `anonymous_mode boolean default true`
-- `avatar_kind text` — 'upload' | 'ai' | 'default'
-- `notif_prefs jsonb default '{}'`
-- `privacy jsonb default '{}'`
+`src/components/drama/` is still actively imported but misnamed after the rebrand.
 
-Backfill `handle` from slugified `nickname` + random suffix.
+- `src/components/drama/DramaQuestion.tsx` → `src/components/scan/ScanQuestion.tsx` (exported as `ScanQuestion`)
+- `src/components/drama/ScanProgress.tsx` → `src/components/scan/ScanProgress.tsx`
+- `src/components/drama/ScoreReveal.tsx` → `src/components/scan/ScoreReveal.tsx`
+- Delete the empty `src/components/drama/` folder.
+- Update the 3 importers: `scan/question.$step.tsx`, `scan/result.$scanId.tsx`, `spill/$draftId/score.tsx`.
 
-### Extend `posts`
-- `visibility text default 'public'` — 'public' | 'private' | 'friends'
-- `view_count int default 0`
-- `like_count int default 0` (denormalized cache; truth still in `post_reactions`)
-- `share_count int default 0` (denormalized cache; truth in `post_shares`)
-- `save_count int default 0`
-- `forward_count int default 0` — friend-to-friend share clicks
-- `deleted_at timestamptz` (soft delete so analytics survive)
+Pure rename; logic untouched.
 
-Update RLS:
-- `posts published readable` → replace with:
-  - public: `status='published' AND visibility='public' AND deleted_at IS NULL`
-  - friends: also accessible if `visibility='friends' AND is_friend(auth.uid(), author_id)`
-  - private: only author
-  - author always sees own
+## 3. Consolidate posts function modules
 
-### New tables
-- `follows (follower_id, followee_id uuid, created_at)` PK(follower,followee). Indexes on `(followee_id)`.
-- `friendships (requester_id, addressee_id, status text 'pending'|'accepted'|'declined', created_at, responded_at)` PK(requester,addressee). Indexes on `(addressee_id, status)`.
-- `saved_posts (user_id, post_id, created_at)` PK. Owner-only RLS.
-- `blocks (blocker_id, blocked_id, created_at)` PK. Owner RLS.
-- `post_views (id, post_id, viewer_id nullable, session_hash text, viewed_at, country)` — server-fn writes; viewer can't read directly.
-- `post_forwards (id, post_id, sender_id, channel text, created_at)` — when user clicks "send to friend".
+Today there are three overlapping files; their boundaries are blurry:
 
-### Helper functions (security definer)
-- `public.is_handle_available(_handle) returns boolean`
-- `public.suggest_handles(_base) returns text[]`
-- `public.is_friend(_a uuid, _b uuid) returns boolean`
-- `public.increment_post_view(_post_id uuid, _session_hash text)` — dedupe per (post,session) within 24h, bumps `posts.view_count`
-- Triggers: `posts.like_count/share_count/save_count` auto-bumped via after-insert/delete on `post_reactions`/`post_shares`/`saved_posts`
+- `posts.functions.ts` (278 lines) — draft generation, create/update/approve, share recording, reactions.
+- `posts-manage.functions.ts` (252 lines) — author CRUD, public listings, chaos history, forwards.
+- `posts-public.functions.ts` (43 lines) — `getPublishedPost`, `getPostReactionCounts`.
 
-### Storage
-Reuse `story-media` bucket; avatars at `avatars/{user_id}/...`.
+Reorganize into a clearer split:
 
-## Routes
+- `src/lib/posts/drafts.functions.ts` — `generateStoryDraft`, `createDraftPost`, `updateDraftPost`, `approveAndPublish` (authoring pipeline).
+- `src/lib/posts/manage.functions.ts` — author dashboard: `listMyPosts`, `getMyPostCounts`, `setPostVisibility`, `publishPost`, `unpublishPost`, `softDeletePost`, `editPost`.
+- `src/lib/posts/public.functions.ts` — anonymous reads: `getPublishedPost`, `getPostReactionCounts`, `listAuthorPublicPosts`, `getChaosHistory` (move the last two out of `posts-manage`, since they serve public profile pages).
+- `src/lib/posts/engagement.functions.ts` — `recordShare`, `reactToPost`, `recordForward`.
 
-Public:
-- `/u/$handle` — profile (respects privacy + visibility)
+Old files deleted; all importers updated. Shared types (`MyPostRow`, `PublicPostRow`, `ChaosHistoryRow`) live next to their primary owner and are re-exported where needed.
 
-Authenticated (`_authenticated/`):
-- `/me` → redirects to `/u/{myHandle}`
-- `/me/posts` — **post manager** with Published/Drafts/Private tabs
-- `/me/posts/$postId` — **post detail + analytics** (sparkline of views over time, like/share/forward breakdown by platform)
-- `/me/posts/$postId/edit` — edit title/story/cover/visibility
-- `/settings`, `/settings/account|identity|privacy|notifications|language|safety|data`
-- `/friends` — incoming/outgoing requests + friends list
+## 4. Dead code & unused-export sweep
 
-## My Posts manager UX
+- Run `rg`-based scan for: unused exports, orphan files, unreferenced i18n keys, no-op `console.log` calls.
+- Confirmed dead so far: nothing major beyond the renames above. Will verify after passes 1–3 land.
+- Light pass: remove any leftover commented-out blocks AI added during earlier iterations.
 
-```
-┌──────────────────────────────────────────┐
-│ Your Posts                  [+ Spill]    │
-│ [ Published 12 ] [ Drafts 3 ] [ Private 2 ]│
-├──────────────────────────────────────────┤
-│ ▢ cover  Title…                          │
-│          🚨 742 · 👁 1.2k · ❤️ 89 · 🔁 23 │
-│          published 2d ago  ·  public 🌍  │
-│          [⋯] menu → Edit · Make private  │
-│                       · Copy link · Delete│
-└──────────────────────────────────────────┘
-```
+## Verification
 
-Bulk actions deferred; per-row menu is enough.
+- TypeScript build must pass (automatic on each save).
+- Spot-check four flows in preview: landing page, Relationship Scan, Spill the Tea draft → score, profile post list.
+- Grep confirms zero remaining matches for `marriage drama`, `marriagedrama.app`, `drama scanner`, `Drama Olympics`.
 
-## Post detail analytics page
+## Out of scope
 
-- Big header: title + cover thumb + score
-- KPI row: 👁 views, ❤️ likes, 💬 comments, 🔁 shares, 🔖 saves, 📤 forwards
-- Sparkline: views per day (last 30) via aggregate query
-- Share breakdown: per-platform bar (x, tiktok, ig, xhs, whatsapp, imessage)
-- Top reactions list
-- Action bar: Edit · Visibility ▾ · Copy link · Delete
-
-## View tracking implementation
-
-- `/post/$postId` route fires `recordPostView` server fn on mount (debounced, once per session).
-- Server fn hashes `userId || (ip+ua)` → `session_hash`, inserts `post_views` if no row for `(post_id, session_hash)` in last 24h, bumps `posts.view_count`.
-- Anonymous viewers OK; no PII stored.
-
-## Files (new)
-
-```
-src/lib/profile.functions.ts
-src/lib/social.functions.ts
-src/lib/saved.functions.ts
-src/lib/posts-manage.functions.ts   — list mine, update visibility, soft delete, edit, stats
-src/lib/post-analytics.functions.ts — KPIs, daily series, share breakdown
-src/lib/badges.ts
-src/lib/handles.ts
-
-src/routes/u.$handle.tsx
-src/routes/_authenticated/me.tsx
-src/routes/_authenticated/me/posts.tsx                 — manager (layout + list)
-src/routes/_authenticated/me/posts/$postId.tsx         — analytics detail
-src/routes/_authenticated/me/posts/$postId.edit.tsx    — edit
-src/routes/_authenticated/settings.tsx + 7 children
-src/routes/_authenticated/friends.tsx
-
-src/components/profile/ProfileHeader.tsx
-src/components/profile/TabBar.tsx
-src/components/profile/StoriesGrid.tsx
-src/components/profile/ChaosHistory.tsx
-src/components/profile/SavedTea.tsx
-src/components/profile/BadgesGrid.tsx
-src/components/profile/FollowButton.tsx
-src/components/profile/FriendButton.tsx
-src/components/posts/PostRow.tsx
-src/components/posts/PostRowMenu.tsx           — edit / visibility / copy / delete
-src/components/posts/VisibilityBadge.tsx
-src/components/posts/KpiTile.tsx
-src/components/posts/ViewsSparkline.tsx        — pure SVG, no chart lib
-src/components/posts/SharePlatformBars.tsx
-src/components/identity/HandleEditor.tsx
-src/components/identity/AvatarEditor.tsx
-src/components/identity/NameShuffler.tsx
-```
-
-## Identity rules (unchanged)
-
-- Display name: NOT unique (stored in `profiles.nickname`). Hint format `[City]·[Archetype]`.
-- @handle: UNIQUE, lowercase `[a-z0-9_]{3,24}`, debounced live availability + auto-suggestions.
-- AI avatar: lazy generate-on-click (rate-limit 5/day per user).
-- Anonymous mode toggle hides city/score on public profile + defaults new posts to anonymous.
-
-## Microcopy
-
-- Empty Published: "no chaos posted yet 👀 / either peaceful… or hiding something."
-- Delete confirm: "delete forever? the receipts will be wiped 🫥"
-- Made private: "this one's just for you now 🔒"
-- Handle taken: "@queenchaos is taken (bestie has taste). try one of these:"
-- Friend pending: "request sent. now we wait like it's 2009."
-
-## Risks
-
-- Adding `like_count/share_count` triggers needs to backfill from existing rows in same migration.
-- Soft-delete posts must be filtered everywhere (feed, profile, search, share preview). Will audit existing queries in the migration commit and patch RLS + any direct selects.
-- View dedupe via `session_hash` is best-effort; bots can inflate. Acceptable for v1.
-- AI avatar generation cost — rate-limited server-side.
-
-Once you approve I'll: (1) run the migration, (2) build server fns, then (3) routes + components in parallel.
+- DB schema, enum values, migrations.
+- Spill the Tea adaptive logic, scan engine, share-card renderer — all working as intended.
+- New features.
