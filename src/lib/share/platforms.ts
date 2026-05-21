@@ -8,7 +8,7 @@ export type ShareIntent =
 
 export type ShareInput = {
   postId: string;
-  origin: string; // e.g. https://marriagedrama.app
+  origin: string; // e.g. https://shutap.lovable.app
   title: string;
   score: number;
   captions: PlatformCaptions;

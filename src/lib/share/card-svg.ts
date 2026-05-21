@@ -64,7 +64,7 @@ export function buildShareCardSVG(input: ShareCardInput): string {
   const { w, h } = SHARE_CARD_DIMENSIONS[input.format];
   const tier = scoreTier(input.score);
   const [c1, c2] = TIER_GRADIENTS[tier];
-  const domain = input.domain ?? "marriagedrama.app";
+  const domain = input.domain ?? "shutap.lovable.app";
 
   const padX = Math.round(w * 0.07);
   const padY = Math.round(h * 0.07);
@@ -119,7 +119,7 @@ export function buildShareCardSVG(input: ShareCardInput): string {
     })
     .join("");
 
-  const watermark = `marriagedrama.app · scan yours →`;
+  const watermark = `shutap.lovable.app · scan yours →`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
