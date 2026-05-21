@@ -60,17 +60,17 @@ export const en = {
   },
   feed: {
     title: "🔥 Trending today",
-    sub: "What the internet's marriages are doing right now.",
+    sub: "What the internet's relationships are doing right now.",
     been: "Been there",
     worse: "Worse than mine",
-    loadMore: "Load more drama",
+    loadMore: "Load more stories",
   },
   boards: {
     title: "👑 Chaos Championship",
     sub: "Weekly rankings. Updated every Monday. Cried over every Tuesday.",
     items: {
-      chaotic: { emoji: "🌋", title: "Most Chaotic Marriage", copy: "Volcano-level energy, daily." },
-      sweet: { emoji: "💖", title: "Sweetest Marriage Moments", copy: "The ones that restore faith." },
+      chaotic: { emoji: "🌋", title: "Most Chaotic Relationship", copy: "Volcano-level energy, daily." },
+      sweet: { emoji: "💖", title: "Sweetest Relationship Moments", copy: "The ones that restore faith." },
       twist: { emoji: "🤡", title: "Wildest Plot Twist", copy: "M. Night Shyamalan is taking notes." },
       money: { emoji: "💸", title: "Biggest Financial Shock", copy: "Joint account: empty. Trust: also empty." },
       mil: { emoji: "👵", title: "Mother-in-law Olympics", copy: "Gold medal in passive aggression." },
@@ -94,8 +94,8 @@ export const en = {
     items: {
       stories: { n: "1.8M", label: "stories shared" },
       countries: { n: "327", label: "countries & regions" },
-      points: { n: "12M", label: "drama points calculated" },
-      survived: { n: "45K", label: "marriages somehow survived" },
+      points: { n: "12M", label: "Chaos points calculated" },
+      survived: { n: "45K", label: "relationships somehow survived" },
     },
   },
   signup: {
@@ -156,7 +156,7 @@ export const en = {
       sub: "Tap to edit. Pick a vibe. Then unleash it.",
     },
     share: {
-      title: "Your marriage story is ready to go viral.",
+      title: "Your story is ready to go viral.",
       sub: "Pick a platform. We'll handle the caption.",
       done: "✨ Posted!",
       preview: "Preview",
@@ -381,7 +381,7 @@ const es: Messages = {
   ...en,
   appName: "Shutap",
   tagline: "La verdad sobre el matrimonio. Divertida. Real. Sin filtros.",
-  cta: { ...en.cta, headline: "¿Qué tan dramático es tu matrimonio?", sub: "Sé honesto. Hemos visto cosas peores.", button: "Iniciar escáner de drama" },
+  cta: { ...en.cta, headline: "¿Qué tan caótica es tu relación?", sub: "Sé honesto. Hemos visto cosas peores.", button: "Juzgar mi relación" },
   wall: { ...en.wall, title: "🌍 La verdad del matrimonio alrededor del mundo", subtitle: "Amor. Caos. Giros inesperados. Lo hemos visto todo." },
   signup: { ...en.signup, title: "¿Tienes una historia?", sub: "Casi anónimo. Divertido. Sin juicios." },
 };
@@ -390,7 +390,7 @@ const pt: Messages = {
   ...en,
   appName: "Shutap",
   tagline: "A verdade sobre o casamento. Engraçada. Real. Sem filtros.",
-  cta: { ...en.cta, headline: "Quão dramático é o seu casamento?", sub: "Seja honesto. Já vimos coisas piores.", button: "Iniciar scanner de drama" },
+  cta: { ...en.cta, headline: "Quão caótica é a sua relação?", sub: "Seja honesto. Já vimos coisas piores.", button: "Julgar meu relacionamento" },
   wall: { ...en.wall, title: "🌍 A verdade do casamento ao redor do mundo", subtitle: "Amor. Caos. Reviravoltas. Já vimos de tudo." },
   signup: { ...en.signup, title: "Tem uma história?", sub: "Quase anônimo. Engraçado. Sem julgamentos." },
 };

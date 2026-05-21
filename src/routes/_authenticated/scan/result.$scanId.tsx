@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ScoreReveal } from "@/components/drama/ScoreReveal";
+import { ScoreReveal } from "@/components/scan/ScoreReveal";
 import { getScan } from "@/lib/scan.functions";
 import { bandForScore, type ScoreResult, type Subscores } from "@/lib/scan/types";
 
@@ -32,7 +32,7 @@ function ResultPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen grid place-items-center text-muted-foreground">
-        Calculating your drama score…
+        Calculating your Chaos Score…
       </div>
     );
   }

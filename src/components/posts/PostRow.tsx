@@ -2,7 +2,7 @@
 import { Link } from "@tanstack/react-router";
 import { VisibilityBadge } from "./VisibilityBadge";
 import { PostRowMenu } from "./PostRowMenu";
-import type { MyPostRow } from "@/lib/posts-manage.functions";
+import type { MyPostRow } from "@/lib/posts/manage.functions";
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "—";

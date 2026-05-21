@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "The internet's funniest anonymous community for real relationship stories. Love. Chaos. Green flags. Red flags. Family drama. Unexpected happy endings.",
+          "Shutap — the world's most entertaining anonymous relationship storytelling community. Real stories, real chaos, real happy endings.",
       },
       { property: "og:title", content: "Shutap — what actually happened?" },
       { property: "og:description", content: "Anonymous. Authentic. Worldwide. Real relationship stories — no fake perfection." },

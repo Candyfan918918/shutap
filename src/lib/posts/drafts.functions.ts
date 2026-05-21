@@ -1,4 +1,4 @@
-// Server functions for the Post Creation & Viral Distribution Engine.
+// Authoring pipeline: AI draft generation, create/update drafts, approve & publish.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -57,8 +57,8 @@ export const generateStoryDraft = createServerFn({ method: "POST" })
     const locale = scoreContext.locale || "en";
 
     const system = [
-      "You are the witty, empathetic editor of 'Shutap', a fun social platform.",
-      "You write SHORT, viral-style marriage story posts. Tone is warm, slightly dark-humored, never judgmental.",
+      "You are the witty, empathetic editor of 'Shutap', an anonymous relationship storytelling community.",
+      "You write SHORT, viral-style relationship story posts. Tone is warm, slightly dark-humored, never judgmental.",
       "NEVER include PII (real names, addresses, phone numbers).",
       "Output STRICT JSON only — no prose, no markdown fences.",
       `Write in locale: ${locale} (use the user's native language).`,
@@ -75,9 +75,9 @@ Raw notes: ${scoreContext.raw_answers ?? "(none)"}
 
 Return a JSON object shaped exactly:
 {
-  "title": "viral hook, max 80 chars, hooky like 'My marriage scored higher drama than 92% of California'",
+  "title": "viral hook, max 80 chars, hooky like 'My relationship scored higher chaos than 92% of California'",
   "story": "60-180 chars, memeable, emotionally intelligent, slight humor",
-  "badges": ["2-3 punchy badges like 'Plot Twist: High', 'Emotional Damage Detected', 'Still Somehow Married™'"],
+  "badges": ["2-3 punchy badges like 'Plot Twist: High', 'Emotional Damage Detected', 'Still Somehow Together™'"],
   "hashtags": ["3-5 locale-appropriate hashtags, lowercase, no #"],
   "platform_captions": {
     "x": "short emotional hook + score. Max 240 chars. Include 1-2 hashtags.",
@@ -219,60 +219,4 @@ export const approveAndPublish = createServerFn({ method: "POST" })
       post: published as unknown as PostRecord,
       url: `/post/${data.postId}`,
     };
-  });
-
-// ---------- recordShare ----------
-
-export const recordShare = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        postId: z.string().uuid(),
-        platform: z.enum([
-          "x",
-          "tiktok",
-          "instagram",
-          "xiaohongshu",
-          "facebook",
-          "imessage",
-          "whatsapp",
-          "copy_link",
-        ]),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase.from("post_shares").insert({
-      post_id: data.postId,
-      user_id: userId,
-      platform: data.platform,
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-// ---------- react ----------
-
-export const reactToPost = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        postId: z.string().uuid(),
-        kind: z.enum(["been_there", "worse", "hug", "laugh", "drama"]),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("post_reactions")
-      .upsert(
-        { post_id: data.postId, user_id: userId, kind: data.kind },
-        { onConflict: "post_id,user_id,kind", ignoreDuplicates: true },
-      );
-    if (error) throw new Error(error.message);
-    return { ok: true };
   });

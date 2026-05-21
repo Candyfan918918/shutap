@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ScanProgress } from "@/components/drama/ScanProgress";
-import { DramaQuestion } from "@/components/drama/DramaQuestion";
+import { ScanProgress } from "@/components/scan/ScanProgress";
+import { ScanQuestion } from "@/components/scan/ScanQuestion";
 import {
   getScan,
   saveAnswer,
@@ -113,7 +113,7 @@ function QuestionStep() {
   if (isCompleted || pathExhausted || !q) {
     return (
       <div className="min-h-screen grid place-items-center text-muted-foreground">
-        Calculating your drama score…
+        Calculating your Chaos Score…
       </div>
     );
   }
@@ -164,7 +164,7 @@ function QuestionStep() {
         locale={locale}
         onBack={onBack}
       />
-      <DramaQuestion
+      <ScanQuestion
         question={q}
         initialAnswer={answers[q.id] as AnswerValue | undefined}
         locale={locale}

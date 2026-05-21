@@ -14,7 +14,7 @@ interface Props {
   saving?: boolean;
 }
 
-export function DramaQuestion({ question, initialAnswer, locale, onSubmit, saving }: Props) {
+export function ScanQuestion({ question, initialAnswer, locale, onSubmit, saving }: Props) {
   const strings = localizedStrings(question, locale);
   const [value, setValue] = useState<AnswerValue | null>(
     initialAnswer === undefined ? defaultValue(question) : initialAnswer,

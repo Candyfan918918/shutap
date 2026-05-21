@@ -11,7 +11,7 @@ import {
   createDraftPost,
   updateDraftPost,
   approveAndPublish,
-} from "@/lib/posts.functions";
+} from "@/lib/posts/drafts.functions";
 import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 

@@ -94,7 +94,7 @@ export function ScoreReveal({
           >
             Higher than{" "}
             <span className="font-bold tabular-nums">{result.percentile}%</span> of
-            marriages we've scanned
+            relationships we've scanned
           </motion.div>
           {(displayName || cityLabel) && (
             <div className="mt-4 text-xs opacity-70">

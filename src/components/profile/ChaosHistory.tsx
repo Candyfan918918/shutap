@@ -1,6 +1,6 @@
 // Timeline of chaos scores.
 import { Link } from "@tanstack/react-router";
-import type { ChaosHistoryRow } from "@/lib/posts-manage.functions";
+import type { ChaosHistoryRow } from "@/lib/posts/public.functions";
 
 function band(score: number): { color: string; label: string } {
   if (score >= 800) return { color: "from-red-500 to-orange-500", label: "🌋 legendary" };

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { getTeaDraft } from "@/lib/spill.functions";
-import { ScoreReveal } from "@/components/drama/ScoreReveal";
+import { ScoreReveal } from "@/components/scan/ScoreReveal";
 import { bandForScore, type ScoreResult, type Subscores } from "@/lib/scan/types";
 import type { SpillDraftRow } from "@/lib/spill/types";
 
@@ -75,7 +75,7 @@ function ScorePage() {
             className="rounded-2xl bg-surface-elevated border border-border p-5 text-center"
           >
             <div className="text-xs uppercase tracking-widest text-muted-foreground">
-              🌎 Drama Olympics
+              🌎 Chaos Championship™
             </div>
             <p className="mt-2 text-2xl font-black">#{ranking} worldwide</p>
             <p className="mt-1 text-xs text-muted-foreground">

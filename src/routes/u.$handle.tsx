@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getProfileByHandle } from "@/lib/profile.functions";
-import { listAuthorPublicPosts, getChaosHistory } from "@/lib/posts-manage.functions";
+import { listAuthorPublicPosts, getChaosHistory } from "@/lib/posts/public.functions";
 import { listSavedPosts } from "@/lib/saved.functions";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { TabBar } from "@/components/profile/TabBar";

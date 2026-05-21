@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { getPostAnalytics } from "@/lib/post-analytics.functions";
-import { softDeletePost, setPostVisibility } from "@/lib/posts-manage.functions";
+import { softDeletePost, setPostVisibility } from "@/lib/posts/manage.functions";
 import { KpiTile } from "@/components/posts/KpiTile";
 import { ViewsSparkline } from "@/components/posts/ViewsSparkline";
 import { SharePlatformBarsPlatform, SharePlatformBarsChannel } from "@/components/posts/SharePlatformBars";
