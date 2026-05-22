@@ -46,7 +46,7 @@ function EnterPage() {
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
+        navigate({ to: "/welcome", search: { redirect: redirectTo } });
       }
     });
   }, [navigate, redirectTo]);
