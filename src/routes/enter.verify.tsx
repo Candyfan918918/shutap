@@ -47,7 +47,7 @@ function VerifyPage() {
       if (error) throw error;
       sessionStorage.removeItem("md.otpEmail");
       const redirectTo = sessionStorage.getItem("md.postAuthRedirect") || undefined;
-      navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
+      navigate({ to: "/welcome", search: { redirect: redirectTo } });
     } catch {
       toast.error(t("verify.invalid"));
       setBusy(false);
