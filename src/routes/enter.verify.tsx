@@ -35,7 +35,7 @@ function VerifyPage() {
 
   useEffect(() => {
     const stored = sessionStorage.getItem("md.otpEmail");
-    if (!stored) navigate({ to: "/enter" });
+    if (!stored) navigate({ to: "/enter", search: { redirect: undefined } });
     else setEmail(stored);
   }, [navigate]);
 
