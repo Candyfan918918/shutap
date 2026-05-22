@@ -9,6 +9,7 @@ import { OtpInput } from "@/components/auth/OtpInput";
 
 export const Route = createFileRoute("/enter/verify")({
   head: () => ({ meta: [{ title: "Verify — Shutap" }] }),
+  validateSearch: (_search: Record<string, unknown>) => ({}),
   component: VerifyShell,
 });
 
