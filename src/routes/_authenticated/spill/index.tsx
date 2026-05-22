@@ -58,6 +58,7 @@ function SpillLanding() {
         >
           <Link
             to="/spill/start"
+            search={{ voice: 0 }}
             className="block w-full py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-2xl shadow-primary/20"
           >
             Okay so basically… →
