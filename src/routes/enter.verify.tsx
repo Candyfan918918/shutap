@@ -70,7 +70,7 @@ function VerifyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain flex flex-col">
       <header className="px-4 py-3">
-        <Link to="/enter" className="text-sm text-muted-foreground">{t("verify.back")}</Link>
+        <Link to="/enter" search={{ redirect: undefined }} className="text-sm text-muted-foreground">{t("verify.back")}</Link>
       </header>
       <main className="flex-1 flex items-center justify-center px-6 pb-12">
         <motion.div
