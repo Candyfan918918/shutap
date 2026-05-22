@@ -9,6 +9,7 @@ import { OtpInput } from "@/components/auth/OtpInput";
 
 export const Route = createFileRoute("/enter/verify")({
   head: () => ({ meta: [{ title: "Verify — Shutap" }] }),
+  validateSearch: (_search: Record<string, unknown>) => ({}),
   component: VerifyShell,
 });
 
@@ -34,7 +35,7 @@ function VerifyPage() {
 
   useEffect(() => {
     const stored = sessionStorage.getItem("md.otpEmail");
-    if (!stored) navigate({ to: "/enter" });
+    if (!stored) navigate({ to: "/enter", search: { redirect: undefined } });
     else setEmail(stored);
   }, [navigate]);
 
@@ -46,7 +47,7 @@ function VerifyPage() {
       if (error) throw error;
       sessionStorage.removeItem("md.otpEmail");
       const redirectTo = sessionStorage.getItem("md.postAuthRedirect") || undefined;
-      navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
+      navigate({ to: "/welcome", search: { redirect: redirectTo } });
     } catch {
       toast.error(t("verify.invalid"));
       setBusy(false);
@@ -69,7 +70,7 @@ function VerifyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain flex flex-col">
       <header className="px-4 py-3">
-        <Link to="/enter" className="text-sm text-muted-foreground">{t("verify.back")}</Link>
+        <Link to="/enter" search={{ redirect: undefined }} className="text-sm text-muted-foreground">{t("verify.back")}</Link>
       </header>
       <main className="flex-1 flex items-center justify-center px-6 pb-12">
         <motion.div

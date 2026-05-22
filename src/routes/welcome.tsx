@@ -53,7 +53,7 @@ function WelcomePage() {
     void (async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
-        navigate({ to: "/enter" });
+        navigate({ to: "/enter", search: { redirect: undefined } });
         return;
       }
       try {

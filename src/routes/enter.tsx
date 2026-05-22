@@ -46,7 +46,7 @@ function EnterPage() {
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        navigate({ to: "/welcome", search: redirectTo ? { redirect: redirectTo } : {} });
+        navigate({ to: "/welcome", search: { redirect: redirectTo } });
       }
     });
   }, [navigate, redirectTo]);
@@ -65,7 +65,7 @@ function EnterPage() {
       });
       if (error) throw error;
       sessionStorage.setItem("md.otpEmail", email);
-      navigate({ to: "/enter/verify" });
+      navigate({ to: "/enter/verify", search: {} });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.toLowerCase().includes("rate")) toast.error(t("enter.rateLimited"));
