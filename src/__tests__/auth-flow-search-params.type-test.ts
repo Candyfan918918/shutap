@@ -51,11 +51,16 @@ void _verifyContract;
 // 2. Valid Link / navigate option shapes
 // ---------------------------------------------------------------------------
 
+// Shorthand aliases — LinkProps' first generic is TComp ('a' by default),
+// NavigateOptions' first is TRouter.
+type LP<TTo extends string> = LinkProps<"a", RegisteredRouter, string, TTo>;
+type NO<TTo extends string> = NavigateOptions<RegisteredRouter, string, TTo>;
+
 // Link to /enter with explicit redirect
 const _linkEnterWithRedirect = {
   to: "/enter",
   search: { redirect: "/me" },
-} as const satisfies LinkProps<RegisteredRouter, string, "/enter">;
+} as const satisfies LP<"/enter">;
 void _linkEnterWithRedirect;
 
 // Link to /enter with redirect explicitly undefined (matches usage in
@@ -63,21 +68,21 @@ void _linkEnterWithRedirect;
 const _linkEnterNoRedirect = {
   to: "/enter",
   search: { redirect: undefined },
-} as const satisfies LinkProps<RegisteredRouter, string, "/enter">;
+} as const satisfies LP<"/enter">;
 void _linkEnterNoRedirect;
 
 // navigate({ to: "/welcome", search: { redirect } }) — used after OTP verify
 const _navWelcome = {
   to: "/welcome",
   search: { redirect: "/me/posts" as string | undefined },
-} as const satisfies NavigateOptions<RegisteredRouter, string, "/welcome">;
+} as const satisfies NO<"/welcome">;
 void _navWelcome;
 
 // navigate({ to: "/enter/verify", search: {} }) — used after sending OTP
 const _navVerify = {
   to: "/enter/verify",
   search: {},
-} as const satisfies NavigateOptions<RegisteredRouter, string, "/enter/verify">;
+} as const satisfies NO<"/enter/verify">;
 void _navVerify;
 
 // navigate({ to: "/enter", search: { redirect: undefined } }) — used when
@@ -85,7 +90,7 @@ void _navVerify;
 const _navEnter = {
   to: "/enter",
   search: { redirect: undefined },
-} as const satisfies NavigateOptions<RegisteredRouter, string, "/enter">;
+} as const satisfies NO<"/enter">;
 void _navEnter;
 
 // ---------------------------------------------------------------------------
@@ -93,25 +98,25 @@ void _navEnter;
 // ---------------------------------------------------------------------------
 
 // `redirect` must be a string, not a number
-// @ts-expect-error redirect must be string | undefined
 const _badRedirectType = {
   to: "/enter",
+  // @ts-expect-error redirect must be string | undefined
   search: { redirect: 42 },
-} as const satisfies LinkProps<RegisteredRouter, string, "/enter">;
+} as const satisfies LP<"/enter">;
 void _badRedirectType;
 
 // Unknown keys in `search` are rejected
-// @ts-expect-error `foo` is not part of /welcome search schema
 const _unknownSearchKey = {
   to: "/welcome",
+  // @ts-expect-error `foo` is not part of /welcome search schema
   search: { redirect: "/x", foo: "bar" },
-} as const satisfies NavigateOptions<RegisteredRouter, string, "/welcome">;
+} as const satisfies NO<"/welcome">;
 void _unknownSearchKey;
 
 // Wrong `to` value cannot satisfy a Link typed for /enter
-// @ts-expect-error `/nonexistent` is not a known route
 const _badRoute = {
+  // @ts-expect-error `/nonexistent` is not a known route
   to: "/nonexistent",
-  search: {},
-} as const satisfies LinkProps<RegisteredRouter, string, "/enter">;
+  search: { redirect: undefined },
+} as const satisfies LP<"/enter">;
 void _badRoute;
