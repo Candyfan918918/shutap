@@ -13,8 +13,7 @@ import { TabBar } from "@/components/profile/TabBar";
 import { StoriesGrid } from "@/components/profile/StoriesGrid";
 import { ChaosHistory } from "@/components/profile/ChaosHistory";
 import { SavedTea } from "@/components/profile/SavedTea";
-import { ReputationPanel } from "@/components/profile/ReputationPanel";
-import { getUserReputation } from "@/lib/reputation.functions";
+import { BadgesGrid } from "@/components/profile/BadgesGrid";
 
 type Tab = "stories" | "history" | "saved" | "badges";
 
@@ -53,7 +52,6 @@ function ProfilePage() {
   const fetchPosts = useServerFn(listAuthorPublicPosts);
   const fetchHistory = useServerFn(getChaosHistory);
   const fetchSaved = useServerFn(listSavedPosts);
-  const fetchReputation = useServerFn(getUserReputation);
 
   const sessionQuery = useQuery({
     queryKey: ["session"],
@@ -84,12 +82,6 @@ function ProfilePage() {
     enabled: !!profile?.isMe && tab === "saved",
     queryKey: ["saved", profile?.id],
     queryFn: () => fetchSaved({ data: {} }),
-  });
-  const reputationQuery = useQuery({
-    enabled: !!profile && tab === "badges",
-    queryKey: ["reputation", profile?.id],
-    queryFn: () => fetchReputation({ data: { userId: profile!.id } }),
-    staleTime: 60_000,
   });
 
   if (profileQuery.isLoading) {
@@ -125,7 +117,7 @@ function ProfilePage() {
           {tab === "stories" && <StoriesGrid posts={postsQuery.data ?? []} isMe={profile.isMe} />}
           {tab === "history" && <ChaosHistory rows={historyQuery.data ?? []} />}
           {tab === "saved" && profile.isMe && <SavedTea rows={savedQuery.data ?? []} isMe />}
-          {tab === "badges" && <ReputationPanel rep={reputationQuery.data} achievementBadges={profile.badges} />}
+          {tab === "badges" && <BadgesGrid badges={profile.badges} />}
         </div>
       </main>
     </div>
