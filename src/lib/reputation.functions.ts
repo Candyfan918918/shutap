@@ -44,8 +44,6 @@ export const getUserReputation = createServerFn({ method: "GET" })
 
     const [
       commentsAgg,
-      commentLikesRes,
-      commentFunnyRes,
       verdicts,
       updateReqs,
       arcs,
@@ -54,24 +52,32 @@ export const getUserReputation = createServerFn({ method: "GET" })
       streakRes,
       funny,
     ] = await Promise.all([
-      // All published comments by user (we need ids + counts)
       supabaseAdmin
         .from("post_comments")
         .select("id, like_count, funny_count")
         .eq("user_id", uid)
         .eq("status", "published")
         .is("deleted_at", null),
-      // (covered by commentsAgg sums; placeholder)
-      Promise.resolve(null),
-      Promise.resolve(null),
       supabaseAdmin
         .from("post_verdict_votes")
         .select("kind")
         .eq("user_id", uid),
-      count("post_update_requests", (q) => q.eq("user_id", uid)),
-      count("post_arc_follows", (q) => q.eq("user_id", uid)),
-      count("post_shares", (q) => q.eq("user_id", uid)),
-      count("saved_posts", (q) => q.eq("user_id", uid)),
+      supabaseAdmin
+        .from("post_update_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", uid),
+      supabaseAdmin
+        .from("post_arc_follows")
+        .select("user_id", { count: "exact", head: true })
+        .eq("user_id", uid),
+      supabaseAdmin
+        .from("post_shares")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", uid),
+      supabaseAdmin
+        .from("saved_posts")
+        .select("user_id", { count: "exact", head: true })
+        .eq("user_id", uid),
       supabaseAdmin
         .from("user_streaks")
         .select("current_streak, longest_streak")
@@ -87,6 +93,7 @@ export const getUserReputation = createServerFn({ method: "GET" })
         .order("like_count", { ascending: false })
         .limit(3),
     ]);
+
 
     void commentLikesRes;
     void commentFunnyRes;
