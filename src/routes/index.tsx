@@ -14,6 +14,7 @@ import {
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
+import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
 
 export const Route = createFileRoute("/")({
