@@ -153,7 +153,10 @@ function PostPage() {
           mediaUrl={post.media_url}
         />
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
-        <VerdictBar postId={post.id} />
+        <VerdictBar
+          postId={post.id}
+          onVoted={() => commentsRef.current?.focus("Honestly… here's what I'd do: ")}
+        />
         <ReactionsBar postId={post.id} />
         <div className="pt-2 grid grid-cols-3 gap-3">
           <button
@@ -170,8 +173,14 @@ function PostPage() {
         >
           {t("post.landingCta")}
         </Link>
-        <CommentThread postId={post.id} />
+        <CommentThread
+          ref={commentsRef}
+          postId={post.id}
+          onCommentPosted={() => setShowRelated(true)}
+        />
+        <RelatedPosts postId={post.id} autoLoad={showRelated} />
       </main>
+
 
       <AnimatePresence>
         {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}
