@@ -126,7 +126,7 @@ function ProfilePage() {
           {tab === "stories" && <StoriesGrid posts={postsQuery.data ?? []} isMe={profile.isMe} />}
           {tab === "history" && <ChaosHistory rows={historyQuery.data ?? []} />}
           {tab === "saved" && profile.isMe && <SavedTea rows={savedQuery.data ?? []} isMe />}
-          {tab === "badges" && <BadgesGrid badges={profile.badges} />}
+          {tab === "badges" && <ReputationPanel rep={reputationQuery.data} achievementBadges={profile.badges} />}
         </div>
       </main>
     </div>
