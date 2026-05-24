@@ -283,6 +283,7 @@ const TABS: Array<{ key: TabKey; label: string }> = [
 
 function TrendingFeed() {
   const fetchFeed = useServerFn(listTrendingFeed);
+  const fetchCourt = useServerFn(getActiveCourtCasesByPostIds);
   const [tab, setTab] = useState<TabKey>("trending");
 
   const params = useMemo(() => {
@@ -296,6 +297,15 @@ function TrendingFeed() {
     queryFn: () => fetchFeed({ data: params }),
     staleTime: 60_000,
   });
+
+  const postIds = useMemo(() => (data ?? []).map((d) => d.id), [data]);
+  const courtQuery = useQuery({
+    enabled: postIds.length > 0,
+    queryKey: ["feed-court", postIds.join(",")],
+    queryFn: () => fetchCourt({ data: { postIds } }),
+    staleTime: 60_000,
+  });
+
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
