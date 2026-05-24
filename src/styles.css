@@ -57,6 +57,12 @@
 
   --font-display: "Space Grotesk", "Noto Sans SC", "Noto Sans JP", system-ui, sans-serif;
   --font-body: "Inter", "Noto Sans SC", "Noto Sans JP", system-ui, sans-serif;
+
+  --radius-card: 24px;
+  --radius-button: 18px;
+  --radius-modal: 32px;
+
+  --shadow-soft: 0 10px 30px rgba(0,0,0,.06);
 }
 
 :root {
