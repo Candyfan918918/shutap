@@ -344,7 +344,7 @@ function TrendingFeed() {
       ) : data && data.length > 0 ? (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
           {data.map((item, i) => (
-            <FeedCard key={item.id} item={item} index={i} />
+            <FeedCard key={item.id} item={item} index={i} court={courtQuery.data?.[item.id]} />
           ))}
         </div>
       ) : (
