@@ -21,7 +21,7 @@ type PrimaryLink = {
 };
 
 const PRIMARY_LINKS: PrimaryLink[] = [
-  { to: "/court", label: "Court", emoji: "⚖️", highlight: true },
+  { to: "/court", label: "Court", emoji: "👑", highlight: true },
   { to: "/spill", label: "Spill", emoji: "🫖" },
   { to: "/scan/start", label: "Scan", emoji: "🔍" },
   { to: "/friends", label: "Friends", emoji: "👯" },

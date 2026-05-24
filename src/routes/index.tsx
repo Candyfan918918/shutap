@@ -14,6 +14,7 @@ import {
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
+import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
 
 export const Route = createFileRoute("/")({
@@ -282,6 +283,7 @@ const TABS: Array<{ key: TabKey; label: string }> = [
 
 function TrendingFeed() {
   const fetchFeed = useServerFn(listTrendingFeed);
+  const fetchCourt = useServerFn(getActiveCourtCasesByPostIds);
   const [tab, setTab] = useState<TabKey>("trending");
 
   const params = useMemo(() => {
@@ -295,6 +297,15 @@ function TrendingFeed() {
     queryFn: () => fetchFeed({ data: params }),
     staleTime: 60_000,
   });
+
+  const postIds = useMemo(() => (data ?? []).map((d) => d.id), [data]);
+  const courtQuery = useQuery({
+    enabled: postIds.length > 0,
+    queryKey: ["feed-court", postIds.join(",")],
+    queryFn: () => fetchCourt({ data: { postIds } }),
+    staleTime: 60_000,
+  });
+
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
@@ -333,7 +344,7 @@ function TrendingFeed() {
       ) : data && data.length > 0 ? (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
           {data.map((item, i) => (
-            <FeedCard key={item.id} item={item} index={i} />
+            <FeedCard key={item.id} item={item} index={i} court={courtQuery.data?.[item.id]} />
           ))}
         </div>
       ) : (

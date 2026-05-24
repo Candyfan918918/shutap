@@ -37,6 +37,7 @@ import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authent
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
+import { Route as ApiPublicHooksCourtTickRouteImport } from './routes/api/public/hooks/court-tick'
 import { Route as AuthenticatedSpillDraftIdScoringRouteImport } from './routes/_authenticated/spill/$draftId/scoring'
 import { Route as AuthenticatedSpillDraftIdScoreRouteImport } from './routes/_authenticated/spill/$draftId/score'
 import { Route as AuthenticatedSpillDraftIdDraftRouteImport } from './routes/_authenticated/spill/$draftId/draft'
@@ -196,6 +197,11 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
   path: '/api/public/s/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksCourtTickRoute = ApiPublicHooksCourtTickRouteImport.update({
+  id: '/api/public/hooks/court-tick',
+  path: '/api/public/hooks/court-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSpillDraftIdScoringRoute =
   AuthenticatedSpillDraftIdScoringRouteImport.update({
     id: '/spill/$draftId/scoring',
@@ -276,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/me/posts/': typeof AuthenticatedMePostsIndexRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/me/posts': typeof AuthenticatedMePostsIndexRoute
@@ -351,6 +359,7 @@ export interface FileRoutesById {
   '/_authenticated/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/_authenticated/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/_authenticated/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/_authenticated/me/posts/': typeof AuthenticatedMePostsIndexRoute
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/draft'
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
+    | '/api/public/hooks/court-tick'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/me/posts/'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/draft'
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
+    | '/api/public/hooks/court-tick'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/me/posts'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/_authenticated/spill/$draftId/draft'
     | '/_authenticated/spill/$draftId/score'
     | '/_authenticated/spill/$draftId/scoring'
+    | '/api/public/hooks/court-tick'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/_authenticated/me/posts/'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
+  ApiPublicHooksCourtTickRoute: typeof ApiPublicHooksCourtTickRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
   ApiPublicShareCardPostIdRoute: typeof ApiPublicShareCardPostIdRoute
 }
@@ -681,6 +694,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/court-tick': {
+      id: '/api/public/hooks/court-tick'
+      path: '/api/public/hooks/court-tick'
+      fullPath: '/api/public/hooks/court-tick'
+      preLoaderRoute: typeof ApiPublicHooksCourtTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/spill/$draftId/scoring': {
       id: '/_authenticated/spill/$draftId/scoring'
       path: '/spill/$draftId/scoring'
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
+  ApiPublicHooksCourtTickRoute: ApiPublicHooksCourtTickRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
   ApiPublicShareCardPostIdRoute: ApiPublicShareCardPostIdRoute,
 }

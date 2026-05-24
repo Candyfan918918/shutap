@@ -1,6 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { FeedItem } from "@/lib/posts/feed.functions";
+import { CountdownChip } from "@/components/court/CountdownChip";
+
+export interface CourtRibbon {
+  caseId: string;
+  closesAt: string | null;
+  regionLabel: string;
+  status: "in_court" | "legendary" | "nominated" | "judgment_pending" | "decided";
+}
 
 function fmt(n: number) {
   if (n >= 10000) return `${(n / 1000).toFixed(0)}k`;
@@ -23,7 +31,7 @@ function ScoreBadge({ score, small = false }: { score: number; small?: boolean }
   );
 }
 
-export function FeedCard({ item, index }: { item: FeedItem; index: number }) {
+export function FeedCard({ item, index, court }: { item: FeedItem; index: number; court?: CourtRibbon }) {
   const tall = index % 3 === 1;
   const location = [item.cityLabel, item.countryCode].filter(Boolean).join(" · ");
   return (
@@ -66,6 +74,17 @@ export function FeedCard({ item, index }: { item: FeedItem; index: number }) {
           </div>
         </div>
         <div className="p-3 space-y-2">
+          {court && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/40">
+                {court.status === "legendary" ? "🔥 Legendary" : "⚖️ In Court"}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-elevated border border-border text-muted-foreground">
+                {court.regionLabel}
+              </span>
+              {court.closesAt && <CountdownChip to={court.closesAt} prefix="Judgment in" />}
+            </div>
+          )}
           <p className="text-sm font-semibold leading-snug line-clamp-2">{item.title}</p>
           <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">

@@ -1,9 +1,81 @@
-// Daily Relationship Court: featured case + streaks.
+// 👑 Relationship Court™ — global, regional, event-based community system.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { VERDICT_KINDS, type VerdictKind, type VerdictCounts } from "@/lib/posts/community.functions";
+import {
+  VERDICT_KINDS,
+  type VerdictKind,
+  type VerdictCounts,
+} from "@/lib/posts/community.functions";
+
+// ──────────────────────────────────────────────────────────────
+// Types
+// ──────────────────────────────────────────────────────────────
+
+export type CourtScope = "city" | "country" | "world";
+export type CourtStatus =
+  | "nominated"
+  | "in_court"
+  | "judgment_pending"
+  | "decided"
+  | "legendary";
+
+export interface CourtCase {
+  id: string;
+  postId: string;
+  scope: CourtScope;
+  regionCode: string;
+  regionLabel: string;
+  status: CourtStatus;
+  nominatedAt: string;
+  opensAt: string | null;
+  closesAt: string | null;
+  decidedAt: string | null;
+  finalVerdict: string | null;
+  aiSummary: string | null;
+  engagementScore: number;
+  post: {
+    id: string;
+    title: string;
+    storyText: string;
+    mediaUrl: string | null;
+    scoreCategory: string | null;
+    score: number | null;
+    badges: string[];
+    commentCount: number;
+    likeCount: number;
+    shareCount: number;
+    saveCount: number;
+    authorId: string;
+  } | null;
+  verdict: { counts: VerdictCounts; total: number };
+}
+
+export interface ViewerRegion {
+  country: string | null;
+  countryLabel: string;
+  city: string | null;
+}
+
+export interface HonorBadge {
+  id: string;
+  postId: string;
+  caseId: string | null;
+  badgeKind: string;
+  regionLabel: string;
+  pinned: boolean;
+  earnedAt: string;
+  post?: { id: string; title: string; mediaUrl: string | null } | null;
+}
+
+const emptyCounts = (): VerdictCounts =>
+  VERDICT_KINDS.reduce((a, k) => ({ ...a, [k]: 0 }), {} as VerdictCounts);
+
+// ──────────────────────────────────────────────────────────────
+// Backwards-compat: keep existing Daily Court types/exports
+// ──────────────────────────────────────────────────────────────
 
 export interface DailyCase {
   caseDate: string;
@@ -11,116 +83,10 @@ export interface DailyCase {
   headline: string;
   subheadline: string;
   aiSummary: string | null;
-  post: {
-    id: string;
-    title: string;
-    storyText: string;
-    score: number | null;
-    scoreCategory: string | null;
-    mediaUrl: string | null;
-    badges: string[];
-    commentCount: number;
-    likeCount: number;
-    shareCount: number;
-    saveCount: number;
-  } | null;
+  post: CourtCase["post"];
   verdict: { counts: VerdictCounts; total: number };
 }
 
-function todayUTC(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-const FUNNY_LINES = [
-  "The internet has spoken 😭",
-  "The jury is shook.",
-  "Verdict served warm.",
-  "Court is officially in shambles.",
-  "Receipts have entered the chat.",
-];
-
-function pickAiSummary(counts: VerdictCounts, total: number): string {
-  if (total === 0) return "Court is empty… be the first juror.";
-  const sorted = (Object.entries(counts) as Array<[VerdictKind, number]>)
-    .filter(([, n]) => n > 0)
-    .sort((a, b) => b[1] - a[1]);
-  if (sorted.length === 0) return "Court is empty… be the first juror.";
-  const [topKind, topN] = sorted[0];
-  const pct = Math.round((topN / total) * 100);
-  const labels: Record<VerdictKind, string> = {
-    red_flag: "🚩 Red Flag",
-    green_flag: "💚 Green Flag",
-    run: "🏃 Run",
-    talk_it_out: "🗣 Talk It Out",
-    lawyer_up: "⚖️ Lawyer Up",
-    therapy_might_help: "🛋 Therapy Might Help",
-    need_update: "👀 Need Update",
-  };
-  const line = FUNNY_LINES[total % FUNNY_LINES.length];
-  return `${pct}% voted ${labels[topKind]}. ${line}`;
-}
-
-const emptyCounts = (): VerdictCounts =>
-  VERDICT_KINDS.reduce((acc, k) => ({ ...acc, [k]: 0 }), {} as VerdictCounts);
-
-export const getTodaysCase = createServerFn({ method: "GET" })
-  .handler(async (): Promise<DailyCase | null> => {
-    const today = todayUTC();
-    const { data: row, error } = await supabaseAdmin.rpc("ensure_daily_case", { _date: today });
-    if (error) throw new Error(error.message);
-    const dc = (Array.isArray(row) ? row[0] : row) as
-      | { case_date: string; post_id: string; headline: string | null; subheadline: string | null; ai_summary: string | null }
-      | null;
-    if (!dc) return null;
-
-    const [{ data: post }, { data: vRows }] = await Promise.all([
-      supabaseAdmin
-        .from("posts")
-        .select("id, title, story_text, score, score_category, media_url, badges, comment_count, like_count, share_count, save_count, status, visibility, deleted_at")
-        .eq("id", dc.post_id)
-        .maybeSingle(),
-      supabaseAdmin
-        .from("post_verdict_counts")
-        .select("kind, count")
-        .eq("post_id", dc.post_id),
-    ]);
-
-    const counts = emptyCounts();
-    let total = 0;
-    for (const r of (vRows ?? []) as Array<{ kind: VerdictKind; count: number }>) {
-      counts[r.kind] = r.count;
-      total += r.count;
-    }
-
-    const aiSummary = dc.ai_summary ?? pickAiSummary(counts, total);
-
-    return {
-      caseDate: dc.case_date,
-      postId: dc.post_id,
-      headline: dc.headline ?? "⚖️ Daily Relationship Court™",
-      subheadline: dc.subheadline ?? "Today's case… who's actually wrong here?",
-      aiSummary,
-      post:
-        post && post.status === "published" && post.visibility === "public" && !post.deleted_at
-          ? {
-              id: post.id as string,
-              title: post.title as string,
-              storyText: post.story_text as string,
-              score: (post.score as number | null) ?? null,
-              scoreCategory: (post.score_category as string | null) ?? null,
-              mediaUrl: (post.media_url as string | null) ?? null,
-              badges: ((post.badges as string[] | null) ?? []),
-              commentCount: (post.comment_count as number | null) ?? 0,
-              likeCount: (post.like_count as number | null) ?? 0,
-              shareCount: (post.share_count as number | null) ?? 0,
-              saveCount: (post.save_count as number | null) ?? 0,
-            }
-          : null,
-      verdict: { counts, total },
-    };
-  });
-
-// ---------- Streaks ----------
 export interface StreakInfo {
   current: number;
   longest: number;
@@ -134,6 +100,10 @@ function streakBadge(current: number): StreakInfo["badge"] {
   if (current >= 3) return { label: "Tea streak", emoji: "☕" };
   if (current >= 1) return { label: "Day one juror", emoji: "🧑‍⚖️" };
   return null;
+}
+
+function todayUTC(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const getMyStreak = createServerFn({ method: "POST" })
@@ -175,4 +145,333 @@ export const recordParticipation = createServerFn({ method: "POST" })
       lastActiveDate: row?.last_active_date ?? today,
       badge: streakBadge(current),
     };
+  });
+
+// Kept for backwards compat with any pre-existing callers.
+export const getTodaysCase = createServerFn({ method: "GET" })
+  .handler(async (): Promise<DailyCase | null> => {
+    // Pick the highest engagement case currently in court (world scope).
+    const { data: cc } = await supabaseAdmin
+      .from("court_cases")
+      .select("id, post_id, status, ai_summary")
+      .in("status", ["in_court", "legendary", "decided"])
+      .order("engagement_score", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!cc) return null;
+    const full = await loadCase(cc.id as string);
+    if (!full) return null;
+    return {
+      caseDate: todayUTC(),
+      postId: full.postId,
+      headline: "👑 Relationship Court™",
+      subheadline: "Where the internet decides.",
+      aiSummary: full.aiSummary,
+      post: full.post,
+      verdict: full.verdict,
+    };
+  });
+
+// ──────────────────────────────────────────────────────────────
+// Region detection
+// ──────────────────────────────────────────────────────────────
+
+const COUNTRY_LABELS: Record<string, string> = {
+  US: "🇺🇸 US",
+  GB: "🇬🇧 UK",
+  CA: "🇨🇦 Canada",
+  AU: "🇦🇺 Australia",
+  FR: "🇫🇷 France",
+  DE: "🇩🇪 Germany",
+  ES: "🇪🇸 Spain",
+  IT: "🇮🇹 Italy",
+  JP: "🇯🇵 Japan",
+  KR: "🇰🇷 Korea",
+  CN: "🇨🇳 China",
+  IN: "🇮🇳 India",
+  BR: "🇧🇷 Brazil",
+  MX: "🇲🇽 Mexico",
+  NL: "🇳🇱 Netherlands",
+  SE: "🇸🇪 Sweden",
+  ID: "🇮🇩 Indonesia",
+  PH: "🇵🇭 Philippines",
+  TR: "🇹🇷 Türkiye",
+  AE: "🇦🇪 UAE",
+  SG: "🇸🇬 Singapore",
+};
+
+export const getViewerRegion = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ViewerRegion> => {
+    const cc =
+      getRequestHeader("cf-ipcountry") ||
+      getRequestHeader("x-vercel-ip-country") ||
+      getRequestHeader("x-country") ||
+      null;
+    const country = cc ? cc.toUpperCase() : null;
+    return {
+      country,
+      countryLabel: country ? COUNTRY_LABELS[country] ?? `🌐 ${country}` : "🌎 World",
+      city: null,
+    };
+  }
+);
+
+// ──────────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────────
+
+async function attachPostsAndVerdicts(
+  cases: Array<{
+    id: string;
+    post_id: string;
+    scope: CourtScope;
+    region_code: string;
+    region_label: string;
+    status: CourtStatus;
+    nominated_at: string;
+    opens_at: string | null;
+    closes_at: string | null;
+    decided_at: string | null;
+    final_verdict: string | null;
+    ai_summary: string | null;
+    engagement_score: number;
+  }>
+): Promise<CourtCase[]> {
+  if (cases.length === 0) return [];
+  const postIds = Array.from(new Set(cases.map((c) => c.post_id)));
+
+  const [{ data: posts }, { data: votes }] = await Promise.all([
+    supabaseAdmin
+      .from("posts")
+      .select(
+        "id, title, story_text, media_url, score_category, score, badges, comment_count, like_count, share_count, save_count, author_id, status, visibility, deleted_at"
+      )
+      .in("id", postIds),
+    supabaseAdmin
+      .from("post_verdict_votes")
+      .select("post_id, kind")
+      .in("post_id", postIds),
+  ]);
+
+  const postMap = new Map<string, NonNullable<CourtCase["post"]>>();
+  for (const p of (posts ?? []) as Array<Record<string, unknown>>) {
+    if (
+      p.status !== "published" ||
+      p.visibility !== "public" ||
+      p.deleted_at != null
+    )
+      continue;
+    postMap.set(p.id as string, {
+      id: p.id as string,
+      title: (p.title as string) ?? "",
+      storyText: (p.story_text as string) ?? "",
+      mediaUrl: (p.media_url as string | null) ?? null,
+      scoreCategory: (p.score_category as string | null) ?? null,
+      score: (p.score as number | null) ?? null,
+      badges: ((p.badges as string[] | null) ?? []) as string[],
+      commentCount: (p.comment_count as number) ?? 0,
+      likeCount: (p.like_count as number) ?? 0,
+      shareCount: (p.share_count as number) ?? 0,
+      saveCount: (p.save_count as number) ?? 0,
+      authorId: p.author_id as string,
+    });
+  }
+
+  const tally = new Map<string, VerdictCounts>();
+  const totals = new Map<string, number>();
+  for (const v of (votes ?? []) as Array<{ post_id: string; kind: VerdictKind }>) {
+    if (!tally.has(v.post_id)) tally.set(v.post_id, emptyCounts());
+    const t = tally.get(v.post_id)!;
+    if (VERDICT_KINDS.includes(v.kind)) {
+      t[v.kind] = (t[v.kind] ?? 0) + 1;
+      totals.set(v.post_id, (totals.get(v.post_id) ?? 0) + 1);
+    }
+  }
+
+  return cases.map((c) => ({
+    id: c.id,
+    postId: c.post_id,
+    scope: c.scope,
+    regionCode: c.region_code,
+    regionLabel: c.region_label,
+    status: c.status,
+    nominatedAt: c.nominated_at,
+    opensAt: c.opens_at,
+    closesAt: c.closes_at,
+    decidedAt: c.decided_at,
+    finalVerdict: c.final_verdict,
+    aiSummary: c.ai_summary,
+    engagementScore: c.engagement_score,
+    post: postMap.get(c.post_id) ?? null,
+    verdict: {
+      counts: tally.get(c.post_id) ?? emptyCounts(),
+      total: totals.get(c.post_id) ?? 0,
+    },
+  }));
+}
+
+async function loadCase(caseId: string): Promise<CourtCase | null> {
+  const { data: row } = await supabaseAdmin
+    .from("court_cases")
+    .select("*")
+    .eq("id", caseId)
+    .maybeSingle();
+  if (!row) return null;
+  const enriched = await attachPostsAndVerdicts([row as never]);
+  return enriched[0] ?? null;
+}
+
+// ──────────────────────────────────────────────────────────────
+// listCourtCases
+// ──────────────────────────────────────────────────────────────
+
+export const listCourtCases = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({
+      scope: z.enum(["city", "country", "world"]).default("world"),
+      regionCode: z.string().min(1).max(16).default("WORLD"),
+      status: z
+        .array(z.enum(["nominated", "in_court", "judgment_pending", "decided", "legendary"]))
+        .optional(),
+      limit: z.number().int().min(1).max(50).default(20),
+    }).parse
+  )
+  .handler(async ({ data }): Promise<CourtCase[]> => {
+    let q = supabaseAdmin
+      .from("court_cases")
+      .select("*")
+      .eq("scope", data.scope)
+      .eq("region_code", data.regionCode)
+      .order("status", { ascending: true })
+      .order("engagement_score", { ascending: false })
+      .limit(data.limit);
+    if (data.status && data.status.length > 0) {
+      q = q.in("status", data.status);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return attachPostsAndVerdicts((rows ?? []) as never);
+  });
+
+// ──────────────────────────────────────────────────────────────
+// getCourtCase
+// ──────────────────────────────────────────────────────────────
+
+export const getCourtCase = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ caseId: z.string().uuid() }).parse)
+  .handler(async ({ data }): Promise<CourtCase | null> => {
+    return loadCase(data.caseId);
+  });
+
+// ──────────────────────────────────────────────────────────────
+// getActiveCourtCaseForPost — used by FeedCard ribbon
+// ──────────────────────────────────────────────────────────────
+
+export const getActiveCourtCasesByPostIds = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({ postIds: z.array(z.string().uuid()).min(0).max(60) }).parse
+  )
+  .handler(
+    async ({
+      data,
+    }): Promise<
+      Record<string, { caseId: string; closesAt: string | null; regionLabel: string; status: CourtStatus } | undefined>
+    > => {
+      if (data.postIds.length === 0) return {};
+      const { data: rows } = await supabaseAdmin
+        .from("court_cases")
+        .select("id, post_id, closes_at, region_label, status, engagement_score")
+        .in("post_id", data.postIds)
+        .in("status", ["in_court", "legendary"])
+        .order("engagement_score", { ascending: false });
+      const out: Record<
+        string,
+        { caseId: string; closesAt: string | null; regionLabel: string; status: CourtStatus }
+      > = {};
+      for (const r of (rows ?? []) as Array<{
+        id: string;
+        post_id: string;
+        closes_at: string | null;
+        region_label: string;
+        status: CourtStatus;
+      }>) {
+        if (!out[r.post_id]) {
+          out[r.post_id] = {
+            caseId: r.id,
+            closesAt: r.closes_at,
+            regionLabel: r.region_label,
+            status: r.status,
+          };
+        }
+      }
+      return out;
+    }
+  );
+
+// ──────────────────────────────────────────────────────────────
+// Honor board
+// ──────────────────────────────────────────────────────────────
+
+export const getHonorBoard = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ userId: z.string().uuid() }).parse)
+  .handler(async ({ data }): Promise<HonorBadge[]> => {
+    const { data: rows, error } = await supabaseAdmin
+      .from("court_case_badges")
+      .select("id, post_id, case_id, badge_kind, region_label, pinned, earned_at")
+      .eq("author_id", data.userId)
+      .order("pinned", { ascending: false })
+      .order("earned_at", { ascending: false })
+      .limit(40);
+    if (error) throw new Error(error.message);
+    const list = (rows ?? []) as Array<{
+      id: string;
+      post_id: string;
+      case_id: string | null;
+      badge_kind: string;
+      region_label: string;
+      pinned: boolean;
+      earned_at: string;
+    }>;
+    const postIds = Array.from(new Set(list.map((r) => r.post_id)));
+    let postMap = new Map<string, { id: string; title: string; mediaUrl: string | null }>();
+    if (postIds.length > 0) {
+      const { data: posts } = await supabaseAdmin
+        .from("posts")
+        .select("id, title, media_url")
+        .in("id", postIds);
+      for (const p of (posts ?? []) as Array<{ id: string; title: string; media_url: string | null }>) {
+        postMap.set(p.id, { id: p.id, title: p.title, mediaUrl: p.media_url });
+      }
+    }
+    return list.map((r) => ({
+      id: r.id,
+      postId: r.post_id,
+      caseId: r.case_id,
+      badgeKind: r.badge_kind,
+      regionLabel: r.region_label,
+      pinned: r.pinned,
+      earnedAt: r.earned_at,
+      post: postMap.get(r.post_id) ?? null,
+    }));
+  });
+
+export const togglePinHonorBadge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ badgeId: z.string().uuid() }).parse)
+  .handler(async ({ data, context }): Promise<{ pinned: boolean }> => {
+    const { supabase, userId } = context;
+    const { data: row, error: e1 } = await supabase
+      .from("court_case_badges")
+      .select("id, pinned, author_id")
+      .eq("id", data.badgeId)
+      .maybeSingle();
+    if (e1 || !row) throw new Error("Not found");
+    if ((row as { author_id: string }).author_id !== userId) throw new Error("Forbidden");
+    const next = !(row as { pinned: boolean }).pinned;
+    const { error: e2 } = await supabase
+      .from("court_case_badges")
+      .update({ pinned: next })
+      .eq("id", data.badgeId);
+    if (e2) throw new Error(e2.message);
+    return { pinned: next };
   });
