@@ -9,6 +9,7 @@ import { ScoreCard } from "@/components/post-engine/ScoreCard";
 import { getPublishedPost, getPostReactionCounts } from "@/lib/posts/public.functions";
 import { recordShare, reactToPost } from "@/lib/posts/engagement.functions";
 import { recordPostView } from "@/lib/post-analytics.functions";
+import { toggleSavePost } from "@/lib/saved.functions";
 import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,20 +154,21 @@ function PostPage() {
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
         <VerdictBar postId={post.id} />
         <ReactionsBar postId={post.id} />
-        <div className="pt-2 grid grid-cols-2 gap-3">
+        <div className="pt-2 grid grid-cols-3 gap-3">
           <button
             onClick={() => setShowShare(true)}
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+            className="col-span-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
           >
             📤 Challenge a friend
           </button>
-          <Link
-            to="/"
-            className="px-6 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-center"
-          >
-            {t("post.landingCta")}
-          </Link>
+          <SaveButton postId={post.id} />
         </div>
+        <Link
+          to="/"
+          className="block px-6 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-center"
+        >
+          {t("post.landingCta")}
+        </Link>
         <CommentThread postId={post.id} />
       </main>
 
