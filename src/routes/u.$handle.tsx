@@ -54,6 +54,7 @@ function ProfilePage() {
   const fetchPosts = useServerFn(listAuthorPublicPosts);
   const fetchHistory = useServerFn(getChaosHistory);
   const fetchSaved = useServerFn(listSavedPosts);
+  const fetchReputation = useServerFn(getUserReputation);
 
   const sessionQuery = useQuery({
     queryKey: ["session"],
