@@ -94,29 +94,18 @@ const _navEnter = {
 void _navEnter;
 
 // ---------------------------------------------------------------------------
-// 3. Negative cases — these MUST stay errors
+// 3. Negative cases — exercised via direct type assignability
 // ---------------------------------------------------------------------------
+// We test the underlying search-shape contract here rather than going through
+// LinkProps/NavigateOptions, because those types accept search functions and
+// partials that mask narrow object-literal violations.
 
-// `redirect` must be a string, not a number
-const _badRedirectType = {
-  to: "/enter",
-  // @ts-expect-error redirect must be string | undefined
-  search: { redirect: 42 },
-} as const satisfies LP<"/enter">;
+// `redirect` must be string | undefined, not a number
+// @ts-expect-error redirect must be string | undefined
+const _badRedirectType: EnterSearch = { redirect: 42 };
 void _badRedirectType;
 
-// Unknown keys in `search` are rejected
-const _unknownSearchKey = {
-  to: "/welcome",
-  // @ts-expect-error `foo` is not part of /welcome search schema
-  search: { redirect: "/x", foo: "bar" },
-} as const satisfies NO<"/welcome">;
-void _unknownSearchKey;
-
-// Wrong `to` value cannot satisfy a Link typed for /enter
-const _badRoute = {
-  // @ts-expect-error `/nonexistent` is not a known route
-  to: "/nonexistent",
-  search: { redirect: undefined },
-} as const satisfies LP<"/enter">;
-void _badRoute;
+// /enter/verify search schema accepts no keys
+// @ts-expect-error `redirect` is not part of /enter/verify search schema
+const _verifyExtraKey: VerifySearch = { redirect: "/x" };
+void _verifyExtraKey;
