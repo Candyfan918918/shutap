@@ -70,21 +70,6 @@ const CHAMPIONS: Champion[] = [
   { flag: "🔥", country: "Trending Now", scope: "trending", score: 812, preview: "他求婚那天，我前任发来一张我们的合照。", tag: "💀 Chaos" },
 ];
 
-type FeedCard = {
-  id: number; nickname: string; preview: string; score: number; tag: string;
-  likes: number; comments: number; saves: number; tall?: boolean; img?: string;
-};
-const FEED: FeedCard[] = [
-  { id: 1, nickname: "爱吃火锅的小猫", preview: "婆婆把我们的婚纱照换成了她和老公的合照。客厅。正中央。", score: 781, tag: "👵 MIL", likes: 12400, comments: 893, saves: 2100, tall: true },
-  { id: 2, nickname: "Silent Mango", preview: "He proposed in Paris. He cheated in Bali. We honeymooned in Tokyo. I left in Seoul.", score: 902, tag: "💔 Cheating", likes: 24100, comments: 1822, saves: 5600 },
-  { id: 3, nickname: "周一不上班", preview: "结婚十年第一次他主动洗碗。我以为他要离婚。结果他升职了。", score: 312, tag: "❤️ Sweet-ish", likes: 8800, comments: 401, saves: 1100 },
-  { id: 4, nickname: "Lost Pancake", preview: "Our couples therapist quit. On us. Mid-session.", score: 689, tag: "🤡 Plot Twist", likes: 15300, comments: 990, saves: 3400, tall: true },
-  { id: 5, nickname: "南瓜灯灯灯", preview: "他给我买了 LV。结果是奥莱的。结果是假的。结果是从同事那里借的。", score: 754, tag: "💸 Debt", likes: 11200, comments: 712, saves: 1800 },
-  { id: 6, nickname: "Tired Tofu", preview: "12 years. One real apology. Worth every minute. I'm not saying he's perfect. I'm saying he tried.", score: 188, tag: "🥹 Healing", likes: 30100, comments: 2400, saves: 8200, tall: true },
-  { id: 7, nickname: "海边的椰子", preview: "婚礼当天，他妈妈穿了白色。整套。带头纱。", score: 612, tag: "👵 MIL", likes: 9800, comments: 540, saves: 1400 },
-  { id: 8, nickname: "Quiet Whale", preview: "We argued for 3 hours about a parking spot. Same parking spot. Empty parking lot.", score: 422, tag: "😶 Daily", likes: 6700, comments: 311, saves: 800 },
-];
-
 const CAT_KEYS = ["cheating", "debt", "mil", "neglect", "divorce", "custody", "romance", "healing"] as const;
 const BOARD_KEYS = ["chaotic", "sweet", "twist", "money", "mil", "recovery"] as const;
 const DIM_KEYS = ["twist", "damage", "money", "family", "comms", "love"] as const;
