@@ -176,6 +176,7 @@ function PostPage() {
         >
           {t("post.landingCta")}
         </Link>
+        <StoryArc postId={post.id} />
         <CommentThread
           ref={commentsRef}
           postId={post.id}
