@@ -67,6 +67,104 @@ export type Database = {
           },
         ]
       }
+      court_case_badges: {
+        Row: {
+          author_id: string
+          badge_kind: string
+          case_id: string | null
+          earned_at: string
+          id: string
+          pinned: boolean
+          post_id: string
+          region_label: string
+        }
+        Insert: {
+          author_id: string
+          badge_kind: string
+          case_id?: string | null
+          earned_at?: string
+          id?: string
+          pinned?: boolean
+          post_id: string
+          region_label: string
+        }
+        Update: {
+          author_id?: string
+          badge_kind?: string
+          case_id?: string | null
+          earned_at?: string
+          id?: string
+          pinned?: boolean
+          post_id?: string
+          region_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "court_case_badges_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "court_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      court_cases: {
+        Row: {
+          ai_summary: string | null
+          closes_at: string | null
+          controversy_score: number
+          created_at: string
+          decided_at: string | null
+          engagement_score: number
+          final_verdict: string | null
+          id: string
+          nominated_at: string
+          opens_at: string | null
+          post_id: string
+          region_code: string
+          region_label: string
+          scope: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          closes_at?: string | null
+          controversy_score?: number
+          created_at?: string
+          decided_at?: string | null
+          engagement_score?: number
+          final_verdict?: string | null
+          id?: string
+          nominated_at?: string
+          opens_at?: string | null
+          post_id: string
+          region_code: string
+          region_label: string
+          scope: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          closes_at?: string | null
+          controversy_score?: number
+          created_at?: string
+          decided_at?: string | null
+          engagement_score?: number
+          final_verdict?: string | null
+          id?: string
+          nominated_at?: string
+          opens_at?: string | null
+          post_id?: string
+          region_code?: string
+          region_label?: string
+          scope?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_cases: {
         Row: {
           ai_summary: string | null
@@ -1177,6 +1275,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      finalize_court_cases: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1190,6 +1289,16 @@ export type Database = {
       }
       is_friend: { Args: { _a: string; _b: string }; Returns: boolean }
       is_handle_available: { Args: { _handle: string }; Returns: boolean }
+      nominate_court_cases: {
+        Args: {
+          _limit?: number
+          _region_code: string
+          _region_label: string
+          _scope: string
+        }
+        Returns: number
+      }
+      promote_court_cases: { Args: never; Returns: number }
       suggest_handles: { Args: { _base: string }; Returns: string[] }
     }
     Enums: {
