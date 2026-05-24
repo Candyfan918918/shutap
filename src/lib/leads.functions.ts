@@ -48,9 +48,9 @@ async function computeLeadScore(opts: {
   intent: IntentKind;
   urgency: number;
   postId: string | null;
-}): Promise<{ score: number; signals: Record<string, unknown> }> {
+}): Promise<{ score: number; signals: Record<string, string | number | boolean | string[] | null> }> {
   let score = INTENT_WEIGHTS[opts.intent];
-  const signals: Record<string, unknown> = { intent_weight: INTENT_WEIGHTS[opts.intent] };
+  const signals: Record<string, string | number | boolean | string[] | null> = { intent_weight: INTENT_WEIGHTS[opts.intent] };
 
   // Urgency: +0..+15
   const urgencyBonus = Math.max(0, Math.min(5, opts.urgency - 1)) * 3;
@@ -208,7 +208,7 @@ export interface AdminLeadRow {
   urgency: number;
   leadScore: number;
   leadTemperature: LeadTemperature;
-  signals: Record<string, unknown>;
+  signals: Record<string, string | number | boolean | string[] | null>;
   createdAt: string;
   postId: string | null;
   postTitle: string | null;
@@ -265,7 +265,7 @@ export const listLeadsForAdmin = createServerFn({ method: "GET" })
     const rows = (intents ?? []) as Array<{
       id: string; user_id: string; post_id: string | null; intent: IntentKind;
       urgency: number; lead_score: number; lead_temperature: LeadTemperature;
-      signals: Record<string, unknown>; created_at: string;
+      signals: Record<string, string | number | boolean | string[] | null>; created_at: string;
     }>;
 
     const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
