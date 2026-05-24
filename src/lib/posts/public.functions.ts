@@ -84,15 +84,17 @@ export interface PublicPostRow {
 
 export const listAuthorPublicPosts = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) =>
-    z.object({ authorId: z.string().uuid(), viewerId: z.string().uuid().nullable().optional() }).parse(i),
+    z.object({ authorId: z.string().uuid() }).parse(i),
   )
   .handler(async ({ data }): Promise<PublicPostRow[]> => {
+    // Derive viewer from the Bearer token — never trust a client-supplied id.
+    const viewerId = await resolveViewerId();
     let visibilityFilter = ["public"];
-    if (data.viewerId && data.viewerId === data.authorId) {
+    if (viewerId && viewerId === data.authorId) {
       visibilityFilter = ["public", "friends", "private"];
-    } else if (data.viewerId) {
+    } else if (viewerId) {
       const { data: friend } = await supabaseAdmin.rpc("is_friend", {
-        _a: data.viewerId,
+        _a: viewerId,
         _b: data.authorId,
       });
       if (friend === true) visibilityFilter = ["public", "friends"];
@@ -109,6 +111,7 @@ export const listAuthorPublicPosts = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (rows ?? []) as unknown as PublicPostRow[];
   });
+
 
 // ---------- Chaos history ----------
 export interface ChaosHistoryRow {
