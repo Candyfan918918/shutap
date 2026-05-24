@@ -34,6 +34,7 @@ import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
+import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin.leads'
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
@@ -180,6 +181,11 @@ const AuthenticatedProfileScansRoute =
     path: '/profile/scans',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminLeadsRoute = AuthenticatedAdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedMePostsIndexRoute =
   AuthenticatedMePostsIndexRouteImport.update({
     id: '/posts/',
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/admin/leads'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/admin/leads'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/_authenticated/admin/leads'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/settings/account'
@@ -673,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/leads': {
+      id: '/_authenticated/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AuthenticatedAdminLeadsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/me/posts/': {
       id: '/_authenticated/me/posts/'
       path: '/posts'
@@ -809,6 +828,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
+  AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
@@ -827,6 +847,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
+  AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,
@@ -869,3 +890,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
