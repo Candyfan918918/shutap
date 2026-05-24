@@ -245,6 +245,68 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_contacts: {
+        Row: {
+          assigned_to: string | null
+          city: string | null
+          consent_at: string | null
+          consent_given: boolean
+          country_code: string | null
+          created_at: string
+          email: string | null
+          help_type: Database["public"]["Enums"]["intent_kind"] | null
+          id: string
+          intent_id: string | null
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          city?: string | null
+          consent_at?: string | null
+          consent_given?: boolean
+          country_code?: string | null
+          created_at?: string
+          email?: string | null
+          help_type?: Database["public"]["Enums"]["intent_kind"] | null
+          id?: string
+          intent_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          city?: string | null
+          consent_at?: string | null
+          consent_given?: boolean
+          country_code?: string | null
+          created_at?: string
+          email?: string | null
+          help_type?: Database["public"]["Enums"]["intent_kind"] | null
+          id?: string
+          intent_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_contacts_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "professional_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           case_type: string | null
@@ -810,6 +872,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      professional_intents: {
+        Row: {
+          created_at: string
+          id: string
+          intent: Database["public"]["Enums"]["intent_kind"]
+          lead_score: number
+          lead_temperature: Database["public"]["Enums"]["lead_temperature"]
+          note: string | null
+          post_id: string | null
+          scan_id: string | null
+          signals: Json
+          source: string | null
+          urgency: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intent: Database["public"]["Enums"]["intent_kind"]
+          lead_score?: number
+          lead_temperature?: Database["public"]["Enums"]["lead_temperature"]
+          note?: string | null
+          post_id?: string | null
+          scan_id?: string | null
+          signals?: Json
+          source?: string | null
+          urgency?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intent?: Database["public"]["Enums"]["intent_kind"]
+          lead_score?: number
+          lead_temperature?: Database["public"]["Enums"]["lead_temperature"]
+          note?: string | null
+          post_id?: string | null
+          scan_id?: string | null
+          signals?: Json
+          source?: string | null
+          urgency?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1393,6 +1500,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      intent_kind:
+        | "reactions"
+        | "support"
+        | "documentation"
+        | "legal"
+        | "next_steps"
       interaction_kind:
         | "view"
         | "like"
@@ -1403,6 +1516,7 @@ export type Database = {
         | "report"
         | "comment"
       lead_status: "new" | "contacted" | "converted" | "closed"
+      lead_temperature: "cold" | "early" | "warm" | "hot"
       post_status: "draft" | "published" | "removed"
       post_tone: "funny" | "serious" | "chaotic" | "soft"
       reaction_kind: "been_there" | "worse" | "hug" | "laugh" | "drama"
@@ -1552,6 +1666,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      intent_kind: [
+        "reactions",
+        "support",
+        "documentation",
+        "legal",
+        "next_steps",
+      ],
       interaction_kind: [
         "view",
         "like",
@@ -1563,6 +1684,7 @@ export const Constants = {
         "comment",
       ],
       lead_status: ["new", "contacted", "converted", "closed"],
+      lead_temperature: ["cold", "early", "warm", "hot"],
       post_status: ["draft", "published", "removed"],
       post_tone: ["funny", "serious", "chaotic", "soft"],
       reaction_kind: ["been_there", "worse", "hug", "laugh", "drama"],
