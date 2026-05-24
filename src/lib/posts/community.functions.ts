@@ -16,6 +16,12 @@ export const VERDICT_KINDS = [
 ] as const;
 export type VerdictKind = (typeof VERDICT_KINDS)[number];
 
+export const COMMENT_REACTION_KINDS = ["like", "funny"] as const;
+export type CommentReactionKind = (typeof COMMENT_REACTION_KINDS)[number];
+
+export const COMMENT_SORTS = ["top", "newest", "funniest"] as const;
+export type CommentSort = (typeof COMMENT_SORTS)[number];
+
 export interface CommentRow {
   id: string;
   postId: string;
@@ -23,6 +29,9 @@ export interface CommentRow {
   parentId: string | null;
   body: string;
   createdAt: string;
+  likeCount: number;
+  funnyCount: number;
+  myReactions: CommentReactionKind[];
   author: { handle: string | null; nickname: string | null; avatarUrl: string | null } | null;
 }
 
@@ -30,36 +39,88 @@ export type VerdictCounts = Record<VerdictKind, number>;
 const emptyVerdictCounts = (): VerdictCounts =>
   VERDICT_KINDS.reduce((acc, k) => ({ ...acc, [k]: 0 }), {} as VerdictCounts);
 
-// ---------- listComments (public) ----------
+// ---------- listComments (public; viewer-aware via bearer) ----------
+import { getRequestHeader } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
+
+async function resolveViewerId(): Promise<string | null> {
+  try {
+    const auth = getRequestHeader("authorization") ?? getRequestHeader("Authorization");
+    if (!auth?.startsWith("Bearer ")) return null;
+    const token = auth.slice(7);
+    const url = process.env.SUPABASE_URL!;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const c = createClient(url, key, { auth: { persistSession: false } });
+    const { data } = await c.auth.getUser(token);
+    return data.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const listComments = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) =>
-    z.object({ postId: z.string().uuid(), limit: z.number().min(1).max(100).default(50) }).parse(i),
+    z
+      .object({
+        postId: z.string().uuid(),
+        limit: z.number().min(1).max(100).default(50),
+        sort: z.enum(COMMENT_SORTS).default("top"),
+      })
+      .parse(i),
   )
   .handler(async ({ data }): Promise<CommentRow[]> => {
-    const { data: rows, error } = await supabaseAdmin
+    let q = supabaseAdmin
       .from("post_comments")
-      .select("id, post_id, user_id, parent_id, body, created_at")
+      .select("id, post_id, user_id, parent_id, body, created_at, like_count, funny_count")
       .eq("post_id", data.postId)
       .eq("status", "published")
       .is("deleted_at", null)
-      .order("created_at", { ascending: true })
       .limit(data.limit);
+    if (data.sort === "newest") {
+      q = q.order("created_at", { ascending: false });
+    } else if (data.sort === "funniest") {
+      q = q.order("funny_count", { ascending: false }).order("created_at", { ascending: false });
+    } else {
+      q = q.order("like_count", { ascending: false }).order("created_at", { ascending: false });
+    }
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     const list = (rows ?? []) as Array<{
       id: string; post_id: string; user_id: string; parent_id: string | null;
-      body: string; created_at: string;
+      body: string; created_at: string; like_count: number; funny_count: number;
     }>;
     if (list.length === 0) return [];
+
     const userIds = Array.from(new Set(list.map((c) => c.user_id)));
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select("id, handle, nickname, avatar_url")
-      .in("id", userIds);
-    const byId = new Map(
+    const commentIds = list.map((c) => c.id);
+    const viewerId = await resolveViewerId();
+
+    const [{ data: profiles }, { data: myReacts }] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id, handle, nickname, avatar_url")
+        .in("id", userIds),
+      viewerId
+        ? supabaseAdmin
+            .from("post_comment_reactions")
+            .select("comment_id, kind")
+            .eq("user_id", viewerId)
+            .in("comment_id", commentIds)
+        : Promise.resolve({ data: [] as Array<{ comment_id: string; kind: CommentReactionKind }> }),
+    ]);
+
+    const byUser = new Map(
       (profiles ?? []).map((p) => [p.id as string, p as { id: string; handle: string | null; nickname: string | null; avatar_url: string | null }]),
     );
+    const mine = new Map<string, CommentReactionKind[]>();
+    for (const r of (myReacts ?? []) as Array<{ comment_id: string; kind: CommentReactionKind }>) {
+      const arr = mine.get(r.comment_id) ?? [];
+      arr.push(r.kind);
+      mine.set(r.comment_id, arr);
+    }
+
     return list.map((c) => {
-      const p = byId.get(c.user_id);
+      const p = byUser.get(c.user_id);
       return {
         id: c.id,
         postId: c.post_id,
@@ -67,6 +128,9 @@ export const listComments = createServerFn({ method: "GET" })
         parentId: c.parent_id,
         body: c.body,
         createdAt: c.created_at,
+        likeCount: c.like_count ?? 0,
+        funnyCount: c.funny_count ?? 0,
+        myReactions: mine.get(c.id) ?? [],
         author: p ? { handle: p.handle, nickname: p.nickname, avatarUrl: p.avatar_url } : null,
       };
     });
@@ -113,6 +177,39 @@ export const deleteComment = createServerFn({ method: "POST" })
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// ---------- toggleCommentReaction (auth) ----------
+export const toggleCommentReaction = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) =>
+    z.object({
+      commentId: z.string().uuid(),
+      kind: z.enum(COMMENT_REACTION_KINDS),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }): Promise<{ active: boolean }> => {
+    const { supabase, userId } = context;
+    const { data: existing } = await supabase
+      .from("post_comment_reactions")
+      .select("id")
+      .eq("comment_id", data.commentId)
+      .eq("user_id", userId)
+      .eq("kind", data.kind)
+      .maybeSingle();
+    if (existing) {
+      const { error } = await supabase
+        .from("post_comment_reactions")
+        .delete()
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+      return { active: false };
+    }
+    const { error } = await supabase
+      .from("post_comment_reactions")
+      .insert({ comment_id: data.commentId, user_id: userId, kind: data.kind });
+    if (error) throw new Error(error.message);
+    return { active: true };
   });
 
 // ---------- getVerdictCounts (public) ----------
@@ -178,4 +275,82 @@ export const removeVerdict = createServerFn({ method: "POST" })
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// ---------- getRelatedPosts (public) ----------
+export interface RelatedPost {
+  id: string;
+  title: string;
+  scoreCategory: string | null;
+  score: number | null;
+  badges: string[];
+  mediaUrl: string | null;
+  commentCount: number;
+}
+
+export const getRelatedPosts = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) =>
+    z.object({ postId: z.string().uuid(), limit: z.number().min(1).max(12).default(4) }).parse(i),
+  )
+  .handler(async ({ data }): Promise<RelatedPost[]> => {
+    const { data: cur } = await supabaseAdmin
+      .from("posts")
+      .select("score_category, badges")
+      .eq("id", data.postId)
+      .maybeSingle();
+    const cat = (cur?.score_category as string | null) ?? null;
+    const badges = (cur?.badges as string[] | null) ?? [];
+
+    let q = supabaseAdmin
+      .from("posts")
+      .select("id, title, score_category, score, badges, media_url, comment_count")
+      .eq("status", "published")
+      .eq("visibility", "public")
+      .is("deleted_at", null)
+      .neq("id", data.postId)
+      .order("comment_count", { ascending: false })
+      .limit(data.limit * 3);
+    if (cat) q = q.eq("score_category", cat);
+    const { data: rows } = await q;
+    let pool = (rows ?? []) as Array<{
+      id: string; title: string; score_category: string | null; score: number | null;
+      badges: string[] | null; media_url: string | null; comment_count: number | null;
+    }>;
+
+    if (pool.length < data.limit) {
+      const { data: extra } = await supabaseAdmin
+        .from("posts")
+        .select("id, title, score_category, score, badges, media_url, comment_count")
+        .eq("status", "published")
+        .eq("visibility", "public")
+        .is("deleted_at", null)
+        .neq("id", data.postId)
+        .order("created_at", { ascending: false })
+        .limit(data.limit * 2);
+      const seen = new Set(pool.map((p) => p.id));
+      for (const r of (extra ?? []) as typeof pool) {
+        if (!seen.has(r.id)) pool.push(r);
+      }
+    }
+
+    // light badge-overlap boost
+    const badgeSet = new Set(badges);
+    pool = pool
+      .map((p) => ({
+        p,
+        bonus: (p.badges ?? []).filter((b) => badgeSet.has(b)).length,
+      }))
+      .sort((a, b) => b.bonus - a.bonus)
+      .map((x) => x.p)
+      .slice(0, data.limit);
+
+    return pool.map((p) => ({
+      id: p.id,
+      title: p.title,
+      scoreCategory: p.score_category,
+      score: p.score,
+      badges: p.badges ?? [],
+      mediaUrl: p.media_url,
+      commentCount: p.comment_count ?? 0,
+    }));
   });
