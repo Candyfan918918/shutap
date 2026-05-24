@@ -86,6 +86,7 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
             </div>
           )}
           <p className="text-sm font-semibold leading-snug line-clamp-2">{item.title}</p>
+          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
               <span className="truncate">{item.author?.nickname ?? item.author?.handle ?? "anon"}</span>
