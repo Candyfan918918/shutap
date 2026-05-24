@@ -88,9 +88,6 @@ export const getUserReputation = createServerFn({ method: "GET" })
     ]);
 
 
-    void commentLikesRes;
-    void commentFunnyRes;
-
     const cRows = (commentsAgg.data ?? []) as Array<{ like_count: number; funny_count: number }>;
     const commentCount = cRows.length;
     const commentLikes = cRows.reduce((a, r) => a + (r.like_count ?? 0), 0);
@@ -113,13 +110,14 @@ export const getUserReputation = createServerFn({ method: "GET" })
       verdictsCast,
       redFlagVotesCast,
       hopeVotesCast,
-      updateRequestsGiven: updateReqs,
-      arcsFollowed: arcs,
-      sharesGiven: shares,
-      savesGiven: saves,
+      updateRequestsGiven: updateReqs.count ?? 0,
+      arcsFollowed: arcs.count ?? 0,
+      sharesGiven: shares.count ?? 0,
+      savesGiven: saves.count ?? 0,
       currentStreak: streak.current_streak,
       longestStreak: streak.longest_streak,
     };
+
 
     const funniestComments: TopFunnyComment[] = ((funny.data ?? []) as Array<{
       id: string; body: string; post_id: string; funny_count: number; like_count: number; created_at: string;
