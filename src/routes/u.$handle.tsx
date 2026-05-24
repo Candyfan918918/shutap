@@ -71,7 +71,7 @@ function ProfilePage() {
   const postsQuery = useQuery({
     enabled: !!profile,
     queryKey: ["profile_posts", profile?.id, viewerId],
-    queryFn: () => fetchPosts({ data: { authorId: profile!.id, viewerId } }),
+    queryFn: () => fetchPosts({ data: { authorId: profile!.id } }),
   });
   const historyQuery = useQuery({
     enabled: !!profile && tab === "history",

@@ -1,9 +1,35 @@
 // Public (unauthenticated) reads for published posts and profile data.
 // Uses admin client with explicit filters so RLS is irrelevant for these queries.
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 import type { PostRecord, ReactionKind } from "@/lib/posts/types";
+
+// Resolve the caller's userId from a Bearer token if present. Returns null
+// for unauthenticated callers. Never trust a client-supplied viewer id.
+async function resolveViewerId(): Promise<string | null> {
+  try {
+    const authHeader = getRequestHeader("authorization");
+    if (!authHeader?.startsWith("Bearer ")) return null;
+    const token = authHeader.slice(7);
+    if (!token) return null;
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return null;
+    const tmp = createClient<Database>(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await tmp.auth.getClaims(token);
+    if (error || !data?.claims?.sub) return null;
+    return data.claims.sub as string;
+  } catch {
+    return null;
+  }
+}
+
 
 export const getPublishedPost = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
@@ -58,15 +84,17 @@ export interface PublicPostRow {
 
 export const listAuthorPublicPosts = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) =>
-    z.object({ authorId: z.string().uuid(), viewerId: z.string().uuid().nullable().optional() }).parse(i),
+    z.object({ authorId: z.string().uuid() }).parse(i),
   )
   .handler(async ({ data }): Promise<PublicPostRow[]> => {
+    // Derive viewer from the Bearer token — never trust a client-supplied id.
+    const viewerId = await resolveViewerId();
     let visibilityFilter = ["public"];
-    if (data.viewerId && data.viewerId === data.authorId) {
+    if (viewerId && viewerId === data.authorId) {
       visibilityFilter = ["public", "friends", "private"];
-    } else if (data.viewerId) {
+    } else if (viewerId) {
       const { data: friend } = await supabaseAdmin.rpc("is_friend", {
-        _a: data.viewerId,
+        _a: viewerId,
         _b: data.authorId,
       });
       if (friend === true) visibilityFilter = ["public", "friends"];
@@ -83,6 +111,7 @@ export const listAuthorPublicPosts = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (rows ?? []) as unknown as PublicPostRow[];
   });
+
 
 // ---------- Chaos history ----------
 export interface ChaosHistoryRow {
