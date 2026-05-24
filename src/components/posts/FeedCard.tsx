@@ -1,6 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { FeedItem } from "@/lib/posts/feed.functions";
+import { CountdownChip } from "@/components/court/CountdownChip";
+
+export interface CourtRibbon {
+  caseId: string;
+  closesAt: string | null;
+  regionLabel: string;
+  status: "in_court" | "legendary" | "nominated" | "judgment_pending" | "decided";
+}
 
 function fmt(n: number) {
   if (n >= 10000) return `${(n / 1000).toFixed(0)}k`;
