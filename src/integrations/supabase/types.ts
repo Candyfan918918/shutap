@@ -67,6 +67,44 @@ export type Database = {
           },
         ]
       }
+      daily_cases: {
+        Row: {
+          ai_summary: string | null
+          case_date: string
+          created_at: string
+          headline: string | null
+          post_id: string
+          subheadline: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          case_date: string
+          created_at?: string
+          headline?: string | null
+          post_id: string
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          case_date?: string
+          created_at?: string
+          headline?: string | null
+          post_id?: string
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_cases_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -1036,6 +1074,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          current_streak: number
+          last_active_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       post_reaction_counts: {
@@ -1081,6 +1143,40 @@ export type Database = {
         Returns: undefined
       }
       _slugify_handle: { Args: { _text: string }; Returns: string }
+      bump_streak: {
+        Args: { _today: string; _user_id: string }
+        Returns: {
+          current_streak: number
+          last_active_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_streaks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      ensure_daily_case: {
+        Args: { _date: string }
+        Returns: {
+          ai_summary: string | null
+          case_date: string
+          created_at: string
+          headline: string | null
+          post_id: string
+          subheadline: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "daily_cases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
