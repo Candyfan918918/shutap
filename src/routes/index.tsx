@@ -11,7 +11,6 @@ import {
   SUPPORTED_LOCALES,
   type Locale,
 } from "@/lib/i18n";
-import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
 import { PrimaryNav } from "@/components/nav/PrimaryNav";
 import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
