@@ -78,6 +78,8 @@ function PostPage() {
   // shared === 2 (default) means "ordinary view, no auto-popup"
   const justPublished = shared === 1;
   const [showShare, setShowShare] = useState(false);
+  const [showRelated, setShowRelated] = useState(false);
+  const commentsRef = useRef<CommentThreadHandle | null>(null);
   const recordView = useServerFn(recordPostView);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
