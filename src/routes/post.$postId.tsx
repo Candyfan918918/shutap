@@ -83,6 +83,17 @@ function PostPage() {
   const [showRelated, setShowRelated] = useState(false);
   const commentsRef = useRef<CommentThreadHandle | null>(null);
   const recordView = useServerFn(recordPostView);
+  const [isAuthorViewing, setIsAuthorViewing] = useState(false);
+
+  useEffect(() => {
+    if (!post) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!cancelled) setIsAuthorViewing(data.user?.id === post.author_id);
+    })();
+    return () => { cancelled = true; };
+  }, [post]);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
   useEffect(() => {
