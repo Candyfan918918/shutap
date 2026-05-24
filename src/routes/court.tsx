@@ -165,9 +165,7 @@ function CaseBlock({ data }: { data: DailyCase }) {
 
 async function bumpStreakSafe() {
   try {
-    const fn = recordParticipation;
-    // Need bearer; call via fetch through serverFn helper:
-    await (fn as unknown as (args: { data: Record<string, never> }) => Promise<unknown>)({ data: {} });
+    await recordParticipation();
   } catch { /* ignore */ }
 }
 
@@ -276,7 +274,7 @@ function CourtVerdict({
     }
     if (nextMine) {
       setRevealed(true);
-      try { await bumpStreak({ data: {} }); } catch { /* ignore */ }
+      try { await bumpStreak(); } catch { /* ignore */ }
       onParticipated?.();
     }
   };
