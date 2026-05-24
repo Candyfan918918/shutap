@@ -29,13 +29,6 @@ export interface ReputationSummary {
   funniestComments: TopFunnyComment[];
 }
 
-async function count(table: string, filter: (q: ReturnType<typeof supabaseAdmin.from>) => unknown): Promise<number> {
-  // helper for head-count queries
-  const q = supabaseAdmin.from(table).select("*", { count: "exact", head: true });
-  const res = await (filter(q) as ReturnType<typeof q.eq>);
-  // @ts-expect-error count returned on PostgrestResponse
-  return (res?.count as number | null) ?? 0;
-}
 
 export const getUserReputation = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
