@@ -95,17 +95,20 @@ export const getScan = createServerFn({ method: "GET" })
     z.object({ scanId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }): Promise<ScanRow | null> => {
-    // Use admin client because completed scans should be publicly viewable
-    // (for share links), and RLS already enforces "completed OR owner".
+    // Unauthenticated endpoint for share links — only return completed scans.
+    // In-progress scans contain sensitive answer data and must be fetched
+    // via authenticated endpoints (getActiveScan / listMyScans).
     const { data: row, error } = await supabaseAdmin
       .from("scan_results")
       .select(SCAN_COLS)
       .eq("id", data.scanId)
+      .eq("status", "completed")
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
     return rowToScan(row as Record<string, unknown>);
   });
+
 
 // ---------- listMyScans ----------
 
