@@ -93,6 +93,12 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
           <span className="font-semibold tracking-tight">{t("appName")}</span>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            to="/court"
+            className="hidden sm:inline-flex text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
+          >
+            ⚖️ Court
+          </Link>
           <IdentityHeaderSlot />
           <div className="relative">
             <button
