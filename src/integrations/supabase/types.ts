@@ -245,6 +245,57 @@ export type Database = {
           },
         ]
       }
+      post_comments: {
+        Row: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          parent_id: string | null
+          post_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_forwards: {
         Row: {
           channel: string
@@ -336,6 +387,35 @@ export type Database = {
           },
         ]
       }
+      post_verdict_votes: {
+        Row: {
+          created_at: string
+          kind: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_verdict_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_views: {
         Row: {
           country: string | null
@@ -367,11 +447,13 @@ export type Database = {
         Row: {
           author_id: string
           badges: string[]
+          comment_count: number
           created_at: string
           deleted_at: string | null
           forward_count: number
           hashtags: string[]
           id: string
+          is_seed: boolean
           like_count: number
           locale: string
           media_url: string | null
@@ -396,11 +478,13 @@ export type Database = {
         Insert: {
           author_id: string
           badges?: string[]
+          comment_count?: number
           created_at?: string
           deleted_at?: string | null
           forward_count?: number
           hashtags?: string[]
           id?: string
+          is_seed?: boolean
           like_count?: number
           locale?: string
           media_url?: string | null
@@ -425,11 +509,13 @@ export type Database = {
         Update: {
           author_id?: string
           badges?: string[]
+          comment_count?: number
           created_at?: string
           deleted_at?: string | null
           forward_count?: number
           hashtags?: string[]
           id?: string
+          is_seed?: boolean
           like_count?: number
           locale?: string
           media_url?: string | null
@@ -923,6 +1009,22 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_verdict_counts: {
+        Row: {
+          count: number | null
+          kind: string | null
+          post_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_verdict_votes_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
