@@ -201,6 +201,8 @@ function PostPage() {
       <AnimatePresence>
         {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}
       </AnimatePresence>
+
+      {justPublished && isAuthorViewing && <IntentSheet postId={post.id} />}
     </div>
   );
 }
