@@ -95,7 +95,7 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
         <div className="flex items-center gap-2">
           <Link
             to="/court"
-            className="hidden sm:inline-flex text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
+            className="inline-flex text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
           >
             ⚖️ Court
           </Link>
