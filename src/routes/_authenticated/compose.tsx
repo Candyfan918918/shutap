@@ -14,6 +14,8 @@ import {
 } from "@/lib/posts/drafts.functions";
 import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
+import { scanPii, type PiiHit } from "@/lib/pii";
+import { AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
@@ -54,6 +56,7 @@ function Composer() {
   const [postId, setPostId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [piiHits, setPiiHits] = useState<PiiHit[] | null>(null);
 
   // Generate initial draft + persist
   const regen = async (nextTone: PostTone = tone) => {
@@ -104,11 +107,11 @@ function Composer() {
     void regen(next);
   };
 
-  const onApprove = async () => {
+  const doPublish = async () => {
     if (!postId || !draft) return;
+    setPiiHits(null);
     setPublishing(true);
     try {
-      // Persist latest edits first
       await updateDraft({
         data: {
           postId,
@@ -129,6 +132,17 @@ function Composer() {
     } finally {
       setPublishing(false);
     }
+  };
+
+  const onApprove = () => {
+    if (!postId || !draft) return;
+    const combined = `${draft.title}\n${draft.story}`;
+    const hits = scanPii(combined);
+    if (hits.length > 0) {
+      setPiiHits(hits);
+      return;
+    }
+    void doPublish();
   };
 
   const TONES: PostTone[] = ["funny", "serious", "chaotic", "soft"];
