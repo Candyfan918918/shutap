@@ -17,6 +17,7 @@ import { VerdictBar } from "@/components/posts/VerdictBar";
 import { CommentThread, type CommentThreadHandle } from "@/components/posts/CommentThread";
 import { RelatedPosts } from "@/components/posts/RelatedPosts";
 import { StoryArc } from "@/components/posts/StoryArc";
+import { IntentSheet } from "@/components/posts/IntentSheet";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
@@ -82,6 +83,17 @@ function PostPage() {
   const [showRelated, setShowRelated] = useState(false);
   const commentsRef = useRef<CommentThreadHandle | null>(null);
   const recordView = useServerFn(recordPostView);
+  const [isAuthorViewing, setIsAuthorViewing] = useState(false);
+
+  useEffect(() => {
+    if (!post) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!cancelled) setIsAuthorViewing(data.user?.id === post.author_id);
+    })();
+    return () => { cancelled = true; };
+  }, [post]);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
   useEffect(() => {
@@ -189,6 +201,8 @@ function PostPage() {
       <AnimatePresence>
         {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}
       </AnimatePresence>
+
+      {justPublished && isAuthorViewing && <IntentSheet postId={post.id} />}
     </div>
   );
 }
