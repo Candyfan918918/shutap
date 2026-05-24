@@ -86,6 +86,12 @@ function ProfilePage() {
     queryKey: ["saved", profile?.id],
     queryFn: () => fetchSaved({ data: {} }),
   });
+  const reputationQuery = useQuery({
+    enabled: !!profile && tab === "badges",
+    queryKey: ["reputation", profile?.id],
+    queryFn: () => fetchReputation({ data: { userId: profile!.id } }),
+    staleTime: 60_000,
+  });
 
   if (profileQuery.isLoading) {
     return <div className="min-h-screen grid place-items-center text-muted-foreground">loading…</div>;
