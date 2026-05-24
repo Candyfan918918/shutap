@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { I18nProvider, useT } from "@/lib/i18n/context";
@@ -10,6 +12,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
+import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
@@ -65,21 +68,6 @@ const CHAMPIONS: Champion[] = [
   { flag: "🏙️", country: "Shanghai #1", scope: "city", score: 871, preview: "婆婆有我家钥匙的备份。她每天都来。", tag: "👵 MIL" },
   { flag: "🔥", country: "Trending Now", scope: "trending", score: 845, preview: "We renewed our vows last week. He filed yesterday.", tag: "Plot Twist" },
   { flag: "🔥", country: "Trending Now", scope: "trending", score: 812, preview: "他求婚那天，我前任发来一张我们的合照。", tag: "💀 Chaos" },
-];
-
-type FeedCard = {
-  id: number; nickname: string; preview: string; score: number; tag: string;
-  likes: number; comments: number; saves: number; tall?: boolean; img?: string;
-};
-const FEED: FeedCard[] = [
-  { id: 1, nickname: "爱吃火锅的小猫", preview: "婆婆把我们的婚纱照换成了她和老公的合照。客厅。正中央。", score: 781, tag: "👵 MIL", likes: 12400, comments: 893, saves: 2100, tall: true },
-  { id: 2, nickname: "Silent Mango", preview: "He proposed in Paris. He cheated in Bali. We honeymooned in Tokyo. I left in Seoul.", score: 902, tag: "💔 Cheating", likes: 24100, comments: 1822, saves: 5600 },
-  { id: 3, nickname: "周一不上班", preview: "结婚十年第一次他主动洗碗。我以为他要离婚。结果他升职了。", score: 312, tag: "❤️ Sweet-ish", likes: 8800, comments: 401, saves: 1100 },
-  { id: 4, nickname: "Lost Pancake", preview: "Our couples therapist quit. On us. Mid-session.", score: 689, tag: "🤡 Plot Twist", likes: 15300, comments: 990, saves: 3400, tall: true },
-  { id: 5, nickname: "南瓜灯灯灯", preview: "他给我买了 LV。结果是奥莱的。结果是假的。结果是从同事那里借的。", score: 754, tag: "💸 Debt", likes: 11200, comments: 712, saves: 1800 },
-  { id: 6, nickname: "Tired Tofu", preview: "12 years. One real apology. Worth every minute. I'm not saying he's perfect. I'm saying he tried.", score: 188, tag: "🥹 Healing", likes: 30100, comments: 2400, saves: 8200, tall: true },
-  { id: 7, nickname: "海边的椰子", preview: "婚礼当天，他妈妈穿了白色。整套。带头纱。", score: 612, tag: "👵 MIL", likes: 9800, comments: 540, saves: 1400 },
-  { id: 8, nickname: "Quiet Whale", preview: "We argued for 3 hours about a parking spot. Same parking spot. Empty parking lot.", score: 422, tag: "😶 Daily", likes: 6700, comments: 311, saves: 800 },
 ];
 
 const CAT_KEYS = ["cheating", "debt", "mil", "neglect", "divorce", "custody", "romance", "healing"] as const;
@@ -304,10 +292,17 @@ function Categories() {
   );
 }
 
-/* ───────────────────────── 4. Trending feed ───────────────────────── */
+/* ───────────────────────── 4. Trending feed (real data) ───────────────────────── */
 
 function TrendingFeed() {
   const { t } = useT();
+  const fetchFeed = useServerFn(listTrendingFeed);
+  const { data, isLoading } = useQuery({
+    queryKey: ["trending-feed"],
+    queryFn: () => fetchFeed({ data: { limit: 24 } }),
+    staleTime: 60_000,
+  });
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
       <div className="flex items-end justify-between mb-4">
@@ -316,55 +311,85 @@ function TrendingFeed() {
           <p className="text-sm text-muted-foreground">{t("feed.sub")}</p>
         </div>
       </div>
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
-        {FEED.map((card, i) => (
-          <FeedCardView key={card.id} card={card} index={i} />
-        ))}
-      </div>
-      <div className="mt-8 text-center">
-        <button className="px-5 py-2.5 rounded-full bg-surface-elevated border border-border text-sm hover:border-primary/50 transition">
-          {t("feed.loadMore")}
-        </button>
-      </div>
+
+      {isLoading ? (
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="mb-3 break-inside-avoid rounded-2xl border border-border bg-card animate-pulse aspect-[4/3]" />
+          ))}
+        </div>
+      ) : data && data.length > 0 ? (
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
+          {data.map((item, i) => (
+            <FeedCardView key={item.id} item={item} index={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 rounded-2xl border border-dashed border-border">
+          <p className="text-2xl mb-2">☕</p>
+          <p className="font-semibold">No tea yet</p>
+          <p className="text-sm text-muted-foreground mt-1">Be the first to spill.</p>
+          <Link
+            to="/spill"
+            className="mt-4 inline-flex px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-sm font-bold"
+          >
+            ☕ Spill The Tea
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
 
-function FeedCardView({ card, index }: { card: FeedCard; index: number }) {
-  const { t } = useT();
+function FeedCardView({ item, index }: { item: FeedItem; index: number }) {
+  const tall = index % 3 === 1;
+  const primaryBadge = item.badges?.[0] ?? item.scoreCategory ?? "";
   return (
     <motion.article
       initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
       transition={{ delay: Math.min(index * 0.03, 0.25) }}
       className="mb-3 break-inside-avoid rounded-2xl overflow-hidden border border-border bg-card hover:border-primary/40 transition group"
     >
-      <div className={`relative ${card.tall ? "aspect-[3/4]" : "aspect-[4/3]"} bg-gradient-to-br from-surface-elevated via-surface to-card flex items-center justify-center p-4`}>
-        <div className="absolute top-2 right-2"><ScoreBadge score={card.score} small /></div>
-        <p className="text-base sm:text-lg font-medium leading-snug text-balance text-center">
-          "{card.preview}"
-        </p>
-      </div>
-      <div className="p-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
-            <span className="text-xs truncate text-muted-foreground">{card.nickname}</span>
+      <Link to="/post/$postId" params={{ postId: item.id }} search={{ shared: 2 }}>
+        <div className={`relative ${tall ? "aspect-[3/4]" : "aspect-[4/3]"} bg-gradient-to-br from-surface-elevated via-surface to-card flex items-center justify-center p-4`}>
+          {item.score != null && (
+            <div className="absolute top-2 right-2"><ScoreBadge score={item.score} small /></div>
+          )}
+          {item.isSeed && (
+            <div className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded-full bg-background/60 border border-border backdrop-blur">
+              example
+            </div>
+          )}
+          {item.mediaUrl ? (
+            <img src={item.mediaUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
+          ) : (
+            <p className="text-base sm:text-lg font-medium leading-snug text-balance text-center line-clamp-6">
+              "{item.storyText}"
+            </p>
+          )}
+        </div>
+        <div className="p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
+              <span className="text-xs truncate text-muted-foreground">
+                {item.author?.nickname ?? item.author?.handle ?? "anon"}
+              </span>
+            </div>
+            {primaryBadge && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-elevated border border-border shrink-0 truncate max-w-[40%]">
+                {primaryBadge}
+              </span>
+            )}
           </div>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-elevated border border-border shrink-0">
-            {card.tag}
-          </span>
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span>❤️ {fmt(item.likeCount)}</span>
+            <span>💬 {fmt(item.commentCount)}</span>
+            <span>📤 {fmt(item.shareCount)}</span>
+            <span>👀 {fmt(item.viewCount)}</span>
+          </div>
         </div>
-        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span>💀 {fmt(card.likes)}</span>
-          <span>😭 {fmt(card.comments)}</span>
-          <span>🚩 {fmt(card.saves)}</span>
-          <span>☠️</span>
-        </div>
-        <div className="mt-2 flex gap-1.5">
-          <button className="flex-1 text-[11px] px-2 py-1 rounded-full bg-surface-elevated hover:bg-secondary transition">{t("feed.been")}</button>
-          <button className="flex-1 text-[11px] px-2 py-1 rounded-full bg-surface-elevated hover:bg-secondary transition">{t("feed.worse")}</button>
-        </div>
-      </div>
+      </Link>
     </motion.article>
   );
 }

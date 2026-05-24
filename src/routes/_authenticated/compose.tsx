@@ -14,6 +14,8 @@ import {
 } from "@/lib/posts/drafts.functions";
 import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
+import { scanPii, type PiiHit } from "@/lib/pii";
+import { AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
@@ -54,6 +56,7 @@ function Composer() {
   const [postId, setPostId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [piiHits, setPiiHits] = useState<PiiHit[] | null>(null);
 
   // Generate initial draft + persist
   const regen = async (nextTone: PostTone = tone) => {
@@ -104,11 +107,11 @@ function Composer() {
     void regen(next);
   };
 
-  const onApprove = async () => {
+  const doPublish = async () => {
     if (!postId || !draft) return;
+    setPiiHits(null);
     setPublishing(true);
     try {
-      // Persist latest edits first
       await updateDraft({
         data: {
           postId,
@@ -129,6 +132,17 @@ function Composer() {
     } finally {
       setPublishing(false);
     }
+  };
+
+  const onApprove = () => {
+    if (!postId || !draft) return;
+    const combined = `${draft.title}\n${draft.story}`;
+    const hits = scanPii(combined);
+    if (hits.length > 0) {
+      setPiiHits(hits);
+      return;
+    }
+    void doPublish();
   };
 
   const TONES: PostTone[] = ["funny", "serious", "chaotic", "soft"];
@@ -233,6 +247,51 @@ function Composer() {
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {piiHits && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-2xl"
+            >
+              <p className="text-2xl">🚨</p>
+              <h3 className="mt-2 text-lg font-bold">Hold up — looks like personal info</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                We spotted what looks like contact details. Posts on Shutap are anonymous —
+                please remove names, phone numbers, emails, handles, and links before publishing.
+              </p>
+              <ul className="mt-3 space-y-1 max-h-40 overflow-auto">
+                {piiHits.map((h, i) => (
+                  <li key={i} className="text-xs flex items-center gap-2">
+                    <span className="px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold uppercase tracking-wider text-[10px]">
+                      {h.kind}
+                    </span>
+                    <code className="truncate">{h.sample}</code>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={() => setPiiHits(null)}
+                  className="flex-1 px-4 py-2.5 rounded-full bg-surface-elevated border border-border text-sm font-medium"
+                >
+                  ← Let me edit
+                </button>
+                <button
+                  onClick={() => void doPublish()}
+                  className="flex-1 px-4 py-2.5 rounded-full bg-destructive text-destructive-foreground text-sm font-bold"
+                >
+                  Publish anyway
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
