@@ -1,5 +1,4 @@
-// Primary site navigation: logo, primary links (desktop), user menu, language
-// switcher, and a mobile sheet that exposes every feature.
+// Minimal navigation: Home, Court, Profile + Spill CTA. Mobile sheet matches.
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -13,26 +12,12 @@ import {
   type Locale,
 } from "@/lib/i18n";
 
-type PrimaryLink = {
-  to: string;
-  label: string;
-  emoji: string;
-  highlight?: boolean;
-};
+type PrimaryLink = { to: string; label: string; emoji: string };
 
 const PRIMARY_LINKS: PrimaryLink[] = [
-  { to: "/court", label: "Court", emoji: "👑", highlight: true },
-  { to: "/spill", label: "Spill", emoji: "🫖" },
-  { to: "/scan/start", label: "Scan", emoji: "🔍" },
-  { to: "/friends", label: "Friends", emoji: "👯" },
-];
-
-const USER_LINKS: PrimaryLink[] = [
-  { to: "/me", label: "My profile", emoji: "👤" },
-  { to: "/me/posts", label: "My posts", emoji: "📝" },
-  { to: "/profile/scans", label: "My scans", emoji: "🔍" },
-  { to: "/compose", label: "New post", emoji: "✨" },
-  { to: "/settings", label: "Settings", emoji: "⚙️" },
+  { to: "/", label: "Home", emoji: "🏠" },
+  { to: "/court", label: "Court", emoji: "⚖️" },
+  { to: "/me", label: "Profile", emoji: "👤" },
 ];
 
 function useClickOutside<T extends HTMLElement>(onClose: () => void) {
@@ -60,51 +45,55 @@ export function PrimaryNav({
   const langRef = useClickOutside<HTMLDivElement>(() => setLangOpen(false));
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
-      <div className="mx-auto max-w-6xl flex items-center justify-between gap-3 px-4 py-3">
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/60">
+      <div className="mx-auto max-w-5xl flex items-center justify-between gap-3 px-5 py-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-sm">
+          <div className="h-8 w-8 rounded-2xl bg-gradient-to-br from-primary to-accent grid place-items-center text-base shadow-sm">
             👀
           </div>
-          <span className="font-semibold tracking-tight">{t("appName")}</span>
+          <span className="font-display font-bold tracking-tight text-lg">shutap</span>
         </Link>
 
-        {/* Desktop primary links */}
+        {/* Desktop primary links — only 3 */}
         <nav className="hidden md:flex items-center gap-1">
           {PRIMARY_LINKS.map((l) => (
             <Link
               key={l.to}
               to={l.to}
-              className={
-                l.highlight
-                  ? "text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
-                  : "text-xs px-3 py-1.5 rounded-full border border-transparent hover:border-border hover:bg-surface-elevated transition font-medium text-muted-foreground hover:text-foreground"
-              }
-              activeProps={{ className: "text-xs px-3 py-1.5 rounded-full border border-primary/40 bg-surface-elevated transition font-semibold" }}
+              className="text-sm px-4 py-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-surface transition font-medium"
+              activeOptions={{ exact: l.to === "/" }}
+              activeProps={{ className: "text-sm px-4 py-2 rounded-full bg-surface text-foreground font-semibold" }}
             >
-              {l.emoji} {l.label}
+              {l.label}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/spill"
+            className="hidden sm:inline-flex text-sm px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-bold shadow-soft hover:scale-[1.02] active:scale-95 transition"
+          >
+            ☕ Spill
+          </Link>
+
           <UserMenu />
 
-          <div className="relative hidden sm:block" ref={langRef}>
+          <div className="relative hidden md:block" ref={langRef}>
             <button
               onClick={() => setLangOpen((v) => !v)}
-              className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border hover:border-primary/50 transition"
+              className="text-xs px-3 py-2 rounded-full hover:bg-surface transition text-muted-foreground"
               aria-label={t("nav.language")}
             >
-              🌐 {LOCALE_LABELS[locale]}
+              🌐
             </button>
             {langOpen && (
-              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1 shadow-xl z-50">
+              <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-border bg-popover p-1 shadow-soft z-50">
                 {SUPPORTED_LOCALES.map((l) => (
                   <button
                     key={l}
                     onClick={() => { onLocaleChange(l); setLangOpen(false); }}
-                    className={`w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition ${l === locale ? "text-primary" : ""}`}
+                    className={`w-full text-left text-sm px-3 py-2 rounded-xl hover:bg-surface transition ${l === locale ? "text-primary font-semibold" : ""}`}
                   >
                     {LOCALE_LABELS[l]}
                   </button>
@@ -116,7 +105,7 @@ export function PrimaryNav({
           {/* Mobile menu trigger */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border"
+            className="md:hidden h-10 w-10 grid place-items-center rounded-full hover:bg-surface transition"
             aria-label="Menu"
             aria-expanded={mobileOpen}
           >
@@ -127,35 +116,37 @@ export function PrimaryNav({
 
       {/* Mobile sheet */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-          <nav className="mx-auto max-w-6xl px-4 py-3 grid grid-cols-2 gap-2">
+        <div className="md:hidden border-t border-border bg-background animate-fade-in">
+          <nav className="mx-auto max-w-5xl px-5 py-4 flex flex-col gap-1">
             {PRIMARY_LINKS.map((l) => (
               <Link
                 key={l.to}
                 to={l.to}
                 onClick={() => setMobileOpen(false)}
-                className="text-sm px-3 py-2.5 rounded-xl bg-surface-elevated border border-border hover:border-primary/50 transition font-medium"
+                className="text-base px-4 py-3 rounded-2xl hover:bg-surface transition font-medium"
               >
-                {l.emoji} {l.label}
+                <span className="mr-3">{l.emoji}</span>{l.label}
               </Link>
             ))}
-          </nav>
-          <div className="mx-auto max-w-6xl px-4 pb-3 sm:hidden">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-2 mb-1.5 px-1">
-              {t("nav.language")}
-            </div>
-            <div className="flex flex-wrap gap-1.5">
+            <Link
+              to="/spill"
+              onClick={() => setMobileOpen(false)}
+              className="mt-2 text-base px-4 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-center"
+            >
+              ☕ Spill the tea
+            </Link>
+            <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-1.5">
               {SUPPORTED_LOCALES.map((l) => (
                 <button
                   key={l}
                   onClick={() => { onLocaleChange(l); setMobileOpen(false); }}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition ${l === locale ? "border-primary text-primary" : "border-border text-muted-foreground"}`}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition ${l === locale ? "border-primary text-primary" : "border-border text-muted-foreground"}`}
                 >
                   {LOCALE_LABELS[l]}
                 </button>
               ))}
             </div>
-          </div>
+          </nav>
         </div>
       )}
     </header>
@@ -203,33 +194,30 @@ function UserMenu() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-2 px-2 py-1 rounded-full bg-surface-elevated/80 border border-border max-w-[180px] hover:border-primary/50 transition"
+          className="inline-flex items-center gap-2 p-1 pr-1 rounded-full hover:bg-surface transition"
           aria-haspopup="menu"
           aria-expanded={open}
         >
-          <AvatarSvg src={identity.avatarUrl} size={28} className="shadow-none" alt="" />
-          <span className="text-xs font-semibold truncate hidden sm:inline">{identity.displayName}</span>
-          <span className="text-[10px] text-muted-foreground">▾</span>
+          <AvatarSvg src={identity.avatarUrl} size={32} className="shadow-none" alt="" />
         </button>
         {open && (
-          <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-popover p-1 shadow-xl z-50">
-            <div className="px-3 py-2 border-b border-border mb-1">
-              <div className="text-xs font-semibold truncate">{identity.displayName}</div>
-              <div className="text-[10px] text-muted-foreground">Signed in</div>
+          <div className="absolute right-0 mt-2 w-60 rounded-2xl border border-border bg-popover p-2 shadow-soft z-50">
+            <div className="px-3 py-2 mb-1">
+              <div className="text-sm font-bold truncate">{identity.displayName}</div>
+              <div className="text-[11px] text-muted-foreground">Signed in</div>
             </div>
-            {USER_LINKS.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                onClick={() => setOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm hover:bg-surface-elevated transition"
-              >
-                <span className="mr-2">{l.emoji}</span>{l.label}
-              </Link>
-            ))}
+            <Link to="/me" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm hover:bg-surface transition">
+              👤 My profile
+            </Link>
+            <Link to="/me/posts" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm hover:bg-surface transition">
+              📝 My posts
+            </Link>
+            <Link to="/settings" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-xl text-sm hover:bg-surface transition">
+              ⚙️ Settings
+            </Link>
             <button
               onClick={handleSignOut}
-              className="w-full text-left px-3 py-2 mt-1 rounded-lg text-sm hover:bg-surface-elevated transition border-t border-border text-muted-foreground"
+              className="w-full text-left px-3 py-2.5 mt-1 rounded-xl text-sm hover:bg-surface transition border-t border-border text-muted-foreground"
             >
               🚪 Sign out
             </button>
@@ -244,9 +232,9 @@ function UserMenu() {
       <Link
         to="/welcome"
         search={{ redirect: undefined }}
-        className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border hover:border-primary/50 transition"
+        className="text-xs px-4 py-2 rounded-full bg-surface border border-border hover:border-primary/50 transition"
       >
-        ✨ {t("nav.finishOnboarding")}
+        ✨ Finish setup
       </Link>
     );
   }
@@ -255,9 +243,9 @@ function UserMenu() {
     <Link
       to="/enter"
       search={{ redirect: undefined }}
-      className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+      className="text-sm px-4 py-2 rounded-full border border-border hover:border-primary/60 hover:bg-surface transition font-medium"
     >
-      {t("nav.enter")} →
+      {t("nav.enter")}
     </Link>
   );
 }
