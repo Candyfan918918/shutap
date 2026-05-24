@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { I18nProvider, useT } from "@/lib/i18n/context";
@@ -10,6 +12,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
+import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
