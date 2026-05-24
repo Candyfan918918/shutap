@@ -74,8 +74,18 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
           </div>
         </div>
         <div className="p-3 space-y-2">
+          {court && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/40">
+                {court.status === "legendary" ? "🔥 Legendary" : "⚖️ In Court"}
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-elevated border border-border text-muted-foreground">
+                {court.regionLabel}
+              </span>
+              {court.closesAt && <CountdownChip to={court.closesAt} prefix="Judgment in" />}
+            </div>
+          )}
           <p className="text-sm font-semibold leading-snug line-clamp-2">{item.title}</p>
-          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
               <span className="truncate">{item.author?.nickname ?? item.author?.handle ?? "anon"}</span>
