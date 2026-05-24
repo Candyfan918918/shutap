@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { I18nProvider, useT } from "@/lib/i18n/context";
 import {
   detectBrowserLocale,
@@ -12,7 +12,8 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
-import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
+import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
+import { FeedCard } from "@/components/posts/FeedCard";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
@@ -42,7 +43,7 @@ function IndexShell() {
   }, []);
   const change = (l: Locale) => {
     setLocale(l);
-    try { window.localStorage.setItem(LOCALE_KEY, l); } catch {}
+    try { window.localStorage.setItem(LOCALE_KEY, l); } catch { /* ignore */ }
   };
   return (
     <I18nProvider locale={locale}>
@@ -51,31 +52,9 @@ function IndexShell() {
   );
 }
 
-/* ───────────────────────── Placeholder data ───────────────────────── */
-
-type Champion = {
-  flag: string; country: string; scope: "global" | "country" | "city" | "trending";
-  score: number; preview: string; tag: string;
-};
-const CHAMPIONS: Champion[] = [
-  { flag: "🌍", country: "Global #1", scope: "global", score: 994, preview: "He said it was overtime. Turns out it was a second family.", tag: "Cheating" },
-  { flag: "🇺🇸", country: "USA #1", scope: "country", score: 982, preview: "I found her wedding ring… on someone else's hand at brunch.", tag: "Plot Twist" },
-  { flag: "🇨🇳", country: "中国 #1", scope: "country", score: 963, preview: "离婚后我才发现房子不在我名下。", tag: "财产大战" },
-  { flag: "🇯🇵", country: "日本 #1", scope: "country", score: 921, preview: "结婚20年，他退休当天提离婚。", tag: "Cold Marriage" },
-  { flag: "🇪🇸", country: "España #1", scope: "country", score: 909, preview: "Descubrí los mensajes el día de nuestro aniversario.", tag: "Cheating" },
-  { flag: "🇧🇷", country: "Brasil #1", scope: "country", score: 898, preview: "Ele sumiu com a poupança e a cachorra.", tag: "Financial Shock" },
-  { flag: "🇰🇷", country: "한국 #1", scope: "country", score: 887, preview: "결혼 5년 만에 그가 빚 3억을 숨겨왔다.", tag: "Hidden Debt" },
-  { flag: "🏙️", country: "Shanghai #1", scope: "city", score: 871, preview: "婆婆有我家钥匙的备份。她每天都来。", tag: "👵 MIL" },
-  { flag: "🔥", country: "Trending Now", scope: "trending", score: 845, preview: "We renewed our vows last week. He filed yesterday.", tag: "Plot Twist" },
-  { flag: "🔥", country: "Trending Now", scope: "trending", score: 812, preview: "他求婚那天，我前任发来一张我们的合照。", tag: "💀 Chaos" },
-];
-
-const CAT_KEYS = ["cheating", "debt", "mil", "neglect", "divorce", "custody", "romance", "healing"] as const;
 const BOARD_KEYS = ["chaotic", "sweet", "twist", "money", "mil", "recovery"] as const;
 const DIM_KEYS = ["twist", "damage", "money", "family", "comms", "love"] as const;
 const PROOF_KEYS = ["stories", "countries", "points", "survived"] as const;
-
-/* ───────────────────────── Page ───────────────────────── */
 
 function HomePage({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: (l: Locale) => void }) {
   const { t } = useT();
@@ -83,9 +62,8 @@ function HomePage({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: 
     <div className="min-h-screen bg-background text-foreground bg-grain">
       <TopBar locale={locale} onChange={onLocaleChange} />
       <main className="pb-24">
-        <ChampionWall />
+        <TopTrendingWall />
         <MainCTA />
-        <Categories />
         <TrendingFeed />
         <Leaderboards />
         <HowItWorks />
@@ -101,8 +79,6 @@ function HomePage({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: 
     </div>
   );
 }
-
-/* ───────────────────────── Top bar ───────────────────────── */
 
 function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) => void }) {
   const { t } = useT();
@@ -146,10 +122,17 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
   );
 }
 
-/* ───────────────────────── 1. Champion wall ───────────────────────── */
+/* ───────────────────────── Hero: real top trending wall ───────────────────────── */
 
-function ChampionWall() {
+function TopTrendingWall() {
   const { t } = useT();
+  const fetchFeed = useServerFn(listTrendingFeed);
+  const { data, isLoading } = useQuery({
+    queryKey: ["trending-feed", "wall"],
+    queryFn: () => fetchFeed({ data: { limit: 10, sort: "trending" } }),
+    staleTime: 60_000,
+  });
+
   return (
     <section className="pt-6 sm:pt-10">
       <div className="mx-auto max-w-6xl px-4">
@@ -160,56 +143,63 @@ function ChampionWall() {
           {t("wall.title")}
         </motion.h1>
         <p className="mt-2 text-muted-foreground">{t("wall.subtitle")}</p>
-        <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar">
-          {(["global", "country", "city", "trending"] as const).map((k) => (
-            <span key={k} className="shrink-0 text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border">
-              {t(`wall.chips.${k}` as const)}
-            </span>
-          ))}
-        </div>
       </div>
 
       <div className="mt-5 overflow-x-auto no-scrollbar">
         <div className="flex gap-3 px-4 sm:px-[max(1rem,calc(50vw-36rem))] snap-x snap-mandatory">
-          {CHAMPIONS.map((c, i) => (
-            <motion.article
-              key={i}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              transition={{ delay: Math.min(i * 0.04, 0.3) }}
-              className="snap-start shrink-0 w-[78vw] sm:w-[320px] rounded-3xl overflow-hidden border border-border bg-gradient-to-br from-card to-surface relative group"
-            >
-              <div className="aspect-[4/5] p-5 flex flex-col justify-between relative">
-                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_20%_10%,oklch(0.62_0.22_25/_0.5),transparent_60%)]" />
-                <div className="relative flex items-start justify-between">
-                  <div>
-                    <div className="text-4xl">{c.flag}</div>
-                    <div className="mt-2 text-sm font-medium text-foreground/90">{c.country}</div>
-                  </div>
-                  <ScoreBadge score={c.score} />
-                </div>
-                <div className="relative">
-                  <p className="text-lg sm:text-xl font-semibold leading-snug text-balance">
-                    "{c.preview}"
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs px-2 py-1 rounded-full bg-background/50 backdrop-blur border border-border">
-                      #{c.tag}
-                    </span>
-                    <span className="text-xs text-primary group-hover:text-primary-glow transition">
-                      {t("wall.readStory")} →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </motion.article>
-          ))}
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="snap-start shrink-0 w-[78vw] sm:w-[320px] aspect-[4/5] rounded-3xl border border-border bg-card animate-pulse" />
+              ))
+            : (data ?? []).map((item, i) => <WallCard key={item.id} item={item} index={i} />)}
         </div>
       </div>
     </section>
   );
 }
 
-/* ───────────────────────── 2. Main CTA ───────────────────────── */
+function WallCard({ item, index }: { item: FeedItem; index: number }) {
+  const location = [item.cityLabel, item.countryCode].filter(Boolean).join(" · ");
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      transition={{ delay: Math.min(index * 0.04, 0.3) }}
+      className="snap-start shrink-0 w-[78vw] sm:w-[320px] rounded-3xl overflow-hidden border border-border bg-gradient-to-br from-card to-surface relative group"
+    >
+      <Link to="/post/$postId" params={{ postId: item.id }} search={{ shared: 2 }}>
+        <div className="aspect-[4/5] p-5 flex flex-col justify-between relative">
+          {item.mediaUrl ? (
+            <img src={item.mediaUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_20%_10%,oklch(0.62_0.22_25/_0.5),transparent_60%)]" />
+          )}
+          <div className="relative flex items-start justify-between">
+            <div>
+              <div className="text-xs px-2 py-1 rounded-full bg-background/60 backdrop-blur border border-border font-semibold inline-block">
+                {item.funnyLabel}
+              </div>
+              {location && (
+                <div className="mt-2 text-sm font-medium text-foreground/90">📍 {location}</div>
+              )}
+            </div>
+            {item.score != null && <ScoreBadge score={item.score} />}
+          </div>
+          <div className="relative">
+            <p className="text-lg sm:text-xl font-semibold leading-snug text-balance line-clamp-4">
+              "{item.title}"
+            </p>
+            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+              <span>💬 {fmt(item.commentCount)} · ⚖️ {fmt(item.verdictCount)}</span>
+              <span className="text-primary">Read story →</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.article>
+  );
+}
+
+/* ───────────────────────── Main CTA ───────────────────────── */
 
 function MainCTA() {
   const { t } = useT();
@@ -224,7 +214,6 @@ function MainCTA() {
       <p className="mt-4 text-muted-foreground text-balance max-w-xl mx-auto">{t("cta.sub")}</p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 text-left">
-        {/* Spill The Tea */}
         <motion.div
           initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           whileHover={{ y: -4 }}
@@ -244,7 +233,6 @@ function MainCTA() {
           </div>
         </motion.div>
 
-        {/* Judge My Relationship */}
         <motion.div
           initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           transition={{ delay: 0.06 }}
@@ -271,35 +259,33 @@ function MainCTA() {
   );
 }
 
-/* ───────────────────────── 3. Categories ───────────────────────── */
+/* ───────────────────────── Trending feed with tabs ───────────────────────── */
 
-function Categories() {
-  const { t } = useT();
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-6">
-      <h3 className="text-xl sm:text-2xl font-semibold mb-4">{t("cats.title")}</h3>
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4">
-        {CAT_KEYS.map((k) => (
-          <button
-            key={k}
-            className="shrink-0 px-4 py-2 rounded-full bg-surface-elevated border border-border text-sm hover:border-primary/60 hover:bg-card transition"
-          >
-            {t(`cats.items.${k}` as const)}
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ───────────────────────── 4. Trending feed (real data) ───────────────────────── */
+type TabKey = "trending" | "latest" | FeedCategory;
+const TABS: Array<{ key: TabKey; label: string }> = [
+  { key: "trending", label: "🔥 Trending" },
+  { key: "latest", label: "🆕 Latest" },
+  { key: "chaos", label: "💀 Chaos" },
+  { key: "wholesome", label: "❤️ Wholesome" },
+  { key: "family", label: "👨‍👩‍👧 Family Drama" },
+  { key: "situationship", label: "🤡 Situationship" },
+  { key: "marriage", label: "💍 Marriage" },
+  { key: "plot_twist", label: "🍿 Plot Twist" },
+];
 
 function TrendingFeed() {
-  const { t } = useT();
   const fetchFeed = useServerFn(listTrendingFeed);
+  const [tab, setTab] = useState<TabKey>("trending");
+
+  const params = useMemo(() => {
+    if (tab === "trending") return { limit: 24, sort: "trending" as const };
+    if (tab === "latest") return { limit: 24, sort: "latest" as const };
+    return { limit: 24, sort: "trending" as const, category: tab };
+  }, [tab]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["trending-feed"],
-    queryFn: () => fetchFeed({ data: { limit: 24 } }),
+    queryKey: ["trending-feed", tab],
+    queryFn: () => fetchFeed({ data: params }),
     staleTime: 60_000,
   });
 
@@ -307,9 +293,28 @@ function TrendingFeed() {
     <section className="mx-auto max-w-6xl px-4 py-10">
       <div className="flex items-end justify-between mb-4">
         <div>
-          <h3 className="text-xl sm:text-2xl font-semibold">{t("feed.title")}</h3>
-          <p className="text-sm text-muted-foreground">{t("feed.sub")}</p>
+          <h3 className="text-xl sm:text-2xl font-semibold">The Feed</h3>
+          <p className="text-sm text-muted-foreground">Real stories, fresh chaos. Updated live.</p>
         </div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-3">
+        {TABS.map((tb) => {
+          const active = tb.key === tab;
+          return (
+            <button
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm border transition ${
+                active
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-surface-elevated border-border hover:border-primary/60"
+              }`}
+            >
+              {tb.label}
+            </button>
+          );
+        })}
       </div>
 
       {isLoading ? (
@@ -321,14 +326,14 @@ function TrendingFeed() {
       ) : data && data.length > 0 ? (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
           {data.map((item, i) => (
-            <FeedCardView key={item.id} item={item} index={i} />
+            <FeedCard key={item.id} item={item} index={i} />
           ))}
         </div>
       ) : (
         <div className="text-center py-16 rounded-2xl border border-dashed border-border">
           <p className="text-2xl mb-2">☕</p>
-          <p className="font-semibold">No tea yet</p>
-          <p className="text-sm text-muted-foreground mt-1">Be the first to spill.</p>
+          <p className="font-semibold">No tea here yet</p>
+          <p className="text-sm text-muted-foreground mt-1">Try another category — or be the first to spill.</p>
           <Link
             to="/spill"
             className="mt-4 inline-flex px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-sm font-bold"
@@ -341,65 +346,13 @@ function TrendingFeed() {
   );
 }
 
-function FeedCardView({ item, index }: { item: FeedItem; index: number }) {
-  const tall = index % 3 === 1;
-  const primaryBadge = item.badges?.[0] ?? item.scoreCategory ?? "";
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-      transition={{ delay: Math.min(index * 0.03, 0.25) }}
-      className="mb-3 break-inside-avoid rounded-2xl overflow-hidden border border-border bg-card hover:border-primary/40 transition group"
-    >
-      <Link to="/post/$postId" params={{ postId: item.id }} search={{ shared: 2 }}>
-        <div className={`relative ${tall ? "aspect-[3/4]" : "aspect-[4/3]"} bg-gradient-to-br from-surface-elevated via-surface to-card flex items-center justify-center p-4`}>
-          {item.score != null && (
-            <div className="absolute top-2 right-2"><ScoreBadge score={item.score} small /></div>
-          )}
-          {item.isSeed && (
-            <div className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded-full bg-background/60 border border-border backdrop-blur">
-              example
-            </div>
-          )}
-          {item.mediaUrl ? (
-            <img src={item.mediaUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
-          ) : (
-            <p className="text-base sm:text-lg font-medium leading-snug text-balance text-center line-clamp-6">
-              "{item.storyText}"
-            </p>
-          )}
-        </div>
-        <div className="p-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
-              <span className="text-xs truncate text-muted-foreground">
-                {item.author?.nickname ?? item.author?.handle ?? "anon"}
-              </span>
-            </div>
-            {primaryBadge && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-elevated border border-border shrink-0 truncate max-w-[40%]">
-                {primaryBadge}
-              </span>
-            )}
-          </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-            <span>❤️ {fmt(item.likeCount)}</span>
-            <span>💬 {fmt(item.commentCount)}</span>
-            <span>📤 {fmt(item.shareCount)}</span>
-            <span>👀 {fmt(item.viewCount)}</span>
-          </div>
-        </div>
-      </Link>
-    </motion.article>
-  );
-}
-
 function fmt(n: number) {
+  if (n >= 10000) return `${(n / 1000).toFixed(0)}k`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
 }
 
-/* ───────────────────────── 5. Leaderboards ───────────────────────── */
+/* ───────────────────────── Leaderboards ───────────────────────── */
 
 function Leaderboards() {
   const { t } = useT();
@@ -427,8 +380,6 @@ function Leaderboards() {
   );
 }
 
-/* ───────────────────────── 6. How it works ───────────────────────── */
-
 function HowItWorks() {
   const { t } = useT();
   return (
@@ -454,8 +405,6 @@ function HowItWorks() {
   );
 }
 
-/* ───────────────────────── 7. Social proof ───────────────────────── */
-
 function SocialProof() {
   const { t } = useT();
   return (
@@ -480,8 +429,6 @@ function SocialProof() {
   );
 }
 
-/* ───────────────────────── 8. Soft signup ───────────────────────── */
-
 function SoftSignup() {
   const { t } = useT();
   return (
@@ -489,30 +436,22 @@ function SoftSignup() {
       <h3 className="text-3xl font-bold">{t("signup.title")}</h3>
       <p className="mt-2 text-muted-foreground text-balance">{t("signup.sub")}</p>
       <div className="mt-6 space-y-2">
-        <button className="w-full px-5 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-95 transition">
+        <Link to="/enter" search={{ redirect: undefined }} className="block w-full px-5 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-95 transition">
           ✉️ {t("signup.email")}
-        </button>
-        <button className="w-full px-5 py-3 rounded-full bg-surface-elevated border border-border font-medium hover:border-primary/50 transition">
-          {t("signup.google")}
-        </button>
-        <button className="w-full mt-2 text-sm text-muted-foreground hover:text-foreground transition">
-          {t("signup.skip")}
-        </button>
+        </Link>
       </div>
     </section>
   );
 }
-
-/* ───────────────────────── Bits ───────────────────────── */
 
 function ScoreBadge({ score, small = false }: { score: number; small?: boolean }) {
   const tier =
     score >= 800 ? "legendary" : score >= 600 ? "high" : score >= 350 ? "mid" : "low";
   const cls =
     tier === "legendary" ? "bg-score-legendary"
-    : tier === "high" ? "bg-score-high"
-    : tier === "mid" ? "bg-score-mid"
-    : "bg-score-low";
+      : tier === "high" ? "bg-score-high"
+      : tier === "mid" ? "bg-score-mid"
+      : "bg-score-low";
   return (
     <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold text-background ${cls}`}>
       {score}
