@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as EnterRouteImport } from './routes/enter'
+import { Route as CourtRouteImport } from './routes/court'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
@@ -53,6 +54,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const EnterRoute = EnterRouteImport.update({
   id: '/enter',
   path: '/enter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourtRoute = CourtRouteImport.update({
+  id: '/court',
+  path: '/court',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -241,6 +247,7 @@ const AuthenticatedMePostsPostIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -277,6 +284,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -314,6 +322,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/court'
     | '/enter'
     | '/welcome'
     | '/compose'
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/court'
     | '/enter'
     | '/welcome'
     | '/compose'
@@ -424,6 +435,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/court'
     | '/enter'
     | '/welcome'
     | '/_authenticated/compose'
@@ -462,6 +474,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  CourtRoute: typeof CourtRoute
   EnterRoute: typeof EnterRouteWithChildren
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
@@ -484,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/enter'
       fullPath: '/enter'
       preLoaderRoute: typeof EnterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/court': {
+      id: '/court'
+      path: '/court'
+      fullPath: '/court'
+      preLoaderRoute: typeof CourtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -817,6 +837,7 @@ const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  CourtRoute: CourtRoute,
   EnterRoute: EnterRouteWithChildren,
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
