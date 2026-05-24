@@ -157,7 +157,6 @@ export const getMyStreak = createServerFn({ method: "POST" })
 
 export const recordParticipation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({}).parse(i ?? {}))
   .handler(async ({ context }): Promise<StreakInfo> => {
     const { userId } = context;
     const today = todayUTC();
