@@ -12,6 +12,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
+import { PrimaryNav } from "@/components/nav/PrimaryNav";
 import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
 
@@ -60,7 +61,7 @@ function HomePage({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: 
   const { t } = useT();
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain">
-      <TopBar locale={locale} onChange={onLocaleChange} />
+      <PrimaryNav locale={locale} onLocaleChange={onLocaleChange} />
       <main className="pb-24">
         <TopTrendingWall />
         <MainCTA />
