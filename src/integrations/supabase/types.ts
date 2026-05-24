@@ -381,6 +381,24 @@ export type Database = {
           },
         ]
       }
+      post_arc_follows: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comment_reactions: {
         Row: {
           comment_id: string
@@ -561,6 +579,72 @@ export type Database = {
           },
         ]
       }
+      post_update_requests: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_updates: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          episode_number: number
+          id: string
+          kind: string
+          media_url: string | null
+          post_id: string
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          episode_number?: number
+          id?: string
+          kind?: string
+          media_url?: string | null
+          post_id: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          episode_number?: number
+          id?: string
+          kind?: string
+          media_url?: string | null
+          post_id?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_verdict_votes: {
         Row: {
           created_at: string
@@ -645,6 +729,8 @@ export type Database = {
           story_text: string
           title: string
           tone: Database["public"]["Enums"]["post_tone"]
+          update_count: number
+          update_request_count: number
           updated_at: string
           view_count: number
           visibility: string
@@ -676,6 +762,8 @@ export type Database = {
           story_text: string
           title: string
           tone?: Database["public"]["Enums"]["post_tone"]
+          update_count?: number
+          update_request_count?: number
           updated_at?: string
           view_count?: number
           visibility?: string
@@ -707,6 +795,8 @@ export type Database = {
           story_text?: string
           title?: string
           tone?: Database["public"]["Enums"]["post_tone"]
+          update_count?: number
+          update_request_count?: number
           updated_at?: string
           view_count?: number
           visibility?: string
