@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { I18nProvider, useT } from "@/lib/i18n/context";
@@ -14,7 +14,8 @@ import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
 import { supabase } from "@/integrations/supabase/client";
 import { VerdictBar } from "@/components/posts/VerdictBar";
-import { CommentThread } from "@/components/posts/CommentThread";
+import { CommentThread, type CommentThreadHandle } from "@/components/posts/CommentThread";
+import { RelatedPosts } from "@/components/posts/RelatedPosts";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
@@ -77,6 +78,8 @@ function PostPage() {
   // shared === 2 (default) means "ordinary view, no auto-popup"
   const justPublished = shared === 1;
   const [showShare, setShowShare] = useState(false);
+  const [showRelated, setShowRelated] = useState(false);
+  const commentsRef = useRef<CommentThreadHandle | null>(null);
   const recordView = useServerFn(recordPostView);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
@@ -152,7 +155,10 @@ function PostPage() {
           mediaUrl={post.media_url}
         />
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
-        <VerdictBar postId={post.id} />
+        <VerdictBar
+          postId={post.id}
+          onVoted={() => commentsRef.current?.focus("Honestly… here's what I'd do: ")}
+        />
         <ReactionsBar postId={post.id} />
         <div className="pt-2 grid grid-cols-3 gap-3">
           <button
@@ -169,8 +175,14 @@ function PostPage() {
         >
           {t("post.landingCta")}
         </Link>
-        <CommentThread postId={post.id} />
+        <CommentThread
+          ref={commentsRef}
+          postId={post.id}
+          onCommentPosted={() => setShowRelated(true)}
+        />
+        <RelatedPosts postId={post.id} autoLoad={showRelated} />
       </main>
+
 
       <AnimatePresence>
         {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}

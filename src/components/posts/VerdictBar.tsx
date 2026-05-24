@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   castVerdict,
   removeVerdict,
@@ -23,7 +23,17 @@ const LABELS: Record<VerdictKind, { emoji: string; label: string }> = {
   need_update: { emoji: "👀", label: "Need update!" },
 };
 
-export function VerdictBar({ postId }: { postId: string }) {
+function fmt(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`;
+  return `${n}`;
+}
+
+interface Props {
+  postId: string;
+  onVoted?: (kind: VerdictKind) => void;
+}
+
+export function VerdictBar({ postId, onVoted }: Props) {
   const getCounts = useServerFn(getVerdictCounts);
   const getMine = useServerFn(getMyVerdict);
   const cast = useServerFn(castVerdict);
@@ -35,6 +45,7 @@ export function VerdictBar({ postId }: { postId: string }) {
   const [mine, setMine] = useState<VerdictKind | null>(null);
   const [authed, setAuthed] = useState(false);
   const [total, setTotal] = useState(0);
+  const [showNudge, setShowNudge] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +68,6 @@ export function VerdictBar({ postId }: { postId: string }) {
   const onVote = async (kind: VerdictKind) => {
     if (!authed) { toast.message("Sign in to vote"); return; }
     const prev = mine;
-    // Optimistic
     setCounts((c) => {
       const next = { ...c };
       if (prev && prev !== kind) next[prev] = Math.max(0, next[prev] - 1);
@@ -73,40 +83,84 @@ export function VerdictBar({ postId }: { postId: string }) {
       if (prev) return t;
       return t + 1;
     });
-    setMine(prev === kind ? null : kind);
+    const nextMine = prev === kind ? null : kind;
+    setMine(nextMine);
     try {
       if (prev === kind) await remove({ data: { postId } });
       else await cast({ data: { postId, kind } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Vote failed");
+      return;
+    }
+    if (nextMine) {
+      setShowNudge(true);
+      onVoted?.(kind);
+    } else {
+      setShowNudge(false);
     }
   };
+
+  // Compute max for bar fill
+  const maxCount = Math.max(1, ...VERDICT_KINDS.map((k) => counts[k]));
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-baseline justify-between mb-3">
         <p className="text-sm font-semibold">⚖️ Your verdict?</p>
-        <span className="text-xs text-muted-foreground">{total} {total === 1 ? "vote" : "votes"}</span>
+        <span className="text-xs text-muted-foreground">{fmt(total)} {total === 1 ? "vote" : "votes"}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-1.5">
         {VERDICT_KINDS.map((k) => {
           const active = mine === k;
+          const pct = (counts[k] / maxCount) * 100;
           return (
             <motion.button
               key={k}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onVote(k)}
-              className={`px-3 py-1.5 rounded-full text-xs border transition ${
+              className={`relative w-full overflow-hidden rounded-full border text-left px-3 py-2 transition ${
                 active
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-surface-elevated border-border hover:border-primary/50"
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-surface-elevated hover:border-primary/50"
               }`}
             >
-              {LABELS[k].emoji} {LABELS[k].label} · {counts[k]}
+              <span
+                className={`absolute inset-y-0 left-0 ${
+                  active ? "bg-primary/25" : "bg-primary/10"
+                }`}
+                style={{ width: `${pct}%` }}
+              />
+              <span className="relative flex items-center justify-between text-xs">
+                <span className="font-medium">
+                  {LABELS[k].emoji} {LABELS[k].label}
+                </span>
+                <span className={`tabular-nums ${active ? "font-bold" : "text-muted-foreground"}`}>
+                  {fmt(counts[k])}
+                </span>
+              </span>
             </motion.button>
           );
         })}
       </div>
+
+      <AnimatePresence>
+        {showNudge && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/40 bg-gradient-to-r from-primary/10 to-accent/10 p-3"
+          >
+            <p className="text-xs font-semibold">Wait… what would YOU do? 👀</p>
+            <button
+              onClick={() => onVoted?.(mine!)}
+              className="shrink-0 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold"
+            >
+              💬 Drop a comment
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
