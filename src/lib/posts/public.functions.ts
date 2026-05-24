@@ -1,9 +1,35 @@
 // Public (unauthenticated) reads for published posts and profile data.
 // Uses admin client with explicit filters so RLS is irrelevant for these queries.
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 import type { PostRecord, ReactionKind } from "@/lib/posts/types";
+
+// Resolve the caller's userId from a Bearer token if present. Returns null
+// for unauthenticated callers. Never trust a client-supplied viewer id.
+async function resolveViewerId(): Promise<string | null> {
+  try {
+    const authHeader = getRequestHeader("authorization");
+    if (!authHeader?.startsWith("Bearer ")) return null;
+    const token = authHeader.slice(7);
+    if (!token) return null;
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return null;
+    const tmp = createClient<Database>(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await tmp.auth.getClaims(token);
+    if (error || !data?.claims?.sub) return null;
+    return data.claims.sub as string;
+  } catch {
+    return null;
+  }
+}
+
 
 export const getPublishedPost = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
