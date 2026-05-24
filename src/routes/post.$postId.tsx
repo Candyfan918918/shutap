@@ -12,6 +12,8 @@ import { recordPostView } from "@/lib/post-analytics.functions";
 import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
 import { supabase } from "@/integrations/supabase/client";
+import { VerdictBar } from "@/components/posts/VerdictBar";
+import { CommentThread } from "@/components/posts/CommentThread";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
@@ -149,8 +151,9 @@ function PostPage() {
           mediaUrl={post.media_url}
         />
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
+        <VerdictBar postId={post.id} />
         <ReactionsBar postId={post.id} />
-        <div className="pt-4 grid grid-cols-2 gap-3">
+        <div className="pt-2 grid grid-cols-2 gap-3">
           <button
             onClick={() => setShowShare(true)}
             className="px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
@@ -164,6 +167,7 @@ function PostPage() {
             {t("post.landingCta")}
           </Link>
         </div>
+        <CommentThread postId={post.id} />
       </main>
 
       <AnimatePresence>
