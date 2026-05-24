@@ -245,12 +245,46 @@ export type Database = {
           },
         ]
       }
+      post_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           body: string
           created_at: string
           deleted_at: string | null
+          funny_count: number
           id: string
+          like_count: number
           parent_id: string | null
           post_id: string
           status: string
@@ -261,7 +295,9 @@ export type Database = {
           body: string
           created_at?: string
           deleted_at?: string | null
+          funny_count?: number
           id?: string
+          like_count?: number
           parent_id?: string | null
           post_id: string
           status?: string
@@ -272,7 +308,9 @@ export type Database = {
           body?: string
           created_at?: string
           deleted_at?: string | null
+          funny_count?: number
           id?: string
+          like_count?: number
           parent_id?: string | null
           post_id?: string
           status?: string
@@ -1034,6 +1072,10 @@ export type Database = {
       }
     }
     Functions: {
+      _bump_comment_counter: {
+        Args: { _col: string; _comment_id: string; _delta: number }
+        Returns: undefined
+      }
       _bump_post_counter: {
         Args: { _col: string; _delta: number; _post_id: string }
         Returns: undefined
