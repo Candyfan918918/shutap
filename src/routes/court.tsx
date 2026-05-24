@@ -382,7 +382,7 @@ function StreakChip() {
       try {
         const { data: u } = await supabase.auth.getUser();
         if (!u.user || cancelled) return;
-        const r = await fetch({ data: {} });
+        const r = await fetch();
         if (!cancelled) setS(r);
       } catch { /* ignore */ }
     })();
