@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { I18nProvider, useT } from "@/lib/i18n/context";
@@ -14,7 +14,8 @@ import { buildShareIntent } from "@/lib/share/platforms";
 import { nativeShareCard, downloadShareCard, canNativeShare } from "@/lib/share/native-share";
 import { supabase } from "@/integrations/supabase/client";
 import { VerdictBar } from "@/components/posts/VerdictBar";
-import { CommentThread } from "@/components/posts/CommentThread";
+import { CommentThread, type CommentThreadHandle } from "@/components/posts/CommentThread";
+import { RelatedPosts } from "@/components/posts/RelatedPosts";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 export const Route = createFileRoute("/post/$postId")({
