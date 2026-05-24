@@ -229,6 +229,40 @@ function ReactionsBar({ postId }: { postId: string }) {
   );
 }
 
+function SaveButton({ postId }: { postId: string }) {
+  const toggle = useServerFn(toggleSavePost);
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const onClick = async () => {
+    if (busy) return;
+    setBusy(true);
+    const prev = saved;
+    setSaved(!prev);
+    try {
+      const r = await toggle({ data: { postId } });
+      setSaved(r.saved);
+    } catch (e) {
+      setSaved(prev);
+      toast.error(e instanceof Error ? e.message : "Sign in to save");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={busy}
+      className={`px-4 py-3 rounded-full font-semibold border transition ${
+        saved
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-surface-elevated border-border hover:border-primary/60"
+      }`}
+    >
+      {saved ? "🔖 Saved" : "🔖 Save"}
+    </button>
+  );
+}
+
 function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }) {
   const { t } = useT();
   const recordSh = useServerFn(recordShare);
