@@ -63,6 +63,8 @@ function Composer() {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [piiHits, setPiiHits] = useState<PiiHit[] | null>(null);
+  const [blocked, setBlocked] = useState<BlockedReason | null>(null);
+
 
   // Generate initial draft + persist
   const regen = async (nextTone: PostTone = tone) => {
