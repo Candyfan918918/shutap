@@ -223,9 +223,46 @@ export const approveAndPublish = createServerFn({ method: "POST" })
       `${current.title ?? ""}\n\n${current.story_text ?? ""}`,
     );
     if (!risk.safeToPublish) {
-      const reason = risk.reasons[0] ?? "flagged by safety classifier";
-      throw new Error(`SAFETY_BLOCK: ${reason}`);
+      // Save the content privately to post_drafts (never publicly visible).
+      const { data: savedDraft } = await supabase
+        .from("post_drafts")
+        .insert({
+          user_id: userId,
+          post_id: data.postId,
+          title: current.title ?? null,
+          story_text: current.story_text ?? null,
+          tone: (current as { tone?: string }).tone ?? null,
+          reason: risk.reasons[0] ?? "safety",
+        })
+        .select("id")
+        .single();
+
+      // Audit (no PII).
+      await supabase.from("safety_events").insert({
+        user_id: userId,
+        post_id: data.postId,
+        draft_id: savedDraft?.id ?? null,
+        reasons: risk.reasons ?? [],
+      });
+
+      // Soft-delete the public post row so it cannot leak.
+      await supabase
+        .from("posts")
+        .update({ deleted_at: new Date().toISOString(), status: "draft" })
+        .eq("id", data.postId)
+        .eq("author_id", userId);
+
+      // Structured error the UI parses to show the interstitial.
+      throw new Error(
+        `SAFETY_BLOCK:${JSON.stringify({
+          reasons: risk.reasons ?? [],
+          draftId: savedDraft?.id ?? null,
+          abuseRisk: risk.abuseRisk,
+          selfHarmRisk: risk.selfHarmRisk,
+        })}`,
+      );
     }
+
 
     const { error: updErr, data: published } = await supabase
       .from("posts")
