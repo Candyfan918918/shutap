@@ -62,7 +62,7 @@ function ProfilePage() {
 
   const profileQuery = useQuery({
     queryKey: ["profile", handle, viewerId],
-    queryFn: () => fetchProfile({ data: { handle, viewerId } }),
+    queryFn: () => fetchProfile({ data: { handle } }),
   });
 
   const profile = profileQuery.data;
