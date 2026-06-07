@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { FeedItem } from "@/lib/posts/feed.functions";
 import { CountdownChip } from "@/components/court/CountdownChip";
+import { AnonymityGuarantee } from "@/components/identity/AnonymityGuarantee";
 
 export interface CourtRibbon {
   caseId: string;
