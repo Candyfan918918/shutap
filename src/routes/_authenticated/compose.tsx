@@ -166,6 +166,11 @@ function Composer() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
+      <BlockedContentInterstitial
+        open={!!blocked}
+        onEdit={() => setBlocked(null)}
+      />
+
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/75 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate({ to: "/" })} className="text-sm text-muted-foreground">
