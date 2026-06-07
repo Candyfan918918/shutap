@@ -463,15 +463,8 @@ function SoftSignup() {
 }
 
 function ScoreBadge({ score, small = false }: { score: number; small?: boolean }) {
-  const tier =
-    score >= 800 ? "legendary" : score >= 600 ? "high" : score >= 350 ? "mid" : "low";
-  const cls =
-    tier === "legendary" ? "bg-score-legendary"
-      : tier === "high" ? "bg-score-high"
-      : tier === "mid" ? "bg-score-mid"
-      : "bg-score-low";
   return (
-    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold text-background ${cls}`}>
+    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold bg-primary text-primary-foreground`}>
       {score}
     </div>
   );

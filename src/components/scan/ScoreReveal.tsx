@@ -35,45 +35,29 @@ export function ScoreReveal({
   const band = bandForScore(result.totalScore);
   const labels = locale === "zh" ? SUBSCORE_LABELS_ZH : SUBSCORE_LABELS_EN;
 
-  const gradient =
-    band.key === "legendary"
-      ? "from-[oklch(0.55_0.22_300)] via-[oklch(0.5_0.22_350)] to-[oklch(0.55_0.22_25)]"
-      : band.key === "courtroom"
-      ? "from-[oklch(0.55_0.22_25)] to-[oklch(0.5_0.2_340)]"
-      : band.key === "netflix"
-      ? "from-[oklch(0.55_0.2_25)] to-[oklch(0.5_0.2_50)]"
-      : band.key === "snacks_therapy"
-      ? "from-[oklch(0.6_0.18_60)] to-[oklch(0.55_0.18_30)]"
-      : band.key === "functional"
-      ? "from-[oklch(0.55_0.16_200)] to-[oklch(0.5_0.15_280)]"
-      : "from-[oklch(0.65_0.15_160)] to-[oklch(0.55_0.15_200)]";
-
   const display = useCountUp(result.totalScore, 1600);
 
   return (
     <div className="space-y-6">
-      <div
-        className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} text-white p-8 shadow-2xl`}
-      >
-        <div className="absolute inset-0 bg-black/20" />
+      <div className="relative overflow-hidden rounded-3xl bg-surface border border-border p-8 shadow-sm">
         <div className="relative text-center">
-          <div className="text-xs uppercase tracking-[0.3em] opacity-80">
+          <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             {locale === "zh" ? "关系狗血指数™" : "Relationship Chaos Score™"}
           </div>
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 16, delay: 0.1 }}
-            className="text-8xl sm:text-9xl font-black tabular-nums leading-none mt-3 drop-shadow-2xl"
+            className="text-8xl sm:text-9xl font-black tabular-nums leading-none mt-3 text-primary"
           >
             {display}
           </motion.div>
-          <div className="text-sm opacity-80 mt-1">/ 1000</div>
+          <div className="text-sm text-muted-foreground mt-1">/ 1000</div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0 }}
-            className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur text-base font-bold"
+            className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-tag-peach text-tag-peach-foreground text-base font-bold"
           >
             <span>{band.emoji}</span>
             <span>{result.category}</span>
@@ -82,7 +66,7 @@ export function ScoreReveal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4 }}
-            className="mt-4 text-base opacity-95 italic max-w-sm mx-auto text-balance"
+            className="font-display mt-4 text-xl leading-snug max-w-sm mx-auto text-balance text-foreground"
           >
             "{band.commentary}"
           </motion.p>
@@ -90,14 +74,14 @@ export function ScoreReveal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.6 }}
-            className="mt-3 text-xs opacity-80"
+            className="mt-3 text-xs text-muted-foreground"
           >
             Higher than{" "}
-            <span className="font-bold tabular-nums">{result.percentile}%</span> of
+            <span className="font-bold tabular-nums text-foreground">{result.percentile}%</span> of
             relationships we've scanned
           </motion.div>
           {(displayName || cityLabel) && (
-            <div className="mt-4 text-xs opacity-70">
+            <div className="mt-4 text-xs text-muted-foreground">
               {cityLabel ? `${cityLabel} · ` : ""}
               {displayName ?? ""}
             </div>
@@ -129,15 +113,8 @@ export function ScoreReveal({
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(pct, 100)}%` }}
                   transition={{ delay: 1.8, duration: 0.8, ease: "easeOut" }}
-                  className={`h-full ${
-                    isBonus
-                      ? "bg-gradient-to-r from-pink-400 to-rose-400"
-                      : pct >= 70
-                      ? "bg-gradient-to-r from-red-500 to-orange-500"
-                      : pct >= 40
-                      ? "bg-gradient-to-r from-orange-400 to-yellow-400"
-                      : "bg-gradient-to-r from-emerald-400 to-teal-400"
-                  }`}
+                  className={`h-full ${isBonus ? "bg-tag-pink-foreground/80" : "bg-primary"}`}
+                  style={{ opacity: isBonus ? 1 : Math.max(0.45, Math.min(1, pct / 100 + 0.4)) }}
                 />
               </div>
             </div>
