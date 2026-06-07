@@ -183,6 +183,9 @@ function Composer() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+        <div className="flex justify-center">
+          <AnonymityGuarantee variant="pill" />
+        </div>
         <p className="text-sm text-muted-foreground text-center">{t("post.composer.sub")}</p>
 
         {loading || !draft ? (
