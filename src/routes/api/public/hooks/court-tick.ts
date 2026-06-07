@@ -6,7 +6,14 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export const Route = createFileRoute("/api/public/hooks/court-tick")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        // Shared-secret check: this endpoint mutates admin state, so any
+        // unauthenticated caller would otherwise be able to drive the court lifecycle.
+        const expected = process.env.COURT_HOOK_SECRET;
+        if (!expected) return new Response("Server misconfigured", { status: 500 });
+        const provided = request.headers.get("x-hook-secret");
+        if (provided !== expected) return new Response("Forbidden", { status: 403 });
+
         const regions: Array<{ scope: "world" | "country"; code: string; label: string }> = [
           { scope: "world", code: "WORLD", label: "World" },
           { scope: "country", code: "US", label: "🇺🇸 US" },
