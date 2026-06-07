@@ -777,6 +777,7 @@ export type Database = {
           like_count: number
           locale: string
           media_url: string | null
+          pii_removed: boolean
           platform_captions: Json
           published_at: string | null
           save_count: number
@@ -810,6 +811,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          pii_removed?: boolean
           platform_captions?: Json
           published_at?: string | null
           save_count?: number
@@ -843,6 +845,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          pii_removed?: boolean
           platform_captions?: Json
           published_at?: string | null
           save_count?: number
