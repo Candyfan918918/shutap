@@ -41,8 +41,25 @@ export const getPublishedPost = createServerFn({ method: "GET" })
       .select("*")
       .eq("id", data.postId)
       .eq("status", "published")
+      .is("deleted_at", null)
       .maybeSingle();
-    return { post: (row as unknown as PostRecord) ?? null };
+    if (!row) return { post: null };
+    const r = row as Record<string, unknown>;
+    const visibility = r.visibility as string;
+    const authorId = r.author_id as string;
+    if (visibility === "public") return { post: row as unknown as PostRecord };
+    // Non-public: require authenticated viewer who is author or a friend.
+    const viewerId = await resolveViewerId();
+    if (!viewerId) return { post: null };
+    if (viewerId === authorId) return { post: row as unknown as PostRecord };
+    if (visibility === "friends") {
+      const { data: friend } = await supabaseAdmin.rpc("is_friend", {
+        _a: viewerId,
+        _b: authorId,
+      });
+      if (friend === true) return { post: row as unknown as PostRecord };
+    }
+    return { post: null };
   });
 
 export const getPostReactionCounts = createServerFn({ method: "GET" })
