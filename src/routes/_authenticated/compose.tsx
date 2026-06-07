@@ -136,10 +136,19 @@ function Composer() {
       }
       navigate({ to: "/post/$postId", params: { postId }, search: { shared: 0 } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Publish failed");
+      const block = parseSafetyBlock(e);
+      if (block) {
+        // Public post row was already soft-deleted server-side; clear local postId
+        // so an Edit click starts a fresh draft with the existing text restored below.
+        setPostId(null);
+        setBlocked(block);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Publish failed");
+      }
     } finally {
       setPublishing(false);
     }
+
   };
 
   const onApprove = () => {
