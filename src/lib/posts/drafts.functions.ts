@@ -174,9 +174,22 @@ export const updateDraftPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const patch: Record<string, unknown> = { ...data.patch };
+    let piiRemoved = false;
+    if (typeof patch.title === "string") {
+      const s = scrubPII(patch.title);
+      patch.title = s.text;
+      piiRemoved = piiRemoved || s.piiRemoved;
+    }
+    if (typeof patch.story_text === "string") {
+      const s = scrubPII(patch.story_text);
+      patch.story_text = s.text;
+      piiRemoved = piiRemoved || s.piiRemoved;
+    }
+    if (piiRemoved) patch.pii_removed = true;
     const { error, data: row } = await supabase
       .from("posts")
-      .update(data.patch)
+      .update(patch)
       .eq("id", data.postId)
       .eq("author_id", userId)
       .select("*")
