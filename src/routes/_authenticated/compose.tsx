@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { ScoreCard } from "@/components/post-engine/ScoreCard";
+import { AnonymityGuarantee } from "@/components/identity/AnonymityGuarantee";
 import {
   generateStoryDraft,
   createDraftPost,
@@ -182,6 +183,9 @@ function Composer() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+        <div className="flex justify-center">
+          <AnonymityGuarantee variant="pill" />
+        </div>
         <p className="text-sm text-muted-foreground text-center">{t("post.composer.sub")}</p>
 
         {loading || !draft ? (

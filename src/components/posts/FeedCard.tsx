@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { FeedItem } from "@/lib/posts/feed.functions";
 import { CountdownChip } from "@/components/court/CountdownChip";
+import { AnonymityGuarantee } from "@/components/identity/AnonymityGuarantee";
 
 export interface CourtRibbon {
   caseId: string;
@@ -78,6 +79,7 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
           <p className="font-display text-base leading-snug line-clamp-2">{item.title}</p>
           <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">
+              <AnonymityGuarantee variant="tooltip" />
               <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
               <span className="truncate">{item.author?.nickname ?? item.author?.handle ?? "anon"}</span>
             </div>
