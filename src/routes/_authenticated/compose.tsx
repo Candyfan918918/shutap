@@ -16,6 +16,12 @@ import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 import { scanPii, type PiiHit } from "@/lib/pii";
 import { AnimatePresence } from "framer-motion";
+import {
+  BlockedContentInterstitial,
+  parseSafetyBlock,
+  type BlockedReason,
+} from "@/lib/safety/blocked-content";
+
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
