@@ -13,9 +13,9 @@ export const SHARE_CARD_DIMENSIONS: Record<ShareCardFormat, { w: number; h: numb
 
 type Tier = ReturnType<typeof scoreTier>;
 
-// One calm cream → peach gradient for every tier. Coral does the talking.
-const CARD_GRADIENT: [string, string] = ["#FFFDF9", "#FFE9D6"];
-const CORAL = "#E8602A";
+// One calm cream → soft pink gradient for every tier. Baby pink does the talking.
+const CARD_GRADIENT: [string, string] = ["#FFFDF9", "#FFE8EC"];
+const BABY_PINK = "#E89BA8";
 const INK = "#1A1410";
 const INK_SOFT = "rgba(26,20,16,0.6)";
 // Kept for type compatibility; unused at runtime.
@@ -116,9 +116,9 @@ export function buildShareCardSVG(input: ShareCardInput): string {
         <g>
           <rect x="${badgeX}" y="${badgeY}" rx="${badgeH / 2}" ry="${badgeH / 2}"
                 width="${approxW}" height="${badgeH}"
-                fill="rgba(232,96,42,0.10)" stroke="rgba(232,96,42,0.35)" stroke-width="1.5"/>
+                fill="rgba(232,155,168,0.10)" stroke="rgba(232,155,168,0.35)" stroke-width="1.5"/>
           <text x="${badgeX + badgePadX}" y="${badgeY + badgeFont + badgePadY * 0.55}"
-                font-size="${badgeFont}" font-weight="600" fill="${CORAL}" font-family="${BODY_FONT}">${txt}</text>
+                font-size="${badgeFont}" font-weight="600" fill="${BABY_PINK}" font-family="${BODY_FONT}">${txt}</text>
         </g>`;
       badgeX += approxW + Math.round(badgeFont * 0.6);
       return node;
@@ -144,7 +144,7 @@ export function buildShareCardSVG(input: ShareCardInput): string {
   </text>
 
   <text x="${w / 2}" y="${scoreCenterY}" text-anchor="middle" font-size="${scoreSize}"
-        font-weight="900" fill="${CORAL}" font-family="${BODY_FONT}">${input.score}</text>
+        font-weight="900" fill="${BABY_PINK}" font-family="${BODY_FONT}">${input.score}</text>
   <text x="${w / 2}" y="${scoreCenterY + Math.round(scoreSize * 0.18)}" text-anchor="middle"
         font-size="${labelSize}" fill="${INK_SOFT}" font-family="${BODY_FONT}">/ 1000</text>
 
@@ -154,9 +154,9 @@ export function buildShareCardSVG(input: ShareCardInput): string {
           width="${Math.round(input.category.length * catSize * 0.84) + catSize}"
           height="${Math.round(catSize * 1.6)}"
           rx="${Math.round(catSize * 0.9)}"
-          fill="rgba(232,96,42,0.14)" stroke="rgba(232,96,42,0.35)" stroke-width="1.5"/>
+          fill="rgba(232,155,168,0.14)" stroke="rgba(232,155,168,0.35)" stroke-width="1.5"/>
     <text x="${w / 2}" y="${catY}" text-anchor="middle" font-size="${catSize}" font-weight="600"
-          fill="${CORAL}" font-family="${BODY_FONT}">${escapeXml(input.category)}</text>
+          fill="${BABY_PINK}" font-family="${BODY_FONT}">${escapeXml(input.category)}</text>
   </g>
 
   ${titleSvg}

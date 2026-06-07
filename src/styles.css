@@ -6,7 +6,7 @@
 
 /*
  * Shutap — Warm Light Reading Surface
- * Light-first. One coral accent. Soft pastel category tags. Calm everywhere.
+ * Light-first. Baby pink + baby blue tones. Soft pastel category tags. Calm everywhere.
  * All colors in oklch. Never hardcode hex in components.
  */
 
@@ -79,32 +79,33 @@
   --popover: oklch(1 0.003 80);
   --popover-foreground: oklch(0.22 0.01 60);
 
-  /* One coral accent — #E8602A-ish */
-  --primary: oklch(0.66 0.18 40);
+  /* Baby pink primary */
+  --primary: oklch(0.72 0.14 15);
   --primary-foreground: oklch(0.99 0.005 80);
 
-  --secondary: oklch(0.94 0.012 75);
+  /* Baby blue secondary */
+  --secondary: oklch(0.88 0.06 245);
   --secondary-foreground: oklch(0.22 0.01 60);
   --muted: oklch(0.94 0.012 75);
   --muted-foreground: oklch(0.5 0.015 60);
 
-  /* Accent === primary family so legacy uses stay calm */
-  --accent: oklch(0.7 0.16 45);
-  --accent-foreground: oklch(0.99 0.005 80);
+  /* Accent = baby blue for calm contrast */
+  --accent: oklch(0.84 0.07 245);
+  --accent-foreground: oklch(0.22 0.01 60);
 
-  /* Calm rust, only for true destructive actions */
-  --destructive: oklch(0.58 0.16 30);
+  /* Calm dusty rose for destructive — stays in pink family, no orange */
+  --destructive: oklch(0.58 0.12 15);
   --destructive-foreground: oklch(0.99 0.005 80);
 
   --border: oklch(0.22 0.01 60 / 12%);
   --input: oklch(0.22 0.01 60 / 14%);
-  --ring: oklch(0.66 0.18 40);
+  --ring: oklch(0.72 0.14 15);
 
-  /* Soft pastel category tags */
-  --tag-pink: oklch(0.93 0.04 20);
-  --tag-pink-foreground: oklch(0.45 0.12 25);
-  --tag-peach: oklch(0.94 0.05 60);
-  --tag-peach-foreground: oklch(0.48 0.13 45);
+  /* Soft pastel category tags — pink & blue family */
+  --tag-pink: oklch(0.93 0.04 15);
+  --tag-pink-foreground: oklch(0.45 0.12 15);
+  --tag-peach: oklch(0.92 0.05 245);
+  --tag-peach-foreground: oklch(0.42 0.1 245);
   --tag-sand: oklch(0.94 0.04 85);
   --tag-sand-foreground: oklch(0.45 0.08 70);
   --tag-sage: oklch(0.93 0.03 150);
@@ -114,11 +115,11 @@
   --tag-lilac: oklch(0.93 0.04 300);
   --tag-lilac-foreground: oklch(0.45 0.12 300);
 
-  --chart-1: oklch(0.66 0.18 40);
-  --chart-2: oklch(0.7 0.16 45);
-  --chart-3: oklch(0.6 0.13 300);
-  --chart-4: oklch(0.65 0.11 200);
-  --chart-5: oklch(0.7 0.12 150);
+  --chart-1: oklch(0.72 0.14 15);
+  --chart-2: oklch(0.84 0.07 245);
+  --chart-3: oklch(0.78 0.08 15);
+  --chart-4: oklch(0.82 0.06 245);
+  --chart-5: oklch(0.75 0.1 15);
 }
 
 @layer base {
@@ -142,10 +143,10 @@
 }
 
 @utility bg-grain {
-  /* Soft warm paper texture — no doom-scroll glow */
+  /* Soft pink + blue paper texture — no doom-scroll glow */
   background-image:
-    radial-gradient(circle at 15% 0%, oklch(0.94 0.05 60 / 0.5), transparent 55%),
-    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 20 / 0.35), transparent 50%);
+    radial-gradient(circle at 15% 0%, oklch(0.92 0.05 245 / 0.4), transparent 55%),
+    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 15 / 0.35), transparent 50%);
 }
 
 @layer utilities {
