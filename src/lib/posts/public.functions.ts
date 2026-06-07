@@ -142,6 +142,9 @@ export interface ChaosHistoryRow {
 export const getChaosHistory = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) => z.object({ userId: z.string().uuid() }).parse(i))
   .handler(async ({ data }): Promise<ChaosHistoryRow[]> => {
+    // Scan history is private. Only the owner (verified via Bearer token) can read it.
+    const viewerId = await resolveViewerId();
+    if (!viewerId || viewerId !== data.userId) return [];
     const { data: rows, error } = await supabaseAdmin
       .from("scan_results")
       .select("id, score, category, completed_at, post_id")
