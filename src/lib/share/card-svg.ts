@@ -116,9 +116,9 @@ export function buildShareCardSVG(input: ShareCardInput): string {
         <g>
           <rect x="${badgeX}" y="${badgeY}" rx="${badgeH / 2}" ry="${badgeH / 2}"
                 width="${approxW}" height="${badgeH}"
-                fill="rgba(232,96,42,0.10)" stroke="rgba(232,96,42,0.35)" stroke-width="1.5"/>
+                fill="rgba(232,155,168,0.10)" stroke="rgba(232,155,168,0.35)" stroke-width="1.5"/>
           <text x="${badgeX + badgePadX}" y="${badgeY + badgeFont + badgePadY * 0.55}"
-                font-size="${badgeFont}" font-weight="600" fill="${CORAL}" font-family="${BODY_FONT}">${txt}</text>
+                font-size="${badgeFont}" font-weight="600" fill="${BABY_PINK}" font-family="${BODY_FONT}">${txt}</text>
         </g>`;
       badgeX += approxW + Math.round(badgeFont * 0.6);
       return node;
