@@ -72,7 +72,7 @@ const PROFILE_COLS =
 // ---------- public profile by handle ----------
 export const getProfileByHandle = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
-    z.object({ handle: HandleSchema, viewerId: z.string().uuid().nullable().optional() }).parse(input),
+    z.object({ handle: HandleSchema }).parse(input),
   )
   .handler(async ({ data }): Promise<PublicProfile | null> => {
     const { data: row, error } = await supabaseAdmin
@@ -83,7 +83,8 @@ export const getProfileByHandle = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!row) return null;
 
-    const viewerId = data.viewerId ?? null;
+    // Derive viewer from the Bearer token — never trust client input.
+    const viewerId = await resolveViewerId();
     return await hydrateProfile(row as Record<string, unknown>, viewerId);
   });
 
