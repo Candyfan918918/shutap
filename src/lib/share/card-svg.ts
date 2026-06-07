@@ -13,9 +13,9 @@ export const SHARE_CARD_DIMENSIONS: Record<ShareCardFormat, { w: number; h: numb
 
 type Tier = ReturnType<typeof scoreTier>;
 
-// One calm cream → peach gradient for every tier. Coral does the talking.
-const CARD_GRADIENT: [string, string] = ["#FFFDF9", "#FFE9D6"];
-const CORAL = "#E8602A";
+// One calm cream → soft pink gradient for every tier. Baby pink does the talking.
+const CARD_GRADIENT: [string, string] = ["#FFFDF9", "#FFE8EC"];
+const BABY_PINK = "#E89BA8";
 const INK = "#1A1410";
 const INK_SOFT = "rgba(26,20,16,0.6)";
 // Kept for type compatibility; unused at runtime.
