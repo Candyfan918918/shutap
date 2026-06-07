@@ -189,7 +189,7 @@ export const updateDraftPost = createServerFn({ method: "POST" })
     if (piiRemoved) patch.pii_removed = true;
     const { error, data: row } = await supabase
       .from("posts")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.postId)
       .eq("author_id", userId)
       .select("*")
