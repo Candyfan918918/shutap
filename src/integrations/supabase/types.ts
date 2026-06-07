@@ -550,6 +550,42 @@ export type Database = {
           },
         ]
       }
+      post_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string | null
+          reason: string | null
+          story_text: string | null
+          title: string | null
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string | null
+          story_text?: string | null
+          title?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          reason?: string | null
+          story_text?: string | null
+          title?: string | null
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_forwards: {
         Row: {
           channel: string
@@ -999,6 +1035,33 @@ export type Database = {
           region?: string | null
           updated_at?: string
           vibe?: string | null
+        }
+        Relationships: []
+      }
+      safety_events: {
+        Row: {
+          created_at: string
+          draft_id: string | null
+          id: string
+          post_id: string | null
+          reasons: string[]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          draft_id?: string | null
+          id?: string
+          post_id?: string | null
+          reasons?: string[]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          draft_id?: string | null
+          id?: string
+          post_id?: string | null
+          reasons?: string[]
+          user_id?: string
         }
         Relationships: []
       }
