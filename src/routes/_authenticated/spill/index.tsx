@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { AnonymityGuarantee } from "@/components/identity/AnonymityGuarantee";
 
 export const Route = createFileRoute("/_authenticated/spill/")({
   component: SpillLanding,
