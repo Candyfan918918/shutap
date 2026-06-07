@@ -16,6 +16,12 @@ import { linkScanToPost } from "@/lib/scan.functions";
 import { scoreCategoryLabel, type DraftPayload, type PostTone } from "@/lib/posts/types";
 import { scanPii, type PiiHit } from "@/lib/pii";
 import { AnimatePresence } from "framer-motion";
+import {
+  BlockedContentInterstitial,
+  parseSafetyBlock,
+  type BlockedReason,
+} from "@/lib/safety/blocked-content";
+
 
 export const Route = createFileRoute("/_authenticated/compose")({
   component: ComposeShell,
@@ -57,6 +63,8 @@ function Composer() {
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [piiHits, setPiiHits] = useState<PiiHit[] | null>(null);
+  const [blocked, setBlocked] = useState<BlockedReason | null>(null);
+
 
   // Generate initial draft + persist
   const regen = async (nextTone: PostTone = tone) => {
@@ -128,10 +136,19 @@ function Composer() {
       }
       navigate({ to: "/post/$postId", params: { postId }, search: { shared: 0 } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Publish failed");
+      const block = parseSafetyBlock(e);
+      if (block) {
+        // Public post row was already soft-deleted server-side; clear local postId
+        // so an Edit click starts a fresh draft with the existing text restored below.
+        setPostId(null);
+        setBlocked(block);
+      } else {
+        toast.error(e instanceof Error ? e.message : "Publish failed");
+      }
     } finally {
       setPublishing(false);
     }
+
   };
 
   const onApprove = () => {
@@ -149,6 +166,11 @@ function Composer() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
+      <BlockedContentInterstitial
+        open={!!blocked}
+        onEdit={() => setBlocked(null)}
+      />
+
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/75 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate({ to: "/" })} className="text-sm text-muted-foreground">
