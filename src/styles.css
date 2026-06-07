@@ -143,10 +143,10 @@
 }
 
 @utility bg-grain {
-  /* Soft warm paper texture — no doom-scroll glow */
+  /* Soft pink + blue paper texture — no doom-scroll glow */
   background-image:
-    radial-gradient(circle at 15% 0%, oklch(0.94 0.05 60 / 0.5), transparent 55%),
-    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 20 / 0.35), transparent 50%);
+    radial-gradient(circle at 15% 0%, oklch(0.92 0.05 245 / 0.4), transparent 55%),
+    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 15 / 0.35), transparent 50%);
 }
 
 @layer utilities {
