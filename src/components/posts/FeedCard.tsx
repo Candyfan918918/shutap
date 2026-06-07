@@ -17,15 +17,8 @@ function fmt(n: number) {
 }
 
 function ScoreBadge({ score, small = false }: { score: number; small?: boolean }) {
-  const tier =
-    score >= 800 ? "legendary" : score >= 600 ? "high" : score >= 350 ? "mid" : "low";
-  const cls =
-    tier === "legendary" ? "bg-score-legendary"
-      : tier === "high" ? "bg-score-high"
-      : tier === "mid" ? "bg-score-mid"
-      : "bg-score-low";
   return (
-    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold text-background ${cls}`}>
+    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold bg-primary text-primary-foreground`}>
       {score}
     </div>
   );
@@ -52,12 +45,9 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
               loading="lazy"
             />
           ) : (
-            <>
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_10%,oklch(0.62_0.22_25/_0.5),transparent_60%)]" />
-              <p className="relative text-base sm:text-lg font-medium leading-snug text-balance text-center line-clamp-6">
-                "{item.storyText}"
-              </p>
-            </>
+            <p className="relative font-display text-lg sm:text-xl leading-snug text-balance text-center line-clamp-6 text-foreground/85">
+              "{item.storyText}"
+            </p>
           )}
           {item.score != null && (
             <div className="absolute top-2 right-2"><ScoreBadge score={item.score} small /></div>
@@ -85,7 +75,7 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
               {court.closesAt && <CountdownChip to={court.closesAt} prefix="Judgment in" />}
             </div>
           )}
-          <p className="text-sm font-semibold leading-snug line-clamp-2">{item.title}</p>
+          <p className="font-display text-base leading-snug line-clamp-2">{item.title}</p>
           <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />

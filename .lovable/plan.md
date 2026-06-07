@@ -1,154 +1,101 @@
-# Refactor: Daily Court → 👑 Relationship Court™
 
-Turn the static daily case into a **live, regional, event-based** community system with countdowns, honor badges, and shareable milestones.
+# Light, Warm, Calm — Design System Overhaul
 
-## Scope
+Flip Shutap from dark doom-scroll to warm-light reading surface. One coral accent, soft pastel category tags, serif headlines, calm everywhere.
 
-Rename + restructure the existing `/court` route, add region scoping, multi-case selection, countdowns, lifecycle statuses, author notifications, honor-board badges on profiles, and milestone share cards.
+## 1. Token rewrite (`src/styles.css`)
 
-## 1. Data model (migration)
+Replace the current dark-first token set. All values in `oklch` (no hex in components), but converted from the targets you gave:
 
-Replace single-row-per-day `daily_cases` with a richer `court_cases` table that supports multiple concurrent cases across regions and tracks lifecycle.
+- `--background`: warm white `#FFFDF9` → `oklch(0.99 0.005 80)`
+- `--foreground`: near-black ink `oklch(0.22 0.01 60)` (warm, not pure black)
+- `--surface`: `oklch(0.975 0.008 75)` (card on bg)
+- `--surface-elevated`: `oklch(0.96 0.01 75)`
+- `--border`: `oklch(0.22 0.01 60 / 10%)`
+- `--muted-foreground`: `oklch(0.5 0.015 60)`
 
-```text
-court_cases
-  id, post_id, scope ('city' | 'country' | 'world'),
-  region_code (e.g. 'US', 'JP', 'US-CA-SF', 'WORLD'),
-  region_label, status ('nominated' | 'in_court' | 'judgment_pending' | 'decided' | 'legendary'),
-  nominated_at, opens_at, closes_at, decided_at,
-  final_verdict (text), ai_summary (text),
-  controversy_score, engagement_score, created_at, updated_at
+Single action color (coral `#E8602A`):
+- `--primary`: `oklch(0.66 0.18 40)`
+- `--primary-foreground`: `oklch(0.99 0.005 80)`
+- `--primary-glow`: removed (no glow on light)
+- `--ring`: same as primary
+- `--destructive`: keep but desaturate to a calm rust `oklch(0.58 0.14 35)` — used only for true destructive actions (delete), never as ambient brand color
 
-court_case_badges  (honor board entries)
-  id, post_id, author_id, case_id, badge_kind
-  ('court_featured' | 'world_court' | 'viral_case' | 'public_debate' |
-   'final_verdict_run' | 'final_verdict_red_flag' | ...),
-  region_label, earned_at, pinned (bool)
+Kill these tokens entirely (and any utilities that reference them):
+- `--score-low/-mid/-high/-legendary` gradient stops
+- `.ring-danger`, `.gradient-score`, `.bg-grain` (replace grain with a much softer paper texture or drop)
+- `--primary-glow` references in components
 
-court_notifications  (uses existing notifications table; new `kind`s:
-  'court_nominated', 'court_entered', 'court_trending',
-  'court_world', 'court_countdown', 'court_verdict')
-```
+Category accent palette — soft pastel fills used by tags/badges only (low chroma, high lightness):
+- `--tag-pink`: `oklch(0.93 0.04 20)` fg `oklch(0.45 0.12 25)`
+- `--tag-peach`: `oklch(0.94 0.05 60)` fg `oklch(0.48 0.13 45)`
+- `--tag-sand`: `oklch(0.94 0.04 85)` fg `oklch(0.45 0.08 70)`
+- `--tag-sage`: `oklch(0.93 0.03 150)` fg `oklch(0.42 0.08 150)`
+- `--tag-sky`: `oklch(0.93 0.035 230)` fg `oklch(0.45 0.1 240)`
+- `--tag-lilac`: `oklch(0.93 0.04 300)` fg `oklch(0.45 0.12 300)`
 
-Keep `daily_cases` table around (read-only) for backwards compatibility; new code reads from `court_cases`.
+Score tiers no longer drive color. Tier is communicated through copy + a single coral progress fill (intensity via opacity/width, not hue).
 
-RLS: `court_cases` and `court_case_badges` are publicly readable; writes only via SECURITY DEFINER functions called from server fns.
+Dark mode: drop `.dark` overrides for now (app is light-first). Keep `color-scheme: light` on `html`.
 
-DB functions:
-- `nominate_court_cases(_scope, _region, _now)` — picks top trending posts in a region using `comments*3 + likes*2 + shares*2 + saves + views/10 + controversy_bonus` and inserts as `nominated`. Idempotent.
-- `promote_court_cases(_now)` — moves `nominated` → `in_court` after threshold, sets `closes_at = now + 24h`.
-- `finalize_court_cases(_now)` — for any `in_court` past `closes_at`: tallies `post_verdict_votes`, sets `final_verdict`, generates ai_summary template, status → `decided`, awards badges, inserts notifications. Marks top global cases `legendary`.
+## 2. Typography
 
-## 2. Region detection
+Load via `<link>` in `src/routes/__root.tsx` head() — never `@import` URLs in CSS:
+- DM Serif Display (400)
+- DM Sans (400, 500, 600, 700)
 
-- Server fn `getViewerRegion()` reads `request-cf-ipcountry` / `x-vercel-ip-country` headers (workerd exposes `cf-ipcountry`); fallback to `WORLD`.
-- City scope only when the post's `posts` row has `city`/`country` (already on profiles, propagate from author at publish time — small server-fn helper).
-- User can switch tab: Near You / Country / Worldwide.
+In `@theme`:
+- `--font-display: "DM Serif Display", Georgia, serif;`
+- `--font-body: "DM Sans", system-ui, sans-serif;`
 
-## 3. Server functions (`src/lib/court.functions.ts` — rewrite)
+Add a `.font-display` utility and apply it to:
+- Story titles in `FeedCard`, `PostRow`, `post.$postId` hero
+- ScoreCard headline title (the "story quote" line)
+- Section headers on `/court`, `/me`, `/u/$handle`
+- ScoreReveal big number stays sans (tabular numerals look better in DM Sans)
 
-- `getViewerRegion()` → `{ country, city, label }`
-- `listCourtCases({ scope, region, status? })` → cases + post snippets + vote tallies + time-left
-- `getCourtCase({ caseId })` → full case + post + verdict counts + hot comments + countdown
-- `castCourtVerdict({ caseId, kind })` → wraps existing `castVerdict`, also records `recordParticipation` for streaks
-- `getAuthorCourtStatus()` → cases where viewer is author, with status + countdown + share assets
-- `getHonorBoard({ userId })` → badges for a profile (pinned first)
-- `togglePinBadge({ badgeId })` → author-only
+Body everywhere uses DM Sans. Bump base line-height to `1.6` for story bodies.
 
-Public scheduling endpoint (NEW): `src/routes/api/public/hooks/court-tick.ts`
-- POST with `apikey` header (anon key)
-- Calls `nominate_court_cases` for each active region + `WORLD`, then `promote_court_cases` + `finalize_court_cases`.
-- Scheduled via `pg_cron` every 15 minutes.
+## 3. ScoreCard & share-card recolor
 
-## 4. UI
+`src/components/post-engine/ScoreCard.tsx`:
+- Drop the 5-tier gradient. Single card style: warm cream background `oklch(0.97 0.015 75)`, coral score number, ink-black title in DM Serif Display, pastel badge chips.
+- Remove the dark overlay on media; instead a soft white scrim `bg-white/60`.
 
-Rename route `/court` → keep the URL (no breaking links), update branding to **👑 Relationship Court™ — Where the internet decides.**
+`src/lib/share/card-svg.ts`:
+- Replace `TIER_GRADIENTS` with one shared cream→peach gradient (`#FFFDF9` → `#FFE9D6`) and coral accent.
+- Score number in coral `#E8602A`; title in `#1A1410` DM Serif Display.
+- Update `FONT_FAMILY` to include `"DM Serif Display"` for title text and `"DM Sans"` for the rest.
 
-New layout:
-```text
-/court
-├── Header: 👑 Relationship Court™ + tagline + streak chip
-├── Tabs: [Near You] [Country] [Worldwide]
-├── Featured "In Court" case (large card + countdown + verdict bar)
-├── Section: ⏳ Judgment Pending (grid)
-├── Section: 👀 Nominated (smaller cards)
-└── Section: 👑 Final Decisions (recent decided cases w/ verdicts)
-```
+## 4. Component sweep
 
-New components:
-- `src/components/court/CountdownChip.tsx` — live `mm:ss` / `Xh Ym` ticker
-- `src/components/court/CourtCaseCard.tsx` — cover, headline, region flag, status pill, countdown, verdict mini-bar
-- `src/components/court/CourtTabs.tsx` — scope switcher
-- `src/components/court/HonorBadge.tsx` — trophy chip used in profile + author status
-- `src/components/court/MilestoneShareCard.tsx` — generates a sharable canvas/og card for each milestone
-- `src/components/court/AuthorCourtStatus.tsx` — on `/me`, shows author's active cases
+Targeted edits, no behavioral changes:
+- `FeedCard.tsx`, `PostRow.tsx`, `StoryArc.tsx`, `CourtCaseCard.tsx`, `CountdownChip.tsx`, `VerdictBar.tsx`, `ScoreReveal.tsx`, `ProfileHeader.tsx`, `PrimaryNav.tsx`: swap any `bg-black/…`, `from-[oklch(...)]`, hard-coded gradient classes, and `ring-danger` for the new tokens. Verdict bar fill becomes solid coral at varying widths.
+- "⚖️ In Court" ribbon: change from red urgency to coral on cream.
+- Court countdown chip: calm — coral text on peach pill, no pulse-glow.
+- Category tags: cycle through the 6 pastel tag tokens by category key (stable hash → color).
 
-Feed integration:
-- `FeedCard` shows a **⚖️ In Court — Judgment in 7h 12m** ribbon when the post has an active `court_cases` row.
-- Post page (`post.$postId`) shows the same ribbon + a "View in Court" link.
+## 5. Cleanup
 
-Profile integration (`/u/$handle` and `/me`):
-- Honor Board strip showing earned badges (pinned first). Author can pin/unpin from `/me`.
+- Remove `bg-grain`, `ring-danger`, `gradient-score` utility classes after callsites are migrated.
+- Search for stray `text-white`, `bg-black`, `from-[oklch(0.6…)]` literals and replace with tokens.
+- Verify `OG`/share images still look right after `card-svg.ts` rewrite.
 
-## 5. Author notifications
+## What is NOT changing
 
-When `nominate_court_cases` / `promote_court_cases` / `finalize_court_cases` runs, insert rows into existing `notifications` table with new `kind`s. UI: small bell badge in `PrimaryNav` (count of unread). Clicking opens a dropdown with the prestigious copy:
-- "👀 Your story entered {region} Court."
-- "🔥 Your story entered US Court."
-- "🌎 Your story entered World Court."
-- "👑 Final verdict is in."
+- No route, data, server-fn, or schema changes.
+- Score math, verdicts, court lifecycle, story arcs, notifications — all untouched.
+- Layouts and component structure stay; only colors, fonts, and a few overlays change.
 
-## 6. Final verdict + AI summary
+## Files touched (approx)
 
-When finalizing, compute the winning verdict kind from `post_verdict_votes`. Generate `ai_summary` by template (no AI call needed for v1):
-- "🏃 Final Verdict: RUN. 78% of the internet agrees. The jury has concerns 😭"
-- "🗣 Final Verdict: Talk It Out. This one deserves one honest conversation."
-
-(AI Gateway call optional later — keep deterministic for v1.)
-
-## 7. Share cards
-
-For each milestone (nominated, entered, trending, countdown, verdict), generate an OG image URL via a new server route `/api/public/court/og/$caseId.png` returning a rendered SVG → PNG (use `@resvg/resvg-wasm` if compatible; otherwise serve SVG directly and let platforms convert). The post page adds dynamic `head()` `og:image` referencing this URL.
-
-## 8. Cron schedule
-
-Insert (via insert tool, not migration) one pg_cron job:
-```sql
-select cron.schedule(
-  'court-tick',
-  '*/15 * * * *',
-  $$ select net.http_post(
-    url := 'https://project--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app/api/public/hooks/court-tick',
-    headers := '{"Content-Type":"application/json","apikey":"<ANON>"}'::jsonb,
-    body := '{}'::jsonb
-  ) $$
-);
-```
-
-## 9. Migration steps (ordered)
-
-1. **Migration**: create `court_cases`, `court_case_badges`, RLS, DB functions (`nominate_*`, `promote_*`, `finalize_*`), enable pg_cron + pg_net.
-2. **Insert** (post-approval): seed initial `WORLD` nominations from existing high-engagement posts so the page isn't empty.
-3. **Insert**: pg_cron schedule for `court-tick`.
-4. **Server fns**: rewrite `src/lib/court.functions.ts`.
-5. **Server route**: `src/routes/api/public/hooks/court-tick.ts` (anon key gated).
-6. **UI**: new components + rewrite `src/routes/court.tsx`.
-7. **Feed/Post integration**: ribbon on `FeedCard` + `post.$postId`.
-8. **Profile**: Honor Board on `/u/$handle` and `/me` with pin controls.
-9. **Notifications**: bell in `PrimaryNav` + dropdown.
-10. **Share cards**: OG route + wire into post `head()`.
-
-## Out of scope (v1)
-
-- Real LLM-generated verdict summaries (templated for now)
-- Push/email notifications (in-app only)
-- City-level resolution beyond what's on `posts` (no geocoding)
-- Per-region tournaments / brackets (status framework leaves room for v2)
-
-## Risks / notes
-
-- `cf-ipcountry` header may be absent on preview; fall back to `WORLD` cleanly.
-- Existing `/court` callers (homepage nav, daily streak) keep working — `recordParticipation` is preserved and called from `castCourtVerdict`.
-- Bell/notifications UI is new but reuses existing `notifications` table — no schema change beyond accepted `kind` values (free text).
-
-Want me to proceed with this plan, or trim/expand any section (e.g. skip OG cards in v1, skip notifications bell, drop city scope)?
+- `src/styles.css` (token rewrite)
+- `src/routes/__root.tsx` (font link tags)
+- `src/components/post-engine/ScoreCard.tsx`
+- `src/lib/share/card-svg.ts`
+- `src/components/posts/FeedCard.tsx`, `PostRow.tsx`, `StoryArc.tsx`, `VerdictBar.tsx`
+- `src/components/court/*` (CourtCaseCard, CountdownChip, CourtTabs, HonorBadge)
+- `src/components/scan/ScoreReveal.tsx`
+- `src/components/profile/ProfileHeader.tsx`
+- `src/components/nav/PrimaryNav.tsx`
+- Any remaining components using removed tokens (grep-driven sweep)

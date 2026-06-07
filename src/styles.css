@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Divorce Rank — Dark Doom-Scroll Design System
- * All colors MUST use oklch. Never hardcode hex in components.
- * Tokens: bg/fg/primary(blood-red)/danger-glow/score gradients/category accents.
+ * Shutap — Warm Light Reading Surface
+ * Light-first. One coral accent. Soft pastel category tags. Calm everywhere.
+ * All colors in oklch. Never hardcode hex in components.
  */
 
 @theme inline {
@@ -29,7 +29,6 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary-glow: var(--primary-glow);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -43,10 +42,18 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
-  --color-score-low: var(--score-low);
-  --color-score-mid: var(--score-mid);
-  --color-score-high: var(--score-high);
-  --color-score-legendary: var(--score-legendary);
+  --color-tag-pink: var(--tag-pink);
+  --color-tag-pink-foreground: var(--tag-pink-foreground);
+  --color-tag-peach: var(--tag-peach);
+  --color-tag-peach-foreground: var(--tag-peach-foreground);
+  --color-tag-sand: var(--tag-sand);
+  --color-tag-sand-foreground: var(--tag-sand-foreground);
+  --color-tag-sage: var(--tag-sage);
+  --color-tag-sage-foreground: var(--tag-sage-foreground);
+  --color-tag-sky: var(--tag-sky);
+  --color-tag-sky-foreground: var(--tag-sky-foreground);
+  --color-tag-lilac: var(--tag-lilac);
+  --color-tag-lilac-foreground: var(--tag-lilac-foreground);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -54,63 +61,68 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --font-display: "Inter", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif;
-  --font-body: "Inter", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif;
+  --font-display: "DM Serif Display", Georgia, "Noto Serif SC", serif;
+  --font-body: "DM Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif;
 }
 
 :root {
-  /* App is dark-first. We define both but default html will carry .dark. */
   --radius: 0.75rem;
 
-  --background: oklch(0.13 0.02 20);
-  --foreground: oklch(0.97 0.01 80);
-  --surface: oklch(0.17 0.025 20);
-  --surface-elevated: oklch(0.21 0.03 20);
+  /* Warm white reading surface */
+  --background: oklch(0.99 0.006 80);
+  --foreground: oklch(0.22 0.01 60);
+  --surface: oklch(0.975 0.008 75);
+  --surface-elevated: oklch(0.955 0.012 75);
 
-  --card: oklch(0.17 0.025 20);
-  --card-foreground: oklch(0.97 0.01 80);
-  --popover: oklch(0.19 0.025 20);
-  --popover-foreground: oklch(0.97 0.01 80);
+  --card: oklch(1 0.003 80);
+  --card-foreground: oklch(0.22 0.01 60);
+  --popover: oklch(1 0.003 80);
+  --popover-foreground: oklch(0.22 0.01 60);
 
-  /* Blood red primary */
-  --primary: oklch(0.62 0.22 25);
+  /* One coral accent — #E8602A-ish */
+  --primary: oklch(0.66 0.18 40);
   --primary-foreground: oklch(0.99 0.005 80);
-  --primary-glow: oklch(0.72 0.25 25);
 
-  --secondary: oklch(0.25 0.04 20);
-  --secondary-foreground: oklch(0.97 0.01 80);
-  --muted: oklch(0.22 0.02 20);
-  --muted-foreground: oklch(0.68 0.02 60);
-  --accent: oklch(0.74 0.18 65); /* warm amber accent */
-  --accent-foreground: oklch(0.13 0.02 20);
-  --destructive: oklch(0.58 0.24 25);
+  --secondary: oklch(0.94 0.012 75);
+  --secondary-foreground: oklch(0.22 0.01 60);
+  --muted: oklch(0.94 0.012 75);
+  --muted-foreground: oklch(0.5 0.015 60);
+
+  /* Accent === primary family so legacy uses stay calm */
+  --accent: oklch(0.7 0.16 45);
+  --accent-foreground: oklch(0.99 0.005 80);
+
+  /* Calm rust, only for true destructive actions */
+  --destructive: oklch(0.58 0.16 30);
   --destructive-foreground: oklch(0.99 0.005 80);
 
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.62 0.22 25);
+  --border: oklch(0.22 0.01 60 / 12%);
+  --input: oklch(0.22 0.01 60 / 14%);
+  --ring: oklch(0.66 0.18 40);
 
-  /* Score gradient stops */
-  --score-low: oklch(0.78 0.16 145);
-  --score-mid: oklch(0.78 0.18 75);
-  --score-high: oklch(0.66 0.22 35);
-  --score-legendary: oklch(0.55 0.27 15);
+  /* Soft pastel category tags */
+  --tag-pink: oklch(0.93 0.04 20);
+  --tag-pink-foreground: oklch(0.45 0.12 25);
+  --tag-peach: oklch(0.94 0.05 60);
+  --tag-peach-foreground: oklch(0.48 0.13 45);
+  --tag-sand: oklch(0.94 0.04 85);
+  --tag-sand-foreground: oklch(0.45 0.08 70);
+  --tag-sage: oklch(0.93 0.03 150);
+  --tag-sage-foreground: oklch(0.42 0.08 150);
+  --tag-sky: oklch(0.93 0.035 230);
+  --tag-sky-foreground: oklch(0.45 0.1 240);
+  --tag-lilac: oklch(0.93 0.04 300);
+  --tag-lilac-foreground: oklch(0.45 0.12 300);
 
-  --chart-1: oklch(0.62 0.22 25);
-  --chart-2: oklch(0.74 0.18 65);
-  --chart-3: oklch(0.66 0.22 320);
-  --chart-4: oklch(0.7 0.18 200);
-  --chart-5: oklch(0.78 0.16 145);
-}
-
-.dark {
-  /* Same — we are dark by default */
-  --background: oklch(0.13 0.02 20);
-  --foreground: oklch(0.97 0.01 80);
+  --chart-1: oklch(0.66 0.18 40);
+  --chart-2: oklch(0.7 0.16 45);
+  --chart-3: oklch(0.6 0.13 300);
+  --chart-4: oklch(0.65 0.11 200);
+  --chart-5: oklch(0.7 0.12 150);
 }
 
 @layer base {
-  html { color-scheme: dark; }
+  html { color-scheme: light; }
   * { border-color: var(--color-border); }
   body {
     background-color: var(--color-background);
@@ -119,22 +131,23 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  /* Hide scrollbar on doom-scroll surfaces */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
 }
 
+@utility font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+@utility bg-grain {
+  /* Soft warm paper texture — no doom-scroll glow */
+  background-image:
+    radial-gradient(circle at 15% 0%, oklch(0.94 0.05 60 / 0.5), transparent 55%),
+    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 20 / 0.35), transparent 50%);
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
-  .bg-grain {
-    background-image:
-      radial-gradient(circle at 50% 50%, oklch(0.62 0.22 25 / 0.08), transparent 60%),
-      radial-gradient(circle at 0% 0%, oklch(0.66 0.22 320 / 0.06), transparent 50%);
-  }
-  .ring-danger {
-    box-shadow: 0 0 0 1px oklch(0.62 0.22 25 / 0.4), 0 0 40px oklch(0.62 0.22 25 / 0.25);
-  }
-  .gradient-score {
-    background: linear-gradient(135deg, var(--score-low), var(--score-mid), var(--score-high), var(--score-legendary));
-  }
 }
