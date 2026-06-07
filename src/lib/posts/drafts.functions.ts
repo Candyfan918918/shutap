@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callGatewayJSON } from "@/lib/ai/gateway";
 import { scoreCategoryLabel } from "@/lib/posts/types";
+import { scrubPII } from "@/lib/safety/pii-scrubber";
 import type { DraftPayload, PostRecord, PlatformCaptions } from "@/lib/posts/types";
 
 // ---------- Schemas ----------
