@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callGatewayJSON } from "@/lib/ai/gateway";
 import { scoreCategoryLabel } from "@/lib/posts/types";
+import { scrubPII } from "@/lib/safety/pii-scrubber";
 import type { DraftPayload, PostRecord, PlatformCaptions } from "@/lib/posts/types";
 
 // ---------- Schemas ----------
@@ -122,14 +123,17 @@ export const createDraftPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ post: PostRecord }> => {
     const { supabase, userId } = context;
+    const scrubbedTitle = scrubPII(data.draft.title);
+    const scrubbedStory = scrubPII(data.draft.story);
+    const piiRemoved = scrubbedTitle.piiRemoved || scrubbedStory.piiRemoved;
     const { error, data: row } = await supabase
       .from("posts")
       .insert({
         author_id: userId,
         story_id: data.storyId ?? null,
         status: "draft",
-        title: data.draft.title,
-        story_text: data.draft.story,
+        title: scrubbedTitle.text,
+        story_text: scrubbedStory.text,
         tone: data.tone,
         badges: data.draft.badges,
         hashtags: data.draft.hashtags,
@@ -138,6 +142,7 @@ export const createDraftPost = createServerFn({ method: "POST" })
         locale: data.locale,
         score: data.score,
         score_category: data.scoreCategory ?? scoreCategoryLabel(data.score),
+        pii_removed: piiRemoved,
       })
       .select("*")
       .single();
@@ -169,9 +174,22 @@ export const updateDraftPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const patch: Record<string, unknown> = { ...data.patch };
+    let piiRemoved = false;
+    if (typeof patch.title === "string") {
+      const s = scrubPII(patch.title);
+      patch.title = s.text;
+      piiRemoved = piiRemoved || s.piiRemoved;
+    }
+    if (typeof patch.story_text === "string") {
+      const s = scrubPII(patch.story_text);
+      patch.story_text = s.text;
+      piiRemoved = piiRemoved || s.piiRemoved;
+    }
+    if (piiRemoved) patch.pii_removed = true;
     const { error, data: row } = await supabase
       .from("posts")
-      .update(data.patch)
+      .update(patch as never)
       .eq("id", data.postId)
       .eq("author_id", userId)
       .select("*")
