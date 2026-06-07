@@ -23,6 +23,9 @@ function SpillLanding() {
         </div>
       </header>
       <main className="mx-auto max-w-xl px-5 pt-10 pb-24 text-center">
+        <div className="flex justify-center mb-6">
+          <AnonymityGuarantee variant="pill" />
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
