@@ -122,14 +122,17 @@ export const createDraftPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ post: PostRecord }> => {
     const { supabase, userId } = context;
+    const scrubbedTitle = scrubPII(data.draft.title);
+    const scrubbedStory = scrubPII(data.draft.story);
+    const piiRemoved = scrubbedTitle.piiRemoved || scrubbedStory.piiRemoved;
     const { error, data: row } = await supabase
       .from("posts")
       .insert({
         author_id: userId,
         story_id: data.storyId ?? null,
         status: "draft",
-        title: data.draft.title,
-        story_text: data.draft.story,
+        title: scrubbedTitle.text,
+        story_text: scrubbedStory.text,
         tone: data.tone,
         badges: data.draft.badges,
         hashtags: data.draft.hashtags,
@@ -138,6 +141,7 @@ export const createDraftPost = createServerFn({ method: "POST" })
         locale: data.locale,
         score: data.score,
         score_category: data.scoreCategory ?? scoreCategoryLabel(data.score),
+        pii_removed: piiRemoved,
       })
       .select("*")
       .single();
