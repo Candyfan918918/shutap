@@ -175,8 +175,8 @@ const RULES: Rule[] = [
   {
     kind: "Name",
     re: new RegExp(
-      `\\b((?:my|her|his|their|our|the)\\s+(?:${RELATIONSHIP_WORDS.join("|")}))\\s+(${NAME_TOKEN})\\b`,
-      "gi",
+      `\\b((?:my|My|MY|her|Her|HER|his|His|HIS|their|Their|our|Our|the|The)\\s+(?:${RELATIONSHIP_WORDS.join("|")}))\\s+(${NAME_TOKEN})\\b`,
+      "g",
     ),
     replace: (m) => `${m[1]} [Name]`,
   },
@@ -184,7 +184,7 @@ const RULES: Rule[] = [
   // "called Jake" / "named Sarah Smith"
   {
     kind: "Name",
-    re: new RegExp(`\\b(${NAMED_WORDS.join("|")})\\s+(${NAME_TOKEN})\\b`, "gi"),
+    re: new RegExp(`\\b(${NAMED_WORDS.join("|")})\\s+(${NAME_TOKEN})\\b`, "g"),
     replace: (m) => `${m[1]} [Name]`,
   },
 ];
