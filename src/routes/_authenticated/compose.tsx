@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { ScoreCard } from "@/components/post-engine/ScoreCard";
+import { AnonymityGuarantee } from "@/components/identity/AnonymityGuarantee";
 import {
   generateStoryDraft,
   createDraftPost,
