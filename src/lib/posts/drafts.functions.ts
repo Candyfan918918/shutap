@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callGatewayJSON } from "@/lib/ai/gateway";
 import { scoreCategoryLabel } from "@/lib/posts/types";
 import { scrubPII } from "@/lib/safety/pii-scrubber";
+import { classifyRisk } from "@/lib/safety/risk-classifier";
 import type { DraftPayload, PostRecord, PlatformCaptions } from "@/lib/posts/types";
 
 // ---------- Schemas ----------
@@ -216,6 +217,15 @@ export const approveAndPublish = createServerFn({ method: "POST" })
       .eq("author_id", userId)
       .single();
     if (getErr || !current) throw new Error(getErr?.message ?? "Post not found");
+
+    // Safety gate — block publish on clear self-harm / abuse / minor-involved signals.
+    const risk = await classifyRisk(
+      `${current.title ?? ""}\n\n${current.story_text ?? ""}`,
+    );
+    if (!risk.safeToPublish) {
+      const reason = risk.reasons[0] ?? "flagged by safety classifier";
+      throw new Error(`SAFETY_BLOCK: ${reason}`);
+    }
 
     const { error: updErr, data: published } = await supabase
       .from("posts")
