@@ -217,6 +217,15 @@ export const approveAndPublish = createServerFn({ method: "POST" })
       .single();
     if (getErr || !current) throw new Error(getErr?.message ?? "Post not found");
 
+    // Safety gate — block publish on clear self-harm / abuse / minor-involved signals.
+    const risk = await classifyRisk(
+      `${current.title ?? ""}\n\n${current.story_text ?? ""}`,
+    );
+    if (!risk.safeToPublish) {
+      const reason = risk.reasons[0] ?? "flagged by safety classifier";
+      throw new Error(`SAFETY_BLOCK: ${reason}`);
+    }
+
     const { error: updErr, data: published } = await supabase
       .from("posts")
       .update({ status: "published", published_at: new Date().toISOString() })
