@@ -17,7 +17,7 @@ import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/
 import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
 import shutapIcon from "@/assets/shutap-icon.svg.asset.json";
-import shutapLogoDark from "@/assets/shutap-logo-dark.svg.asset.json";
+import shutapLogoClear from "@/assets/shutap-logo-clear.svg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
@@ -91,7 +91,7 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
-          <img src={shutapLogoDark.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
+          <img src={shutapLogoClear.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
           <img src={shutapIcon.url} alt={t("appName")} className="sm:hidden h-7 w-auto" />
         </div>
         <div className="flex items-center gap-2">

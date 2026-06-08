@@ -13,7 +13,7 @@ import {
   type Locale,
 } from "@/lib/i18n";
 import shutapIcon from "@/assets/shutap-icon.svg.asset.json";
-import shutapLogoDark from "@/assets/shutap-logo-dark.svg.asset.json";
+import shutapLogoClear from "@/assets/shutap-logo-clear.svg.asset.json";
 
 type PrimaryLink = {
   to: string;
@@ -65,7 +65,7 @@ export function PrimaryNav({
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
       <div className="mx-auto max-w-6xl flex items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex items-center shrink-0" aria-label={t("appName")}>
-          <img src={shutapLogoDark.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
+          <img src={shutapLogoClear.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
           <img src={shutapIcon.url} alt={t("appName")} className="sm:hidden h-7 w-auto" />
         </Link>
 
