@@ -16,8 +16,8 @@ import { PrimaryNav } from "@/components/nav/PrimaryNav";
 import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
 import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
-import shutapIcon from "@/assets/shutap-icon-transparent.png.asset.json";
-import shutapLogoClear from "@/assets/shutap-logo-blush.svg.asset.json";
+import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
+import shutapLogoClear from "@/assets/shutap-logo-light.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
