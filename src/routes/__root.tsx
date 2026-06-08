@@ -11,6 +11,8 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
+import shutapIconAsset from "@/assets/shutap-icon.svg.asset.json";
+import shutapAppIconAsset from "@/assets/shutap-app-icon.svg.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -88,11 +90,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/72f91b30-c67d-4416-9501-b882c88b4379/id-preview-64de9d85--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app-1779225769431.png" },
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: shutapIconAsset.url },
+      { rel: "apple-touch-icon", href: shutapAppIconAsset.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&family=Sora:wght@900&display=swap",
       },
       {
         rel: "stylesheet",
