@@ -90,11 +90,9 @@ function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) =>
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-sm">
-            👀
-          </div>
-          <span className="font-semibold tracking-tight">{t("appName")}</span>
+        <div className="flex items-center">
+          <img src={shutapLogoDark.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
+          <img src={shutapIcon.url} alt={t("appName")} className="sm:hidden h-7 w-auto" />
         </div>
         <div className="flex items-center gap-2">
           <Link
