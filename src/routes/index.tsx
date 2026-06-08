@@ -17,7 +17,7 @@ import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/
 import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
 import { FeedCard } from "@/components/posts/FeedCard";
 import shutapIcon from "@/assets/shutap-icon.svg.asset.json";
-import shutapLogoDark from "@/assets/shutap-logo-dark.svg.asset.json";
+import shutapLogoClear from "@/assets/shutap-logo-clear.svg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: IndexShell,
