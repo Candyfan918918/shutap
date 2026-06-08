@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/72f91b30-c67d-4416-9501-b882c88b4379/id-preview-64de9d85--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app-1779225769431.png" },
     ],
     links: [
-      { rel: "icon", type: "image/svg+xml", href: shutapIconAsset.url },
+      { rel: "icon", type: "image/png", href: shutapIconAsset.url },
       { rel: "apple-touch-icon", href: shutapAppIconAsset.url },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
