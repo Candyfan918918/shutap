@@ -11,8 +11,8 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
-import shutapIconAsset from "@/assets/shutap-icon-transparent.png.asset.json";
-import shutapAppIconAsset from "@/assets/shutap-icon-transparent.png.asset.json";
+import shutapIconAsset from "@/assets/shutap-favicon-32.png.asset.json";
+import shutapAppIconAsset from "@/assets/shutap-favicon-32.png.asset.json";
 
 function NotFoundComponent() {
   return (
