@@ -12,8 +12,8 @@ import {
   SUPPORTED_LOCALES,
   type Locale,
 } from "@/lib/i18n";
-import shutapIcon from "@/assets/shutap-icon-transparent.png.asset.json";
-import shutapLogoClear from "@/assets/shutap-logo-blush.svg.asset.json";
+import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
+import shutapLogoClear from "@/assets/shutap-logo-light.png.asset.json";
 
 type PrimaryLink = {
   to: string;
