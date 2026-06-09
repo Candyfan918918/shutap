@@ -22,7 +22,6 @@ import {
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useGateStore, type PendingAction } from "@/stores/gate";
-import { IdentityCeremony, RESUME_KEY } from "@/components/gate/IdentityCeremony";
 import { CourtroomPanel } from "@/components/court/CourtroomPanel";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
