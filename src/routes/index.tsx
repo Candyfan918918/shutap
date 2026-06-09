@@ -1,471 +1,661 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+// Anonymous Court landing page — the first screen any visitor sees.
+// Watching is free. Participating requires identity. Every action gates on tap.
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
-import { I18nProvider, useT } from "@/lib/i18n/context";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  detectBrowserLocale,
-  isLocale,
-  LOCALE_LABELS,
-  SUPPORTED_LOCALES,
-  type Locale,
-} from "@/lib/i18n";
-import { IdentityHeaderSlot } from "@/components/identity/IdentityHeaderSlot";
-import { PrimaryNav } from "@/components/nav/PrimaryNav";
-import { listTrendingFeed, type FeedItem, type FeedCategory } from "@/lib/posts/feed.functions";
-import { getActiveCourtCasesByPostIds } from "@/lib/court.functions";
-import { FeedCard } from "@/components/posts/FeedCard";
+  getFeaturedCourtCase,
+  getGlobalVerdictCount,
+  type FeaturedCase,
+} from "@/lib/court.functions";
+import { listComments, type CommentRow } from "@/lib/posts/community.functions";
+import { supabase } from "@/integrations/supabase/client";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
-import shutapLogoClear from "@/assets/shutap-logo-light.png.asset.json";
+import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
 
 export const Route = createFileRoute("/")({
-  component: IndexShell,
+  component: AnonymousCourt,
   head: () => ({
     meta: [
-      { title: "Shutap — 👀 what actually happened?" },
+      { title: "Shutap — 👑 Relationship Court™" },
       {
         name: "description",
         content:
-          "Shutap — the world's most entertaining anonymous relationship storytelling community. Real stories, real chaos, real happy endings.",
+          "The internet decides. Read the case, watch the verdict bar move in real time. Zero real names exposed.",
       },
-      { property: "og:title", content: "Shutap — what actually happened?" },
-      { property: "og:description", content: "Anonymous. Authentic. Worldwide. Real relationship stories — no fake perfection." },
+      { property: "og:title", content: "Shutap — Relationship Court™" },
+      {
+        property: "og:description",
+        content: "Watch the world decide. Zero real names exposed.",
+      },
       { property: "og:type", content: "website" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
     ],
   }),
 });
 
-const LOCALE_KEY = "md.locale";
+// ───────────────────────── Verdict labels ─────────────────────────
 
-function IndexShell() {
-  const [locale, setLocale] = useState<Locale>("en");
+const VERDICTS: Array<{ kind: string; emoji: string; label: string; color: string }> = [
+  { kind: "red_flag", emoji: "🚩", label: "Red Flag", color: "oklch(0.62 0.22 25)" },
+  { kind: "green_flag", emoji: "💚", label: "Green Flag", color: "oklch(0.65 0.18 145)" },
+  { kind: "run", emoji: "🏃", label: "RUN", color: "oklch(0.6 0.24 18)" },
+  { kind: "talk_it_out", emoji: "🗣", label: "Talk It Out", color: "oklch(0.7 0.15 80)" },
+  { kind: "lawyer_up", emoji: "⚖️", label: "Lawyer Up", color: "oklch(0.55 0.2 285)" },
+  { kind: "therapy_might_help", emoji: "🛋", label: "Therapy", color: "oklch(0.68 0.15 200)" },
+  { kind: "need_update", emoji: "👀", label: "Need Update", color: "oklch(0.7 0.05 280)" },
+];
+
+const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
+  { kind: "guilty", emoji: "👎", label: "Guilty" },
+  { kind: "not_guilty", emoji: "👍", label: "Not Guilty" },
+  { kind: "both_at_fault", emoji: "🤷", label: "Both At Fault" },
+  { kind: "need_more", emoji: "👀", label: "Need More" },
+];
+
+// ───────────────────────── Page ─────────────────────────
+
+function AnonymousCourt() {
+  const navigate = useNavigate();
+  const [authed, setAuthed] = useState<boolean | null>(null);
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem(LOCALE_KEY) : null;
-    setLocale(isLocale(stored) ? stored : detectBrowserLocale());
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setAuthed(!!data.session);
+    });
+    return () => { active = false; };
   }, []);
-  const change = (l: Locale) => {
-    setLocale(l);
-    try { window.localStorage.setItem(LOCALE_KEY, l); } catch { /* ignore */ }
+
+  const gate = (intent: string) => {
+    navigate({ to: "/enter", search: { redirect: `/?intent=${intent}` } });
   };
-  return (
-    <I18nProvider locale={locale}>
-      <HomePage locale={locale} onLocaleChange={change} />
-    </I18nProvider>
-  );
-}
 
-const BOARD_KEYS = ["chaotic", "sweet", "twist", "money", "mil", "recovery"] as const;
-const DIM_KEYS = ["twist", "damage", "money", "family", "comms", "love"] as const;
-const PROOF_KEYS = ["stories", "countries", "points", "survived"] as const;
+  const fetchFeatured = useServerFn(getFeaturedCourtCase);
+  const fetchGlobal = useServerFn(getGlobalVerdictCount);
 
-function HomePage({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: (l: Locale) => void }) {
-  const { t } = useT();
+  const featuredQ = useQuery({
+    queryKey: ["anon-court", "featured"],
+    queryFn: () => fetchFeatured(),
+    refetchInterval: 8_000,
+    staleTime: 0,
+  });
+  const globalQ = useQuery({
+    queryKey: ["anon-court", "global-verdicts"],
+    queryFn: () => fetchGlobal(),
+    refetchInterval: 5_000,
+    staleTime: 0,
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain">
-      <PrimaryNav locale={locale} onLocaleChange={onLocaleChange} />
-      <main className="pb-24">
-        <TopTrendingWall />
-        <MainCTA />
-        <TrendingFeed />
-        <Leaderboards />
-        <HowItWorks />
-        <SocialProof />
-        <SoftSignup />
+      <TrustSignalBar total={globalQ.data?.total ?? null} />
+      <TopChrome authed={authed} />
+
+      <main className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8">
+        <HeroIntro />
+        {featuredQ.isLoading ? (
+          <CaseSkeleton />
+        ) : featuredQ.data ? (
+          <CaseView featured={featuredQ.data} onGate={gate} />
+        ) : (
+          <CourtInRecess />
+        )}
+        <BottomCTA onGate={gate} />
       </main>
+
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-4 py-8 text-center text-xs text-muted-foreground space-y-1">
-          <p>⚠️ {t("disclaimer")}</p>
-          <p>{t("footer.made")}</p>
+        <div className="mx-auto max-w-3xl px-4 py-8 text-center text-xs text-muted-foreground space-y-1">
+          <p>⚠️ Real stories, real opinions. Not legal or therapeutic advice.</p>
+          <p>Made with chaos, worldwide.</p>
         </div>
       </footer>
     </div>
   );
 }
 
-function TopBar({ locale, onChange }: { locale: Locale; onChange: (l: Locale) => void }) {
-  const { t } = useT();
-  const [open, setOpen] = useState(false);
+// ───────────────────────── Trust signal bar ─────────────────────────
+
+function TrustSignalBar({ total }: { total: number | null }) {
+  // Smoothly tween the visible count so updates feel live.
+  const [display, setDisplay] = useState<number | null>(total);
+  const last = useRef<number | null>(null);
+  useEffect(() => {
+    if (total == null) return;
+    if (last.current == null) {
+      last.current = total;
+      setDisplay(total);
+      return;
+    }
+    const from = last.current;
+    const to = total;
+    if (from === to) return;
+    const start = performance.now();
+    const dur = 800;
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / dur);
+      setDisplay(Math.round(from + (to - from) * t));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else last.current = to;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [total]);
+
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
-      <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
+    <div className="w-full border-b border-border bg-surface-elevated/80 backdrop-blur">
+      <div className="mx-auto max-w-3xl px-4 py-1.5 flex items-center justify-between text-[12px] text-muted-foreground font-normal">
+        <span className="flex items-center gap-1.5">
+          <span className="relative inline-block h-1.5 w-1.5">
+            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
+            <span className="absolute inset-0 rounded-full bg-emerald-500" />
+          </span>
+          <span>
+            <span className="font-semibold text-foreground tabular-nums">
+              {display != null ? display.toLocaleString() : "—"}
+            </span>{" "}
+            verdicts cast
+          </span>
+        </span>
+        <span>Zero real names exposed.</span>
+      </div>
+    </div>
+  );
+}
+
+function TopChrome({ authed }: { authed: boolean | null }) {
+  return (
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-background/75 border-b border-border">
+      <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
-          <img src={shutapLogoClear.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
-          <img src={shutapIcon.url} alt={t("appName")} className="sm:hidden h-7 w-auto" />
+          <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-7 w-auto" />
+          <img src={shutapIcon.url} alt="Shutap" className="sm:hidden h-7 w-auto" />
         </div>
-        <div className="flex items-center gap-2">
+        {authed ? (
           <Link
             to="/court"
-            className="inline-flex text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
+            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
           >
-            ⚖️ Court
+            Enter Court →
           </Link>
-          <IdentityHeaderSlot />
-          <div className="relative">
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="text-xs px-3 py-1.5 rounded-full bg-surface-elevated border border-border hover:border-primary/50 transition"
-              aria-label={t("nav.language")}
-            >
-              🌐 {LOCALE_LABELS[locale]}
-            </button>
-            {open && (
-              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1 shadow-xl">
-                {SUPPORTED_LOCALES.map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => { onChange(l); setOpen(false); }}
-                    className={`w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition ${l === locale ? "text-primary" : ""}`}
-                  >
-                    {LOCALE_LABELS[l]}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        ) : (
+          <Link
+            to="/enter"
+            search={{ redirect: "/" }}
+            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+          >
+            Claim my identity →
+          </Link>
+        )}
       </div>
     </header>
   );
 }
 
-/* ───────────────────────── Hero: real top trending wall ───────────────────────── */
-
-function TopTrendingWall() {
-  const { t } = useT();
-  const fetchFeed = useServerFn(listTrendingFeed);
-  const { data, isLoading } = useQuery({
-    queryKey: ["trending-feed", "wall"],
-    queryFn: () => fetchFeed({ data: { limit: 10, sort: "trending" } }),
-    staleTime: 60_000,
-  });
-
+function HeroIntro() {
   return (
-    <section className="pt-6 sm:pt-10">
-      <div className="mx-auto max-w-6xl px-4">
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="text-3xl sm:text-5xl font-bold tracking-tight text-balance leading-tight"
-        >
-          {t("wall.title")}
-        </motion.h1>
-        <p className="mt-2 text-muted-foreground">{t("wall.subtitle")}</p>
-      </div>
-
-      <div className="mt-5 overflow-x-auto no-scrollbar">
-        <div className="flex gap-3 px-4 sm:px-[max(1rem,calc(50vw-36rem))] snap-x snap-mandatory">
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="snap-start shrink-0 w-[78vw] sm:w-[320px] aspect-[4/5] rounded-3xl border border-border bg-card animate-pulse" />
-              ))
-            : (data ?? []).map((item, i) => <WallCard key={item.id} item={item} index={i} />)}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WallCard({ item, index }: { item: FeedItem; index: number }) {
-  const location = [item.cityLabel, item.countryCode].filter(Boolean).join(" · ");
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-      transition={{ delay: Math.min(index * 0.04, 0.3) }}
-      className="snap-start shrink-0 w-[78vw] sm:w-[320px] rounded-3xl overflow-hidden border border-border bg-gradient-to-br from-card to-surface relative group"
-    >
-      <Link to="/post/$postId" params={{ postId: item.id }} search={{ shared: 2 }}>
-        <div className="aspect-[4/5] p-5 flex flex-col justify-between relative">
-          {item.mediaUrl ? (
-            <img src={item.mediaUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
-          ) : (
-            <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_20%_10%,oklch(0.62_0.22_25/_0.5),transparent_60%)]" />
-          )}
-          <div className="relative flex items-start justify-between">
-            <div>
-              <div className="text-xs px-2 py-1 rounded-full bg-background/60 backdrop-blur border border-border font-semibold inline-block">
-                {item.funnyLabel}
-              </div>
-              {location && (
-                <div className="mt-2 text-sm font-medium text-foreground/90">📍 {location}</div>
-              )}
-            </div>
-            {item.score != null && <ScoreBadge score={item.score} />}
-          </div>
-          <div className="relative">
-            <p className="text-lg sm:text-xl font-semibold leading-snug text-balance line-clamp-4">
-              "{item.title}"
-            </p>
-            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-              <span>💬 {fmt(item.commentCount)} · ⚖️ {fmt(item.verdictCount)}</span>
-              <span className="text-primary">Read story →</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.article>
-  );
-}
-
-/* ───────────────────────── Main CTA ───────────────────────── */
-
-function MainCTA() {
-  const { t } = useT();
-  return (
-    <section className="mx-auto max-w-3xl px-4 py-16 sm:py-20 text-center">
-      <motion.h2
-        initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-        className="text-4xl sm:text-6xl font-black tracking-tight text-balance"
+    <section className="text-center pt-2">
+      <motion.h1
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-3xl sm:text-5xl font-bold tracking-tight text-balance"
       >
-        {t("cta.headline")}
-      </motion.h2>
-      <p className="mt-4 text-muted-foreground text-balance max-w-xl mx-auto">{t("cta.sub")}</p>
-
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 text-left">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          whileHover={{ y: -4 }}
-          className="group rounded-3xl border border-border bg-gradient-to-br from-card to-surface p-6 hover:border-primary/60 transition relative overflow-hidden"
-        >
-          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/20 transition" />
-          <div className="relative">
-            <div className="text-xs font-bold tracking-wider text-primary">{t("cta.spill.tag")}</div>
-            <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.spill.title")}</div>
-            <p className="mt-2 text-sm text-muted-foreground">{t("cta.spill.desc")}</p>
-            <Link
-              to="/spill"
-              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm shadow-lg"
-            >
-              {t("cta.spill.cta")}
-            </Link>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          transition={{ delay: 0.06 }}
-          whileHover={{ y: -4 }}
-          className="group rounded-3xl border border-border bg-gradient-to-br from-card to-surface p-6 hover:border-accent/60 transition relative overflow-hidden"
-        >
-          <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-accent/10 blur-2xl group-hover:bg-accent/20 transition" />
-          <div className="relative">
-            <div className="text-xs font-bold tracking-wider text-accent">{t("cta.judge.tag")}</div>
-            <div className="mt-2 text-2xl font-bold leading-tight">{t("cta.judge.title")}</div>
-            <p className="mt-2 text-sm text-muted-foreground">{t("cta.judge.desc")}</p>
-            <Link
-              to="/scan/start"
-              className="mt-5 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm hover:border-accent/60 transition"
-            >
-              {t("cta.judge.cta")}
-            </Link>
-          </div>
-        </motion.div>
-      </div>
-
-      <p className="mt-6 text-xs text-muted-foreground">{t("cta.hint")}</p>
+        👑 Relationship Court™
+      </motion.h1>
+      <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+        Where the <span className="text-foreground font-semibold">internet</span> decides.
+      </p>
     </section>
   );
 }
 
-/* ───────────────────────── Trending feed with tabs ───────────────────────── */
+function CourtInRecess() {
+  return (
+    <section className="rounded-3xl border border-dashed border-border bg-card p-8 text-center">
+      <p className="text-2xl">⚖️</p>
+      <p className="mt-2 font-semibold">Court is in recess.</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        The jury is between cases. The next one drops shortly.
+      </p>
+    </section>
+  );
+}
 
-type TabKey = "trending" | "latest" | FeedCategory;
-const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: "trending", label: "🔥 Trending" },
-  { key: "latest", label: "🆕 Latest" },
-  { key: "chaos", label: "💀 Chaos" },
-  { key: "wholesome", label: "❤️ Wholesome" },
-  { key: "family", label: "👨‍👩‍👧 Family Drama" },
-  { key: "situationship", label: "🤡 Situationship" },
-  { key: "marriage", label: "💍 Marriage" },
-  { key: "plot_twist", label: "🍿 Plot Twist" },
-];
+function CaseSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="h-8 w-2/3 bg-surface-elevated rounded animate-pulse" />
+      <div className="h-40 bg-surface-elevated rounded-2xl animate-pulse" />
+      <div className="h-24 bg-surface-elevated rounded-2xl animate-pulse" />
+    </div>
+  );
+}
 
-function TrendingFeed() {
-  const fetchFeed = useServerFn(listTrendingFeed);
-  const fetchCourt = useServerFn(getActiveCourtCasesByPostIds);
-  const [tab, setTab] = useState<TabKey>("trending");
+// ───────────────────────── Case ─────────────────────────
 
-  const params = useMemo(() => {
-    if (tab === "trending") return { limit: 24, sort: "trending" as const };
-    if (tab === "latest") return { limit: 24, sort: "latest" as const };
-    return { limit: 24, sort: "trending" as const, category: tab };
-  }, [tab]);
+function CaseView({
+  featured,
+  onGate,
+}: {
+  featured: FeaturedCase;
+  onGate: (intent: string) => void;
+}) {
+  const c = featured.case;
+  const post = c.post!;
+  const alias = featured.author?.handle ?? "anonymous";
+  const aliasNick = featured.author?.nickname ?? "Anonymous Juror";
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["trending-feed", tab],
-    queryFn: () => fetchFeed({ data: params }),
-    staleTime: 60_000,
-  });
-
-  const postIds = useMemo(() => (data ?? []).map((d) => d.id), [data]);
-  const courtQuery = useQuery({
-    enabled: postIds.length > 0,
-    queryKey: ["feed-court", postIds.join(",")],
-    queryFn: () => fetchCourt({ data: { postIds } }),
-    staleTime: 60_000,
-  });
-
+  const categoryLabel = (post.scoreCategory ?? "Relationship").replace(/_/g, " ");
+  const tier =
+    c.status === "legendary"
+      ? "Legendary"
+      : c.status === "decided"
+        ? "Final Decision"
+        : c.status === "judgment_pending"
+          ? "Judgment Pending"
+          : c.status === "in_court"
+            ? "Live Trial"
+            : "Nominated";
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <h3 className="text-xl sm:text-2xl font-semibold">The Feed</h3>
-          <p className="text-sm text-muted-foreground">Real stories, fresh chaos. Updated live.</p>
+    <article className="space-y-6">
+      <CourtRibbon
+        category={categoryLabel}
+        tier={tier}
+        closesAt={c.closesAt}
+        regionLabel={c.regionLabel}
+      />
+
+      <div className="flex items-center gap-3">
+        <AliasPill handle={alias} nickname={aliasNick} avatarUrl={featured.author?.avatarUrl ?? null} />
+        <div className="flex flex-wrap gap-1.5">
+          <Pill>💔 {categoryLabel}</Pill>
+          {post.score != null && <Pill>🔥 {post.score} chaos</Pill>}
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-3">
-        {TABS.map((tb) => {
-          const active = tb.key === tab;
-          return (
-            <button
-              key={tb.key}
-              onClick={() => setTab(tb.key)}
-              className={`shrink-0 px-4 py-2 rounded-full text-sm border transition ${
-                active
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-surface-elevated border-border hover:border-primary/60"
-              }`}
-            >
-              {tb.label}
-            </button>
-          );
-        })}
+      <div className="rounded-2xl border-l-4 border-primary bg-card p-5">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+          The case
+        </p>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-bold leading-tight text-balance">
+          {post.title}
+        </h2>
+        <p className="mt-3 italic text-muted-foreground text-sm">
+          Question before court: <span className="text-foreground">What would you do?</span>
+        </p>
       </div>
 
-      {isLoading ? (
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="mb-3 break-inside-avoid rounded-2xl border border-border bg-card animate-pulse aspect-[4/3]" />
-          ))}
-        </div>
-      ) : data && data.length > 0 ? (
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
-          {data.map((item, i) => (
-            <FeedCard key={item.id} item={item} index={i} court={courtQuery.data?.[item.id]} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-border">
-          <p className="text-2xl mb-2">☕</p>
-          <p className="font-semibold">No tea here yet</p>
-          <p className="text-sm text-muted-foreground mt-1">Try another category — or be the first to spill.</p>
-          <Link
-            to="/spill"
-            className="mt-4 inline-flex px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-sm font-bold"
-          >
-            ☕ Spill The Tea
-          </Link>
+      <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-xs text-amber-200">
+        ⚠️ One person's account — the other party has not responded.
+      </div>
+
+      {post.mediaUrl && (
+        <div className="rounded-2xl overflow-hidden border border-border">
+          <img src={post.mediaUrl} alt="" className="w-full h-auto object-cover" />
         </div>
       )}
-    </section>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
+          {post.storyText}
+        </p>
+      </div>
+
+      <VerdictBar
+        counts={c.verdict.counts as unknown as Record<string, number>}
+        total={c.verdict.total}
+      />
+
+      <VoteGrid onGate={() => onGate("vote")} />
+
+      <ActionRow
+        relates={featured.totalRelates}
+        comments={post.commentCount}
+        shares={post.shareCount}
+        caseUrl={typeof window !== "undefined" ? window.location.href : ""}
+        onRelate={() => onGate("relate")}
+      />
+
+      <JudgmentRow onGate={() => onGate("judgment")} />
+
+      <CommentSection postId={post.id} onGate={() => onGate("comment")} />
+    </article>
   );
 }
 
-function fmt(n: number) {
-  if (n >= 10000) return `${(n / 1000).toFixed(0)}k`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
-
-/* ───────────────────────── Leaderboards ───────────────────────── */
-
-function Leaderboards() {
-  const { t } = useT();
+function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <h3 className="text-xl sm:text-2xl font-semibold">{t("boards.title")}</h3>
-      <p className="text-sm text-muted-foreground">{t("boards.sub")}</p>
-      <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {BOARD_KEYS.map((k, i) => (
-          <motion.div
-            key={k}
-            initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.04 }}
-            whileHover={{ y: -3 }}
-            className="rounded-2xl border border-border bg-card p-5 hover:border-primary/50 transition cursor-pointer"
-          >
-            <div className="text-3xl">{t(`boards.items.${k}.emoji` as const)}</div>
-            <div className="mt-2 font-semibold">{t(`boards.items.${k}.title` as const)}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{t(`boards.items.${k}.copy` as const)}</div>
-            <div className="mt-4 text-xs text-primary">View board →</div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
+    <span className="text-[11px] px-2 py-0.5 rounded-full bg-surface-elevated border border-border text-muted-foreground">
+      {children}
+    </span>
   );
 }
 
-function HowItWorks() {
-  const { t } = useT();
+function AliasPill({
+  handle,
+  nickname,
+  avatarUrl,
+}: {
+  handle: string;
+  nickname: string;
+  avatarUrl: string | null;
+}) {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-12">
-      <div className="text-center max-w-2xl mx-auto">
-        <h3 className="text-2xl sm:text-3xl font-bold text-balance">{t("how.title")}</h3>
-        <p className="mt-2 text-muted-foreground">{t("how.sub")}</p>
+    <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-elevated border border-border">
+      {avatarUrl ? (
+        <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+      ) : (
+        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-accent" />
+      )}
+      <div className="leading-tight">
+        <div className="text-xs font-semibold">{nickname}</div>
+        <div className="text-[10px] text-muted-foreground">@{handle}</div>
       </div>
-      <div className="mt-8 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {DIM_KEYS.map((k, i) => (
-          <motion.div
-            key={k}
-            initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.04 }}
-            className="rounded-2xl border border-border bg-surface p-5"
-          >
-            <div className="font-semibold">{t(`how.dims.${k}.name` as const)}</div>
-            <p className="mt-1 text-sm text-muted-foreground">{t(`how.dims.${k}.copy` as const)}</p>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SocialProof() {
-  const { t } = useT();
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-12">
-      <h3 className="text-xl sm:text-2xl font-semibold text-center">{t("proof.title")}</h3>
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-        {PROOF_KEYS.map((k, i) => (
-          <motion.div
-            key={k}
-            initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.05 }}
-            className="rounded-2xl border border-border bg-gradient-to-br from-card to-surface p-5 text-center"
-          >
-            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t(`proof.items.${k}.n` as const)}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">{t(`proof.items.${k}.label` as const)}</div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SoftSignup() {
-  const { t } = useT();
-  return (
-    <section className="mx-auto max-w-md px-4 py-16 text-center">
-      <h3 className="text-3xl font-bold">{t("signup.title")}</h3>
-      <p className="mt-2 text-muted-foreground text-balance">{t("signup.sub")}</p>
-      <div className="mt-6 space-y-2">
-        <Link to="/enter" search={{ redirect: undefined }} className="block w-full px-5 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-95 transition">
-          ✉️ {t("signup.email")}
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-function ScoreBadge({ score, small = false }: { score: number; small?: boolean }) {
-  return (
-    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold bg-primary text-primary-foreground`}>
-      {score}
     </div>
+  );
+}
+
+function CourtRibbon({
+  category,
+  tier,
+  closesAt,
+  regionLabel,
+}: {
+  category: string;
+  tier: string;
+  closesAt: string | null;
+  regionLabel: string;
+}) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  const remaining = closesAt ? new Date(closesAt).getTime() - now : null;
+  const countdown = (() => {
+    if (remaining == null) return "open indefinitely";
+    if (remaining <= 0) return "verdict landed";
+    const totalMin = Math.floor(remaining / 60_000);
+    const d = Math.floor(totalMin / 1440);
+    const h = Math.floor((totalMin % 1440) / 60);
+    const m = totalMin % 60;
+    const s = Math.floor((remaining % 60_000) / 1000);
+    if (d > 0) return `${d}d ${h}h to verdict`;
+    if (h > 0) return `${h}h ${m}m to verdict`;
+    if (m > 0) return `${m}m ${s}s to verdict`;
+    return `${s}s to verdict`;
+  })();
+  return (
+    <div className="flex items-center justify-between rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2 text-xs font-semibold">
+      <span className="text-foreground">
+        {category} Court · {tier}
+      </span>
+      <span className="text-primary tabular-nums">⏳ {countdown}</span>
+      <span className="hidden sm:inline text-muted-foreground">{regionLabel}</span>
+    </div>
+  );
+}
+
+// ───────────────────────── Verdict bar ─────────────────────────
+
+function VerdictBar({
+  counts,
+  total,
+}: {
+  counts: Record<string, number>;
+  total: number;
+}) {
+  const segments = VERDICTS.map((v) => ({
+    ...v,
+    n: counts[v.kind] ?? 0,
+    pct: total > 0 ? ((counts[v.kind] ?? 0) / total) * 100 : 100 / VERDICTS.length,
+  }));
+  return (
+    <div className="space-y-2">
+      <div className="flex items-end justify-between text-xs">
+        <span className="font-semibold">Live verdict</span>
+        <span className="text-muted-foreground">
+          <span className="tabular-nums text-foreground font-semibold">
+            {total.toLocaleString()}
+          </span>{" "}
+          juror{total === 1 ? "" : "s"} weighed in
+        </span>
+      </div>
+      <div className="h-8 w-full rounded-full overflow-hidden flex border border-border bg-surface-elevated">
+        {segments.map((s) => (
+          <motion.div
+            key={s.kind}
+            layout
+            initial={{ width: 0 }}
+            animate={{ width: `${s.pct}%` }}
+            transition={{ type: "spring", stiffness: 140, damping: 22 }}
+            style={{ background: s.color }}
+            className="h-full flex items-center justify-center text-[10px] font-bold text-black/80"
+            title={`${s.label}: ${Math.round(s.pct)}%`}
+          >
+            {s.pct > 8 ? `${s.emoji} ${Math.round(s.pct)}%` : ""}
+          </motion.div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+        {segments.map((s) => (
+          <span key={s.kind}>
+            <span style={{ color: s.color }}>●</span> {s.emoji} {s.label}{" "}
+            <span className="tabular-nums text-foreground">{Math.round(s.pct)}%</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ───────────────────────── Vote / Judgment / Action rows ─────────────────────────
+
+function GateButton({
+  children,
+  onClick,
+  className = "",
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative group rounded-xl border border-border bg-card hover:border-primary/60 hover:bg-surface-elevated transition px-3 py-2.5 text-sm font-semibold text-left ${className}`}
+    >
+      {children}
+      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/85 opacity-0 group-hover:opacity-100 transition text-xs font-bold text-primary">
+        Join to vote →
+      </span>
+    </button>
+  );
+}
+
+function VoteGrid({ onGate }: { onGate: () => void }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        Cast your verdict
+      </p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {VERDICTS.map((v) => (
+          <GateButton key={v.kind} onClick={onGate}>
+            <span className="mr-1.5">{v.emoji}</span>
+            {v.label}
+          </GateButton>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function JudgmentRow({ onGate }: { onGate: () => void }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        Final judgment
+      </p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {JUDGMENTS.map((j) => (
+          <GateButton key={j.kind} onClick={onGate}>
+            <span className="mr-1.5">{j.emoji}</span>
+            {j.label}
+          </GateButton>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ActionRow({
+  relates,
+  comments,
+  shares,
+  caseUrl,
+  onRelate,
+}: {
+  relates: number;
+  comments: number;
+  shares: number;
+  caseUrl: string;
+  onRelate: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(caseUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        onClick={onRelate}
+        className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:border-primary/60 transition"
+      >
+        <span>❤️</span>
+        <span>It happened to me</span>
+        <span className="tabular-nums text-muted-foreground">
+          · {relates.toLocaleString()} felt this
+        </span>
+      </button>
+      <span className="text-xs text-muted-foreground">💬 {comments.toLocaleString()}</span>
+      <span className="text-xs text-muted-foreground">📤 {shares.toLocaleString()}</span>
+      <button
+        onClick={copy}
+        className="ml-auto flex items-center gap-2 rounded-full border border-border bg-surface-elevated px-4 py-2 text-sm font-semibold hover:border-primary/60 transition"
+      >
+        <span>🔗</span>
+        <span>{copied ? "Link copied." : "Share this case"}</span>
+      </button>
+    </div>
+  );
+}
+
+// ───────────────────────── Comments ─────────────────────────
+
+function CommentSection({ postId, onGate }: { postId: string; onGate: () => void }) {
+  const fetchComments = useServerFn(listComments);
+  const q = useQuery({
+    queryKey: ["anon-court", "comments", postId],
+    queryFn: () => fetchComments({ data: { postId, sort: "top", limit: 25 } }),
+    refetchInterval: 15_000,
+    staleTime: 0,
+  });
+  const list: CommentRow[] = q.data ?? [];
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">💬 Comments ({list.length})</p>
+        <span className="text-[11px] text-muted-foreground">Top first</span>
+      </div>
+
+      <button
+        onClick={onGate}
+        className="w-full text-left rounded-xl border border-border bg-surface-elevated px-4 py-3 text-sm text-muted-foreground hover:border-primary/60 transition"
+      >
+        What would you do?
+      </button>
+
+      <div className="space-y-3">
+        <AnimatePresence>
+          {list.map((c) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl border border-border bg-card p-3"
+            >
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {c.author?.avatarUrl ? (
+                  <img src={c.author.avatarUrl} alt="" className="h-5 w-5 rounded-full" />
+                ) : (
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent" />
+                )}
+                <span className="font-semibold text-foreground">
+                  {c.author?.nickname ?? "Anonymous"}
+                </span>
+                <span>@{c.author?.handle ?? "anon"}</span>
+              </div>
+              <p className="mt-1.5 text-sm whitespace-pre-wrap">{c.body}</p>
+              <div className="mt-2 flex gap-3 text-[11px] text-muted-foreground">
+                <span>❤️ {c.likeCount}</span>
+                <span>😂 {c.funnyCount}</span>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {!q.isLoading && list.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-6">
+            No comments yet. The jury is reading.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────────── Bottom CTA ─────────────────────────
+
+function BottomCTA({ onGate }: { onGate: (intent: string) => void }) {
+  return (
+    <section className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card to-accent/10 p-6 text-center">
+      <p className="text-lg font-bold text-balance">
+        The court is in session.
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground text-balance">
+        Claim your identity to vote, relate, and submit your own case.
+      </p>
+      <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <button
+          onClick={() => onGate("claim")}
+          className="px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg"
+        >
+          Claim my identity →
+        </button>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Keep reading ↑
+        </a>
+      </div>
+    </section>
   );
 }
