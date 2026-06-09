@@ -152,17 +152,17 @@ function SpillChat() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/80 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => history.back()} className="text-sm text-muted-foreground">
             ← Back
           </button>
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-accent grid place-items-center text-xs">
+            <div className="h-7 w-7 rounded-full bg-primary grid place-items-center text-xs">
               ☕
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold">Tea</div>
+              <div className="text-sm font-medium">Tea</div>
               <div className="text-[10px] text-muted-foreground">your nosiest friend</div>
             </div>
           </div>
@@ -202,12 +202,12 @@ function SpillChat() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 to-accent/10 p-5 text-center"
+              className="mt-6 rounded-3xl border border-primary/40 bg-primary p-5 text-center"
             >
               <p className="text-sm">okay babe… I have enough 👀</p>
               <button
                 onClick={onGoScore}
-                className="mt-4 w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+                className="mt-4 w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium"
               >
                 🚨 Run the chaos numbers →
               </button>
@@ -217,7 +217,7 @@ function SpillChat() {
       </main>
 
       {!draft?.ready_for_score && (
-        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
           <div className="mx-auto max-w-2xl px-4 py-3 flex items-end gap-2">
             {userId && (
               <ReceiptsUploader
@@ -261,7 +261,7 @@ function SpillChat() {
             <button
               onClick={() => void onSend()}
               disabled={aiThinking || !input.trim()}
-              className="shrink-0 h-10 px-5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm disabled:opacity-40"
+              className="shrink-0 h-10 px-5 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-40"
             >
               Send
             </button>

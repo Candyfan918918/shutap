@@ -20,13 +20,13 @@ export function ProfileHeader({ p, onChanged }: { p: PublicProfile; onChanged: (
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-lg font-bold truncate">{p.displayName}</div>
+              <div className="text-lg font-medium truncate">{p.displayName}</div>
               <div className="text-sm text-muted-foreground">@{p.handle}</div>
             </div>
             {p.isMe ? (
               <Link
                 to="/settings/identity"
-                className="px-4 py-2 rounded-full bg-surface-elevated border border-border text-sm font-semibold"
+                className="px-4 py-2 rounded-full bg-surface-elevated border border-border text-sm font-medium"
               >
                 Edit profile
               </Link>
@@ -44,9 +44,9 @@ export function ProfileHeader({ p, onChanged }: { p: PublicProfile; onChanged: (
           )}
 
           <div className="mt-3 flex items-center gap-4 text-sm">
-            <div><span className="font-bold tabular-nums">{stat(p.postCount)}</span> <span className="text-muted-foreground">posts</span></div>
-            <div><span className="font-bold tabular-nums">{stat(p.followerCount)}</span> <span className="text-muted-foreground">followers</span></div>
-            <div><span className="font-bold tabular-nums">{stat(p.followingCount)}</span> <span className="text-muted-foreground">following</span></div>
+            <div><span className="font-medium tabular-nums">{stat(p.postCount)}</span> <span className="text-muted-foreground">posts</span></div>
+            <div><span className="font-medium tabular-nums">{stat(p.followerCount)}</span> <span className="text-muted-foreground">followers</span></div>
+            <div><span className="font-medium tabular-nums">{stat(p.followingCount)}</span> <span className="text-muted-foreground">following</span></div>
           </div>
 
           {(p.avgScore > 0 || p.maxScore > 0) && (

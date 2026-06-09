@@ -139,7 +139,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
   return (
     <section ref={wrapRef} className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-sm font-semibold">💬 Comments</h2>
+        <h2 className="text-sm font-medium">💬 Comments</h2>
         <span className="text-xs text-muted-foreground">{comments.length}</span>
       </div>
 
@@ -149,7 +149,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
           <button
             key={s}
             onClick={() => setSort(s)}
-            className={`px-3 py-1 text-[11px] rounded-full transition font-semibold ${
+            className={`px-3 py-1 text-[11px] rounded-full transition font-medium ${
               sort === s
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -188,7 +188,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
             <button
               type="submit"
               disabled={submitting || !body.trim()}
-              className="px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50"
+              className="px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50"
             >
               {submitting ? "posting…" : "post"}
             </button>
@@ -214,10 +214,10 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
             const laughedByMe = c.myReactions.includes("funny");
             return (
               <li key={c.id} className="flex gap-3">
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
+                <div className="h-7 w-7 rounded-full bg-primary shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-semibold truncate">
+                    <span className="text-xs font-medium truncate">
                       {c.author?.nickname ?? c.author?.handle ?? "anon"}
                     </span>
                     <span className="text-[10px] text-muted-foreground">{timeAgo(c.createdAt)}</span>
@@ -235,7 +235,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
                     <button
                       onClick={() => onReact(c, "like")}
                       className={`flex items-center gap-1 transition ${
-                        likedByMe ? "text-rose-500 font-semibold" : "text-muted-foreground hover:text-foreground"
+                        likedByMe ? "text-rose-500 font-medium" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <span>{likedByMe ? "❤️" : "🤍"}</span>
@@ -244,7 +244,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
                     <button
                       onClick={() => onReact(c, "funny")}
                       className={`flex items-center gap-1 transition ${
-                        laughedByMe ? "text-amber-500 font-semibold" : "text-muted-foreground hover:text-foreground"
+                        laughedByMe ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <span>😂</span>

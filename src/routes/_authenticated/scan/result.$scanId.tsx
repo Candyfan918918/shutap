@@ -90,12 +90,12 @@ function ResultPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/85 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/85 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/scan" className="text-sm text-muted-foreground">
             ← New scan
           </Link>
-          <span className="font-semibold">Chaos Score™</span>
+          <span className="font-medium">Chaos Score™</span>
           <span className="w-12" />
         </div>
       </header>
@@ -107,7 +107,7 @@ function ResultPage() {
       </main>
 
       {/* Sticky action bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
         <div className="mx-auto max-w-2xl px-4 py-3 flex gap-2">
           <Link
             to="/profile/scans"
@@ -120,7 +120,7 @@ function ResultPage() {
               to="/post/$postId"
               params={{ postId: scan.post_id }}
               search={{ shared: 0 }}
-              className="flex-[2] px-4 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm grid place-items-center"
+              className="flex-[2] px-4 py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm grid place-items-center"
             >
               ✨ View your post
             </Link>
@@ -128,7 +128,7 @@ function ResultPage() {
             <Link
               to="/compose"
               search={{ score: scan.score, scanId: scan.id }}
-              className="flex-[2] px-4 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm grid place-items-center"
+              className="flex-[2] px-4 py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm grid place-items-center"
             >
               ✨ Turn into a post
             </Link>

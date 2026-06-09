@@ -38,12 +38,12 @@ function EditPostPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/me/posts/$postId" params={{ postId }} className="p-1 -ml-1 text-muted-foreground">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <div className="font-semibold">Edit post</div>
+          <div className="font-medium">Edit post</div>
           <span className="w-6" />
         </div>
       </header>
@@ -69,7 +69,7 @@ function EditPostPage() {
         <button
           onClick={onSave}
           disabled={busy}
-          className="w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-40"
+          className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-40"
         >
           {busy ? "saving…" : "save changes"}
         </button>

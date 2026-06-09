@@ -30,7 +30,7 @@ export function SavedTea({ rows, isMe }: { rows: SavedPostRow[]; isMe: boolean }
               {p.media_url ? <img src={p.media_url} alt="" className="w-full h-full object-cover rounded-xl" /> : "☕"}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-semibold truncate">{p.title}</div>
+              <div className="font-medium truncate">{p.title}</div>
               <div className="text-xs text-muted-foreground mt-0.5">@{p.author_handle}</div>
               <div className="text-sm text-foreground/80 line-clamp-2 mt-1">{p.story_text}</div>
             </div>

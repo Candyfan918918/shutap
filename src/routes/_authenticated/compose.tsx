@@ -172,12 +172,12 @@ function Composer() {
         onEdit={() => setBlocked(null)}
       />
 
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-background/75 border-b border-border">
+      <header className="sticky top-0 z-40  bg-background/75 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate({ to: "/" })} className="text-sm text-muted-foreground">
             {t("post.backToScore")}
           </button>
-          <span className="font-semibold">{t("post.composer.title")}</span>
+          <span className="font-medium">{t("post.composer.title")}</span>
           <span className="w-12" />
         </div>
       </header>
@@ -255,7 +255,7 @@ function Composer() {
         )}
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
         <div className="mx-auto max-w-2xl px-4 py-3 flex gap-2">
           <button
             onClick={() => regen(tone)}
@@ -267,7 +267,7 @@ function Composer() {
           <button
             onClick={onApprove}
             disabled={loading || publishing || !draft}
-            className="flex-[2] px-4 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm disabled:opacity-50"
+            className="flex-[2] px-4 py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-50"
           >
             {publishing ? t("post.publishing") : `✨ ${t("post.approve")}`}
           </button>
@@ -278,14 +278,14 @@ function Composer() {
         {piiHits && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-4"
+            className="fixed inset-0 z-50 bg-background/80  grid place-items-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }}
-              className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-2xl"
+              className="w-full max-w-md rounded-2xl border border-border bg-card p-5 "
             >
               <p className="text-2xl">🚨</p>
-              <h3 className="mt-2 text-lg font-bold">Hold up — looks like personal info</h3>
+              <h3 className="mt-2 text-lg font-medium">Hold up — looks like personal info</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 We spotted what looks like contact details. Posts on Shutap are anonymous —
                 please remove names, phone numbers, emails, handles, and links before publishing.
@@ -293,7 +293,7 @@ function Composer() {
               <ul className="mt-3 space-y-1 max-h-40 overflow-auto">
                 {piiHits.map((h, i) => (
                   <li key={i} className="text-xs flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-semibold uppercase tracking-wider text-[10px]">
+                    <span className="px-1.5 py-0.5 rounded bg-destructive/15 text-destructive font-medium uppercase tracking-wider text-[10px]">
                       {h.kind}
                     </span>
                     <code className="truncate">{h.sample}</code>
@@ -309,7 +309,7 @@ function Composer() {
                 </button>
                 <button
                   onClick={() => void doPublish()}
-                  className="flex-1 px-4 py-2.5 rounded-full bg-destructive text-destructive-foreground text-sm font-bold"
+                  className="flex-1 px-4 py-2.5 rounded-full bg-destructive text-destructive-foreground text-sm font-medium"
                 >
                   Publish anyway
                 </button>

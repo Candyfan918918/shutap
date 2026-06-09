@@ -62,7 +62,7 @@ export function PrimaryNav({
   const langRef = useClickOutside<HTMLDivElement>(() => setLangOpen(false));
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/75 border-b border-border">
+    <header className="sticky top-0 z-50  bg-background/75 border-b border-border">
       <div className="mx-auto max-w-6xl flex items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex items-center shrink-0" aria-label={t("appName")}>
           <img src={shutapLogoClear.url} alt={t("appName")} className="hidden sm:block h-7 w-auto" />
@@ -77,10 +77,10 @@ export function PrimaryNav({
               to={l.to}
               className={
                 l.highlight
-                  ? "text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 border border-primary/40 hover:border-primary transition font-semibold"
+                  ? "text-xs px-3 py-1.5 rounded-full bg-primary border border-primary/40 hover:border-primary transition font-medium"
                   : "text-xs px-3 py-1.5 rounded-full border border-transparent hover:border-border hover:bg-surface-elevated transition font-medium text-muted-foreground hover:text-foreground"
               }
-              activeProps={{ className: "text-xs px-3 py-1.5 rounded-full border border-primary/40 bg-surface-elevated transition font-semibold" }}
+              activeProps={{ className: "text-xs px-3 py-1.5 rounded-full border border-primary/40 bg-surface-elevated transition font-medium" }}
             >
               {l.emoji} {l.label}
             </Link>
@@ -99,7 +99,7 @@ export function PrimaryNav({
               🌐 {LOCALE_LABELS[locale]}
             </button>
             {langOpen && (
-              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1 shadow-xl z-50">
+              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-border bg-popover p-1  z-50">
                 {SUPPORTED_LOCALES.map((l) => (
                   <button
                     key={l}
@@ -127,7 +127,7 @@ export function PrimaryNav({
 
       {/* Mobile sheet */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-border bg-background/95 ">
           <nav className="mx-auto max-w-6xl px-4 py-3 grid grid-cols-2 gap-2">
             {PRIMARY_LINKS.map((l) => (
               <Link
@@ -208,13 +208,13 @@ function UserMenu() {
           aria-expanded={open}
         >
           <AvatarSvg src={identity.avatarUrl} size={28} className="shadow-none" alt="" />
-          <span className="text-xs font-semibold truncate hidden sm:inline">{identity.displayName}</span>
+          <span className="text-xs font-medium truncate hidden sm:inline">{identity.displayName}</span>
           <span className="text-[10px] text-muted-foreground">▾</span>
         </button>
         {open && (
-          <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-popover p-1 shadow-xl z-50">
+          <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-popover p-1  z-50">
             <div className="px-3 py-2 border-b border-border mb-1">
-              <div className="text-xs font-semibold truncate">{identity.displayName}</div>
+              <div className="text-xs font-medium truncate">{identity.displayName}</div>
               <div className="text-[10px] text-muted-foreground">Signed in</div>
             </div>
             {USER_LINKS.map((l) => (
@@ -255,7 +255,7 @@ function UserMenu() {
     <Link
       to="/enter"
       search={{ redirect: undefined }}
-      className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+      className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
     >
       {t("nav.enter")} →
     </Link>

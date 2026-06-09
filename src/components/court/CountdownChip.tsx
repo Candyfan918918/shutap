@@ -41,7 +41,7 @@ export function CountdownChip({
   const closed = remaining <= 0;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${
         closed
           ? "bg-surface-elevated border-border text-muted-foreground"
           : "bg-primary/15 border-primary/40 text-primary"

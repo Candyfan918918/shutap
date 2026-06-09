@@ -89,7 +89,7 @@ function CourtPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain pb-24">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/75 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/75 border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-sm text-muted-foreground">← Shutap</Link>
           <StreakChip />
@@ -98,9 +98,9 @@ function CourtPage() {
 
       <main className="mx-auto max-w-3xl px-4 pt-6 space-y-6">
         <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="text-3xl sm:text-5xl font-bold text-balance">👑 Relationship Court™</h1>
+          <h1 className="text-3xl sm:text-5xl font-medium text-balance">👑 Relationship Court™</h1>
           <p className="mt-2 text-base text-muted-foreground text-balance">
-            Where the <span className="text-foreground font-semibold">internet</span> decides.
+            Where the <span className="text-foreground font-medium">internet</span> decides.
           </p>
         </motion.div>
 
@@ -112,7 +112,7 @@ function CourtPage() {
 
         {!casesQuery.isLoading && cases.length === 0 && (
           <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-            <p className="text-base font-semibold">Court is in recess in {regionCode}.</p>
+            <p className="text-base font-medium">Court is in recess in {regionCode}.</p>
             <p className="text-sm text-muted-foreground mt-1">
               No cases yet. Try {tab !== "world" ? "World" : "another region"} — or file your own.
             </p>
@@ -127,7 +127,7 @@ function CourtPage() {
               )}
               <Link
                 to="/spill"
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm"
+                className="px-5 py-2 rounded-full bg-primary text-primary-foreground font-medium text-sm"
               >
                 ✍️ File a case
               </Link>
@@ -182,7 +182,7 @@ function CourtPage() {
 function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-3">
-      <h2 className="text-lg font-bold">{title}</h2>
+      <h2 className="text-lg font-medium">{title}</h2>
       {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );

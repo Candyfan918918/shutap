@@ -32,7 +32,7 @@ export const Route = createFileRoute("/u/$handle")({
     <div className="min-h-screen grid place-items-center text-center px-6">
       <div>
         <div className="text-5xl mb-3">🕳️</div>
-        <div className="font-bold">user vanished</div>
+        <div className="font-medium">user vanished</div>
         <div className="text-muted-foreground text-sm mt-1">this handle doesn't exist (or never did).</div>
         <Link to="/" className="text-primary underline text-sm mt-4 inline-block">go home</Link>
       </div>
@@ -91,10 +91,10 @@ function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="p-1 -ml-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></Link>
-          <div className="font-semibold text-sm">@{profile.handle}</div>
+          <div className="font-medium text-sm">@{profile.handle}</div>
           <span className="w-6" />
         </div>
       </header>

@@ -53,8 +53,8 @@ export function AnonymityGuarantee({ variant = "pill" }: { variant?: "pill" | "i
         <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-surface-elevated border border-border text-[10px] cursor-help">
           🔒
         </span>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-xl border border-border bg-surface-elevated p-3 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50">
-          <p className="text-[11px] font-semibold text-foreground mb-1.5">🔒 Your story is posted anonymously</p>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-xl border border-border bg-surface-elevated p-3  opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50">
+          <p className="text-[11px] font-medium text-foreground mb-1.5">🔒 Your story is posted anonymously</p>
           <ul className="space-y-1">
             {GUARANTEES.map((g) => (
               <li key={g} className="flex items-start gap-1.5 text-[10px] text-muted-foreground">

@@ -22,7 +22,7 @@ export function HonorBadge({ b, onPin }: { b: HonorBadgeT; onPin?: (id: string) 
     >
       <div className="text-2xl">{meta.emoji}</div>
       <div className="min-w-0 flex-1">
-        <div className="text-xs font-bold truncate">{meta.label}</div>
+        <div className="text-xs font-medium truncate">{meta.label}</div>
         <div className="text-[10px] text-muted-foreground truncate">
           {b.regionLabel} · {new Date(b.earnedAt).toLocaleDateString()}
         </div>

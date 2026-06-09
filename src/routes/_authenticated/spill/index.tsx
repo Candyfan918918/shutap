@@ -15,10 +15,10 @@ export const Route = createFileRoute("/_authenticated/spill/")({
 function SpillLanding() {
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/75 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/75 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-sm text-muted-foreground">← Home</Link>
-          <span className="text-xs font-semibold tracking-widest text-primary">☕ SPILL THE TEA</span>
+          <span className="text-xs font-medium tracking-widest text-primary">☕ SPILL THE TEA</span>
           <span className="w-12" />
         </div>
       </header>
@@ -37,11 +37,11 @@ function SpillLanding() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="mt-4 text-4xl sm:text-5xl font-black tracking-tight text-balance leading-tight"
+          className="mt-4 text-4xl sm:text-5xl font-medium tracking-tight text-balance leading-tight"
         >
           Okay…
           <br />
-          what <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ACTUALLY</span> happened?
+          what <span className="bg-primary bg-clip-text text-transparent">ACTUALLY</span> happened?
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -63,14 +63,14 @@ function SpillLanding() {
           <Link
             to="/spill/start"
             search={{ voice: 0 }}
-            className="block w-full py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-2xl shadow-primary/20"
+            className="block w-full py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg  shadow-primary/20"
           >
             Okay so basically… →
           </Link>
           <Link
             to="/spill/start"
             search={{ voice: 1 }}
-            className="block w-full py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm hover:border-primary/40 transition"
+            className="block w-full py-3 rounded-full bg-surface-elevated border border-border font-medium text-sm hover:border-primary/40 transition"
           >
             🎙 Tell it out loud
           </Link>

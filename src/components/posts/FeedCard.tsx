@@ -19,7 +19,7 @@ function fmt(n: number) {
 
 function ScoreBadge({ score, small = false }: { score: number; small?: boolean }) {
   return (
-    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-bold bg-primary text-primary-foreground`}>
+    <div className={`${small ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"} rounded-md font-medium bg-primary text-primary-foreground`}>
       {score}
     </div>
   );
@@ -54,12 +54,12 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
             <div className="absolute top-2 right-2"><ScoreBadge score={item.score} small /></div>
           )}
           {item.isSeed && (
-            <div className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded-full bg-background/60 border border-border backdrop-blur">
+            <div className="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded-full bg-background/60 border border-border ">
               example
             </div>
           )}
           <div className="absolute bottom-2 left-2 right-2">
-            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-background/70 backdrop-blur border border-border font-semibold">
+            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-background/70  border border-border font-medium">
               {item.funnyLabel}
             </span>
           </div>
@@ -67,7 +67,7 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
         <div className="p-3 space-y-2">
           {court && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/40">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/15 text-primary border border-primary/40">
                 {court.status === "legendary" ? "🔥 Legendary" : "⚖️ In Court"}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-elevated border border-border text-muted-foreground">
@@ -80,7 +80,7 @@ export function FeedCard({ item, index, court }: { item: FeedItem; index: number
           <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-1.5 min-w-0">
               <AnonymityGuarantee variant="tooltip" />
-              <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent shrink-0" />
+              <div className="h-5 w-5 rounded-full bg-primary shrink-0" />
               <span className="truncate">{item.author?.nickname ?? item.author?.handle ?? "anon"}</span>
             </div>
             {location && <span className="shrink-0 truncate">📍 {location}</span>}

@@ -17,7 +17,7 @@ export function AvatarSvg({
       alt={alt}
       width={size}
       height={size}
-      className={`rounded-full shadow-2xl ${className}`}
+      className={`rounded-full  ${className}`}
       style={{ width: size, height: size }}
     />
   );

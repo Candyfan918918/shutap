@@ -22,9 +22,9 @@ export function CourtTabs({
           <button
             key={it.key}
             onClick={() => onChange(it.key)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${
               active
-                ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent"
+                ? "bg-primary text-primary-foreground border-transparent"
                 : "bg-surface-elevated border-border text-foreground hover:border-primary/40"
             }`}
           >

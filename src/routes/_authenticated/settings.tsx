@@ -21,10 +21,10 @@ function SettingsLayout() {
   const { pathname } = useLocation();
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-4xl px-4 py-3 flex items-center justify-between">
           <Link to="/me" className="p-1 -ml-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></Link>
-          <div className="font-semibold">Settings</div>
+          <div className="font-medium">Settings</div>
           <span className="w-6" />
         </div>
       </header>

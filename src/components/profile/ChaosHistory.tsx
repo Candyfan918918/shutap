@@ -35,7 +35,7 @@ export function ChaosHistory({ rows }: { rows: ChaosHistoryRow[] }) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-black tabular-nums">
+                <div className="text-3xl font-medium tabular-nums">
                   {r.score}
                   <span className="text-sm font-normal text-muted-foreground"> / 1000</span>
                 </div>
@@ -43,7 +43,7 @@ export function ChaosHistory({ rows }: { rows: ChaosHistoryRow[] }) {
               </div>
               <div className="text-right">
                 {prev && (
-                  <div className={`text-sm font-semibold ${delta > 0 ? "text-red-400" : delta < 0 ? "text-emerald-400" : "text-muted-foreground"}`}>
+                  <div className={`text-sm font-medium ${delta > 0 ? "text-red-400" : delta < 0 ? "text-emerald-400" : "text-muted-foreground"}`}>
                     {delta > 0 ? "↑" : delta < 0 ? "↓" : "→"} {Math.abs(delta)}
                   </div>
                 )}

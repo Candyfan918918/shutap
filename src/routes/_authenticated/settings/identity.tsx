@@ -46,12 +46,12 @@ function IdentityPage() {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="text-lg font-bold mb-3">Avatar</h2>
+        <h2 className="text-lg font-medium mb-3">Avatar</h2>
         <AvatarEditor currentUrl={data.avatarUrl} onChanged={() => qc.invalidateQueries({ queryKey: ["me_profile"] })} />
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-1">Display name</h2>
+        <h2 className="text-lg font-medium mb-1">Display name</h2>
         <p className="text-sm text-muted-foreground mb-3">Can repeat. Format like <em>Shanghai · Chaos Queen</em>.</p>
         <input
           value={displayName}
@@ -61,13 +61,13 @@ function IdentityPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-1">@handle</h2>
+        <h2 className="text-lg font-medium mb-1">@handle</h2>
         <p className="text-sm text-muted-foreground mb-3">Must be unique. Letters, numbers, underscores only.</p>
         <HandleEditor currentHandle={data.handle} onChanged={() => qc.invalidateQueries({ queryKey: ["me_profile"] })} />
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-1">Bio</h2>
+        <h2 className="text-lg font-medium mb-1">Bio</h2>
         <textarea
           value={bio}
           onChange={(e) => setBio(e.target.value.slice(0, 200))}
@@ -79,7 +79,7 @@ function IdentityPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-bold mb-1">Anonymous mode</h2>
+        <h2 className="text-lg font-medium mb-1">Anonymous mode</h2>
         <p className="text-sm text-muted-foreground mb-3">When on: hides your city & average score on your profile.</p>
         <ToggleRow value={anonymous} onChange={setAnonymous} label="anonymous era" />
       </section>
@@ -87,7 +87,7 @@ function IdentityPage() {
       <button
         onClick={saveBasics}
         disabled={saving}
-        className="w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-40"
+        className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-40"
       >
         {saving ? "saving…" : "save profile"}
       </button>

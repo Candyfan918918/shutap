@@ -106,7 +106,7 @@ export function VerdictBar({ postId, onVoted }: Props) {
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-sm font-semibold">⚖️ Your verdict?</p>
+        <p className="text-sm font-medium">⚖️ Your verdict?</p>
         <span className="text-xs text-muted-foreground">{fmt(total)} {total === 1 ? "vote" : "votes"}</span>
       </div>
       <div className="space-y-1.5">
@@ -134,7 +134,7 @@ export function VerdictBar({ postId, onVoted }: Props) {
                 <span className="font-medium">
                   {LABELS[k].emoji} {LABELS[k].label}
                 </span>
-                <span className={`tabular-nums ${active ? "font-bold" : "text-muted-foreground"}`}>
+                <span className={`tabular-nums ${active ? "font-medium" : "text-muted-foreground"}`}>
                   {fmt(counts[k])}
                 </span>
               </span>
@@ -149,12 +149,12 @@ export function VerdictBar({ postId, onVoted }: Props) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/40 bg-gradient-to-r from-primary/10 to-accent/10 p-3"
+            className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary p-3"
           >
-            <p className="text-xs font-semibold">Wait… what would YOU do? 👀</p>
+            <p className="text-xs font-medium">Wait… what would YOU do? 👀</p>
             <button
               onClick={() => onVoted?.(mine!)}
-              className="shrink-0 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold"
+              className="shrink-0 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-medium"
             >
               💬 Drop a comment
             </button>

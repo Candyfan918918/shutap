@@ -12,7 +12,7 @@ export function ScoreCard({
   mediaUrl?: string | null;
 }) {
   return (
-    <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-surface border border-border p-6 text-foreground shadow-xl">
+    <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-surface border border-border p-6 text-foreground ">
       {mediaUrl && (
         <>
           <img
@@ -28,11 +28,11 @@ export function ScoreCard({
           Shutap Chaos Score™
         </div>
         <div className="text-center">
-          <div className="text-7xl sm:text-8xl font-black tabular-nums text-primary">
+          <div className="text-7xl sm:text-8xl font-medium tabular-nums text-primary">
             {score}
           </div>
           <div className="text-sm text-muted-foreground mt-1">/ 1000</div>
-          <div className="mt-3 inline-block px-3 py-1 rounded-full bg-tag-peach text-tag-peach-foreground text-sm font-semibold">
+          <div className="mt-3 inline-block px-3 py-1 rounded-full bg-tag-peach text-tag-peach-foreground text-sm font-medium">
             {category}
           </div>
         </div>

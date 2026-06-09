@@ -46,7 +46,7 @@ function LanguagePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">Language</h2>
+        <h2 className="text-lg font-medium">Language</h2>
         <p className="text-sm text-muted-foreground">Auto-detected from your browser. Override here.</p>
       </div>
       <div className="grid grid-cols-2 gap-2">

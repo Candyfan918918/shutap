@@ -8,7 +8,7 @@ const STATUS_PILL: Record<CourtCase["status"], { label: string; cls: string }> =
   in_court: { label: "⚖️ In Court", cls: "bg-primary/15 border-primary/40 text-primary" },
   judgment_pending: { label: "⏳ Judgment Pending", cls: "bg-amber-500/15 border-amber-500/40 text-amber-500" },
   decided: { label: "👑 Final Decision", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-500" },
-  legendary: { label: "🔥 Legendary", cls: "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent" },
+  legendary: { label: "🔥 Legendary", cls: "bg-primary text-primary-foreground border-transparent" },
 };
 
 const VERDICT_EMOJI: Record<string, string> = {
@@ -65,7 +65,7 @@ export function CourtCaseCard({
         )}
         <div className={`${isLarge ? "p-5 space-y-3" : "p-4 space-y-2"}`}>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${status.cls}`}>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${status.cls}`}>
               {status.label}
             </span>
             <span className="px-2 py-0.5 rounded-full text-[10px] bg-surface-elevated border border-border text-muted-foreground">
@@ -76,7 +76,7 @@ export function CourtCaseCard({
             )}
           </div>
 
-          <h3 className={`${isLarge ? "text-xl sm:text-2xl" : "text-base sm:text-lg"} font-bold text-balance leading-tight`}>
+          <h3 className={`${isLarge ? "text-xl sm:text-2xl" : "text-base sm:text-lg"} font-medium text-balance leading-tight`}>
             {c.post.title}
           </h3>
 
@@ -92,7 +92,7 @@ export function CourtCaseCard({
             )
           ) : top ? (
             <div className="text-[11px] text-muted-foreground">
-              Leading: <span className="font-bold text-foreground">{VERDICT_EMOJI[top.kind] ?? ""} {top.pct}%</span>
+              Leading: <span className="font-medium text-foreground">{VERDICT_EMOJI[top.kind] ?? ""} {top.pct}%</span>
               <span className="mx-1">·</span>
               {c.verdict.total} verdict{c.verdict.total === 1 ? "" : "s"}
             </div>

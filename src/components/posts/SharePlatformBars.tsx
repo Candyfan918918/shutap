@@ -40,7 +40,7 @@ export function SharePlatformBars({ rows, title }: { rows: Array<{ k: string; co
           <li key={r.k} className="flex items-center gap-3 text-sm">
             <span className="w-32 truncate">{ICONS[r.k] ?? "·"} {LABELS[r.k] ?? r.k}</span>
             <div className="flex-1 h-2 rounded-full bg-border/40 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-primary to-accent" style={{ width: `${(r.count / max) * 100}%` }} />
+              <div className="h-full bg-primary" style={{ width: `${(r.count / max) * 100}%` }} />
             </div>
             <span className="w-10 text-right tabular-nums">{r.count}</span>
           </li>

@@ -48,7 +48,7 @@ export function ScoreReveal({
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 16, delay: 0.1 }}
-            className="text-8xl sm:text-9xl font-black tabular-nums leading-none mt-3 text-primary"
+            className="text-8xl sm:text-9xl font-medium tabular-nums leading-none mt-3 text-primary"
           >
             {display}
           </motion.div>
@@ -57,7 +57,7 @@ export function ScoreReveal({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0 }}
-            className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-tag-peach text-tag-peach-foreground text-base font-bold"
+            className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-tag-peach text-tag-peach-foreground text-base font-medium"
           >
             <span>{band.emoji}</span>
             <span>{result.category}</span>
@@ -77,7 +77,7 @@ export function ScoreReveal({
             className="mt-3 text-xs text-muted-foreground"
           >
             Higher than{" "}
-            <span className="font-bold tabular-nums text-foreground">{result.percentile}%</span> of
+            <span className="font-medium tabular-nums text-foreground">{result.percentile}%</span> of
             relationships we've scanned
           </motion.div>
           {(displayName || cityLabel) && (
@@ -91,7 +91,7 @@ export function ScoreReveal({
 
       {/* Subscore bars */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           {locale === "zh" ? "分项得分" : "How it broke down"}
         </h3>
         {(Object.keys(labels) as Array<keyof typeof labels>).map((k) => {
@@ -124,7 +124,7 @@ export function ScoreReveal({
 
       {/* Badges */}
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
           {locale === "zh" ? "你的徽章" : "Your badges"}
         </h3>
         <div className="flex flex-wrap gap-2">

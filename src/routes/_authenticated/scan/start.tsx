@@ -306,7 +306,7 @@ function QuickScan() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="px-4 pt-4 pb-2 flex items-center justify-between">
         <Link to="/scan" className="text-sm text-muted-foreground">← exit</Link>
-        <div className="text-xs font-bold tracking-wider text-accent uppercase">Judge My Relationship™</div>
+        <div className="text-xs font-medium tracking-wider text-accent uppercase">Judge My Relationship™</div>
         <span className="w-12" />
       </header>
       <ProgressDots step={Math.min(step, TOTAL_STEPS)} total={TOTAL_STEPS} />
@@ -319,10 +319,10 @@ function QuickScan() {
               key="s0"
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
-              <h1 className="text-3xl font-black leading-tight text-balance">
+              <h1 className="text-3xl font-medium leading-tight text-balance">
                 👀 Okay wait…
               </h1>
-              <p className="mt-1 text-2xl font-bold text-muted-foreground">
+              <p className="mt-1 text-2xl font-medium text-muted-foreground">
                 what kind of mess are we talking about?
               </p>
               <div className="mt-6 space-y-2.5">
@@ -350,7 +350,7 @@ function QuickScan() {
               key="s1"
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
-              <h1 className="text-3xl font-black leading-tight text-balance">
+              <h1 className="text-3xl font-medium leading-tight text-balance">
                 Be honest…
               </h1>
               <p className="mt-1 text-xl text-muted-foreground">
@@ -361,7 +361,7 @@ function QuickScan() {
                 <div className="text-7xl mb-2">
                   {CHAOS_STEPS.reduce((acc, c) => (s.chaos >= c.v ? c : acc), CHAOS_STEPS[0]).emoji}
                 </div>
-                <div className="text-base font-semibold">
+                <div className="text-base font-medium">
                   {CHAOS_STEPS.reduce((acc, c) => (s.chaos >= c.v ? c : acc), CHAOS_STEPS[0]).label}
                 </div>
               </div>
@@ -384,7 +384,7 @@ function QuickScan() {
                   );
                   advance(tier.react, 800);
                 }}
-                className="mt-10 w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
+                className="mt-10 w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
               >
                 that's the vibe →
               </button>
@@ -398,7 +398,7 @@ function QuickScan() {
               key="s2"
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
-              <h1 className="text-3xl font-black leading-tight">
+              <h1 className="text-3xl font-medium leading-tight">
                 🚩 what's the main issue?
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">pick up to 3. we won't tell.</p>
@@ -437,7 +437,7 @@ function QuickScan() {
               <button
                 disabled={s.issues.length === 0}
                 onClick={() => advance("noted. continuing the investigation 🔍", 700)}
-                className="mt-6 w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg disabled:opacity-40"
+                className="mt-6 w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg  disabled:opacity-40"
               >
                 continue →
               </button>
@@ -451,7 +451,7 @@ function QuickScan() {
               key="s3"
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
-              <h1 className="text-3xl font-black leading-tight">okay be honest 👀</h1>
+              <h1 className="text-3xl font-medium leading-tight">okay be honest 👀</h1>
               <p className="mt-1 text-xl text-muted-foreground">do you have receipts?</p>
               <div className="mt-6 space-y-2.5">
                 {RECEIPT_OPTIONS.map((o) => (
@@ -481,7 +481,7 @@ function QuickScan() {
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
               <div className="text-xs text-muted-foreground mb-2">one real question. then we go.</div>
-              <h1 className="text-3xl font-black leading-tight text-balance">
+              <h1 className="text-3xl font-medium leading-tight text-balance">
                 {tea.headline}
               </h1>
               <textarea
@@ -501,7 +501,7 @@ function QuickScan() {
                 </button>
                 <button
                   onClick={() => advance("ok this is juicy 🍵", 600)}
-                  className="flex-[2] px-6 py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold shadow-lg"
+                  className="flex-[2] px-6 py-3.5 rounded-full bg-primary text-primary-foreground font-medium "
                 >
                   spill →
                 </button>
@@ -516,7 +516,7 @@ function QuickScan() {
               key="s5"
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             >
-              <h1 className="text-3xl font-black leading-tight text-balance">
+              <h1 className="text-3xl font-medium leading-tight text-balance">
                 okay but be honest…
               </h1>
               <p className="mt-1 text-xl text-muted-foreground">
@@ -554,7 +554,7 @@ function QuickScan() {
               className="text-center"
             >
               <div className="text-6xl">🧮</div>
-              <h1 className="mt-4 text-3xl font-black leading-tight">
+              <h1 className="mt-4 text-3xl font-medium leading-tight">
                 that's it. 90 seconds. iconic.
               </h1>
               <p className="mt-2 text-muted-foreground">
@@ -562,7 +562,7 @@ function QuickScan() {
               </p>
               <button
                 onClick={() => setStep(TOTAL_STEPS)}
-                className="mt-8 w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
+                className="mt-8 w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
               >
                 🚨 calculate the chaos →
               </button>
@@ -604,7 +604,7 @@ function LoadingReveal() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
-          className="text-lg font-semibold text-muted-foreground"
+          className="text-lg font-medium text-muted-foreground"
         >
           {LOADING_LINES[i]}
         </motion.div>

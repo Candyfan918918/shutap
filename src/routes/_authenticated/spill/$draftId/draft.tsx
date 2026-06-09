@@ -115,10 +115,10 @@ function DraftPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-40">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/80 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => history.back()} className="text-sm text-muted-foreground">← Back</button>
-          <span className="text-xs font-semibold tracking-widest text-primary">PICK A VIBE</span>
+          <span className="text-xs font-medium tracking-widest text-primary">PICK A VIBE</span>
           <span className="w-12" />
         </div>
       </header>
@@ -148,7 +148,7 @@ function DraftPage() {
                 }`}
               >
                 <div className="text-2xl">{meta.emoji}</div>
-                <div className="text-sm font-bold mt-1">{meta.label}</div>
+                <div className="text-sm font-medium mt-1">{meta.label}</div>
                 <div className="text-[10px] text-muted-foreground">{meta.sub}</div>
               </button>
             );
@@ -158,7 +158,7 @@ function DraftPage() {
         {/* Cover */}
         <div>
           <label className="text-xs text-muted-foreground uppercase tracking-wider">Cover</label>
-          <div className="mt-2 aspect-[4/5] max-w-xs mx-auto rounded-3xl overflow-hidden border border-border bg-gradient-to-br from-primary/20 to-accent/20 grid place-items-center relative">
+          <div className="mt-2 aspect-[4/5] max-w-xs mx-auto rounded-3xl overflow-hidden border border-border bg-primary grid place-items-center relative">
             {coverUrl ? (
               coverUrl.match(/\.(mp4|webm|mov)/i) ? (
                 <video src={coverUrl} className="w-full h-full object-cover" muted autoPlay loop />
@@ -168,7 +168,7 @@ function DraftPage() {
             ) : (
               <div className="text-center p-6">
                 <div className="text-5xl mb-3">🚨</div>
-                <div className="text-3xl font-black tabular-nums">{draft.score}/1000</div>
+                <div className="text-3xl font-medium tabular-nums">{draft.score}/1000</div>
                 <p className="mt-2 text-sm opacity-80 line-clamp-3">"{editingTitle}"</p>
               </div>
             )}
@@ -217,7 +217,7 @@ function DraftPage() {
         </div>
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
         <div className="mx-auto max-w-2xl px-4 py-3 flex gap-2">
           <button
             onClick={() => navigate({ to: "/spill/$draftId/score", params: { draftId } })}
@@ -228,7 +228,7 @@ function DraftPage() {
           <button
             onClick={onPublish}
             disabled={publishing || !editingTitle.trim() || editingStory.trim().length < 20}
-            className="flex-1 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-50"
+            className="flex-1 py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-50"
           >
             {publishing ? "Going live…" : "✨ Publish anonymously"}
           </button>

@@ -28,10 +28,10 @@ function FriendsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/me" className="p-1 -ml-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></Link>
-          <div className="font-semibold">Friends</div>
+          <div className="font-medium">Friends</div>
           <span className="w-6" />
         </div>
       </header>
@@ -44,13 +44,13 @@ function FriendsPage() {
               <Row key={r.userId} r={r}>
                 <button
                   onClick={() => run(() => respond({ data: { requesterId: r.userId, accept: true } }), "friends now 🫂")}
-                  className="px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold"
+                  className="px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium"
                 >
                   ✓ Accept
                 </button>
                 <button
                   onClick={() => run(() => respond({ data: { requesterId: r.userId, accept: false } }), "declined")}
-                  className="px-3 py-1.5 rounded-full bg-surface-elevated text-xs font-semibold border border-border"
+                  className="px-3 py-1.5 rounded-full bg-surface-elevated text-xs font-medium border border-border"
                 >
                   Decline
                 </button>
@@ -76,7 +76,7 @@ function FriendsPage() {
             <Row key={r.userId} r={r}>
               <button
                 onClick={() => run(() => remove({ data: { userId: r.userId } }), "unfriended")}
-                className="px-3 py-1.5 rounded-full bg-surface-elevated text-xs font-semibold border border-border"
+                className="px-3 py-1.5 rounded-full bg-surface-elevated text-xs font-medium border border-border"
               >
                 Remove
               </button>
@@ -91,7 +91,7 @@ function FriendsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">{title}</h2>
+      <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground mb-3">{title}</h2>
       <div className="rounded-2xl border border-border bg-card divide-y divide-border">{children}</div>
     </section>
   );

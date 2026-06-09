@@ -83,7 +83,7 @@ function MultiPicker({
             .map((o) => o.label);
           onAnswer(labels.join(" • "));
         }}
-        className="w-full mt-1 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm disabled:opacity-50"
+        className="w-full mt-1 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-50"
       >
         Send →
       </button>
@@ -107,7 +107,7 @@ function SliderPicker({
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{question.minLabel ?? "low"}</span>
-        <span className="text-foreground font-bold text-base tabular-nums">{val}</span>
+        <span className="text-foreground font-medium text-base tabular-nums">{val}</span>
         <span>{question.maxLabel ?? "high"}</span>
       </div>
       <input
@@ -122,7 +122,7 @@ function SliderPicker({
       <button
         disabled={disabled}
         onClick={() => onAnswer(`${val}/100`)}
-        className="w-full py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm disabled:opacity-50"
+        className="w-full py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-50"
       >
         That's me →
       </button>

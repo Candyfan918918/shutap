@@ -54,22 +54,22 @@ function DataPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">Your data</h2>
+        <h2 className="text-lg font-medium">Your data</h2>
         <p className="text-sm text-muted-foreground">Download or delete everything.</p>
       </div>
 
       <button onClick={onExport} className="w-full py-3 rounded-2xl bg-card border border-border text-left px-4">
-        <div className="font-semibold">📦 Download my data</div>
+        <div className="font-medium">📦 Download my data</div>
         <div className="text-xs text-muted-foreground mt-1">Get a zip of your profile, posts, and scans.</div>
       </button>
 
       <button onClick={onPause} className="w-full py-3 rounded-2xl bg-card border border-border text-left px-4">
-        <div className="font-semibold">😴 Pause account</div>
+        <div className="font-medium">😴 Pause account</div>
         <div className="text-xs text-muted-foreground mt-1">Sign out and step away. Come back whenever.</div>
       </button>
 
       <button onClick={() => setConfirm(true)} className="w-full py-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-left px-4">
-        <div className="font-semibold text-red-400">🗑️ Delete account</div>
+        <div className="font-medium text-red-400">🗑️ Delete account</div>
         <div className="text-xs text-red-300/70 mt-1">Your profile becomes anonymous and we sign you out. Posts stay anonymous.</div>
       </button>
 

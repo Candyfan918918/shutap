@@ -43,10 +43,10 @@ function PostAnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
           <Link to="/me/posts" className="p-1 -ml-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></Link>
-          <div className="font-semibold text-sm truncate max-w-[60%]">{data.title}</div>
+          <div className="font-medium text-sm truncate max-w-[60%]">{data.title}</div>
           <button onClick={onDelete} className="p-1 text-red-400" aria-label="Delete">
             <Trash2 className="w-4 h-4" />
           </button>
@@ -60,7 +60,7 @@ function PostAnalyticsPage() {
               {data.media_url ? <img src={data.media_url} alt="" className="w-full h-full object-cover" /> : "☕"}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-base font-bold">{data.title}</div>
+              <div className="text-base font-medium">{data.title}</div>
               <div className="mt-1 text-sm text-muted-foreground line-clamp-2">{data.story_text}</div>
               <div className="mt-3 flex items-center gap-2 flex-wrap text-xs">
                 {data.score !== null && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/30">🚨 {data.score}</span>}
@@ -75,7 +75,7 @@ function PostAnalyticsPage() {
                 key={v}
                 onClick={() => changeVis(v)}
                 disabled={data.visibility === v}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
                   data.visibility === v
                     ? "bg-primary/10 border-primary/40 text-primary"
                     : "bg-surface-elevated border-border hover:border-primary/40"
@@ -87,7 +87,7 @@ function PostAnalyticsPage() {
             <Link
               to="/me/posts/$postId/edit"
               params={{ postId }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold border border-border bg-surface-elevated hover:border-primary/40"
+              className="px-3 py-1.5 rounded-full text-xs font-medium border border-border bg-surface-elevated hover:border-primary/40"
             >
               ✏️ edit
             </Link>
@@ -96,7 +96,7 @@ function PostAnalyticsPage() {
                 await navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
                 toast.success("link copied 🔗");
               }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold border border-border bg-surface-elevated hover:border-primary/40"
+              className="px-3 py-1.5 rounded-full text-xs font-medium border border-border bg-surface-elevated hover:border-primary/40"
             >
               🔗 copy link
             </button>
