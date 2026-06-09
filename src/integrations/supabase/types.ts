@@ -95,6 +95,27 @@ export type Database = {
         }
         Relationships: []
       }
+      bench_voice_strings: {
+        Row: {
+          key: string
+          locale: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          locale: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          locale?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -121,6 +142,10 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          nomination_cap: number
+          paused_reason: string | null
+          updated_at: string
+          updated_by: string | null
         }
         Insert: {
           active?: boolean
@@ -129,6 +154,10 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          nomination_cap?: number
+          paused_reason?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           active?: boolean
@@ -137,6 +166,10 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          nomination_cap?: number
+          paused_reason?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -260,10 +293,16 @@ export type Database = {
           engagement_score: number
           final_judgment: string | null
           final_verdict: string | null
+          flip_round_count: number
+          flip_window_closes_at: string | null
+          flip_window_opened_at: string | null
           id: string
+          is_flip_round: boolean
           nominated_at: string
+          og_image_url: string | null
           opens_at: string | null
           post_id: string
+          pre_flip_verdict: string | null
           region_code: string
           region_label: string
           scope: string
@@ -284,10 +323,16 @@ export type Database = {
           engagement_score?: number
           final_judgment?: string | null
           final_verdict?: string | null
+          flip_round_count?: number
+          flip_window_closes_at?: string | null
+          flip_window_opened_at?: string | null
           id?: string
+          is_flip_round?: boolean
           nominated_at?: string
+          og_image_url?: string | null
           opens_at?: string | null
           post_id: string
+          pre_flip_verdict?: string | null
           region_code: string
           region_label: string
           scope: string
@@ -308,10 +353,16 @@ export type Database = {
           engagement_score?: number
           final_judgment?: string | null
           final_verdict?: string | null
+          flip_round_count?: number
+          flip_window_closes_at?: string | null
+          flip_window_opened_at?: string | null
           id?: string
+          is_flip_round?: boolean
           nominated_at?: string
+          og_image_url?: string | null
           opens_at?: string | null
           post_id?: string
+          pre_flip_verdict?: string | null
           region_code?: string
           region_label?: string
           scope?: string
@@ -617,6 +668,60 @@ export type Database = {
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mod_queue: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          id: string
+          moderator_id: string | null
+          notes: string | null
+          post_id: string
+          reason: string
+          resolved_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          moderator_id?: string | null
+          notes?: string | null
+          post_id: string
+          reason: string
+          resolved_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          moderator_id?: string | null
+          notes?: string | null
+          post_id?: string
+          reason?: string
+          resolved_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mod_queue_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "court_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mod_queue_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
         ]
@@ -1186,6 +1291,7 @@ export type Database = {
       post_verdict_votes: {
         Row: {
           created_at: string
+          flip_round: number
           ip_hash: string | null
           kind: string
           post_id: string
@@ -1196,6 +1302,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          flip_round?: number
           ip_hash?: string | null
           kind: string
           post_id: string
@@ -1206,6 +1313,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          flip_round?: number
           ip_hash?: string | null
           kind?: string
           post_id?: string
