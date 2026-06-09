@@ -1,7 +1,7 @@
 // Identity ceremony — the soft gate. The reels spin, the user verifies, the alias appears.
 // Nothing in the underlying page executes until the user claims an identity here.
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
