@@ -815,6 +815,158 @@ export type Database = {
         }
         Relationships: []
       }
+      post_perspective_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          perspective_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          perspective_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          perspective_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_perspective_comments_perspective_id_fkey"
+            columns: ["perspective_id"]
+            isOneToOne: false
+            referencedRelation: "post_perspectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_perspective_relates: {
+        Row: {
+          created_at: string
+          perspective_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          perspective_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          perspective_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_perspective_relates_perspective_id_fkey"
+            columns: ["perspective_id"]
+            isOneToOne: false
+            referencedRelation: "post_perspectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_perspective_verdicts: {
+        Row: {
+          created_at: string
+          kind: string
+          perspective_id: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          perspective_id: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          perspective_id?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_perspective_verdicts_perspective_id_fkey"
+            columns: ["perspective_id"]
+            isOneToOne: false
+            referencedRelation: "post_perspectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_perspectives: {
+        Row: {
+          comment_count: number
+          created_at: string
+          id: string
+          locked_at: string | null
+          post_id: string
+          receipts_urls: string[]
+          relate_count: number
+          responder_id: string
+          response_text: string | null
+          role: string
+          standing_notes: string | null
+          standing_score: number | null
+          standing_status: string
+          updated_at: string
+        }
+        Insert: {
+          comment_count?: number
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          post_id: string
+          receipts_urls?: string[]
+          relate_count?: number
+          responder_id: string
+          response_text?: string | null
+          role: string
+          standing_notes?: string | null
+          standing_score?: number | null
+          standing_status?: string
+          updated_at?: string
+        }
+        Update: {
+          comment_count?: number
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          post_id?: string
+          receipts_urls?: string[]
+          relate_count?: number
+          responder_id?: string
+          response_text?: string | null
+          role?: string
+          standing_notes?: string | null
+          standing_score?: number | null
+          standing_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_perspectives_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_reactions: {
         Row: {
           created_at: string
@@ -1018,8 +1170,10 @@ export type Database = {
       }
       posts: {
         Row: {
+          additional_perspectives: boolean
           author_id: string
           badges: string[]
+          both_sides_heard: boolean
           comment_count: number
           created_at: string
           deleted_at: string | null
@@ -1030,6 +1184,7 @@ export type Database = {
           like_count: number
           locale: string
           media_url: string | null
+          perspective_count: number
           pii_removed: boolean
           platform_captions: Json
           published_at: string | null
@@ -1052,8 +1207,10 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          additional_perspectives?: boolean
           author_id: string
           badges?: string[]
+          both_sides_heard?: boolean
           comment_count?: number
           created_at?: string
           deleted_at?: string | null
@@ -1064,6 +1221,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          perspective_count?: number
           pii_removed?: boolean
           platform_captions?: Json
           published_at?: string | null
@@ -1086,8 +1244,10 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          additional_perspectives?: boolean
           author_id?: string
           badges?: string[]
+          both_sides_heard?: boolean
           comment_count?: number
           created_at?: string
           deleted_at?: string | null
@@ -1098,6 +1258,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          perspective_count?: number
           pii_removed?: boolean
           platform_captions?: Json
           published_at?: string | null
@@ -1446,6 +1607,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      standing_verifications: {
+        Row: {
+          agent_output: Json | null
+          attempt_no: number
+          claimed_facts: Json
+          created_at: string
+          decision: string
+          id: string
+          perspective_id: string
+          responder_id: string
+        }
+        Insert: {
+          agent_output?: Json | null
+          attempt_no?: number
+          claimed_facts?: Json
+          created_at?: string
+          decision: string
+          id?: string
+          perspective_id: string
+          responder_id: string
+        }
+        Update: {
+          agent_output?: Json | null
+          attempt_no?: number
+          claimed_facts?: Json
+          created_at?: string
+          decision?: string
+          id?: string
+          perspective_id?: string
+          responder_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standing_verifications_perspective_id_fkey"
+            columns: ["perspective_id"]
+            isOneToOne: false
+            referencedRelation: "post_perspectives"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stories: {
         Row: {
