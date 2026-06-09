@@ -88,6 +88,7 @@ function AnonymousCourt() {
   const fetchGlobal = useServerFn(getGlobalVerdictCount);
   const fetchTeaser = useServerFn(getTeaserFeed);
   const fetchOpenCases = useServerFn(getOpenCaseCount);
+  const fetchHof = useServerFn(getHallOfFame);
 
   const featuredQ = useQuery({
     queryKey: ["anon-court", "featured"],
@@ -113,6 +114,13 @@ function AnonymousCourt() {
     refetchInterval: 30_000,
     staleTime: 0,
   });
+  const hofQ = useQuery<HallOfFame>({
+    queryKey: ["anon-court", "hof"],
+    queryFn: () => fetchHof(),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain">
