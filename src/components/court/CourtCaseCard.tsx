@@ -111,3 +111,5 @@ function CourtCaseCardImpl({
     </motion.article>
   );
 }
+
+export const CourtCaseCard = memo(CourtCaseCardImpl);
