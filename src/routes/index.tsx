@@ -184,6 +184,12 @@ function AnonymousCourt() {
         className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8"
       >
         <HeroIntro />
+        {authed && firstSession && (
+          <FirstSessionStream
+            meta={firstSession}
+            onDone={() => setFirstSessionState(null)}
+          />
+        )}
         {featuredQ.isLoading ? (
           <CaseSkeleton />
         ) : featuredQ.data ? (
