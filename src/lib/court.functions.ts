@@ -494,7 +494,8 @@ export interface FeaturedCase {
   totalRelates: number;
 }
 
-export const getFeaturedCourtCase = createServerFn({ method: "GET" }).handler(
+export const getFeaturedCourtCase = createServerFn({ method: "GET" })
+  .handler(
   async (): Promise<FeaturedCase | null> => {
     const { data: rows } = await supabaseAdmin
       .from("court_cases")
@@ -539,7 +540,8 @@ export const getFeaturedCourtCase = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export const getGlobalVerdictCount = createServerFn({ method: "GET" }).handler(
+export const getGlobalVerdictCount = createServerFn({ method: "GET" })
+  .handler(
   async (): Promise<{ total: number }> => {
     const { count } = await supabaseAdmin
       .from("post_verdict_votes")
@@ -659,7 +661,8 @@ export const getTeaserFeed = createServerFn({ method: "GET" })
     }));
   });
 
-export const getOpenCaseCount = createServerFn({ method: "GET" }).handler(
+export const getOpenCaseCount = createServerFn({ method: "GET" })
+  .handler(
   async (): Promise<{ count: number }> => {
     const { count } = await supabaseAdmin
       .from("court_cases")
@@ -737,7 +740,8 @@ async function loadHofAuthorMap(authorIds: string[]) {
   );
 }
 
-export const getHallOfFame = createServerFn({ method: "GET" }).handler(
+export const getHallOfFame = createServerFn({ method: "GET" })
+  .handler(
   async (): Promise<HallOfFame> => {
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
