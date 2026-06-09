@@ -11,8 +11,9 @@ import {
   type CourtCase,
 } from "@/lib/court.functions";
 import { CourtCaseCard } from "@/components/court/CourtCaseCard";
-import { CourtTabs, type CourtTab } from "@/components/court/CourtTabs";
+import { CourtTabs, type CourtTab, type CourtCategory } from "@/components/court/CourtTabs";
 import { CourtroomPanel } from "@/components/court/CourtroomPanel";
+import { WatchParty, shouldShowWatchParty } from "@/components/court/WatchParty";
 
 export const Route = createFileRoute("/court")({
   component: CourtPage,
@@ -59,6 +60,7 @@ function CourtPage() {
   });
 
   const [tab, setTab] = useState<CourtTab>("world");
+  const [category, setCategory] = useState<CourtCategory>("all");
   // Once region resolves, default to country if available.
   useEffect(() => {
     if (regionQuery.data?.country) setTab("country");
@@ -91,13 +93,21 @@ function CourtPage() {
   });
 
   const cases = casesQuery.data ?? [];
+  const filtered = useMemo(() => {
+    if (category === "all") return cases;
+    return cases.filter((c) => {
+      const cat = c.post?.scoreCategory?.toLowerCase() ?? "";
+      return cat.includes(category);
+    });
+  }, [cases, category]);
+
   const grouped = useMemo(() => {
-    const inCourt = cases.filter((c) => c.status === "in_court");
-    const pending = cases.filter((c) => c.status === "judgment_pending");
-    const nominated = cases.filter((c) => c.status === "nominated");
-    const decided = cases.filter((c) => c.status === "decided" || c.status === "legendary");
+    const inCourt = filtered.filter((c) => c.status === "in_court");
+    const pending = filtered.filter((c) => c.status === "judgment_pending");
+    const nominated = filtered.filter((c) => c.status === "nominated");
+    const decided = filtered.filter((c) => c.status === "decided" || c.status === "legendary");
     return { inCourt, pending, nominated, decided };
-  }, [cases]);
+  }, [filtered]);
 
   const featured = grouped.inCourt[0] ?? grouped.decided[0] ?? grouped.nominated[0] ?? null;
 
@@ -140,7 +150,13 @@ function CourtPage() {
           </p>
         </motion.div>
 
-        <CourtTabs value={tab} onChange={setTab} countryLabel={countryLabel} />
+        <CourtTabs
+          value={tab}
+          onChange={setTab}
+          countryLabel={countryLabel}
+          category={category}
+          onCategoryChange={setCategory}
+        />
 
         {casesQuery.isLoading && (
           <p className="text-center text-sm text-muted-foreground">Calling court to order…</p>
@@ -170,6 +186,8 @@ function CourtPage() {
             </div>
           </div>
         )}
+
+        {featured && shouldShowWatchParty(featured) && <WatchParty c={featured} />}
 
         {featured && <CourtroomPanel c={featured} />}
 
