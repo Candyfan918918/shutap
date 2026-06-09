@@ -469,7 +469,7 @@ function AliasPill({
       {avatarUrl ? (
         <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
       ) : (
-        <div className="h-6 w-6 rounded-full bg-primary" />
+        <div className="h-6 w-6 rounded-full bg-c-surface-3 border border-c-border" />
       )}
       <div className="leading-tight">
         <div className="text-xs font-medium">{nickname}</div>
