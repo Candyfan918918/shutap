@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
+import { useGateStore } from "@/stores/gate";
 import {
   addComment,
   listComments,
