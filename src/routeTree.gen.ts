@@ -37,6 +37,7 @@ import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authent
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
+import { Route as ApiPublicHooksOutcomeTrackerRouteImport } from './routes/api/public/hooks/outcome-tracker'
 import { Route as ApiPublicHooksCourtTickRouteImport } from './routes/api/public/hooks/court-tick'
 import { Route as AuthenticatedSpillDraftIdScoringRouteImport } from './routes/_authenticated/spill/$draftId/scoring'
 import { Route as AuthenticatedSpillDraftIdScoreRouteImport } from './routes/_authenticated/spill/$draftId/score'
@@ -197,6 +198,12 @@ const ApiPublicSPostIdRoute = ApiPublicSPostIdRouteImport.update({
   path: '/api/public/s/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksOutcomeTrackerRoute =
+  ApiPublicHooksOutcomeTrackerRouteImport.update({
+    id: '/api/public/hooks/outcome-tracker',
+    path: '/api/public/hooks/outcome-tracker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksCourtTickRoute = ApiPublicHooksCourtTickRouteImport.update({
   id: '/api/public/hooks/court-tick',
   path: '/api/public/hooks/court-tick',
@@ -283,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
+  '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/me/posts/': typeof AuthenticatedMePostsIndexRoute
@@ -320,6 +328,7 @@ export interface FileRoutesByTo {
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
+  '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/me/posts': typeof AuthenticatedMePostsIndexRoute
@@ -360,6 +369,7 @@ export interface FileRoutesById {
   '/_authenticated/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/_authenticated/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
+  '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
   '/api/public/s/$postId': typeof ApiPublicSPostIdRoute
   '/api/public/share-card/$postId': typeof ApiPublicShareCardPostIdRoute
   '/_authenticated/me/posts/': typeof AuthenticatedMePostsIndexRoute
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
     | '/api/public/hooks/court-tick'
+    | '/api/public/hooks/outcome-tracker'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/me/posts/'
@@ -437,6 +448,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
     | '/api/public/hooks/court-tick'
+    | '/api/public/hooks/outcome-tracker'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/me/posts'
@@ -476,6 +488,7 @@ export interface FileRouteTypes {
     | '/_authenticated/spill/$draftId/score'
     | '/_authenticated/spill/$draftId/scoring'
     | '/api/public/hooks/court-tick'
+    | '/api/public/hooks/outcome-tracker'
     | '/api/public/s/$postId'
     | '/api/public/share-card/$postId'
     | '/_authenticated/me/posts/'
@@ -492,6 +505,7 @@ export interface RootRouteChildren {
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
   ApiPublicHooksCourtTickRoute: typeof ApiPublicHooksCourtTickRoute
+  ApiPublicHooksOutcomeTrackerRoute: typeof ApiPublicHooksOutcomeTrackerRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
   ApiPublicShareCardPostIdRoute: typeof ApiPublicShareCardPostIdRoute
 }
@@ -694,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/outcome-tracker': {
+      id: '/api/public/hooks/outcome-tracker'
+      path: '/api/public/hooks/outcome-tracker'
+      fullPath: '/api/public/hooks/outcome-tracker'
+      preLoaderRoute: typeof ApiPublicHooksOutcomeTrackerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/court-tick': {
       id: '/api/public/hooks/court-tick'
       path: '/api/public/hooks/court-tick'
@@ -863,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
   ApiPublicHooksCourtTickRoute: ApiPublicHooksCourtTickRoute,
+  ApiPublicHooksOutcomeTrackerRoute: ApiPublicHooksOutcomeTrackerRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
   ApiPublicShareCardPostIdRoute: ApiPublicShareCardPostIdRoute,
 }
