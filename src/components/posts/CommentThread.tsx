@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
+import { useGateStore } from "@/stores/gate";
 import {
   addComment,
   listComments,
@@ -50,6 +50,8 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
   const post = useServerFn(addComment);
   const del = useServerFn(deleteComment);
   const reactFn = useServerFn(toggleCommentReaction);
+  const enqueue = useGateStore((s) => s.enqueue);
+
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,9 +198,13 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
         </form>
       ) : (
         <div className="mb-4 rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
-          <Link to="/enter" search={{ redirect: undefined }} className="text-primary underline">
+          <button
+            type="button"
+            onClick={() => enqueue({ type: "comment", entityId: postId })}
+            className="text-primary underline"
+          >
             Sign in
-          </Link>{" "}
+          </button>{" "}
           to drop a comment.
         </div>
       )}

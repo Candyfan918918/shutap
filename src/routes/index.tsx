@@ -22,7 +22,6 @@ import {
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useGateStore, type PendingAction } from "@/stores/gate";
-import { IdentityCeremony, RESUME_KEY } from "@/components/gate/IdentityCeremony";
 import { CourtroomPanel } from "@/components/court/CourtroomPanel";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
@@ -96,27 +95,15 @@ function AnonymousCourt() {
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
-    const tryResume = (hasSession: boolean) => {
-      if (!hasSession) return;
-      try {
-        const raw = sessionStorage.getItem(RESUME_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw) as PendingAction;
-        sessionStorage.removeItem(RESUME_KEY);
-        enqueue(parsed);
-      } catch {/* silent */}
-    };
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
       setAuthed(!!data.session);
-      tryResume(!!data.session);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
-      tryResume(!!session);
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
-  }, [enqueue]);
+  }, []);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
@@ -228,9 +215,6 @@ function AnonymousCourt() {
         </div>
       </footer>
 
-      <AnimatePresence>
-        {gateOpen && <IdentityCeremony key="ceremony" />}
-      </AnimatePresence>
     </div>
   );
 }

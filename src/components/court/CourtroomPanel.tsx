@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { CourtCase } from "@/lib/court.functions";
 import { castVerdict } from "@/lib/vote.functions";
+import { useGateStore, type PendingAction } from "@/stores/gate";
 import { CountdownChip } from "./CountdownChip";
 
 type VerdictKey =
@@ -55,9 +56,11 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
 
   const cast = useServerFn(castVerdict);
-  const navigate = useNavigate();
+  const enqueue = useGateStore((s) => s.enqueue);
 
-  // Auth state — every CTA in the courtroom requires sign-in.
+  // Auth state — every CTA in the courtroom requires sign-in. When the user
+  // is signed out, we funnel through the IdentityCeremony "reel" gate
+  // (mounted globally in __root.tsx) instead of redirecting to /enter.
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -70,12 +73,17 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     return () => { cancelled = true; sub.subscription.unsubscribe(); };
   }, []);
 
-  function requireAuth(): boolean {
+  const gateContext = useMemo(
+    () => ({
+      category: c.post?.scoreCategory ?? undefined,
+      relationshipType: c.post?.scoreCategory ?? undefined,
+    }),
+    [c.post?.scoreCategory],
+  );
+
+  function gate(action: Omit<PendingAction, "context">): boolean {
     if (isAuthed) return true;
-    const redirect = typeof window !== "undefined"
-      ? window.location.pathname + window.location.search
-      : "/court";
-    navigate({ to: "/enter", search: { redirect } as any });
+    enqueue({ ...action, context: gateContext });
     return false;
   }
 
@@ -137,7 +145,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickVote(k: VerdictKey) {
     if (submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "vote", entityId: c.post!.id, verdictKind: k })) return;
     setMyVote(k);
     if (fillerSeats.length === 0) {
       const init = JUROR_INITIALS[Math.floor(Math.random() * JUROR_INITIALS.length)];
@@ -147,13 +155,13 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickJudgment(k: JudgmentKey) {
     if (submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "judgment", entityId: c.post!.id })) return;
     setMyJudgment(k);
   }
 
   async function onSubmit() {
     if (!myVote || !myJudgment || submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "vote", entityId: c.post!.id, verdictKind: myVote })) return;
     setSubmitState("submitting");
     setErrorMsg(null);
     try {
@@ -170,8 +178,8 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   function submitComment() {
-    if (!requireAuth()) return;
     const t = draft.trim();
+    if (!gate({ type: "comment", entityId: c.post!.id, draftText: t })) return;
     if (!t) return;
     setComments((cs) => [
       ...cs,
@@ -181,7 +189,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   async function shareCase() {
-    if (!requireAuth()) return;
+    if (!gate({ type: "teaser", entityId: c.post!.id })) return;
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
@@ -201,7 +209,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   function toggleLike() {
-    if (!requireAuth()) return;
+    if (!gate({ type: "relate", entityId: c.post!.id })) return;
     setLiked((v) => !v);
   }
 
@@ -557,7 +565,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="mt-2.5 flex items-center gap-1.5">
           <input
             value={draft}
-            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); requireAuth(); } }}
+            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); gate({ type: "comment", entityId: c.post!.id }); } }}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }}
             placeholder={isAuthed ? "Address the court..." : "Sign in to address the court"}
