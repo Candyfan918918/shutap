@@ -22,6 +22,7 @@ export type Moment =
   | "scan"
   | "compose"
   | "court_verdict"
+  | "court_verdict_lock"
   | "outcome"
   | "chatbot"
   | "hof_update"
@@ -41,6 +42,8 @@ const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
   compose: ["composer"],
   // Court verdict: format the case + speak the Bench line.
   court_verdict: ["case_formatter", "the_bench"],
+  // Court lock: write the sealed one-line verdict for a just-locked case.
+  court_verdict_lock: ["bench_verdict_writer"],
   // Outcome reveal: Bench narration only.
   outcome: ["the_bench"],
   // Chatbot: single router agent owns intent + response text.
