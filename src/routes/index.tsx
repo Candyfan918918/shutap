@@ -10,9 +10,15 @@ import {
   getGlobalVerdictCount,
   getTeaserFeed,
   getOpenCaseCount,
+  getHallOfFame,
   type FeaturedCase,
   type TeaserPost,
+  type HallOfFame,
+  type HofDramatic,
+  type HofRelatable,
+  type HofSurprising,
 } from "@/lib/court.functions";
+
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
