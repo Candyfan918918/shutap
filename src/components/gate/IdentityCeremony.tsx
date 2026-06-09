@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGateStore, type PendingAction } from "@/stores/gate";
+import { finalizeIdentity } from "@/lib/identity.functions";
 import {
   generateAlias,
   claimAlias,
@@ -63,7 +64,9 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const [reelSpeed] = useState<"full" | "slow">("full");
   const [confirmingStep, setConfirmingStep] = useState<0 | 1 | 2>(0);
   const [busy, setBusy] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
 
+  const ensureIdentity = useServerFn(finalizeIdentity);
   const fetchAlias = useServerFn(generateAlias);
   const submitAge = useServerFn(verifyAge);
   const claim = useServerFn(claimAlias);
@@ -74,9 +77,14 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   // Detect existing session — skip the auth card if already signed in.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setPhase((p) => (p === "auth" ? "dob" : p));
+      if (data.session) {
+        setPhase((p) => (p === "auth" ? "dob" : p));
+        ensureIdentity({ data: {} })
+          .then((identity) => setCountryCode(identity.countryCode ?? null))
+          .catch(() => {/* silent */});
+      }
     });
-  }, []);
+  }, [ensureIdentity]);
 
   // Kick off alias prefetch the moment the ceremony opens.
   useEffect(() => {
@@ -84,11 +92,12 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       data: {
         category: pending.context?.category,
         relationshipType: pending.context?.relationshipType,
+        countryCode: countryCode ?? undefined,
       },
     })
       .then((a) => setAlias(a))
       .catch(() => {/* fall through */});
-  }, [fetchAlias, pending.context?.category, pending.context?.relationshipType]);
+  }, [countryCode, fetchAlias, pending.context?.category, pending.context?.relationshipType]);
 
   const replay = async (action: PendingAction) => {
     try {
@@ -119,6 +128,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
         data: {
           category: pending.context?.category,
           relationshipType: pending.context?.relationshipType,
+          countryCode: countryCode ?? undefined,
         },
       }).then((a) => setAlias(a));
       return;
@@ -132,7 +142,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       window.clearTimeout(t1); window.clearTimeout(t2);
       window.clearTimeout(t3); window.clearTimeout(t4);
     };
-  }, [phase, alias, fetchAlias, pending.context?.category, pending.context?.relationshipType]);
+  }, [phase, alias, countryCode, fetchAlias, pending.context?.category, pending.context?.relationshipType]);
 
   const onReroll = async () => {
     if (rerollUsed) return;
@@ -143,6 +153,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       data: {
         category: pending.context?.category,
         relationshipType: pending.context?.relationshipType,
+        countryCode: countryCode ?? undefined,
       },
     });
     setAlias(fresh);
