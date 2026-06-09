@@ -17,7 +17,9 @@ import { VerdictBar } from "@/components/posts/VerdictBar";
 import { CommentThread, type CommentThreadHandle } from "@/components/posts/CommentThread";
 import { RelatedPosts } from "@/components/posts/RelatedPosts";
 import { StoryArc } from "@/components/posts/StoryArc";
+import { OtherPerspectives } from "@/components/perspectives/OtherPerspectives";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
+
 
 export const Route = createFileRoute("/post/$postId")({
   loader: async ({ params }) => {
