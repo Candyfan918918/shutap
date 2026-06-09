@@ -56,7 +56,6 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   const cast = useServerFn(castVerdict);
   const navigate = useNavigate();
-  const navigate = useNavigate();
 
   // Auth state — every CTA in the courtroom requires sign-in.
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
