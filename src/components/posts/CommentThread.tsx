@@ -50,6 +50,8 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
   const post = useServerFn(addComment);
   const del = useServerFn(deleteComment);
   const reactFn = useServerFn(toggleCommentReaction);
+  const enqueue = useGateStore((s) => s.enqueue);
+
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [loading, setLoading] = useState(true);
