@@ -17,7 +17,9 @@ export type AgentName =
   | "chatbot_agent"
   | "hof_scoring_agent"
   | "admin_triage"
-  | "admin_briefing";
+  | "admin_briefing"
+  | "standing_judge";
+
 
 /**
  * Agents whose output contains data the client must NEVER see directly:
