@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { GateRoot } from "@/components/gate/GateRoot";
 
 import appCss from "../styles.css?url";
 import shutapIconAsset from "@/assets/shutap-favicon-32.png.asset.json";
