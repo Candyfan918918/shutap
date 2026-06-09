@@ -60,7 +60,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-c-border-strong bg-card"
+      className="relative overflow-hidden rounded-2xl border border-c-border bg-c-surface-2"
     >
       {/* Ceiling rail */}
       <div
@@ -73,7 +73,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       </div>
 
       {/* Court header */}
-      <div className="relative border-b border-c-border px-4 pt-4 pb-3 text-center">
+      <div className="border-b border-c-border bg-c-surface-2 px-4 pt-4 pb-3 text-center">
         <div className="flex items-center justify-center gap-2 text-c-text-1">
           <Scale className="h-5 w-5" strokeWidth={1.5} />
           <span className="text-lg font-medium tracking-wide">
@@ -83,17 +83,17 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-c-text-2">
           Where the human decides
         </div>
-        <div className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border-[1.5px] border-c-border-strong bg-c-surface-3 text-c-text-1">
+        <div className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border border-c-border-strong bg-c-surface-3 text-c-text-1">
           <Gavel className="h-6 w-6" strokeWidth={1.5} />
         </div>
       </div>
 
-      {/* Case header */}
+      {/* Case file */}
       <Link
         to="/post/$postId"
         params={{ postId: c.post.id }}
         search={{ shared: 2 }}
-        className="block border-b border-c-border bg-c-surface-2 px-4 py-3 text-center transition hover:bg-c-surface-3"
+        className="block border-b border-c-border bg-c-surface px-4 py-3 text-center transition hover:bg-c-surface-2"
       >
         <div className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
           Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {statusLine}
@@ -114,14 +114,14 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       </Link>
 
       {/* Courtroom floor */}
-      <div className="relative px-3 pt-3">
+      <div className="px-3 pt-3">
         {/* Bench zone */}
-        <div className="relative mb-2.5 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3 text-center">
+        <div className="mb-2.5 rounded-lg border border-c-border bg-c-surface px-3 py-3 text-center">
           <div className="mb-1.5 text-[9px] uppercase tracking-[0.12em] text-c-text-2">
             The bench
           </div>
           <div className="flex items-center justify-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-c-border-strong bg-c-surface-3 text-c-text-1">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-c-border-strong bg-c-surface-3 text-c-text-1">
               <Scale className="h-4 w-4" strokeWidth={1.5} />
             </div>
             <div className="text-left">
@@ -158,8 +158,12 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
         <div className="h-2.5" />
 
-        {/* Jury zone */}
-        <div className="mb-2.5 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
+        {/* Jury zone — live tally, NOT interactive */}
+        <div
+          className="mb-2.5 rounded-lg border border-c-border bg-c-surface px-3 py-3"
+          role="group"
+          aria-label="Jury tally"
+        >
           <div className="mb-2.5 flex items-center justify-between">
             <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-c-text-1">
               Jury box
@@ -172,17 +176,18 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
             {seats.map((filled, i) => (
               <div
                 key={i}
+                aria-hidden
                 className={
-                  "flex h-[22px] w-[22px] items-center justify-center rounded-full border text-[9px] " +
+                  "h-[22px] w-[22px] rounded-full border " +
                   (filled
-                    ? "border-c-border-strong bg-c-surface-3 text-c-text-1"
-                    : "border-c-border bg-transparent text-c-text-3")
+                    ? "border-c-border-strong bg-c-surface-3"
+                    : "border-c-border bg-transparent")
                 }
               />
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          <ul className="space-y-1">
             {VERDICT_ORDER.map((k) => {
               const m = VERDICT_META[k];
               const n = (c.verdict.counts as Record<string, number>)[k] ?? 0;
@@ -190,53 +195,76 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
                 c.verdict.total > 0 ? Math.round((n / c.verdict.total) * 100) : 0;
               const isTop = top?.kind === k;
               return (
-                <div
+                <li
                   key={k}
-                  className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11px]"
-                  style={{
-                    borderColor: isTop
-                      ? `color-mix(in oklab, ${m.color} 55%, transparent)`
-                      : "var(--c-border)",
-                    background: isTop
-                      ? `color-mix(in oklab, ${m.color} 12%, transparent)`
-                      : "transparent",
-                    color: isTop ? m.color : "var(--c-text-2)",
-                  }}
+                  className="flex items-center gap-2 text-[11px]"
                 >
                   <span
                     aria-hidden
-                    className="h-[7px] w-[7px] rounded-full"
+                    className="h-[7px] w-[7px] shrink-0 rounded-full"
                     style={{ background: m.color }}
                   />
-                  <span className="flex-1 truncate">{m.label}</span>
-                  <span className="font-medium">{pct}%</span>
-                </div>
+                  <span
+                    className={
+                      "flex-1 truncate " +
+                      (isTop ? "text-c-text-1 font-medium" : "text-c-text-2")
+                    }
+                  >
+                    {m.label}
+                  </span>
+                  <span className="relative h-[3px] w-20 overflow-hidden rounded-full bg-c-surface-3">
+                    <span
+                      className="absolute inset-y-0 left-0 rounded-full"
+                      style={{ width: `${pct}%`, background: m.color }}
+                    />
+                  </span>
+                  <span
+                    className={
+                      "w-9 text-right tabular-nums " +
+                      (isTop ? "text-c-text-1 font-medium" : "text-c-text-2")
+                    }
+                  >
+                    {pct}%
+                  </span>
+                </li>
               );
             })}
-            <div className="col-span-2 flex items-center justify-center gap-2 rounded-md border border-c-border bg-c-surface-3 px-3 py-1.5 text-[11px] font-medium text-c-text-1">
-              {top
-                ? `${VERDICT_META[top.kind]?.label ?? "Mixed"} · current lead ${top.pct}%`
-                : "Awaiting first verdict"}
-            </div>
+          </ul>
+
+          <div className="mt-3 border-t border-c-border pt-2 text-center text-[11px] text-c-text-2">
+            {top ? (
+              <>
+                Leading:{" "}
+                <span
+                  className="font-medium"
+                  style={{ color: VERDICT_META[top.kind]?.color }}
+                >
+                  {VERDICT_META[top.kind]?.label ?? "Mixed"}
+                </span>{" "}
+                · {top.pct}%
+              </>
+            ) : (
+              "Awaiting first verdict"
+            )}
           </div>
         </div>
 
-        {/* Final judgment */}
-        <div className="mb-3 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
-          <div className="mb-2.5 text-center text-[10px] uppercase tracking-[0.12em] text-c-text-2">
+        {/* Final judgment — read-only summary chips, not CTAs */}
+        <div className="mb-3 rounded-lg border border-c-border bg-c-surface px-3 py-3">
+          <div className="mb-2 text-center text-[10px] uppercase tracking-[0.12em] text-c-text-2">
             Final judgment
           </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            <JudgmentOpt label="Guilty" color="var(--c-coral)" />
-            <JudgmentOpt label="Not guilty" color="var(--c-teal)" />
-            <JudgmentOpt label="Both at fault" color="var(--c-update)" />
-            <JudgmentOpt label="Need more" color="var(--c-text-3)" />
+          <div className="flex flex-wrap justify-center gap-1.5">
+            <JudgmentChip label="Guilty" color="var(--c-coral)" />
+            <JudgmentChip label="Not guilty" color="var(--c-teal)" />
+            <JudgmentChip label="Both at fault" color="var(--c-update)" />
+            <JudgmentChip label="Need more" color="var(--c-text-3)" />
           </div>
         </div>
       </div>
 
       {/* Public gallery */}
-      <div className="mx-3 mb-3 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
+      <div className="mx-3 mb-3 rounded-lg border border-c-border bg-c-surface px-3 py-3">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
             Public gallery · {c.post.commentCount}{" "}
@@ -257,17 +285,17 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
           to="/post/$postId"
           params={{ postId: c.post.id }}
           search={{ shared: 2 }}
-          className="block border-t border-c-border pt-2 text-[11px] text-c-text-2 hover:text-c-text-1"
+          className="block border-t border-c-border pt-2 text-[11px] text-c-text-2 transition hover:text-c-text-1"
         >
           Address the court →
         </Link>
       </div>
 
-      {/* Share row */}
-      <div className="flex justify-center gap-2 px-4 pb-4 pt-1">
+      {/* Share row — these ARE the only CTAs */}
+      <div className="flex justify-center gap-2 border-t border-c-border bg-c-surface-2 px-4 py-3">
         <Link
           to="/spill"
-          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] font-medium text-c-text-1 transition hover:bg-c-surface-3"
+          className="inline-flex items-center gap-1.5 rounded-full border border-c-border-strong bg-c-surface-3 px-3.5 py-1.5 text-[11px] font-medium text-c-text-1 transition hover:bg-c-surface"
         >
           <Flag className="h-3 w-3" strokeWidth={1.5} />
           It happened to me
@@ -276,7 +304,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
           to="/post/$postId"
           params={{ postId: c.post.id }}
           search={{ shared: 2 }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] text-c-text-2 hover:text-c-text-1"
+          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] text-c-text-2 transition hover:text-c-text-1"
         >
           <Share2 className="h-3 w-3" strokeWidth={1.5} />
           Share this case
@@ -305,7 +333,7 @@ function PartyZone({
 }) {
   return (
     <div
-      className="rounded-lg border border-c-border bg-c-surface-2 p-2.5"
+      className="rounded-lg border border-c-border bg-c-surface p-2.5"
       style={{
         borderTopWidth: 2,
         borderTopColor: accent,
@@ -342,7 +370,7 @@ function PartyZone({
           Empty chair — has not responded
         </div>
       ) : quote ? (
-        <div className="mt-1.5 rounded-md border border-c-border bg-card px-2 py-1.5 text-left text-[11px] italic leading-snug text-c-text-2">
+        <div className="mt-1.5 rounded-md border border-c-border bg-c-surface-2 px-2 py-1.5 text-left text-[11px] italic leading-snug text-c-text-2">
           "{quote}"
         </div>
       ) : null}
@@ -350,14 +378,23 @@ function PartyZone({
   );
 }
 
-function JudgmentOpt({ label, color }: { label: string; color: string }) {
+function JudgmentChip({ label, color }: { label: string; color: string }) {
   return (
-    <div
-      className="rounded-md border border-c-border bg-c-surface-3 px-2 py-2 text-center text-[12px] font-medium"
-      style={{ color }}
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px]"
+      style={{
+        borderColor: "var(--c-border)",
+        color: "var(--c-text-2)",
+        background: "transparent",
+      }}
     >
+      <span
+        aria-hidden
+        className="h-[6px] w-[6px] rounded-full"
+        style={{ background: color }}
+      />
       {label}
-    </div>
+    </span>
   );
 }
 
