@@ -150,7 +150,13 @@ function CourtPage() {
           </p>
         </motion.div>
 
-        <CourtTabs value={tab} onChange={setTab} countryLabel={countryLabel} />
+        <CourtTabs
+          value={tab}
+          onChange={setTab}
+          countryLabel={countryLabel}
+          category={category}
+          onCategoryChange={setCategory}
+        />
 
         {casesQuery.isLoading && (
           <p className="text-center text-sm text-muted-foreground">Calling court to order…</p>
@@ -180,6 +186,8 @@ function CourtPage() {
             </div>
           </div>
         )}
+
+        {featured && shouldShowWatchParty(featured) && <WatchParty c={featured} />}
 
         {featured && <CourtroomPanel c={featured} />}
 
