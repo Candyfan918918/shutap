@@ -7,15 +7,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import {
   generateAlias,
-  verifyAge,
   claimAlias,
   type GeneratedAlias,
 } from "@/lib/alias.functions";
+import { verifyAge } from "@/lib/auth-age-gate.functions";
 import { castVerdict } from "@/lib/posts/community.functions";
 import { reactToPost } from "@/lib/posts/engagement.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { SlotReel, clickTone } from "@/components/identity/SlotReel";
+import { UnderageBlock } from "@/components/gate/UnderageBlock";
 import { toast } from "sonner";
+
 
 type Phase =
   | "auth"
