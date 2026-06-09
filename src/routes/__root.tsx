@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GateRoot } from "@/components/gate/GateRoot";
+import { IdentityBadge } from "@/components/nav/IdentityBadge";
 
 import appCss from "../styles.css?url";
 import shutapIconAsset from "@/assets/shutap-favicon-32.png.asset.json";
@@ -142,6 +143,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <div className="fixed top-2 right-3 z-[60]">
+        <IdentityBadge />
+      </div>
       <GateRoot />
     </QueryClientProvider>
   );
