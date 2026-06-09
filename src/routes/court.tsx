@@ -12,6 +12,7 @@ import {
 } from "@/lib/court.functions";
 import { CourtCaseCard } from "@/components/court/CourtCaseCard";
 import { CourtTabs, type CourtTab } from "@/components/court/CourtTabs";
+import { CourtroomPanel } from "@/components/court/CourtroomPanel";
 
 export const Route = createFileRoute("/court")({
   component: CourtPage,
