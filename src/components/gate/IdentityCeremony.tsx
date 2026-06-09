@@ -62,7 +62,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   // If a session already exists (e.g. user returned from OAuth redirect), skip auth.
   const [phase, setPhase] = useState<Phase>("auth");
   const [dobMonth, setDobMonth] = useState<number>(1);
-  const [dobYear, setDobYear] = useState<number>(new Date().getFullYear() - 25);
+  const [dobYear, setDobYear] = useState<number>(Math.max(MIN_BIRTH_YEAR, getAdultCutoffYear() - 7));
   const [alias, setAlias] = useState<GeneratedAlias | null>(null);
   const [rerollUsed, setRerollUsed] = useState(false);
   const [emoji, setEmoji] = useState<string>(EMOJI_OPTIONS[0]);
@@ -71,6 +71,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const [confirmingStep, setConfirmingStep] = useState<0 | 1 | 2>(0);
   const [busy, setBusy] = useState(false);
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [identityReady, setIdentityReady] = useState(false);
   const latestAdultYear = getAdultCutoffYear();
 
   const ensureIdentity = useServerFn(finalizeIdentity);
@@ -89,6 +90,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
         ensureIdentity({ data: {} })
           .then((identity) => {
             setCountryCode(identity.countryCode ?? null);
+            setIdentityReady(true);
             const aliasAlreadyClaimed = Boolean(identity.nationality && identity.emotion && identity.creature);
             if (identity.ageVerified && aliasAlreadyClaimed) {
               void replay(pending).finally(() => onClose());
@@ -100,13 +102,16 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
               return "dob";
             });
           })
-          .catch(() => {/* silent */});
+          .catch(() => {
+            setIdentityReady(true);
+          });
       }
     });
   }, [ensureIdentity, onClose, pending]);
 
   // Kick off alias prefetch the moment the ceremony opens.
   useEffect(() => {
+    if (!identityReady) return;
     fetchAlias({
       data: {
         category: pending.context?.category,
@@ -116,7 +121,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     })
       .then((a) => setAlias(a))
       .catch(() => {/* fall through */});
-  }, [countryCode, fetchAlias, pending.context?.category, pending.context?.relationshipType]);
+  }, [countryCode, fetchAlias, identityReady, pending.context?.category, pending.context?.relationshipType]);
 
   const replay = async (action: PendingAction) => {
     try {
@@ -143,6 +148,8 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       }
       if (!res.data?.age_verified) { setPhase("underage"); return; }
       setPhase("spin");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't verify. Try again.");
     } finally { setBusy(false); }
   };
 
