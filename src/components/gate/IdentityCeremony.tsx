@@ -394,7 +394,7 @@ function SlotMachine({
   phase: Phase;
 }) {
   const pools = alias?.reelPools ?? { nationality: ["…"], emotion: ["…"], creature: ["…"] };
-  const dimmed = phase === "phone" || phase === "otp" || phase === "dob";
+  const dimmed = phase === "auth" || phase === "dob";
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
