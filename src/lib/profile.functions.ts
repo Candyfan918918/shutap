@@ -167,10 +167,15 @@ async function hydrateProfile(
 
   const anonymousMode = ((row.anonymous_mode as boolean | null) ?? true);
 
+  const hasClaimedAlias = Boolean(row.nationality && row.emotion && row.creature);
+  const resolvedDisplayName = hasClaimedAlias
+    ? ((row.nickname as string | null) ?? (row.display_name as string | null) ?? row.handle as string)
+    : ((row.display_name as string | null) ?? (row.nickname as string | null) ?? row.handle as string);
+
   return {
     id,
     handle: row.handle as string,
-    displayName: (row.display_name as string) ?? (row.nickname as string) ?? row.handle as string,
+    displayName: resolvedDisplayName,
     bio: (row.bio as string | null) ?? null,
     avatarUrl: (row.avatar_url as string | null) ?? null,
     cityLabel: anonymousMode ? null : ((row.city_label as string | null) ?? null),
