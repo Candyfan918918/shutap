@@ -178,18 +178,9 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     }
   };
 
-  // ── Underage hard block
-  if (phase === "underage") {
-    return (
-      <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
-        <div className="text-center max-w-sm space-y-3">
-          <p className="text-5xl">⚖️</p>
-          <p className="text-xl font-medium text-white">Shutap is for adults 18 and older.</p>
-          <p className="text-sm text-white/70">Come back when you're ready.</p>
-        </div>
-      </div>
-    );
-  }
+  // ── Underage hard block (full-screen black, no retry, no back button)
+  if (phase === "underage") return <UnderageBlock />;
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center pointer-events-none">
@@ -245,11 +236,11 @@ function BenchLine({ phase }: { phase: Phase }) {
 }
 
 function SlotMachine({
-  alias, locks, speed, phase,
+  alias, locks, phase,
 }: {
   alias: GeneratedAlias | null;
   locks: { n: boolean; e: boolean; c: boolean };
-  speed: "full" | "slow";
+  speed?: "full" | "slow";
   phase: Phase;
 }) {
   const pools = alias?.reelPools ?? { nationality: ["…"], emotion: ["…"], creature: ["…"] };
@@ -257,39 +248,14 @@ function SlotMachine({
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-        <Reel pool={pools.nationality} locked={locks.n} value={alias?.nationality ?? "…"} speed={speed} />
-        <Reel pool={pools.emotion} locked={locks.e} value={alias?.emotion ?? "…"} speed={speed} />
-        <Reel pool={pools.creature} locked={locks.c} value={alias?.creature ?? "…"} speed={speed} />
+        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
+        <SlotReel pool={pools.emotion} locked={locks.e} value={alias?.emotion} />
+        <SlotReel pool={pools.creature} locked={locks.c} value={alias?.creature} />
       </div>
     </div>
   );
 }
 
-function Reel({
-  pool, locked, value, speed,
-}: { pool: string[]; locked: boolean; value: string; speed: "full" | "slow" }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    if (locked) return;
-    const interval = speed === "full" ? 70 : 130;
-    const id = window.setInterval(() => setTick((t) => t + 1), interval);
-    return () => window.clearInterval(id);
-  }, [locked, speed]);
-  const display = locked ? value : pool[tick % pool.length] ?? "…";
-  return (
-    <motion.div
-      animate={locked ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-      transition={{ duration: 0.2 }}
-      className={`h-14 rounded-xl flex items-center justify-center text-center px-2 font-medium text-[13px] sm:text-sm leading-tight ${
-        locked
-          ? "bg-primary border border-primary/50 text-foreground"
-          : "bg-background border border-border text-muted-foreground"
-      }`}
-    >
-      <span className="truncate">{display}</span>
-    </motion.div>
-  );
-}
 
 function AliasLine({
   phase, alias, locks,
