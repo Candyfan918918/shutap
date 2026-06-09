@@ -107,21 +107,42 @@ export const submitOutcome = createServerFn({ method: "POST" })
       });
     }
 
-    // Fire Wisdom Graph writer (best-effort; never block).
+    // Phase 5: write wisdom graph + recalc reputation for plaintiff and predictors.
     void (async () => {
       try {
-        const { runMoment } = await import("@/lib/orchestrator.server");
-        await runMoment({
-          moment: "wisdom_graph",
-          payload: {
-            post_id: data.post_id,
-            outcome_type: data.outcome_type,
-            days_elapsed: data.days_elapsed ?? null,
-          },
+        const { writeWisdomGraphForPost } = await import("@/lib/wisdom-graph.server");
+        await writeWisdomGraphForPost({
+          postId: data.post_id,
+          outcomeType: data.outcome_type,
+          daysElapsed: data.days_elapsed ?? null,
           userId: ctx.userId,
         });
       } catch {
-        /* swallow — graph backfill can retry */
+        /* graph backfill can retry */
+      }
+      try {
+        const { recordReputationEvent } = await import("@/lib/reputation.functions");
+        // plaintiff: filed an outcome.
+        await recordReputationEvent({
+          userId: ctx.userId,
+          eventType: "outcome_filed",
+          postId: data.post_id,
+          delta: { outcome_type: data.outcome_type },
+        });
+        // every predictor: prediction was resolved.
+        const seen = new Set<string>();
+        for (const p of preds ?? []) {
+          const uid = (p as any).user_id as string;
+          if (seen.has(uid)) continue;
+          seen.add(uid);
+          await recordReputationEvent({
+            userId: uid,
+            eventType: "prediction_resolved",
+            postId: data.post_id,
+          });
+        }
+      } catch {
+        /* reputation recalc can retry */
       }
     })();
 
