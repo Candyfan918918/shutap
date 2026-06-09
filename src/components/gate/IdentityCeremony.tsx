@@ -164,8 +164,8 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       return;
     }
     setLocks({ n: false, e: false, c: false });
-    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440); }, 2000);
-    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(460); }, 2200);
+    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(440); }, 2000);
+    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(460); }, 2200);
     const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(480); }, 2400);
     const t4 = window.setTimeout(() => setPhase("reveal"), 3200);
     return () => {
@@ -294,8 +294,8 @@ function SlotMachine({
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
         <SlotReel pool={pools.emotion} locked={locks.e} value={alias?.emotion} />
+        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
         <SlotReel pool={pools.creature} locked={locks.c} value={alias?.creature} />
       </div>
     </div>
@@ -312,8 +312,8 @@ function AliasLine({
   if (phase !== "spin" && phase !== "reveal" && phase !== "confirming") return null;
   if (!alias) return null;
   const parts: string[] = ["You are"];
-  if (locks.n || phase !== "spin") parts.push(alias.nationality);
   if (locks.e || phase !== "spin") parts.push(alias.emotion);
+  if (locks.n || phase !== "spin") parts.push(alias.nationality);
   if (locks.c || phase !== "spin") parts.push(alias.creature);
   const text = parts.join(" ") + (locks.c || phase !== "spin" ? "." : "...");
   return (
