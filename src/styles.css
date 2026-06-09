@@ -4,20 +4,126 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Shutap — Warm Light Reading Surface
- * Light-first. Baby pink + baby blue tones. Soft pastel category tags. Calm everywhere.
- * All colors in oklch. Never hardcode hex in components.
- */
+/* ─────────────────────────────────────────────────────────────
+   Shutap Design System v2 — Tailwind v4 port
+   Light default · Pink primary from logo · Warm surfaces
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surfaces — warm cream from logo #0a080f undertone */
+  --c-surface:   #fdfcfb;
+  --c-surface-2: #f7f4f2;
+  --c-surface-3: #ede8e4;
+
+  /* Borders */
+  --c-border:        rgba(10, 8, 15, 0.10);
+  --c-border-strong: rgba(10, 8, 15, 0.20);
+
+  /* Text — logo wordmark */
+  --c-text-1: #0a080f;
+  --c-text-2: #7a6e78;
+  --c-text-3: #b0a4ae;
+
+  /* Pink — logo "ap" + eye gradient */
+  --c-pink:       #e0508a;
+  --c-pink-soft:  #ffd0e8;
+  --c-pink-mid:   #f060a0;
+  --c-pink-deep:  #880040;
+
+  /* Supporting accents */
+  --c-teal:   #1a9e82;
+  --c-coral:  #d45040;
+  --c-amber:  #d4860a;
+  --c-purple: #6b4fa0;
+  --c-green:  #4a8c28;
+  --c-red:    #d03040;
+
+  /* Verdict colours */
+  --c-red-flag:   #d03040;
+  --c-green-flag: #1a9e82;
+  --c-run:        #d45040;
+  --c-talk:       #6b4fa0;
+  --c-lawyer:     #d4860a;
+  --c-therapy:    #3dbda0;
+  --c-update:     #9a8e98;
+
+  /* Radii */
+  --radius: 0.75rem;
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   20px;
+  --r-pill: 9px;
+
+  /* Transitions */
+  --t-fast:    150ms ease;
+  --t-verdict: 600ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* shadcn semantic mapping (light) */
+  --background: var(--c-surface);
+  --foreground: var(--c-text-1);
+  --surface: var(--c-surface-2);
+  --surface-elevated: var(--c-surface-3);
+  --card: var(--c-surface-2);
+  --card-foreground: var(--c-text-1);
+  --popover: var(--c-surface-2);
+  --popover-foreground: var(--c-text-1);
+  --primary: var(--c-pink);
+  --primary-foreground: #ffffff;
+  --secondary: var(--c-surface-3);
+  --secondary-foreground: var(--c-text-1);
+  --muted: var(--c-surface-3);
+  --muted-foreground: var(--c-text-2);
+  --accent: var(--c-pink-soft);
+  --accent-foreground: var(--c-pink-deep);
+  --destructive: var(--c-red);
+  --destructive-foreground: #ffffff;
+  --border: var(--c-border);
+  --input: var(--c-border);
+  --ring: var(--c-pink);
+
+  /* Pastel tag tokens (kept for back-compat) */
+  --tag-pink: var(--c-pink-soft);
+  --tag-pink-foreground: var(--c-pink-deep);
+  --tag-peach: #ffe0d8;
+  --tag-peach-foreground: #a03020;
+  --tag-sand: #ffeec8;
+  --tag-sand-foreground: #8a5000;
+  --tag-sage: #e8f5ee;
+  --tag-sage-foreground: #0a6040;
+  --tag-sky: #e3eef9;
+  --tag-sky-foreground: #2a5a8a;
+  --tag-lilac: #f0eafc;
+  --tag-lilac-foreground: #4a2888;
+
+  --chart-1: var(--c-pink);
+  --chart-2: var(--c-teal);
+  --chart-3: var(--c-coral);
+  --chart-4: var(--c-amber);
+  --chart-5: var(--c-purple);
+}
+
+.dark {
+  --c-surface:   #0a080f;
+  --c-surface-2: #140e18;
+  --c-surface-3: #1e1622;
+  --c-border:        rgba(255, 240, 248, 0.10);
+  --c-border-strong: rgba(255, 240, 248, 0.20);
+  --c-text-1: #fff0f6;
+  --c-text-2: #c0a8b8;
+  --c-text-3: #6a5868;
+  --c-pink:      #f090b8;
+  --c-pink-soft: #4a1030;
+  --c-pink-mid:  #f060a0;
+  --c-pink-deep: #ffd0e8;
+  --accent: var(--c-pink-soft);
+  --accent-foreground: var(--c-pink-deep);
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -42,6 +148,26 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
+  /* c-* design-token color utilities (bg-c-pink, text-c-text-1, border-c-border, …) */
+  --color-c-surface: var(--c-surface);
+  --color-c-surface-2: var(--c-surface-2);
+  --color-c-surface-3: var(--c-surface-3);
+  --color-c-border: var(--c-border);
+  --color-c-border-strong: var(--c-border-strong);
+  --color-c-text-1: var(--c-text-1);
+  --color-c-text-2: var(--c-text-2);
+  --color-c-text-3: var(--c-text-3);
+  --color-c-pink: var(--c-pink);
+  --color-c-pink-soft: var(--c-pink-soft);
+  --color-c-pink-mid: var(--c-pink-mid);
+  --color-c-pink-deep: var(--c-pink-deep);
+  --color-c-teal: var(--c-teal);
+  --color-c-coral: var(--c-coral);
+  --color-c-amber: var(--c-amber);
+  --color-c-purple: var(--c-purple);
+  --color-c-green: var(--c-green);
+  --color-c-red: var(--c-red);
+
   --color-tag-pink: var(--tag-pink);
   --color-tag-pink-foreground: var(--tag-pink-foreground);
   --color-tag-peach: var(--tag-peach);
@@ -61,79 +187,43 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --font-display: "DM Serif Display", Georgia, "Noto Serif SC", serif;
-  --font-body: "DM Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif;
-}
-
-:root {
-  --radius: 0.75rem;
-
-  /* Warm white reading surface */
-  --background: oklch(0.99 0.006 80);
-  --foreground: oklch(0.22 0.01 60);
-  --surface: oklch(0.975 0.008 75);
-  --surface-elevated: oklch(0.955 0.012 75);
-
-  --card: oklch(1 0.003 80);
-  --card-foreground: oklch(0.22 0.01 60);
-  --popover: oklch(1 0.003 80);
-  --popover-foreground: oklch(0.22 0.01 60);
-
-  /* Baby pink primary */
-  --primary: oklch(0.72 0.14 15);
-  --primary-foreground: oklch(0.99 0.005 80);
-
-  /* Baby blue secondary */
-  --secondary: oklch(0.88 0.06 245);
-  --secondary-foreground: oklch(0.22 0.01 60);
-  --muted: oklch(0.94 0.012 75);
-  --muted-foreground: oklch(0.5 0.015 60);
-
-  /* Accent = baby blue for calm contrast */
-  --accent: oklch(0.84 0.07 245);
-  --accent-foreground: oklch(0.22 0.01 60);
-
-  /* Calm dusty rose for destructive — stays in pink family, no orange */
-  --destructive: oklch(0.58 0.12 15);
-  --destructive-foreground: oklch(0.99 0.005 80);
-
-  --border: oklch(0.22 0.01 60 / 12%);
-  --input: oklch(0.22 0.01 60 / 14%);
-  --ring: oklch(0.72 0.14 15);
-
-  /* Soft pastel category tags — pink & blue family */
-  --tag-pink: oklch(0.93 0.04 15);
-  --tag-pink-foreground: oklch(0.45 0.12 15);
-  --tag-peach: oklch(0.92 0.05 245);
-  --tag-peach-foreground: oklch(0.42 0.1 245);
-  --tag-sand: oklch(0.94 0.04 85);
-  --tag-sand-foreground: oklch(0.45 0.08 70);
-  --tag-sage: oklch(0.93 0.03 150);
-  --tag-sage-foreground: oklch(0.42 0.08 150);
-  --tag-sky: oklch(0.93 0.035 230);
-  --tag-sky-foreground: oklch(0.45 0.1 240);
-  --tag-lilac: oklch(0.93 0.04 300);
-  --tag-lilac-foreground: oklch(0.45 0.12 300);
-
-  --chart-1: oklch(0.72 0.14 15);
-  --chart-2: oklch(0.84 0.07 245);
-  --chart-3: oklch(0.78 0.08 15);
-  --chart-4: oklch(0.82 0.06 245);
-  --chart-5: oklch(0.75 0.1 15);
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 @layer base {
   html { color-scheme: light; }
+  .dark { color-scheme: dark; }
   * { border-color: var(--color-border); }
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--c-surface);
+    color: var(--c-text-1);
     font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color var(--t-fast), color var(--t-fast);
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
+
+  ::-webkit-scrollbar        { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--c-border-strong); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); }
+
+  :focus-visible {
+    outline: 2px solid var(--c-pink);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+  :focus:not(:focus-visible) { outline: none; }
+  ::selection {
+    background-color: var(--c-pink-soft);
+    color: var(--c-pink-deep);
+  }
 }
 
 @utility font-display {
@@ -143,12 +233,207 @@
 }
 
 @utility bg-grain {
-  /* Soft pink + blue paper texture — no doom-scroll glow */
   background-image:
-    radial-gradient(circle at 15% 0%, oklch(0.92 0.05 245 / 0.4), transparent 55%),
-    radial-gradient(circle at 90% 10%, oklch(0.93 0.04 15 / 0.35), transparent 50%);
+    radial-gradient(circle at 15% 0%, color-mix(in oklab, var(--c-pink-soft) 50%, transparent), transparent 55%),
+    radial-gradient(circle at 90% 10%, color-mix(in oklab, var(--c-pink-soft) 35%, transparent), transparent 50%);
 }
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
 }
+
+/* ─── Design-system component utilities ─────────────────────── */
+
+.bench-line {
+  border-left: 2px solid var(--c-pink);
+  padding-left: 16px;
+  margin: 20px 0;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--c-text-2);
+  line-height: 1.7;
+}
+.bench-line__cta {
+  display: block;
+  margin-top: 8px;
+  color: var(--c-pink);
+  font-style: normal;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity var(--t-fast);
+}
+.bench-line__cta:hover { opacity: 0.7; }
+
+.alias-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--c-surface-3);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--c-text-1);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.alias-pill:hover { background: var(--c-surface-2); }
+
+.court-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--c-pink);
+  color: #fff;
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.court-ribbon--coral  { background: var(--c-coral);  }
+.court-ribbon--amber  { background: var(--c-amber);  }
+.court-ribbon--purple { background: var(--c-purple); }
+
+.score-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 500;
+}
+.score-badge--gray   { background: var(--c-surface-3); color: var(--c-text-2); }
+.score-badge--pink   { background: var(--c-pink-soft); color: var(--c-pink-deep); }
+.score-badge--coral  { background: #ffe0d8; color: #a03020; }
+.score-badge--amber  { background: #ffeec8; color: #8a5000; }
+
+.both-sides-heard { border-left: 2px solid var(--c-teal) !important; }
+
+.verdict-bar {
+  display: flex;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  gap: 1px;
+  background: var(--c-surface-3);
+}
+.verdict-bar--compact { height: 8px; }
+.verdict-bar--full    { height: 36px; }
+.verdict-segment              { flex: 0 0 0%; transition: flex-basis var(--t-verdict); }
+.verdict-segment--voted       { outline: 1px solid rgba(10,8,15,0.8); outline-offset: -1px; }
+.dark .verdict-segment--voted { outline-color: rgba(255,240,248,0.9); }
+.verdict-segment--red-flag    { background: var(--c-red-flag); }
+.verdict-segment--green-flag  { background: var(--c-green-flag); }
+.verdict-segment--run         { background: var(--c-run); }
+.verdict-segment--talk-it-out { background: var(--c-talk); }
+.verdict-segment--lawyer-up   { background: var(--c-lawyer); }
+.verdict-segment--therapy     { background: var(--c-therapy); }
+.verdict-segment--need-update { background: var(--c-update); }
+
+.story-card {
+  background: var(--c-surface-2);
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.story-card:hover { background: var(--c-surface-3); }
+
+.cta-card {
+  background: var(--c-surface-2);
+  border: 0.5px solid var(--c-border);
+  border-left: 2px solid var(--c-pink);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.cta-card--teal   { border-left-color: var(--c-teal); }
+.cta-card--coral  { border-left-color: var(--c-coral); }
+.cta-card--amber  { border-left-color: var(--c-amber); }
+.cta-card--purple { border-left-color: var(--c-purple); }
+
+.service-card {
+  background: var(--c-surface-2);
+  border: 0.5px solid var(--c-border-strong);
+  border-left: 2px solid var(--c-border-strong);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+
+.hof-card {
+  background: var(--c-surface-2);
+  border: 0.5px solid var(--c-pink-soft);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.chatbot-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--c-surface-3);
+  border: 0.5px solid var(--c-border-strong);
+  border-radius: var(--r-lg);
+  font-size: 12px;
+  color: var(--c-text-2);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--t-fast);
+}
+.chatbot-pill:hover { background: var(--c-surface-2); }
+
+.trust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--c-surface-2);
+  border-bottom: 0.5px solid var(--c-border);
+  font-size: 11px;
+  color: var(--c-text-2);
+}
+.trust-bar__count { font-weight: 500; color: var(--c-text-1); }
+
+.juror-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 500;
+}
+.juror-title--witness   { background: var(--c-surface-3); color: var(--c-text-2); }
+.juror-title--sleuth    { background: var(--c-pink-soft); color: var(--c-pink-deep); }
+.juror-title--messenger { background: #e8f5ee; color: #0a6040; }
+.juror-title--judge     { background: #f0eafc; color: #4a2888; }
+.juror-title--legend    { background: var(--c-pink); color: #fff; }
+.dark .juror-title--messenger { background: #0a2a1a; color: #4ad88a; }
+.dark .juror-title--judge     { background: #1a0e30; color: #b090e0; }
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--c-surface);
+  border: 0.5px solid var(--c-border-strong);
+  border-radius: var(--r-md);
+  color: var(--c-text-1);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--t-fast);
+  width: 100%;
+}
+.auth-btn:hover { background: var(--c-surface-3); }
+.auth-btn--primary {
+  background: var(--c-pink);
+  color: #fff;
+  border-color: transparent;
+}
+.auth-btn--primary:hover { background: var(--c-pink-mid); }
