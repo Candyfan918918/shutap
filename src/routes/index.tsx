@@ -55,7 +55,7 @@ export const Route = createFileRoute("/")({
       <p className="text-xs text-muted-foreground/70 break-words">{error.message}</p>
       <button
         onClick={reset}
-        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm"
+        className="px-4 py-2 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 text-sm font-medium hover:bg-c-surface-3 transition"
       >
         Try again
       </button>
@@ -297,7 +297,7 @@ function TopChrome({ authed }: { authed: boolean | null }) {
         {authed ? (
           <Link
             to="/court"
-            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
+            className="text-xs px-3 py-1.5 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 font-medium hover:bg-c-surface-3 transition"
           >
             Enter Court →
           </Link>
@@ -305,7 +305,7 @@ function TopChrome({ authed }: { authed: boolean | null }) {
           <Link
             to="/enter"
             search={{ redirect: "/" }}
-            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
+            className="text-xs px-3.5 py-1.5 rounded-md bg-c-pink text-white font-medium hover:opacity-90 transition"
           >
             Claim my identity →
           </Link>
@@ -469,7 +469,7 @@ function AliasPill({
       {avatarUrl ? (
         <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
       ) : (
-        <div className="h-6 w-6 rounded-full bg-primary" />
+        <div className="h-6 w-6 rounded-full bg-c-surface-3 border border-c-border" />
       )}
       <div className="leading-tight">
         <div className="text-xs font-medium">{nickname}</div>
@@ -510,12 +510,15 @@ function CourtRibbon({
     return `${s}s to verdict`;
   })();
   return (
-    <div className="flex items-center justify-between rounded-full border border-primary/30 bg-primary px-4 py-2 text-xs font-medium">
-      <span className="text-foreground">
+    <div
+      className="flex items-center justify-between rounded-md bg-c-surface-2 border border-c-border px-4 py-2 text-xs font-medium"
+      style={{ borderLeft: "2px solid var(--c-pink)" }}
+    >
+      <span className="text-c-text-1">
         {category} Court · {tier}
       </span>
-      <span className="text-primary tabular-nums">⏳ {countdown}</span>
-      <span className="hidden sm:inline text-muted-foreground">{regionLabel}</span>
+      <span className="text-c-text-2 tabular-nums">⏳ {countdown}</span>
+      <span className="hidden sm:inline text-c-text-3">{regionLabel}</span>
     </div>
   );
 }
@@ -720,7 +723,7 @@ function CommentSection({ postId, onGate }: { postId: string; onGate: () => void
                 {c.author?.avatarUrl ? (
                   <img src={c.author.avatarUrl} alt="" className="h-5 w-5 rounded-full" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full bg-primary" />
+                  <div className="h-5 w-5 rounded-full bg-c-surface-3 border border-c-border" />
                 )}
                 <span className="font-medium text-foreground">
                   {c.author?.nickname ?? "Anonymous"}
@@ -1103,7 +1106,7 @@ function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
       </p>
       <button
         onClick={() => onGate("claim_final")}
-        className="mt-6 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm "
+        className="mt-6 px-6 py-3 rounded-md bg-c-pink text-white font-medium text-sm hover:opacity-90 transition"
       >
         Claim my identity →
       </button>
