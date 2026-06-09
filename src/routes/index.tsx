@@ -122,6 +122,13 @@ function AnonymousCourt() {
         ) : (
           <CourtInRecess />
         )}
+        <TeaserFeedSection
+          posts={teaserQ.data ?? []}
+          isLoading={teaserQ.isLoading}
+          openCases={openCasesQ.data?.count ?? 0}
+          onGate={gate}
+          excludePostId={featuredQ.data?.case.post?.id}
+        />
         <BottomCTA onGate={gate} />
       </main>
 
