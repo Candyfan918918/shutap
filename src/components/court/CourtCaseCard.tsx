@@ -10,6 +10,8 @@ const STATUS_PILL: Record<CourtCase["status"], { label: string; cls: string }> =
   judgment_pending: { label: "Judgment pending", cls: "bg-amber-500/15 border-amber-500/40 text-amber-500" },
   decided: { label: "Sealed", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-500" },
   legendary: { label: "Legendary", cls: "bg-primary text-primary-foreground border-transparent" },
+  paused: { label: "Paused", cls: "bg-muted text-muted-foreground border-border" },
+  rejected: { label: "Declined", cls: "bg-destructive/15 border-destructive/40 text-destructive" },
 };
 
 const TIER_RIBBON: Record<CourtTier, { label: string; cls: string }> = {
