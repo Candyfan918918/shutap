@@ -125,10 +125,11 @@ export const submitStandingFacts = createServerFn({ method: "POST" })
       perspective_id: p.id,
       responder_id: ctx.userId,
       attempt_no: (count ?? 0) + 1,
-      claimed_facts: data.claimed_facts,
-      agent_output: judge,
+      claimed_facts: data.claimed_facts as never,
+      agent_output: judge as never,
       decision,
     });
+
 
     await supabaseAdmin
       .from("post_perspectives")
