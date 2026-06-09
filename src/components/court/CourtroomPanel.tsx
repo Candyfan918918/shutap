@@ -1,12 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import {
+  Scale,
+  Gavel,
+  Heart,
+  MessageCircle,
+  Flag,
+  Share2,
+  UserX,
+} from "lucide-react";
 import type { CourtCase } from "@/lib/court.functions";
 import { CountdownChip } from "./CountdownChip";
 
-const VERDICT_META: Record<
-  string,
-  { label: string; color: string }
-> = {
+const VERDICT_META: Record<string, { label: string; color: string }> = {
   red_flag: { label: "Red flag", color: "var(--c-red-flag)" },
   green_flag: { label: "Green flag", color: "var(--c-green-flag)" },
   run: { label: "Run", color: "var(--c-run)" },
@@ -54,48 +60,31 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-border-strong bg-card"
+      className="relative overflow-hidden rounded-2xl border border-c-border-strong bg-card"
     >
-      {/* Ceiling rail — gilded columns */}
+      {/* Ceiling rail */}
       <div
-        className="flex items-end justify-center gap-7 border-b py-1.5"
-        style={{
-          background: "color-mix(in oklab, var(--c-amber) 10%, var(--c-surface-3))",
-          borderColor: "color-mix(in oklab, var(--c-amber) 35%, transparent)",
-        }}
+        className="flex items-end justify-center gap-7 border-b border-c-border bg-c-surface-3 py-1.5"
         aria-hidden
       >
         {Array.from({ length: 8 }).map((_, i) => (
-          <span
-            key={i}
-            className="h-5 w-[5px] rounded-[1px]"
-            style={{ background: "var(--c-amber)" }}
-          />
+          <span key={i} className="h-5 w-[5px] rounded-[1px] bg-c-border-strong" />
         ))}
       </div>
 
       {/* Court header */}
-      <div className="relative border-b border-border px-4 pt-4 pb-3 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-xl">⚖️</span>
-          <span
-            className="text-lg font-medium tracking-wide"
-            style={{ color: "var(--c-amber)" }}
-          >
+      <div className="relative border-b border-c-border px-4 pt-4 pb-3 text-center">
+        <div className="flex items-center justify-center gap-2 text-c-text-1">
+          <Scale className="h-5 w-5" strokeWidth={1.5} />
+          <span className="text-lg font-medium tracking-wide">
             Relationship Court™
           </span>
         </div>
-        <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-c-text-2">
           Where the human decides
         </div>
-        <div
-          className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border-[2px] text-xl"
-          style={{
-            borderColor: "var(--c-amber)",
-            background: "var(--c-surface-3)",
-          }}
-        >
-          👨‍⚖️
+        <div className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border-[1.5px] border-c-border-strong bg-c-surface-3 text-c-text-1">
+          <Gavel className="h-6 w-6" strokeWidth={1.5} />
         </div>
       </div>
 
@@ -104,19 +93,16 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         to="/post/$postId"
         params={{ postId: c.post.id }}
         search={{ shared: 2 }}
-        className="block border-b border-border bg-surface-elevated/40 px-4 py-3 text-center transition hover:bg-surface-elevated/70"
+        className="block border-b border-c-border bg-c-surface-2 px-4 py-3 text-center transition hover:bg-c-surface-3"
       >
-        <div className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+        <div className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
           Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {statusLine}
         </div>
-        <h3
-          className="mt-1 text-sm font-medium leading-snug text-balance sm:text-base"
-          style={{ color: "var(--c-amber-strong, var(--c-amber))" }}
-        >
+        <h3 className="mt-1 text-sm font-medium leading-snug text-balance text-c-text-1 sm:text-base">
           {c.post.title}
         </h3>
         {c.post.storyText && (
-          <p className="mt-1.5 text-[11px] italic text-muted-foreground">
+          <p className="mt-1.5 text-[11px] italic text-c-text-2">
             "{truncate(c.post.storyText, 120)}"
           </p>
         )}
@@ -130,43 +116,23 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       {/* Courtroom floor */}
       <div className="relative px-3 pt-3">
         {/* Bench zone */}
-        <div
-          className="relative mb-2.5 rounded-lg border px-3 py-3 text-center"
-          style={{
-            background: "color-mix(in oklab, var(--c-amber) 8%, var(--c-surface-3))",
-            borderColor: "color-mix(in oklab, var(--c-amber) 40%, transparent)",
-          }}
-        >
-          <div className="mb-1.5 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="relative mb-2.5 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3 text-center">
+          <div className="mb-1.5 text-[9px] uppercase tracking-[0.12em] text-c-text-2">
             The bench
           </div>
           <div className="flex items-center justify-center gap-2.5">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] text-base"
-              style={{
-                borderColor: "var(--c-amber)",
-                background: "var(--c-surface-3)",
-              }}
-            >
-              ⚖️
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-c-border-strong bg-c-surface-3 text-c-text-1">
+              <Scale className="h-4 w-4" strokeWidth={1.5} />
             </div>
             <div className="text-left">
-              <div
-                className="text-[13px] font-medium"
-                style={{ color: "var(--c-amber)" }}
-              >
+              <div className="text-[13px] font-medium text-c-text-1">
                 Hon. Public Opinion
               </div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-c-text-2">
                 Presiding — jury verdict required
               </div>
             </div>
           </div>
-          <div
-            className="absolute -bottom-px left-1/2 h-[3px] w-10 -translate-x-1/2 rounded-t"
-            style={{ background: "var(--c-amber)" }}
-            aria-hidden
-          />
         </div>
 
         {/* Parties grid */}
@@ -193,15 +159,12 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="h-2.5" />
 
         {/* Jury zone */}
-        <div className="mb-2.5 rounded-lg border border-border bg-surface-elevated/40 px-3 py-3">
+        <div className="mb-2.5 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
           <div className="mb-2.5 flex items-center justify-between">
-            <span
-              className="text-[11px] font-medium uppercase tracking-[0.1em]"
-              style={{ color: "var(--c-amber)" }}
-            >
+            <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-c-text-1">
               Jury box
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[10px] text-c-text-2">
               {seated} of 12 seated
             </span>
           </div>
@@ -209,29 +172,13 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
             {seats.map((filled, i) => (
               <div
                 key={i}
-                className="flex h-[22px] w-[22px] items-center justify-center rounded-full border text-[9px]"
-                style={
-                  i === 0
-                    ? {
-                        background: "color-mix(in oklab, var(--c-amber) 18%, transparent)",
-                        borderColor: "var(--c-amber)",
-                        color: "var(--c-amber)",
-                      }
-                    : filled
-                    ? {
-                        background: "var(--c-surface-3)",
-                        borderColor: "var(--c-amber)",
-                        color: "var(--c-amber)",
-                      }
-                    : {
-                        background: "transparent",
-                        borderColor: "var(--c-border)",
-                        color: "var(--c-text-3)",
-                      }
+                className={
+                  "flex h-[22px] w-[22px] items-center justify-center rounded-full border text-[9px] " +
+                  (filled
+                    ? "border-c-border-strong bg-c-surface-3 text-c-text-1"
+                    : "border-c-border bg-transparent text-c-text-3")
                 }
-              >
-                {i === 0 ? "Y" : ""}
-              </div>
+              />
             ))}
           </div>
 
@@ -240,9 +187,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
               const m = VERDICT_META[k];
               const n = (c.verdict.counts as Record<string, number>)[k] ?? 0;
               const pct =
-                c.verdict.total > 0
-                  ? Math.round((n / c.verdict.total) * 100)
-                  : 0;
+                c.verdict.total > 0 ? Math.round((n / c.verdict.total) * 100) : 0;
               const isTop = top?.kind === k;
               return (
                 <div
@@ -268,20 +213,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
                 </div>
               );
             })}
-            {/* Leading lane — full row */}
-            <div
-              className="col-span-2 flex items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-[11px] font-medium"
-              style={{
-                borderColor: "color-mix(in oklab, var(--c-update) 50%, transparent)",
-                background: "color-mix(in oklab, var(--c-update) 12%, transparent)",
-                color: "var(--c-update)",
-              }}
-            >
-              <span
-                aria-hidden
-                className="h-[7px] w-[7px] rounded-full"
-                style={{ background: "var(--c-update)" }}
-              />
+            <div className="col-span-2 flex items-center justify-center gap-2 rounded-md border border-c-border bg-c-surface-3 px-3 py-1.5 text-[11px] font-medium text-c-text-1">
               {top
                 ? `${VERDICT_META[top.kind]?.label ?? "Mixed"} · current lead ${top.pct}%`
                 : "Awaiting first verdict"}
@@ -289,25 +221,9 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
           </div>
         </div>
 
-        {/* Floor line */}
-        <div
-          className="mb-2.5 h-[2px] rounded"
-          style={{ background: "color-mix(in oklab, var(--c-amber) 35%, transparent)" }}
-          aria-hidden
-        />
-
         {/* Final judgment */}
-        <div
-          className="mb-3 rounded-lg border px-3 py-3"
-          style={{
-            background: "color-mix(in oklab, var(--c-amber) 8%, var(--c-surface-3))",
-            borderColor: "color-mix(in oklab, var(--c-amber) 40%, transparent)",
-          }}
-        >
-          <div
-            className="mb-2.5 text-center text-[10px] uppercase tracking-[0.12em]"
-            style={{ color: "var(--c-amber)" }}
-          >
+        <div className="mb-3 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
+          <div className="mb-2.5 text-center text-[10px] uppercase tracking-[0.12em] text-c-text-2">
             Final judgment
           </div>
           <div className="grid grid-cols-2 gap-1.5">
@@ -320,21 +236,28 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       </div>
 
       {/* Public gallery */}
-      <div className="mx-3 mb-3 rounded-lg border border-border bg-surface-elevated/40 px-3 py-3">
+      <div className="mx-3 mb-3 rounded-lg border border-c-border bg-c-surface-2 px-3 py-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-            Public gallery · {c.post.commentCount} {c.post.commentCount === 1 ? "comment" : "comments"}
+          <span className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
+            Public gallery · {c.post.commentCount}{" "}
+            {c.post.commentCount === 1 ? "comment" : "comments"}
           </span>
-          <div className="flex gap-2.5 text-[11px] text-muted-foreground">
-            <span>♥ {c.post.likeCount}</span>
-            <span>💬 {c.post.commentCount}</span>
+          <div className="flex items-center gap-3 text-[11px] text-c-text-2">
+            <span className="inline-flex items-center gap-1">
+              <Heart className="h-3 w-3" strokeWidth={1.5} />
+              {c.post.likeCount}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" strokeWidth={1.5} />
+              {c.post.commentCount}
+            </span>
           </div>
         </div>
         <Link
           to="/post/$postId"
           params={{ postId: c.post.id }}
           search={{ shared: 2 }}
-          className="block border-t border-border pt-2 text-[11px] text-muted-foreground hover:text-foreground"
+          className="block border-t border-c-border pt-2 text-[11px] text-c-text-2 hover:text-c-text-1"
         >
           Address the court →
         </Link>
@@ -344,21 +267,19 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       <div className="flex justify-center gap-2 px-4 pb-4 pt-1">
         <Link
           to="/spill"
-          className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-medium transition"
-          style={{
-            borderColor: "color-mix(in oklab, var(--c-coral) 45%, transparent)",
-            color: "var(--c-coral)",
-          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] font-medium text-c-text-1 transition hover:bg-c-surface-3"
         >
-          🚩 It happened to me
+          <Flag className="h-3 w-3" strokeWidth={1.5} />
+          It happened to me
         </Link>
         <Link
           to="/post/$postId"
           params={{ postId: c.post.id }}
           search={{ shared: 2 }}
-          className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] text-c-text-2 hover:text-c-text-1"
         >
-          ↗ Share this case
+          <Share2 className="h-3 w-3" strokeWidth={1.5} />
+          Share this case
         </Link>
       </div>
     </motion.section>
@@ -384,11 +305,11 @@ function PartyZone({
 }) {
   return (
     <div
-      className="rounded-lg border border-border bg-surface-elevated/40 p-2.5"
+      className="rounded-lg border border-c-border bg-c-surface-2 p-2.5"
       style={{
         borderTopWidth: 2,
         borderTopColor: accent,
-        opacity: empty ? 0.78 : 1,
+        opacity: empty ? 0.85 : 1,
       }}
     >
       <div
@@ -405,12 +326,9 @@ function PartyZone({
           background: `color-mix(in oklab, ${accent} 10%, transparent)`,
         }}
       >
-        {letter}
+        {empty ? <UserX className="h-3.5 w-3.5" strokeWidth={1.5} /> : letter}
       </div>
-      <div
-        className="text-center text-[12px] font-medium"
-        style={{ color: "var(--c-amber)" }}
-      >
+      <div className="text-center text-[12px] font-medium text-c-text-1">
         {name}
       </div>
       <div className="text-center text-[10px]" style={{ color: accent }}>
@@ -418,16 +336,13 @@ function PartyZone({
       </div>
       {empty ? (
         <div
-          className="mt-1.5 rounded-md border border-dashed px-2 py-1.5 text-center text-[10px]"
-          style={{
-            borderColor: `color-mix(in oklab, ${accent} 35%, transparent)`,
-            color: `color-mix(in oklab, ${accent} 60%, var(--c-text-3))`,
-          }}
+          className="mt-1.5 rounded-md border border-dashed px-2 py-1.5 text-center text-[10px] text-c-text-2"
+          style={{ borderColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
         >
           Empty chair — has not responded
         </div>
       ) : quote ? (
-        <div className="mt-1.5 rounded-md border border-border bg-card px-2 py-1.5 text-left text-[11px] italic leading-snug text-muted-foreground">
+        <div className="mt-1.5 rounded-md border border-c-border bg-card px-2 py-1.5 text-left text-[11px] italic leading-snug text-c-text-2">
           "{quote}"
         </div>
       ) : null}
@@ -438,12 +353,8 @@ function PartyZone({
 function JudgmentOpt({ label, color }: { label: string; color: string }) {
   return (
     <div
-      className="rounded-md border px-2 py-2 text-center text-[12px] font-medium"
-      style={{
-        borderColor: "var(--c-border)",
-        background: "var(--c-surface-3)",
-        color,
-      }}
+      className="rounded-md border border-c-border bg-c-surface-3 px-2 py-2 text-center text-[12px] font-medium"
+      style={{ color }}
     >
       {label}
     </div>
