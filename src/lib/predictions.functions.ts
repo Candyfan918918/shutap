@@ -69,7 +69,6 @@ export const getPredictionSummary = createServerFn({ method: "GET" })
   .inputValidator((i: unknown) => ListSchema.parse(i))
   .handler(async ({ data }): Promise<{ data: PredictionSummary | null; error: string | null }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { supabase } = await import("@/integrations/supabase/client.server");
 
     const [{ data: post }, { data: rows }, { data: outcome }] = await Promise.all([
       supabaseAdmin
