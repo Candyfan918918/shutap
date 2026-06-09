@@ -164,14 +164,19 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     setRerollUsed(true);
     setAlias(null);
     setPhase("spin");
-    const fresh = await fetchAlias({
-      data: {
-        category: pending.context?.category,
-        relationshipType: pending.context?.relationshipType,
-        countryCode: countryCode ?? undefined,
-      },
-    });
-    setAlias(fresh);
+    try {
+      const fresh = await fetchAlias({
+        data: {
+          category: pending.context?.category,
+          relationshipType: pending.context?.relationshipType,
+          countryCode: countryCode ?? undefined,
+        },
+      });
+      setAlias(fresh);
+    } catch {
+      toast.error("Couldn't assign your alias. Try again.");
+      setPhase("reveal");
+    }
   };
 
   const onClaim = async () => {
