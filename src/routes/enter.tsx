@@ -66,7 +66,7 @@ function EnterPage() {
       });
       if (error) throw error;
       sessionStorage.setItem("md.otpEmail", email);
-      navigate({ to: "/enter/verify", search: {} });
+      navigate({ to: "/enter/verify", search: { redirect: undefined } });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.toLowerCase().includes("rate")) toast.error(t("enter.rateLimited"));
