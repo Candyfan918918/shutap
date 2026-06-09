@@ -475,3 +475,76 @@ export const togglePinHonorBadge = createServerFn({ method: "POST" })
     if (e2) throw new Error(e2.message);
     return { pinned: next };
   });
+
+// ──────────────────────────────────────────────────────────────
+// Anonymous landing page server fns
+// ──────────────────────────────────────────────────────────────
+
+const STATUS_RANK: Record<CourtStatus, number> = {
+  in_court: 0,
+  judgment_pending: 1,
+  legendary: 2,
+  decided: 3,
+  nominated: 4,
+};
+
+export interface FeaturedCase {
+  case: CourtCase;
+  author: { handle: string; nickname: string; avatarUrl: string | null } | null;
+  totalRelates: number;
+}
+
+export const getFeaturedCourtCase = createServerFn({ method: "GET" }).handler(
+  async (): Promise<FeaturedCase | null> => {
+    const { data: rows } = await supabaseAdmin
+      .from("court_cases")
+      .select("*")
+      .order("engagement_score", { ascending: false })
+      .limit(30);
+    if (!rows || rows.length === 0) return null;
+    const enriched = await attachPostsAndVerdicts(rows as never);
+    const valid = enriched.filter((c) => c.post !== null);
+    if (valid.length === 0) return null;
+    valid.sort(
+      (a, b) =>
+        STATUS_RANK[a.status] - STATUS_RANK[b.status] ||
+        b.engagementScore - a.engagementScore,
+    );
+    const featured = valid[0];
+    const authorId = featured.post!.authorId;
+    const [{ data: p }, { count: rel }] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("handle, nickname, avatar_url")
+        .eq("id", authorId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("post_reactions")
+        .select("*", { count: "exact", head: true })
+        .eq("post_id", featured.post!.id)
+        .eq("kind", "been_there"),
+    ]);
+    return {
+      case: featured,
+      author: p
+        ? {
+            handle: (p as Record<string, unknown>).handle as string,
+            nickname: (p as Record<string, unknown>).nickname as string,
+            avatarUrl:
+              ((p as Record<string, unknown>).avatar_url as string | null) ?? null,
+          }
+        : null,
+      totalRelates: rel ?? 0,
+    };
+  },
+);
+
+export const getGlobalVerdictCount = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ total: number }> => {
+    const { count } = await supabaseAdmin
+      .from("post_verdict_votes")
+      .select("*", { count: "exact", head: true });
+    return { total: count ?? 0 };
+  },
+);
+
