@@ -8,7 +8,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getFeaturedCourtCase,
   getGlobalVerdictCount,
+  getTeaserFeed,
+  getOpenCaseCount,
   type FeaturedCase,
+  type TeaserPost,
 } from "@/lib/court.functions";
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
