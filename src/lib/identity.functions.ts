@@ -84,8 +84,12 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       cityLabel,
       seed,
     });
-    const fallbackNickname = existing?.display_name || displayName;
-    const fallbackHandle = existing?.id ? undefined : `user_${userId.replace(/-/g, "").slice(0, 12)}`;
+    const createProfilePatch: Record<string, unknown> = existing?.id
+      ? {}
+      : {
+          handle: `user_${userId.replace(/-/g, "").slice(0, 12)}`,
+          nickname: displayName,
+        };
 
     const patch: Record<string, unknown> = {
       display_name: displayName,
@@ -109,8 +113,7 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       .from("profiles")
       .upsert({
         id: userId,
-        handle: fallbackHandle,
-        nickname: fallbackNickname,
+        ...createProfilePatch,
         ...patch,
       } as never, { onConflict: "id" })
       .select("id, display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
