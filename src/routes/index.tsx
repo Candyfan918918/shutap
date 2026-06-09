@@ -55,7 +55,7 @@ export const Route = createFileRoute("/")({
       <p className="text-xs text-muted-foreground/70 break-words">{error.message}</p>
       <button
         onClick={reset}
-        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm"
+        className="px-4 py-2 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 text-sm font-medium hover:bg-c-surface-3 transition"
       >
         Try again
       </button>
