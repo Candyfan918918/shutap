@@ -223,7 +223,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
 function BenchLine({ phase }: { phase: Phase }) {
   const text =
     phase === "auth" ? "The court is assigning your identity."
-    : phase === "dob" ? "The court asks one last thing."
+    : phase === "dob" ? "Before we go further."
     : phase === "spin" ? "Hold. The reels are deciding."
     : phase === "reveal" ? "The court has spoken."
     : "";
