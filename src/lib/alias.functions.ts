@@ -96,25 +96,32 @@ export const generateAlias = createServerFn({ method: "GET" })
 
     const emotionPool = pickEmotion(data.category);
     const creaturePool = pickCreature(data.relationshipType);
-    const nationality = pickNationality(country);
 
     // Uniqueness — retry up to 5 times against existing claimed aliases.
-    let chosen = { emotion: pick(emotionPool), creature: pick(creaturePool) };
+    let chosen = {
+      nationality: pickNationality(country),
+      emotion: pick(emotionPool),
+      creature: pick(creaturePool),
+    };
     for (let i = 0; i < 5; i++) {
       const { data: existing } = await supabaseAdmin
         .from("profiles")
         .select("id")
-        .eq("nationality", nationality)
+        .eq("nationality", chosen.nationality)
         .eq("emotion", chosen.emotion)
         .eq("creature", chosen.creature)
         .limit(1)
         .maybeSingle();
       if (!existing) break;
-      chosen = { emotion: pick(emotionPool), creature: pick(creaturePool) };
+      chosen = {
+        nationality: pickNationality(country),
+        emotion: pick(emotionPool),
+        creature: pick(creaturePool),
+      };
     }
 
     return {
-      nationality,
+      nationality: chosen.nationality,
       emotion: chosen.emotion,
       creature: chosen.creature,
       reelPools: {
