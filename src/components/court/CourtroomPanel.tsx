@@ -565,7 +565,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="mt-2.5 flex items-center gap-1.5">
           <input
             value={draft}
-            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); requireAuth(); } }}
+            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); gate({ type: "comment", entityId: c.post!.id }); } }}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }}
             placeholder={isAuthed ? "Address the court..." : "Sign in to address the court"}
