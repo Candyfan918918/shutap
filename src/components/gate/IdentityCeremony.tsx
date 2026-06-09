@@ -15,6 +15,7 @@ import {
 import { castVerdict } from "@/lib/posts/community.functions";
 import { reactToPost } from "@/lib/posts/engagement.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { markFirstSession } from "@/lib/firstSession";
 
 type Phase =
   | "phone"
