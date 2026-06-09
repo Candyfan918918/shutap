@@ -18,6 +18,8 @@ import { CommentThread, type CommentThreadHandle } from "@/components/posts/Comm
 import { RelatedPosts } from "@/components/posts/RelatedPosts";
 import { StoryArc } from "@/components/posts/StoryArc";
 import { OtherPerspectives } from "@/components/perspectives/OtherPerspectives";
+import { PredictionsPanel } from "@/components/court/PredictionsPanel";
+import { OutcomePrompt } from "@/components/court/OutcomePrompt";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 
