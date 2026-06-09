@@ -98,3 +98,5 @@ function FeedCardImpl({ item, index, court }: { item: FeedItem; index: number; c
     </motion.article>
   );
 }
+
+export const FeedCard = memo(FeedCardImpl);
