@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { CourtCase } from "@/lib/court.functions";
 import { castVerdict } from "@/lib/vote.functions";
 import { CountdownChip } from "./CountdownChip";
@@ -54,6 +55,29 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
 
   const cast = useServerFn(castVerdict);
+  const navigate = useNavigate();
+
+  // Auth state — every CTA in the courtroom requires sign-in.
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setIsAuthed(!!data.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user);
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+  }, []);
+
+  function requireAuth(): boolean {
+    if (isAuthed) return true;
+    const redirect = typeof window !== "undefined"
+      ? window.location.pathname + window.location.search
+      : "/court";
+    navigate({ to: "/auth", search: { redirect } as any });
+    return false;
+  }
 
   const [myVote, setMyVote] = useState<VerdictKey | null>(null);
   const [myJudgment, setMyJudgment] = useState<JudgmentKey | null>(null);
@@ -113,6 +137,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickVote(k: VerdictKey) {
     if (submitted) return;
+    if (!requireAuth()) return;
     setMyVote(k);
     if (fillerSeats.length === 0) {
       const init = JUROR_INITIALS[Math.floor(Math.random() * JUROR_INITIALS.length)];
@@ -122,11 +147,13 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickJudgment(k: JudgmentKey) {
     if (submitted) return;
+    if (!requireAuth()) return;
     setMyJudgment(k);
   }
 
   async function onSubmit() {
     if (!myVote || !myJudgment || submitted) return;
+    if (!requireAuth()) return;
     setSubmitState("submitting");
     setErrorMsg(null);
     try {
@@ -136,14 +163,14 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       setSubmitted(true);
       setSubmitState("done");
     } catch (e: any) {
-      // Likely age-gate / unauth — leave UI as-submitted-locally with a soft notice.
       setSubmitted(true);
       setSubmitState("error");
-      setErrorMsg(e?.message ?? "Verdict not recorded — sign in required.");
+      setErrorMsg(e?.message ?? "Verdict not recorded.");
     }
   }
 
   function submitComment() {
+    if (!requireAuth()) return;
     const t = draft.trim();
     if (!t) return;
     setComments((cs) => [
@@ -154,6 +181,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   async function shareCase() {
+    if (!requireAuth()) return;
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
@@ -170,6 +198,11 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       setShareLabel("✓ Link copied");
       setTimeout(() => setShareLabel("🔗 Share this case"), 2000);
     } catch { /* ignore */ }
+  }
+
+  function toggleLike() {
+    if (!requireAuth()) return;
+    setLiked((v) => !v);
   }
 
   const benchInsight =
@@ -524,9 +557,10 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="mt-2.5 flex items-center gap-1.5">
           <input
             value={draft}
+            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); requireAuth(); } }}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }}
-            placeholder="Address the court..."
+            placeholder={isAuthed ? "Address the court..." : "Sign in to address the court"}
             className="flex-1 rounded-xl px-3 py-2.5 text-[12px] outline-none transition"
             style={{
               background: "var(--c-surface)",
@@ -549,7 +583,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       <div className="mt-3.5 flex justify-center gap-2 px-4 pb-4">
         <button
           type="button"
-          onClick={() => setLiked((v) => !v)}
+          onClick={toggleLike}
           className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition"
           style={
             liked
