@@ -51,16 +51,32 @@ export const Route = createFileRoute("/api/public/hooks/outcome-tracker")({
               milestone_day: milestone,
             });
 
-            await supabaseAdmin.from("notifications").insert({
-              user_id: post.author_id,
-              kind: "outcome_reminder",
-              payload: {
-                story_id: c.post_id,
-                milestone_day: milestone,
-                title: post.title,
-                message: `${milestone} days since the verdict. Any update?`,
-              },
-            });
+            const recipients = new Set<string>([post.author_id]);
+
+            // Notify every verified named-party responder too.
+            const { data: parties } = await supabaseAdmin
+              .from("post_perspectives")
+              .select("responder_id")
+              .eq("post_id", c.post_id)
+              .eq("standing_status", "verified")
+              .eq("role", "named_party");
+            for (const p of parties ?? []) {
+              const rid = (p as any).responder_id as string | null;
+              if (rid) recipients.add(rid);
+            }
+
+            for (const user_id of recipients) {
+              await supabaseAdmin.from("notifications").insert({
+                user_id,
+                kind: "outcome_reminder",
+                payload: {
+                  story_id: c.post_id,
+                  milestone_day: milestone,
+                  title: post.title,
+                  message: `${milestone} days since the verdict. Any update?`,
+                },
+              });
+            }
 
             sent.push({ story_id: c.post_id, milestone });
           }
