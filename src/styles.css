@@ -111,12 +111,12 @@
   --c-text-1: #fff0f6;
   --c-text-2: #c0a8b8;
   --c-text-3: #6a5868;
-  --c-pink:      #f090b8;
-  --c-pink-soft: #4a1030;
+  --c-pink:      #ffd0e8;
+  --c-pink-soft: #ffd0e8;
   --c-pink-mid:  #ffd0e8;
-  --c-pink-deep: #f090b8;
+  --c-pink-deep: #ffd0e8;
   --accent: var(--c-pink-soft);
-  --accent-foreground: var(--c-pink-deep);
+  --accent-foreground: var(--c-text-1);
 }
 
 @theme inline {
