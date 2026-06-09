@@ -56,9 +56,11 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
 
   const cast = useServerFn(castVerdict);
-  const navigate = useNavigate();
+  const enqueue = useGateStore((s) => s.enqueue);
 
-  // Auth state — every CTA in the courtroom requires sign-in.
+  // Auth state — every CTA in the courtroom requires sign-in. When the user
+  // is signed out, we funnel through the IdentityCeremony "reel" gate
+  // (mounted globally in __root.tsx) instead of redirecting to /enter.
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -71,12 +73,17 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     return () => { cancelled = true; sub.subscription.unsubscribe(); };
   }, []);
 
-  function requireAuth(): boolean {
+  const gateContext = useMemo(
+    () => ({
+      category: c.post?.scoreCategory ?? undefined,
+      relationshipType: c.post?.scoreCategory ?? undefined,
+    }),
+    [c.post?.scoreCategory],
+  );
+
+  function gate(action: Omit<PendingAction, "context">): boolean {
     if (isAuthed) return true;
-    const redirect = typeof window !== "undefined"
-      ? window.location.pathname + window.location.search
-      : "/court";
-    navigate({ to: "/enter", search: { redirect } as any });
+    enqueue({ ...action, context: gateContext });
     return false;
   }
 
