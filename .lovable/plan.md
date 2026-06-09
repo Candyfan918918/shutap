@@ -1,71 +1,82 @@
-# Court System — Alignment Plan
+# Court System — Out-of-Scope Wrap-Up
 
-The canonical spec is far larger than the current schema (`court_cases` has scope/region/status only, no tiers, category, lock time, or bench line; no nomination scoring; no predictions/outcomes/wisdom graph; partial perspectives just landed). Building it all in one shot would mean 8+ tables, 5 agents, ~15 server fns and major UI churn. I will ship it in 5 reviewable phases, each independently usable. Each phase ends with a smoke test before the next migration goes up.
+Five independent feature areas. Each ships as its own slice.
 
-## Phase 1 — Schema foundation
+## 1. Admin tooling for city court toggles
 
-Single migration adds the missing core columns / tables. No UI yet.
+**DB:** `city_courts` already exists. Add `is_enabled bool`, `nomination_cap int`, `paused_reason text`, `updated_by uuid`. RLS: admins only (via `has_role(uid,'admin')`).
 
-- `posts`: `nomination_score numeric`, `weighted_vote_sum numeric`, `controversy_score numeric`, `candidacy_paused bool`, `cool_down_until timestamptz`, `expiry_at timestamptz`, `drama_score int`, `prediction_options jsonb`, `relate_count int`.
-- `court_cases` additions: `current_tier text check in (city|regional|national|world)`, `current_category_court text`, `verdict_lock_at timestamptz`, `bench_verdict_line text`, `final_judgment text`, `candidacy_paused bool`. Keep legacy `scope/region_*` for backwards compat; map `scope→current_tier` in a one-time UPDATE.
-- New tables: `court_tiers` (case_id, tier, started_at, vote_count, ended_at), `city_courts` (code, label, country_code, active), `verdict_weights` view, `predictions`, `prediction_results`, `story_outcomes`, `outcome_reminders` (already exists — verify), `wisdom_graph_nodes`, `wisdom_graph_edges`, `reputation_events`.
-- Verdict weight stored on `post_verdict_votes.weight` (add column) — computed server-side at vote time.
-- All new public tables follow the four-step GRANT pattern; service-role-only tables (`reputation_events`, wisdom graph writes, `story_tags` already) get no anon/auth grants.
+**Server:**
+- `src/lib/admin/cityCourts.functions.ts` — `listCityCourts`, `toggleCityCourt({code, enabled, reason})`, `updateCityCourtConfig({code, cap})`. All `.middleware([requireSupabaseAuth])` + admin role check.
 
-## Phase 2 — Nomination + tier engine (server only)
+**UI:** `src/routes/_authenticated/admin.tsx` (gated by role) → table of city courts with toggle switches, cap input, pause reason. Updated nomination engine (`court-tick.ts`) checks `is_enabled` before scheduling nominations per city.
 
-- `src/lib/nomination.functions.ts`
-  - `recalcNomination(postId)` — computes `nomination_score` per formula in spec; writes to `posts`.
-  - `checkNomination(postId)` — if score > p95 of live pool AND no `court_cases` row AND not paused → call `court/nominate`.
-  - Invoked from existing vote/relate/comment/perspective server fns (one line each).
-- `court.functions.ts` additions:
-  - `nominate(postId)` — computes entry tier from vote geo distribution + category from `story_tags.category` → writes `court_cases` + initial `court_tiers` row + plaintiff notification.
-  - `lockCase(caseId)` — runs at `verdict_lock_at`: computes final_verdict/final_judgment, calls Bench agent for `bench_verdict_line`, fans out push notifications, runs escalation check.
-  - `escalateCase(caseId)` — writes new `court_tiers` row, updates `current_tier` + `verdict_lock_at`.
-- New Bench agent prompt `bench_verdict_writer` in `agent-prompts.server.ts`; orchestrator moment `court_verdict_lock` → `[bench_verdict_writer]`.
-- Cron-style trigger: a single pg_cron job (or `/api/public/court-tick` called every minute by Supabase scheduler) calls `lockCase` for any case whose `verdict_lock_at <= now()` and `final_verdict is null`.
+## 2. Re-vote / flip window when bothSidesHeard flips
 
-## Phase 3 — Court UI alignment
+**DB:** add `flip_window_opened_at timestamptz`, `flip_window_closes_at timestamptz`, `pre_flip_verdict text` to `court_cases`. Vote table gets `flip_round int default 1`.
 
-- `CourtroomPanel` shows current tier, category badge, countdown to `verdict_lock_at`, perspectives tab (already exists), Bench verdict line when locked.
-- New `WatchParty.tsx` overlay surfaces when `verdict_lock_at - now < 60min`: live verdict bar via Supabase realtime, Bench commentary cards (fetched every 3–5 min from `bench_commentary` agent — added to AGENT_PROMPTS), countdown.
-- `CourtTabs` filters by category (Romance/Family/Work/Friendship/Service/Stranger/Digital) + tier — derived from `court_cases`, not new endpoints.
-- `CourtCaseCard` shows tier ribbon + category chip + `both_sides_heard` badge (reuses Phase-just-shipped flag).
+**Logic:** when a verified responder posts a perspective after the bench verdict is generated (`court_cases.status='decided'` and `both_sides_heard` flips from false→true), trigger `openFlipWindow(caseId)` from `perspectives.functions.ts`:
+- snapshot current verdict into `pre_flip_verdict`
+- set `flip_window_closes_at = now() + 6h`
+- reset case status back to `in_court` (flagged `is_flip_round=true`)
+- notify all prior voters: "New evidence dropped — re-vote open for 6h"
 
-## Phase 4 — Predictions + outcomes + reminders
+`court-tick.ts` finalizes flip rounds the same way as normal closes but writes a `verdict_flipped` event into `reputation_events` and adjusts juror scores (correct on flip = bonus).
 
-- `predictions.functions.ts`: `submitPrediction`, `listPredictions`.
-- Outcome submission UI on plaintiff’s closed cases — short overlay drawing options from `posts.prediction_options`. Writes `story_outcomes`, flips `posts.status='closed'`, evaluates `prediction_results`, fires Wisdom Graph writer.
-- `outcome-reminders` cron (daily): pushes Bench reminders to plaintiff + verified named parties at 30/90/180/365 day milestones.
+**UI:** `CourtCaseCard` + `CourtroomPanel` show a "Flip Round Active" ribbon, countdown, and "Your previous vote: X — change?" CTA.
 
-## Phase 5 — Wisdom Graph + reputation
+## 3. Mod queue for paused candidacy
 
-- `wisdom_graph_writer` agent (already prompted earlier) wired to outcome submission only — writes nodes/edges via service role; never returned to client.
-- `reputation.functions.ts` extended: on `court/lock` and on `outcome/submit`, recalc `justice_score`, `wisdom_score`, `prediction_score`, `juror_title` per spec; push when title changes.
+**DB:** new `mod_queue` table — `case_id`, `post_id`, `reason` (enum: `pii_suspected`, `mass_flag`, `legal_risk`, `manual_hold`), `status` (`pending|approved|rejected`), `moderator_id`, `notes`, `resolved_at`.
 
-## Out of scope for this plan
+**Triggers into queue:**
+- `nomination.functions.ts`: if rate-limit or PII scan flags post → insert into `mod_queue` with status `pending`, pause `court_cases.status='paused'`.
+- Manual: admin endpoint `pauseCandidacy({caseId, reason})`.
 
-- Multi-language Bench voice variants (English copy only).
-- Admin tooling for `city_courts.active` toggling (manual SQL for now).
-- AEO sitemap priority bumps and per-case OG image generation (separate SEO pass).
-- Re-vote / flip window UX when `both_sides_heard` flips true — DB allows it; UI prompt deferred.
-- Mod queue for `candidacy_paused` cases (flag is set; review UI later).
+**Server:** `src/lib/admin/modQueue.functions.ts` — `listQueue`, `resolveQueueItem({id, decision, notes})`. On approve → unpause case (status back to `nominated`). On reject → mark `court_cases.status='rejected'`, notify author with Bench voice copy.
 
-## Technical notes (for engineers)
+**UI:** `src/routes/_authenticated/admin.mod-queue.tsx` (admin/mod role) — list with post preview, reason, approve/reject buttons.
 
-- Vote weight formula stays server-only inside `vote.functions.ts`; client never sees `weight`.
-- `nomination_score` p95 is computed cheaply via `percentile_cont(0.95) within group (order by nomination_score) from posts where status='live' and not candidacy_paused`. Cached for 30s via `rate_limit_counters`-style key to avoid recompute storms.
-- All AI calls go through existing orchestrator + `ai-broker`; no new edge functions, no new secrets.
-- Realtime: Supabase realtime already enabled for `court_cases`; add `post_verdict_votes` for Watch Party.
+## 4. Per-case OG image generation
 
-## Build order summary
+**Approach:** lazy, on-demand SSR endpoint, cached to Supabase Storage.
 
-```text
-Phase 1  migration ────────► review/approve
-Phase 2  server fns + Bench prompt + cron ► smoke: post → vote burst → nomination → lock
-Phase 3  UI: panel + watch party + tabs   ► visual review on /court
-Phase 4  predictions + outcomes           ► plaintiff loop end-to-end
-Phase 5  wisdom graph + reputation        ► leaderboard + graph rows visible
-```
+**Endpoint:** `src/routes/api/public/og/case.$caseId.ts` (GET). Flow:
+1. Lookup `court_cases` + post (title, region, tier, verdict).
+2. Check `story-media/og/case-{caseId}-{verdictHash}.png` exists → 302 to public URL.
+3. Otherwise call Lovable AI Gateway `images/generations` with template prompt (Bench voice headline + region label + verdict icon). Upload to storage via `supabaseAdmin`. Return 302.
 
-Confirm and I’ll start with the Phase 1 migration.
+**Wire:** `post.$postId.tsx` `head()` sets `og:image` to `/api/public/og/case/{caseId}` when the post has a court case. Twitter card matches.
+
+## 5. Multi-language Bench voice variants
+
+**Scope:** translate all canonical Bench strings + verdict summaries.
+
+**DB:** `bench_voice_strings` table — `key text`, `locale text`, `text text`, PK `(key, locale)`. Seed `en` from existing constants in `agent-prompts.server.ts`.
+
+**Locales (phase 1):** `en`, `es`, `pt-BR`, `fr`, `de`, `it`, `pl`, `tr`.
+
+**Server:**
+- `src/lib/i18n/bench.server.ts` — `t(key, locale, vars)` with fallback chain `locale → base lang → en`. Cached in-memory per worker.
+- Agent prompts updated to receive `locale` and emit summaries in that language (system prompt: "Respond in {locale}. Tone is Bench: declarative, dry, occasionally savage, never cruel.").
+- `finalize_court_cases` SQL fn: stop hardcoding English summaries — instead store `verdict_kind` + `pct` only. Render display string client-side via `t()`.
+
+**Client:** `useBenchVoice(locale)` hook reads profile `locale` (already on `profiles`). Replace hardcoded strings in `WatchParty`, `CourtCaseCard`, `OutcomePrompt`, etc.
+
+**Migration risk:** existing `court_cases.ai_summary` rows stay English — kept as fallback; new rows render dynamically.
+
+---
+
+## Build order
+
+1. Migration bundle (all 4 schema sets in one approval) — city_courts columns, court_cases flip cols, mod_queue, bench_voice_strings.
+2. Admin role gate + admin layout route.
+3. City court admin UI.
+4. Mod queue end-to-end.
+5. Flip window logic + UI ribbon.
+6. OG image endpoint.
+7. Bench i18n table + client/server wiring.
+
+Approx 18–22 new files, 6 edits.
+
+Confirm and I'll start with the migration.
