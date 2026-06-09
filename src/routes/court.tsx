@@ -115,10 +115,28 @@ function CourtPage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pt-6 space-y-6">
-        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="text-3xl sm:text-5xl font-medium text-balance">👑 Relationship Court™</h1>
-          <p className="mt-2 text-base text-muted-foreground text-balance">
-            Where the <span className="text-foreground font-medium">internet</span> decides.
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div
+            className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-[1.5px] text-2xl"
+            style={{
+              borderColor: "var(--c-amber)",
+              background: "var(--c-surface-3)",
+            }}
+          >
+            ⚖️
+          </div>
+          <h1
+            className="text-2xl sm:text-4xl font-semibold tracking-tight text-balance"
+            style={{ color: "var(--c-amber)" }}
+          >
+            Relationship Court™
+          </h1>
+          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Where the human decides
           </p>
         </motion.div>
 
@@ -153,12 +171,7 @@ function CourtPage() {
           </div>
         )}
 
-        {featured && (
-          <section>
-            <SectionTitle title="Featured case" subtitle="The internet is invested." />
-            <CourtCaseCard c={featured} size="lg" />
-          </section>
-        )}
+        {featured && <CourtroomPanel c={featured} />}
 
         {grouped.inCourt.length > 1 && (
           <Section
