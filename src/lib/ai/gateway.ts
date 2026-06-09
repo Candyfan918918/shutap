@@ -9,25 +9,42 @@ export type GatewayJsonOptions = {
   model?: string;
   messages: GatewayMessage[];
   temperature?: number;
+  /** Hard timeout in ms. Defaults to 20s. */
+  timeoutMs?: number;
 };
 
 export async function callGatewayJSON<T>(opts: GatewayJsonOptions): Promise<T> {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
 
-  const res = await fetch(GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: opts.model ?? "google/gemini-3-flash-preview",
-      messages: opts.messages,
-      temperature: opts.temperature ?? 0.9,
-      response_format: { type: "json_object" },
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutMs = opts.timeoutMs ?? 20_000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res: Response;
+  try {
+    res = await fetch(GATEWAY_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: opts.model ?? "google/gemini-3-flash-preview",
+        messages: opts.messages,
+        temperature: opts.temperature ?? 0.9,
+        response_format: { type: "json_object" },
+      }),
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    if ((e as Error)?.name === "AbortError") {
+      throw new Error("The bench took too long. Try again.");
+    }
+    throw e;
+  }
+  clearTimeout(timer);
 
   if (res.status === 429) throw new Error("Rate limited — try again in a moment.");
   if (res.status === 402) throw new Error("AI credits exhausted. Please add credits in Settings → Workspace.");

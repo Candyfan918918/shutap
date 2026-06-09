@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { CourtCase } from "@/lib/court.functions";
@@ -31,7 +32,7 @@ function topVerdict(c: CourtCase): { kind: string; pct: number } | null {
   return { kind: k, pct: Math.round((n / c.verdict.total) * 100) };
 }
 
-export function CourtCaseCard({
+function CourtCaseCardImpl({
   c,
   size = "md",
   index = 0,
@@ -110,3 +111,5 @@ export function CourtCaseCard({
     </motion.article>
   );
 }
+
+export const CourtCaseCard = memo(CourtCaseCardImpl);
