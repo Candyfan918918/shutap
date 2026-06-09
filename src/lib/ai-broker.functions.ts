@@ -10,8 +10,10 @@ const InputSchema = z.object({
   story_id: z.string().uuid().optional(),
 });
 
-export type AiBrokerResult<T = unknown> = {
-  data: { content: T } | null;
+// Content is serialized as a JSON string so TanStack Start's strict
+// serializability check passes regardless of agent output shape.
+export type AiBrokerResult = {
+  data: { content: string } | null;
   error: string | null;
 };
 
@@ -54,7 +56,8 @@ export const callAgent = createServerFn({ method: "POST" })
         userId: ctx.userId,
         storyId: data.story_id,
       });
-      return { data: { content: result.results[0]?.output ?? null }, error: null };
+      const raw = result.results[0]?.output ?? null;
+      return { data: { content: JSON.stringify(raw) }, error: null };
     } catch (e) {
       return { data: null, error: (e as Error)?.message ?? "ai_call_failed" };
     }

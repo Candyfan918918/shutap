@@ -28,22 +28,21 @@ export const moderate = createServerFn({ method: "POST" })
     const { data: ev, error: evErr } = await supabaseAdmin
       .from("safety_events")
       .insert({
+        user_id: ctx.userId,
         post_id: data.story_id,
-        reporter_id: ctx.userId,
-        kind: data.action,
         action: data.action,
-        reason: data.reason ?? null,
+        reasons: data.reason ? [data.reason] : [],
       })
       .select("id")
       .single();
 
     if (evErr) return { data: null, error: evErr.message };
 
-    // 2. Side effects per action.
+    // 2. Side effects per action (stories.status enum: draft|pending|published|removed|sensitive).
     if (data.action === "retract") {
       await supabaseAdmin
         .from("stories")
-        .update({ status: "retracted" })
+        .update({ status: "removed" })
         .eq("id", data.story_id);
     } else if (data.action === "resolve_claim" && data.claimer_id) {
       await supabaseAdmin
@@ -62,7 +61,7 @@ export const moderate = createServerFn({ method: "POST" })
     } else if (data.action === "flag") {
       await supabaseAdmin
         .from("stories")
-        .update({ status: "under_review" })
+        .update({ status: "sensitive" })
         .eq("id", data.story_id);
     }
 

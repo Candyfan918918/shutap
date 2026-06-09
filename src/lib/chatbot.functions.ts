@@ -26,12 +26,12 @@ interface QuerySpec {
   order_by?: string;
 }
 
-export type ContentItem = { type: string; [k: string]: unknown };
-
+// stream_override is serialized as a JSON string so any shape passes the
+// strict TanStack Start serializability check.
 export type ChatbotResult = {
   data: {
     response_text: string;
-    stream_override?: ContentItem[];
+    stream_override_json: string | null;
   } | null;
   error: string | null;
 };
@@ -64,23 +64,39 @@ export const chat = createServerFn({ method: "POST" })
 
     const response_text: string = agentOutput?.response_text ?? "";
     const query_spec: QuerySpec | undefined = agentOutput?.query_spec;
-    let stream_override: ContentItem[] | undefined = agentOutput?.stream_override;
+    let stream_override: Array<Record<string, unknown>> | undefined =
+      agentOutput?.stream_override;
 
     if (query_spec?.table && QUERY_ALLOWLIST[query_spec.table]) {
       const allowedCols = QUERY_ALLOWLIST[query_spec.table];
       const cols = (query_spec.columns ?? []).filter((c) => allowedCols.includes(c));
       const select = cols.length ? cols.join(",") : allowedCols.join(",");
-      let q = supabaseAdmin.from(query_spec.table).select(select);
+      const admin = supabaseAdmin as unknown as {
+        from: (t: string) => {
+          select: (s: string) => { eq: (k: string, v: unknown) => any; limit: (n: number) => any };
+        };
+      };
+      let q: any = admin.from(query_spec.table).select(select);
       for (const [k, v] of Object.entries(query_spec.filters ?? {})) {
-        if (allowedCols.includes(k)) q = q.eq(k, v as any);
+        if (allowedCols.includes(k)) q = q.eq(k, v);
       }
       const limit = Math.min(Math.max(query_spec.limit ?? 20, 1), 50);
       q = q.limit(limit);
       const { data: rows } = await q;
       if (rows && !stream_override) {
-        stream_override = rows.map((row) => ({ type: "row", table: query_spec.table, row }));
+        stream_override = (rows as unknown[]).map((row) => ({
+          type: "row",
+          table: query_spec.table,
+          row,
+        }));
       }
     }
 
-    return { data: { response_text, stream_override }, error: null };
+    return {
+      data: {
+        response_text,
+        stream_override_json: stream_override ? JSON.stringify(stream_override) : null,
+      },
+      error: null,
+    };
   });

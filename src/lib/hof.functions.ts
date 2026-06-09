@@ -67,7 +67,7 @@ export const recordEvent = createServerFn({ method: "POST" })
             entity_id: data.entity_id,
             period,
             score,
-            metrics,
+            metrics: metrics as Record<string, any>,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "entity_type,entity_id,period" },
