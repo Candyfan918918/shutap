@@ -4,7 +4,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // ── Pools ──────────────────────────────────────────────────────────
 
@@ -83,14 +82,17 @@ export const generateAlias = createServerFn({ method: "GET" })
     z.object({
       category: z.string().max(64).optional(),
       relationshipType: z.string().max(64).optional(),
+      countryCode: z.string().length(2).optional(),
     }).parse,
   )
   .handler(async ({ data }): Promise<GeneratedAlias> => {
     const country =
+      data.countryCode ||
       getRequestHeader("cf-ipcountry") ||
       getRequestHeader("x-vercel-ip-country") ||
       getRequestHeader("x-country") ||
       null;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const emotionPool = pickEmotion(data.category);
     const creaturePool = pickCreature(data.relationshipType);
