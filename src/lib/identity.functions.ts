@@ -19,6 +19,10 @@ export interface IdentityPayload {
   countryCode: string | null;
   region: string | null;
   city: string | null;
+  ageVerified: boolean;
+  nationality: string | null;
+  emotion: string | null;
+  creature: string | null;
   onboardedAt: string | null;
 }
 
@@ -38,7 +42,7 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
 
     const { data: existing, error: getErr } = await supabase
       .from("profiles")
-      .select("id, locale, country, country_code, city, region, display_name, avatar_url, vibe, descriptor, city_label, onboarded_at")
+      .select("id, locale, country, country_code, city, region, display_name, avatar_url, vibe, descriptor, city_label, age_verified, nationality, emotion, creature, onboarded_at")
       .eq("id", userId)
       .maybeSingle();
     if (getErr) throw new Error(getErr.message);
@@ -80,6 +84,12 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       cityLabel,
       seed,
     });
+    const createProfilePatch: Record<string, unknown> = existing?.id
+      ? {}
+      : {
+          handle: `user_${userId.replace(/-/g, "").slice(0, 12)}`,
+          nickname: displayName,
+        };
 
     const patch: Record<string, unknown> = {
       display_name: displayName,
@@ -101,9 +111,12 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
 
     const { data: row, error: updErr } = await supabase
       .from("profiles")
-      .update(patch as never)
-      .eq("id", userId)
-      .select("id, display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, onboarded_at")
+      .upsert({
+        id: userId,
+        ...createProfilePatch,
+        ...patch,
+      } as never, { onConflict: "id" })
+      .select("id, display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .single();
     if (updErr) throw new Error(updErr.message);
 
@@ -118,6 +131,10 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       countryCode: (row.country_code as string | null) ?? countryCode,
       region: (row.region as string | null) ?? region,
       city: (row.city as string | null) ?? cityFromGeo,
+      ageVerified: Boolean(row.age_verified),
+      nationality: (row.nationality as string | null) ?? null,
+      emotion: (row.emotion as string | null) ?? null,
+      creature: (row.creature as string | null) ?? null,
       onboardedAt: (row.onboarded_at as string | null) ?? new Date().toISOString(),
     };
   });
@@ -128,7 +145,7 @@ export const getMyIdentity = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, onboarded_at")
+      .select("display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .eq("id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -151,6 +168,10 @@ export const getMyIdentity = createServerFn({ method: "GET" })
       countryCode: (row.country_code as string | null) ?? null,
       region: (row.region as string | null) ?? null,
       city: (row.city as string | null) ?? null,
+      ageVerified: Boolean(row.age_verified),
+      nationality: (row.nationality as string | null) ?? null,
+      emotion: (row.emotion as string | null) ?? null,
+      creature: (row.creature as string | null) ?? null,
       onboardedAt: (row.onboarded_at as string | null) ?? null,
     };
   });
