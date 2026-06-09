@@ -510,12 +510,15 @@ function CourtRibbon({
     return `${s}s to verdict`;
   })();
   return (
-    <div className="flex items-center justify-between rounded-full border border-primary/30 bg-primary px-4 py-2 text-xs font-medium">
-      <span className="text-foreground">
+    <div
+      className="flex items-center justify-between rounded-md bg-c-surface-2 border border-c-border px-4 py-2 text-xs font-medium"
+      style={{ borderLeft: "2px solid var(--c-pink)" }}
+    >
+      <span className="text-c-text-1">
         {category} Court · {tier}
       </span>
-      <span className="text-primary tabular-nums">⏳ {countdown}</span>
-      <span className="hidden sm:inline text-muted-foreground">{regionLabel}</span>
+      <span className="text-c-text-2 tabular-nums">⏳ {countdown}</span>
+      <span className="hidden sm:inline text-c-text-3">{regionLabel}</span>
     </div>
   );
 }
