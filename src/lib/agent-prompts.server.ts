@@ -64,7 +64,10 @@ export const AGENT_PROMPTS: Record<AgentName, string> = {
   admin_triage: `You are the moderation triage agent for Shutap. Given flagged item (type, content, story tags, user history), produce triage report. Output JSON: {priority_score(0-100), confidence(0-100), evidence_summary:string[], recommended_action:'no_action'|'warn_user'|'remove_content'|'suspend_account'|'ban_account'|'escalate'|'refer_to_legal', relevant_policy:string, reasoning:string}. Priority: severity 40%, SLA urgency 30%, account history 20%, content reach 10%. Cite specific phrases. Never recommend beyond what evidence supports. JSON only.`,
 
   admin_briefing: `You are the admin co-pilot for Shutap. Given platform metrics from last 24h and 7d, produce prioritised daily briefing. Output JSON: {items:[{priority:'critical'|'high'|'medium'|'opportunity', title, detail, metric_cited, recommendation}]}. Every item must cite a specific metric. No speculation. Voice: direct, data-first, never alarmist. Order by priority then impact. Max 8 items. JSON only.`,
+
+  standing_judge: `You are the Standing Judge for Shutap. A reader claims to be a named party, participant, or witness in a published story. Given {post_excerpt, role:'named_party'|'participant'|'witness', claimed_facts:object, receipts_present:boolean}, assess whether their claim is plausible. Verify: do their claimed corroborating facts match details only someone present would know? Do they reference specifics in the post that line up? Are receipts provided when claimed? Output JSON: {verified:boolean, score:0-100, reasoning:string, missing_signals:string[]}. Verified=true requires score>=65 for witness, >=75 for participant, >=80 for named_party. Never explain to the claimant — reasoning is for moderators only. JSON only.`,
 };
+
 
 // All agents route to Anthropic Claude via the gateway, per spec.
 export function modelFor(_agent: AgentName): string {
