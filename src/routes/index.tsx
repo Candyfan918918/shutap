@@ -215,9 +215,6 @@ function AnonymousCourt() {
         </div>
       </footer>
 
-      <AnimatePresence>
-        {gateOpen && <IdentityCeremony key="ceremony" />}
-      </AnimatePresence>
     </div>
   );
 }
