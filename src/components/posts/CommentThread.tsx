@@ -198,9 +198,13 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
         </form>
       ) : (
         <div className="mb-4 rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
-          <Link to="/enter" search={{ redirect: undefined }} className="text-primary underline">
+          <button
+            type="button"
+            onClick={() => enqueue({ type: "comment", entityId: postId })}
+            className="text-primary underline"
+          >
             Sign in
-          </Link>{" "}
+          </button>{" "}
           to drop a comment.
         </div>
       )}
