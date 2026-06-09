@@ -32,7 +32,7 @@ export function PostRow({ post, onChanged }: { post: MyPostRow; onChanged: () =>
       </div>
       <div className="relative flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <div className="font-semibold truncate">{post.title}</div>
+          <div className="font-medium truncate">{post.title}</div>
           <div className="relative z-10 shrink-0">
             <PostRowMenu post={post} onChanged={onChanged} />
           </div>

@@ -80,7 +80,7 @@ export function AvatarEditor({ currentUrl, onChanged }: { currentUrl: string | n
       <div className="rounded-2xl border border-border bg-surface-elevated p-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-4 h-4 text-primary" />
-          <div className="text-sm font-semibold">or generate an AI avatar (5/day)</div>
+          <div className="text-sm font-medium">or generate an AI avatar (5/day)</div>
         </div>
         <div className="flex flex-wrap gap-2 mb-3">
           {STYLES.map((s) => (
@@ -98,7 +98,7 @@ export function AvatarEditor({ currentUrl, onChanged }: { currentUrl: string | n
         <button
           disabled={busy}
           onClick={onGenerate}
-          className="w-full py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm disabled:opacity-40"
+          className="w-full py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-40"
         >
           {busy ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "✨ generate"}
         </button>

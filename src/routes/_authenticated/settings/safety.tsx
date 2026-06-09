@@ -22,7 +22,7 @@ function SafetyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">Safety</h2>
+        <h2 className="text-lg font-medium">Safety</h2>
         <p className="text-sm text-muted-foreground">Manage blocked accounts and report users from their profile.</p>
       </div>
       <div className="rounded-2xl border border-border bg-card divide-y divide-border">

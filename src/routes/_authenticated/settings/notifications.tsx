@@ -50,7 +50,7 @@ function NotificationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">Notifications</h2>
+        <h2 className="text-lg font-medium">Notifications</h2>
         <p className="text-sm text-muted-foreground">Pick what's worth pinging you for.</p>
       </div>
       <div className="space-y-2">
@@ -70,7 +70,7 @@ function NotificationsPage() {
       <button
         onClick={save}
         disabled={saving}
-        className="w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-40"
+        className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-40"
       >
         {saving ? "saving…" : "save"}
       </button>

@@ -83,7 +83,7 @@ function Scoring() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.4 }}
-              className="text-xl font-semibold"
+              className="text-xl font-medium"
             >
               {LINES[idx]}
             </motion.p>

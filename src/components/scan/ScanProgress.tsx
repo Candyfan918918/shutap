@@ -48,7 +48,7 @@ export function ScanProgress({
   const minutes = Math.max(1, Math.ceil(etaSeconds / 60));
 
   return (
-    <div className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+    <div className="sticky top-0 z-30 bg-background/85  border-b border-border">
       <div className="mx-auto max-w-xl px-4 pt-3 pb-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
           <button
@@ -66,7 +66,7 @@ export function ScanProgress({
         </div>
         <div className="h-2 rounded-full bg-surface-elevated overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary to-accent transition-[width] duration-500 ease-out"
+            className="h-full bg-primary transition-[width] duration-500 ease-out"
             style={{ width: `${percent}%` }}
           />
         </div>

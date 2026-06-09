@@ -19,10 +19,10 @@ function ScansHistoryPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-sm text-muted-foreground">← Home</Link>
-          <span className="font-semibold">Your scans</span>
+          <span className="font-medium">Your scans</span>
           <Link to="/scan" className="text-sm text-primary">+ New</Link>
         </div>
       </header>
@@ -38,7 +38,7 @@ function ScansHistoryPage() {
             </p>
             <Link
               to="/scan"
-              className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+              className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium"
             >
               Start your first scan →
             </Link>
@@ -52,13 +52,13 @@ function ScansHistoryPage() {
                   <div className="text-xs text-muted-foreground">
                     {new Date(s.created_at).toLocaleDateString()}
                   </div>
-                  <div className="font-bold mt-0.5">
+                  <div className="font-medium mt-0.5">
                     {s.status === "completed"
                       ? `${band?.emoji ?? ""} ${s.category ?? "—"}`
                       : "⏳ In progress"}
                   </div>
                 </div>
-                <div className="text-3xl font-black tabular-nums">
+                <div className="text-3xl font-medium tabular-nums">
                   {s.score ?? "—"}
                 </div>
               </div>

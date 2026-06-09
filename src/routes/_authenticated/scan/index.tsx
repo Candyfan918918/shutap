@@ -40,10 +40,10 @@ function ScanIntro() {
         >
           👀
         </motion.div>
-        <div className="text-xs font-bold tracking-wider text-accent uppercase mb-3">
+        <div className="text-xs font-medium tracking-wider text-accent uppercase mb-3">
           Judge My Relationship™
         </div>
-        <h1 className="text-4xl sm:text-5xl font-black leading-tight text-balance">
+        <h1 className="text-4xl sm:text-5xl font-medium leading-tight text-balance">
           90 seconds. mostly tapping.
         </h1>
         <p className="mt-4 text-base text-muted-foreground max-w-md text-balance">
@@ -57,13 +57,13 @@ function ScanIntro() {
               <Link
                 to="/scan/result/$scanId"
                 params={{ scanId: active.id }}
-                className="block w-full px-6 py-4 rounded-full bg-surface-elevated border border-border font-semibold text-base"
+                className="block w-full px-6 py-4 rounded-full bg-surface-elevated border border-border font-medium text-base"
               >
                 see your last score →
               </Link>
               <Link
                 to="/scan/start"
-                className="block w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
+                className="block w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
               >
                 start a new one →
               </Link>
@@ -71,7 +71,7 @@ function ScanIntro() {
           ) : (
             <Link
               to="/scan/start"
-              className="block w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg shadow-lg"
+              className="block w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
             >
               👀 okay let's go →
             </Link>

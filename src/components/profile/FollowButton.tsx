@@ -32,10 +32,10 @@ export function FollowButton({ targetUserId, isFollowing, onChanged }: {
     <button
       onClick={toggle}
       disabled={busy}
-      className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+      className={`px-4 py-2 rounded-full text-sm font-medium transition ${
         optimistic
           ? "bg-surface-elevated border border-border"
-          : "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+          : "bg-primary text-primary-foreground shadow-md"
       } disabled:opacity-50`}
     >
       {optimistic ? "Following" : "Follow"}

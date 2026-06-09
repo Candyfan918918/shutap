@@ -102,16 +102,16 @@ export function StoryArc({ postId }: Props) {
       {status.isAuthor && status.requestCount > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/15 to-accent/15 p-4 flex items-center gap-3"
+          className="rounded-2xl border border-primary/40 bg-primary p-4 flex items-center gap-3"
         >
           <span className="text-2xl">😭</span>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm">{fmt(status.requestCount)} people requested an update</p>
+            <p className="font-medium text-sm">{fmt(status.requestCount)} people requested an update</p>
             <p className="text-xs text-muted-foreground">Tell us what happened next.</p>
           </div>
           <button
             onClick={() => setComposing(true)}
-            className="shrink-0 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold"
+            className="shrink-0 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-medium"
           >
             Post update
           </button>
@@ -122,7 +122,7 @@ export function StoryArc({ postId }: Props) {
       {status.isAuthor && status.requestCount === 0 && (
         <button
           onClick={() => setComposing(true)}
-          className="w-full px-4 py-3 rounded-2xl border border-dashed border-border text-sm font-semibold hover:border-primary/60 transition"
+          className="w-full px-4 py-3 rounded-2xl border border-dashed border-border text-sm font-medium hover:border-primary/60 transition"
         >
           ✍️ Post an update (Part {(status.updateCount ?? 0) + 2})
         </button>
@@ -133,7 +133,7 @@ export function StoryArc({ postId }: Props) {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={onRequest}
-            className={`px-4 py-2 rounded-full text-xs font-bold border transition ${
+            className={`px-4 py-2 rounded-full text-xs font-medium border transition ${
               status.iRequested
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-surface-elevated border-border hover:border-primary/60"
@@ -146,7 +146,7 @@ export function StoryArc({ postId }: Props) {
           </button>
           <button
             onClick={onFollow}
-            className={`px-4 py-2 rounded-full text-xs font-bold border transition ${
+            className={`px-4 py-2 rounded-full text-xs font-medium border transition ${
               status.iFollow
                 ? "bg-accent text-accent-foreground border-accent"
                 : "bg-surface-elevated border-border hover:border-accent/60"
@@ -160,7 +160,7 @@ export function StoryArc({ postId }: Props) {
       {/* Timeline */}
       {updates.length > 0 && (
         <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-sm font-semibold mb-3">📖 Story arc · {updates.length + 1} {updates.length === 0 ? "chapter" : "chapters"}</p>
+          <p className="text-sm font-medium mb-3">📖 Story arc · {updates.length + 1} {updates.length === 0 ? "chapter" : "chapters"}</p>
           <ol className="relative pl-5 space-y-4 before:absolute before:left-1.5 before:top-1 before:bottom-1 before:w-px before:bg-border">
             <TimelineDot />
             <li className="relative">
@@ -174,7 +174,7 @@ export function StoryArc({ postId }: Props) {
                   {KIND_LABEL[u.kind].emoji} Part {u.episodeNumber} · {KIND_LABEL[u.kind].label}
                   <span className="ml-2 opacity-60">{new Date(u.createdAt).toLocaleDateString()}</span>
                 </p>
-                {u.title && <p className="text-sm font-semibold mt-0.5">{u.title}</p>}
+                {u.title && <p className="text-sm font-medium mt-0.5">{u.title}</p>}
                 <p className="text-sm leading-relaxed mt-1 whitespace-pre-wrap">{u.body}</p>
                 {u.mediaUrl && (
                   <img src={u.mediaUrl} alt="" className="mt-2 rounded-xl max-h-72 object-cover w-full" loading="lazy" />
@@ -225,18 +225,18 @@ function UpdateComposer({
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl overflow-y-auto"
+      className="fixed inset-0 z-50 bg-background/95  overflow-y-auto"
     >
       <div className="mx-auto max-w-lg px-5 py-8 min-h-full flex flex-col">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">✍️ Post Part {nextEpisode}</h2>
+          <h2 className="text-xl font-medium">✍️ Post Part {nextEpisode}</h2>
           <button onClick={onClose} className="text-sm text-muted-foreground">Close</button>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           Followers and everyone who asked for an update will be notified.
         </p>
 
-        <label className="mt-5 text-xs font-semibold text-muted-foreground">What happened?</label>
+        <label className="mt-5 text-xs font-medium text-muted-foreground">What happened?</label>
         <div className="mt-2 grid grid-cols-2 gap-2">
           {UPDATE_KINDS.map((k) => (
             <button
@@ -253,7 +253,7 @@ function UpdateComposer({
           ))}
         </div>
 
-        <label className="mt-5 text-xs font-semibold text-muted-foreground">Title (optional)</label>
+        <label className="mt-5 text-xs font-medium text-muted-foreground">Title (optional)</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -262,7 +262,7 @@ function UpdateComposer({
           className="mt-2 w-full px-3 py-2 rounded-xl bg-surface-elevated border border-border text-sm focus:outline-none focus:border-primary"
         />
 
-        <label className="mt-4 text-xs font-semibold text-muted-foreground">The update</label>
+        <label className="mt-4 text-xs font-medium text-muted-foreground">The update</label>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -276,7 +276,7 @@ function UpdateComposer({
         <button
           onClick={send}
           disabled={busy}
-          className="mt-6 w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm disabled:opacity-60"
+          className="mt-6 w-full py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm disabled:opacity-60"
         >
           {busy ? "Posting…" : `📣 Drop Part ${nextEpisode}`}
         </button>

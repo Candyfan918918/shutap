@@ -46,7 +46,7 @@ export const Route = createFileRoute("/post/$postId")({
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center text-center p-6">
       <div>
-        <p className="text-2xl font-bold">404</p>
+        <p className="text-2xl font-medium">404</p>
         <Link to="/" className="text-primary underline mt-2 inline-block">Go home</Link>
       </div>
     </div>
@@ -107,7 +107,7 @@ function PostPage() {
     return (
       <div className="min-h-screen grid place-items-center p-6 text-center">
         <div>
-          <p className="text-xl font-semibold mb-2">{t("post.notFound")}</p>
+          <p className="text-xl font-medium mb-2">{t("post.notFound")}</p>
           <Link to="/" className="text-primary underline">←</Link>
         </div>
       </div>
@@ -116,12 +116,12 @@ function PostPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain pb-24">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/75 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/75 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-sm text-muted-foreground">← {t("appName")}</Link>
           <button
             onClick={() => setShowShare(true)}
-            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-semibold"
+            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
           >
             Share
           </button>
@@ -133,16 +133,16 @@ function PostPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/15 to-accent/15 p-4 flex items-center gap-3"
+            className="rounded-2xl border border-primary/40 bg-primary p-4 flex items-center gap-3"
           >
             <span className="text-2xl">🎉</span>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm">Your tea is live</p>
+              <p className="font-medium text-sm">Your tea is live</p>
               <p className="text-xs text-muted-foreground">it's on the leaderboard. now make a friend cry-laugh 👇</p>
             </div>
             <button
               onClick={() => setShowShare(true)}
-              className="shrink-0 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold"
+              className="shrink-0 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-medium"
             >
               Share
             </button>
@@ -164,7 +164,7 @@ function PostPage() {
         <div className="pt-2 grid grid-cols-3 gap-3">
           <button
             onClick={() => setShowShare(true)}
-            className="col-span-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+            className="col-span-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium"
           >
             📤 Challenge a friend
           </button>
@@ -172,7 +172,7 @@ function PostPage() {
         </div>
         <Link
           to="/"
-          className="block px-6 py-3 rounded-full bg-surface-elevated border border-border font-semibold text-center"
+          className="block px-6 py-3 rounded-full bg-surface-elevated border border-border font-medium text-center"
         >
           {t("post.landingCta")}
         </Link>
@@ -227,7 +227,7 @@ function ReactionsBar({ postId }: { postId: string }) {
   const KINDS: ReactionKind[] = ["been_there", "worse", "hug", "laugh", "drama"];
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
-      <p className="text-sm font-semibold mb-3">{t("post.reactions.title")}</p>
+      <p className="text-sm font-medium mb-3">{t("post.reactions.title")}</p>
       <div className="flex flex-wrap gap-2">
         {KINDS.map((k) => (
           <button
@@ -266,7 +266,7 @@ function SaveButton({ postId }: { postId: string }) {
     <button
       onClick={onClick}
       disabled={busy}
-      className={`px-4 py-3 rounded-full font-semibold border transition ${
+      className={`px-4 py-3 rounded-full font-medium border transition ${
         saved
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-surface-elevated border-border hover:border-primary/60"
@@ -353,12 +353,12 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-xl overflow-y-auto"
+      className="fixed inset-0 z-50 bg-background/95  overflow-y-auto"
     >
       <div className="mx-auto max-w-md px-6 py-8 min-h-full flex flex-col">
         <motion.h2
           initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          className="text-2xl sm:text-3xl font-bold text-center text-balance"
+          className="text-2xl sm:text-3xl font-medium text-center text-balance"
         >
           👀 Be honest…
         </motion.h2>
@@ -382,7 +382,7 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
               whileTap={{ scale: 0.97 }}
               onClick={onNativeShare}
               disabled={busy !== "idle"}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg disabled:opacity-60"
+              className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium text-sm  disabled:opacity-60"
             >
               {busy === "native" ? t("post.share.nativePreparing") : `📤 ${t("post.share.native")}`}
             </motion.button>
@@ -391,7 +391,7 @@ function SharePopup({ post, onClose }: { post: PostRecord; onClose: () => void }
             whileTap={{ scale: 0.97 }}
             onClick={onDownload}
             disabled={busy !== "idle"}
-            className="w-full py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm disabled:opacity-60"
+            className="w-full py-3 rounded-full bg-surface-elevated border border-border font-medium text-sm disabled:opacity-60"
           >
             {busy === "download" ? t("post.share.nativePreparing") : `⬇ ${t("post.share.downloadCard")}`}
           </motion.button>

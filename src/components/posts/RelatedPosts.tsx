@@ -30,7 +30,7 @@ export function RelatedPosts({ postId, autoLoad = false }: { postId: string; aut
       className="rounded-2xl border border-border bg-card p-4"
     >
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-sm font-semibold">🍿 More stories like this</p>
+        <p className="text-sm font-medium">🍿 More stories like this</p>
         <Link to="/" className="text-[11px] text-muted-foreground hover:text-foreground">see all</Link>
       </div>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -41,7 +41,7 @@ export function RelatedPosts({ postId, autoLoad = false }: { postId: string; aut
               params={{ postId: p.id }}
               className="block rounded-xl border border-border bg-surface-elevated p-3 hover:border-primary/50 transition"
             >
-              <p className="text-xs font-semibold line-clamp-2">{p.title}</p>
+              <p className="text-xs font-medium line-clamp-2">{p.title}</p>
               <div className="mt-1.5 flex items-center gap-2 text-[10px] text-muted-foreground">
                 {p.scoreCategory && <span className="px-1.5 py-0.5 rounded-full bg-background border border-border">{p.scoreCategory}</span>}
                 <span>💬 {p.commentCount}</span>

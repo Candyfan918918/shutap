@@ -16,7 +16,7 @@ export function BadgesGrid({ badges }: { badges: Badge[] }) {
       {badges.map((b) => (
         <div key={b.id} className="rounded-2xl bg-card border border-border p-4 text-center hover:border-primary/40 transition">
           <div className="text-4xl mb-2">{b.emoji}</div>
-          <div className="font-semibold text-sm">{b.label}</div>
+          <div className="font-medium text-sm">{b.label}</div>
           <div className="text-xs text-muted-foreground mt-1">{b.desc}</div>
         </div>
       ))}

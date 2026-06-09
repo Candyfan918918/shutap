@@ -26,10 +26,10 @@ function MyPostsPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-30 bg-background/85  border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <Link to="/me" className="p-1 -ml-1 text-muted-foreground"><ChevronLeft className="w-5 h-5" /></Link>
-          <div className="font-semibold">Your posts</div>
+          <div className="font-medium">Your posts</div>
           <Link to="/spill" className="p-1 text-primary"><Plus className="w-5 h-5" /></Link>
         </div>
       </header>
@@ -40,9 +40,9 @@ function MyPostsPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border ${
+              className={`px-4 py-2 rounded-full text-sm font-medium border ${
                 tab === t
-                  ? "bg-gradient-to-r from-primary to-accent text-primary-foreground border-transparent"
+                  ? "bg-primary text-primary-foreground border-transparent"
                   : "bg-surface-elevated border-border"
               }`}
             >
@@ -79,11 +79,11 @@ function EmptyState({ tab }: { tab: Tab }) {
   return (
     <div className="text-center py-20 text-muted-foreground">
       <div className="text-6xl mb-3">{copy.emoji}</div>
-      <div className="font-semibold text-foreground">{copy.title}</div>
+      <div className="font-medium text-foreground">{copy.title}</div>
       <div className="text-sm mt-1">{copy.sub}</div>
       <Link
         to="/spill"
-        className="mt-6 inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm"
+        className="mt-6 inline-block px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm"
       >
         ☕ Spill the tea
       </Link>

@@ -54,12 +54,12 @@ function ScorePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-32">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/80 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => history.back()} className="text-sm text-muted-foreground">
             ← Back
           </button>
-          <span className="text-xs font-semibold tracking-widest text-primary">RESULTS</span>
+          <span className="text-xs font-medium tracking-widest text-primary">RESULTS</span>
           <span className="w-12" />
         </div>
       </header>
@@ -77,7 +77,7 @@ function ScorePage() {
             <div className="text-xs uppercase tracking-widest text-muted-foreground">
               🌎 Chaos Championship™
             </div>
-            <p className="mt-2 text-2xl font-black">#{ranking} worldwide</p>
+            <p className="mt-2 text-2xl font-medium">#{ranking} worldwide</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Congratulations… or condolences.
             </p>
@@ -85,13 +85,13 @@ function ScorePage() {
         )}
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
         <div className="mx-auto max-w-2xl px-4 py-3">
           <button
             onClick={() =>
               navigate({ to: "/spill/$draftId/draft", params: { draftId } })
             }
-            className="w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold"
+            className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium"
           >
             Okay… turn this into a post 👀
           </button>

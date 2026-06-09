@@ -51,7 +51,7 @@ function PrivacyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold">Privacy</h2>
+        <h2 className="text-lg font-medium">Privacy</h2>
         <p className="text-sm text-muted-foreground">Mysterious energy is encouraged.</p>
       </div>
       <div className="space-y-2">
@@ -62,7 +62,7 @@ function PrivacyPage() {
       <button
         onClick={save}
         disabled={saving}
-        className="w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-40"
+        className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-40"
       >
         {saving ? "saving…" : "save privacy"}
       </button>

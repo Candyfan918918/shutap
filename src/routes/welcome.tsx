@@ -141,7 +141,7 @@ function WelcomePage() {
               key={identity.displayName}
               initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.55, type: "spring", damping: 18 }}
-              className="mt-3 text-3xl sm:text-4xl font-black text-balance leading-tight"
+              className="mt-3 text-3xl sm:text-4xl font-medium text-balance leading-tight"
             >
               {identity.displayName}
             </motion.h1>
@@ -166,14 +166,14 @@ function WelcomePage() {
                   onClick={() => {
                     try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
                   }}
-                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                  className="block w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium text-center"
                 >
                   Continue →
                 </a>
               ) : (
                 <Link
                   to="/"
-                  className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
+                  className="block w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium text-center"
                 >
                   {t("welcome.cta")}
                 </Link>

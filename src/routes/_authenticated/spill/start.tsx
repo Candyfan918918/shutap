@@ -127,12 +127,12 @@ function SpillStart() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-30  bg-background/80 border-b border-border">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
           <button onClick={() => history.back()} className="text-sm text-muted-foreground">
             ← Back
           </button>
-          <span className="text-xs font-semibold tracking-widest text-primary">☕ SPILLING</span>
+          <span className="text-xs font-medium tracking-widest text-primary">☕ SPILLING</span>
           <span className="w-12" />
         </div>
       </header>
@@ -141,7 +141,7 @@ function SpillStart() {
         <motion.h1
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-2xl sm:text-3xl font-bold leading-tight text-balance"
+          className="text-2xl sm:text-3xl font-medium leading-tight text-balance"
         >
           okay so basically…
         </motion.h1>
@@ -190,7 +190,7 @@ function SpillStart() {
         </p>
       </main>
 
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 ">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-2">
           {userId && (
             <ReceiptsUploader
@@ -214,7 +214,7 @@ function SpillStart() {
           <button
             onClick={onSpill}
             disabled={submitting}
-            className="flex-1 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-50"
+            className="flex-1 py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-50"
           >
             {submitting ? "Pouring…" : "Spill it →"}
           </button>

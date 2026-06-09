@@ -101,7 +101,7 @@ function EnterPage() {
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-sm"
         >
-          <h1 className="text-3xl sm:text-4xl font-black text-balance leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-medium text-balance leading-tight">
             {t("enter.title")}
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">{t("enter.sub")}</p>
@@ -121,7 +121,7 @@ function EnterPage() {
               whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={busy !== "idle"}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-60"
+              className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-60"
             >
               {busy === "email" ? t("enter.sending") : t("enter.emailCta")}
             </motion.button>
@@ -138,7 +138,7 @@ function EnterPage() {
               whileTap={{ scale: 0.97 }}
               onClick={() => onOauth("google")}
               disabled={busy !== "idle"}
-              className="w-full py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm disabled:opacity-60"
+              className="w-full py-3 rounded-full bg-surface-elevated border border-border font-medium text-sm disabled:opacity-60"
             >
               {busy === "google" ? "…" : `🔵  ${t("enter.google")}`}
             </motion.button>
@@ -146,7 +146,7 @@ function EnterPage() {
               whileTap={{ scale: 0.97 }}
               onClick={() => onOauth("apple")}
               disabled={busy !== "idle"}
-              className="w-full py-3 rounded-full bg-surface-elevated border border-border font-semibold text-sm disabled:opacity-60"
+              className="w-full py-3 rounded-full bg-surface-elevated border border-border font-medium text-sm disabled:opacity-60"
             >
               {busy === "apple" ? "…" : `🍎  ${t("enter.apple")}`}
             </motion.button>

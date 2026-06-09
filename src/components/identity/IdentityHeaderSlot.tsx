@@ -71,7 +71,7 @@ export function IdentityHeaderSlot() {
     <Link
       to="/enter"
       search={{ redirect: undefined }}
-      className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+      className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
     >
       {t("nav.enter")} →
     </Link>

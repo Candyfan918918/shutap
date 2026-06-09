@@ -45,7 +45,7 @@ export function ScanQuestion({ question, initialAnswer, locale, onSubmit, saving
           <div className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
             {labelForCategory(question.category, locale)}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-balance">
+          <h1 className="text-2xl sm:text-3xl font-medium leading-tight text-balance">
             {strings.title}
           </h1>
           {strings.subtitle && (
@@ -93,7 +93,7 @@ export function ScanQuestion({ question, initialAnswer, locale, onSubmit, saving
               <button
                 onClick={() => submit(value)}
                 disabled={saving || (!canContinue && question.type !== "text")}
-                className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-base disabled:opacity-50 shadow-lg"
+                className="w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-base disabled:opacity-50 "
               >
                 {saving ? "…" : question.type === "text" && !value ? "Skip" : "Continue →"}
               </button>

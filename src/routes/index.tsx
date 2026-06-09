@@ -248,7 +248,7 @@ function TrustSignalBar({ total }: { total: number | null }) {
   }, [total]);
 
   return (
-    <div className="w-full border-b border-border bg-surface-elevated/80 backdrop-blur">
+    <div className="w-full border-b border-border bg-surface-elevated/80 ">
       <div className="mx-auto max-w-3xl px-4 py-1.5 flex items-center justify-between text-[12px] text-muted-foreground font-normal">
         <span className="flex items-center gap-1.5">
           <span className="relative inline-block h-1.5 w-1.5">
@@ -256,7 +256,7 @@ function TrustSignalBar({ total }: { total: number | null }) {
             <span className="absolute inset-0 rounded-full bg-emerald-500" />
           </span>
           <span>
-            <span className="font-semibold text-foreground tabular-nums">
+            <span className="font-medium text-foreground tabular-nums">
               {display != null ? display.toLocaleString() : "—"}
             </span>{" "}
             verdicts cast
@@ -270,7 +270,7 @@ function TrustSignalBar({ total }: { total: number | null }) {
 
 function TopChrome({ authed }: { authed: boolean | null }) {
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-background/75 border-b border-border">
+    <header className="sticky top-0 z-40  bg-background/75 border-b border-border">
       <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-7 w-auto" />
@@ -279,7 +279,7 @@ function TopChrome({ authed }: { authed: boolean | null }) {
         {authed ? (
           <Link
             to="/court"
-            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
           >
             Enter Court →
           </Link>
@@ -287,7 +287,7 @@ function TopChrome({ authed }: { authed: boolean | null }) {
           <Link
             to="/enter"
             search={{ redirect: "/" }}
-            className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
+            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
           >
             Claim my identity →
           </Link>
@@ -303,12 +303,12 @@ function HeroIntro() {
       <motion.h1
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl sm:text-5xl font-bold tracking-tight text-balance"
+        className="text-3xl sm:text-5xl font-medium tracking-tight text-balance"
       >
         👑 Relationship Court™
       </motion.h1>
       <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-        Where the <span className="text-foreground font-semibold">internet</span> decides.
+        Where the <span className="text-foreground font-medium">internet</span> decides.
       </p>
     </section>
   );
@@ -318,7 +318,7 @@ function CourtInRecess() {
   return (
     <section className="rounded-3xl border border-dashed border-border bg-card p-8 text-center">
       <p className="text-2xl">⚖️</p>
-      <p className="mt-2 font-semibold">Court is in recess.</p>
+      <p className="mt-2 font-medium">Court is in recess.</p>
       <p className="mt-1 text-sm text-muted-foreground">
         The jury is between cases. The next one drops shortly.
       </p>
@@ -380,10 +380,10 @@ function CaseView({
       </div>
 
       <div className="rounded-2xl border-l-4 border-primary bg-card p-5">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
           The case
         </p>
-        <h2 className="mt-2 text-2xl sm:text-3xl font-bold leading-tight text-balance">
+        <h2 className="mt-2 text-2xl sm:text-3xl font-medium leading-tight text-balance">
           {post.title}
         </h2>
         <p className="mt-3 italic text-muted-foreground text-sm">
@@ -451,10 +451,10 @@ function AliasPill({
       {avatarUrl ? (
         <img src={avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
       ) : (
-        <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary to-accent" />
+        <div className="h-6 w-6 rounded-full bg-primary" />
       )}
       <div className="leading-tight">
-        <div className="text-xs font-semibold">{nickname}</div>
+        <div className="text-xs font-medium">{nickname}</div>
         <div className="text-[10px] text-muted-foreground">@{handle}</div>
       </div>
     </div>
@@ -492,7 +492,7 @@ function CourtRibbon({
     return `${s}s to verdict`;
   })();
   return (
-    <div className="flex items-center justify-between rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2 text-xs font-semibold">
+    <div className="flex items-center justify-between rounded-full border border-primary/30 bg-primary px-4 py-2 text-xs font-medium">
       <span className="text-foreground">
         {category} Court · {tier}
       </span>
@@ -519,9 +519,9 @@ function VerdictBar({
   return (
     <div className="space-y-2">
       <div className="flex items-end justify-between text-xs">
-        <span className="font-semibold">Live verdict</span>
+        <span className="font-medium">Live verdict</span>
         <span className="text-muted-foreground">
-          <span className="tabular-nums text-foreground font-semibold">
+          <span className="tabular-nums text-foreground font-medium">
             {total.toLocaleString()}
           </span>{" "}
           juror{total === 1 ? "" : "s"} weighed in
@@ -536,7 +536,7 @@ function VerdictBar({
             animate={{ width: `${s.pct}%` }}
             transition={{ type: "spring", stiffness: 140, damping: 22 }}
             style={{ background: s.color }}
-            className="h-full flex items-center justify-center text-[10px] font-bold text-black/80"
+            className="h-full flex items-center justify-center text-[10px] font-medium text-black/80"
             title={`${s.label}: ${Math.round(s.pct)}%`}
           >
             {s.pct > 8 ? `${s.emoji} ${Math.round(s.pct)}%` : ""}
@@ -569,10 +569,10 @@ function GateButton({
   return (
     <button
       onClick={onClick}
-      className={`relative group rounded-xl border border-border bg-card hover:border-primary/60 hover:bg-surface-elevated transition px-3 py-2.5 text-sm font-semibold text-left ${className}`}
+      className={`relative group rounded-xl border border-border bg-card hover:border-primary/60 hover:bg-surface-elevated transition px-3 py-2.5 text-sm font-medium text-left ${className}`}
     >
       {children}
-      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/85 opacity-0 group-hover:opacity-100 transition text-xs font-bold text-primary">
+      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/85 opacity-0 group-hover:opacity-100 transition text-xs font-medium text-primary">
         Join to vote →
       </span>
     </button>
@@ -582,7 +582,7 @@ function GateButton({
 function VoteGrid({ onGate }: { onGate: () => void }) {
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
         Cast your verdict
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -600,7 +600,7 @@ function VoteGrid({ onGate }: { onGate: () => void }) {
 function JudgmentRow({ onGate }: { onGate: () => void }) {
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
         Final judgment
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -642,7 +642,7 @@ function ActionRow({
     <div className="flex flex-wrap items-center gap-2">
       <button
         onClick={onRelate}
-        className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold hover:border-primary/60 transition"
+        className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium hover:border-primary/60 transition"
       >
         <span>❤️</span>
         <span>It happened to me</span>
@@ -654,7 +654,7 @@ function ActionRow({
       <span className="text-xs text-muted-foreground">📤 {shares.toLocaleString()}</span>
       <button
         onClick={copy}
-        className="ml-auto flex items-center gap-2 rounded-full border border-border bg-surface-elevated px-4 py-2 text-sm font-semibold hover:border-primary/60 transition"
+        className="ml-auto flex items-center gap-2 rounded-full border border-border bg-surface-elevated px-4 py-2 text-sm font-medium hover:border-primary/60 transition"
       >
         <span>🔗</span>
         <span>{copied ? "Link copied." : "Share this case"}</span>
@@ -678,7 +678,7 @@ function CommentSection({ postId, onGate }: { postId: string; onGate: () => void
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">💬 Comments ({list.length})</p>
+        <p className="text-sm font-medium">💬 Comments ({list.length})</p>
         <span className="text-[11px] text-muted-foreground">Top first</span>
       </div>
 
@@ -702,9 +702,9 @@ function CommentSection({ postId, onGate }: { postId: string; onGate: () => void
                 {c.author?.avatarUrl ? (
                   <img src={c.author.avatarUrl} alt="" className="h-5 w-5 rounded-full" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary to-accent" />
+                  <div className="h-5 w-5 rounded-full bg-primary" />
                 )}
-                <span className="font-semibold text-foreground">
+                <span className="font-medium text-foreground">
                   {c.author?.nickname ?? "Anonymous"}
                 </span>
                 <span>@{c.author?.handle ?? "anon"}</span>
@@ -747,7 +747,7 @@ function TeaserFeedSection({
   if (isLoading) {
     return (
       <section className="space-y-4">
-        <p className="text-sm font-semibold text-muted-foreground">
+        <p className="text-sm font-medium text-muted-foreground">
           While you were reading, the court was busy.
         </p>
         <div className="space-y-4">
@@ -763,7 +763,7 @@ function TeaserFeedSection({
 
   return (
     <section className="space-y-5 pt-4">
-      <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+      <p className="text-sm font-medium text-muted-foreground tracking-tight">
         While you were reading, the court was busy.
       </p>
 
@@ -775,12 +775,12 @@ function TeaserFeedSection({
 
       <div className="rounded-2xl border border-border bg-card p-5 text-center space-y-3">
         <p className="text-sm font-medium text-foreground">
-          <span className="tabular-nums font-bold">{openCases.toLocaleString()}</span>{" "}
+          <span className="tabular-nums font-medium">{openCases.toLocaleString()}</span>{" "}
           cases open right now. Every one has a verdict forming.
         </p>
         <button
           onClick={() => onGate("claim")}
-          className="text-sm font-semibold text-primary hover:underline"
+          className="text-sm font-medium text-primary hover:underline"
         >
           Claim your identity to access them all →
         </button>
@@ -832,7 +832,7 @@ function TeaserCard({
         </div>
 
         {/* Title */}
-        <h3 className="text-base sm:text-lg font-bold leading-tight text-balance">
+        <h3 className="text-base sm:text-lg font-medium leading-tight text-balance">
           {post.title}
         </h3>
 
@@ -843,14 +843,14 @@ function TeaserCard({
             {hasMore ? "…" : ""}
           </p>
           {hasMore && (
-            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-card" />
           )}
         </div>
 
         {/* Equal verdict bar */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold">Live verdict</span>
+            <span className="font-medium">Live verdict</span>
             <span className="text-muted-foreground">
               — Join to see verdicts →
             </span>
@@ -894,7 +894,7 @@ function HallOfFameSection({
   if (isLoading) {
     return (
       <section className="space-y-4 pt-4">
-        <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+        <p className="text-sm font-medium text-muted-foreground tracking-tight">
           The court has a memory.
         </p>
         <div className="space-y-4">
@@ -909,7 +909,7 @@ function HallOfFameSection({
 
   return (
     <section className="space-y-5 pt-4">
-      <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+      <p className="text-sm font-medium text-muted-foreground tracking-tight">
         The court has a memory.
       </p>
       <div className="space-y-4">
@@ -927,7 +927,7 @@ function HallOfFameSection({
       <div className="text-center pt-2">
         <p className="text-sm font-medium text-foreground">
           Join{" "}
-          <span className="tabular-nums font-bold">
+          <span className="tabular-nums font-medium">
             {hof.todayVotes.toLocaleString()}
           </span>{" "}
           people who've weighed in today.
@@ -940,7 +940,7 @@ function HallOfFameSection({
 function HofLabel({ color, children }: { color: string; children: React.ReactNode }) {
   return (
     <span
-      className="inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full"
+      className="inline-block text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full"
       style={{ color, borderColor: color, borderWidth: 0.5, borderStyle: "solid" }}
     >
       {children}
@@ -960,12 +960,12 @@ function HofDramaticCard({ post, onGate }: { post: HofDramatic; onGate: () => vo
         <div className="flex items-center justify-between gap-2">
           <HofLabel color={amber}>🔥 Most Dramatic Today</HofLabel>
           {post.score != null && (
-            <span className="text-[11px] tabular-nums font-semibold" style={{ color: amber }}>
+            <span className="text-[11px] tabular-nums font-medium" style={{ color: amber }}>
               {post.score} chaos
             </span>
           )}
         </div>
-        <h3 className="text-xl sm:text-2xl font-bold leading-tight text-balance">
+        <h3 className="text-xl sm:text-2xl font-medium leading-tight text-balance">
           {post.title}
         </h3>
         <p className="text-[11px] text-muted-foreground tabular-nums">
@@ -975,7 +975,7 @@ function HofDramaticCard({ post, onGate }: { post: HofDramatic; onGate: () => vo
         <p className="text-sm italic text-foreground/90 pt-1">
           “{post.benchVerdictLine}”
         </p>
-        <p className="text-[11px] font-semibold text-primary pt-1">
+        <p className="text-[11px] font-medium text-primary pt-1">
           Read the full case →
         </p>
       </div>
@@ -1000,17 +1000,17 @@ function HofRelatableCard({ post, onGate }: { post: HofRelatable; onGate: () => 
           <HofLabel color={teal}>💚 Most Relatable This Week</HofLabel>
           <Pill>💔 {categoryLabel}</Pill>
         </div>
-        <h3 className="text-lg sm:text-xl font-bold leading-tight text-balance">
+        <h3 className="text-lg sm:text-xl font-medium leading-tight text-balance">
           {post.title}
         </h3>
-        <p className="text-sm font-semibold" style={{ color: teal }}>
+        <p className="text-sm font-medium" style={{ color: teal }}>
           {post.relateCount.toLocaleString()} people felt this.
         </p>
         <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
           {snippet}
           {hasMore ? "…" : ""}
         </p>
-        <p className="text-[11px] font-semibold text-primary pt-1">
+        <p className="text-[11px] font-medium text-primary pt-1">
           Read the full case →
         </p>
       </div>
@@ -1028,14 +1028,14 @@ function HofSurprisingCard({ post, onGate }: { post: HofSurprising; onGate: () =
     >
       <div className="p-5 space-y-3">
         <HofLabel color={purple}>🌀 Most Surprising Outcome — All Time</HofLabel>
-        <h3 className="text-lg sm:text-xl font-bold leading-tight text-balance">
+        <h3 className="text-lg sm:text-xl font-medium leading-tight text-balance">
           {post.title}
         </h3>
         <div className="rounded-xl bg-surface-elevated/60 p-4 space-y-2 text-sm">
           {post.dominantVerdict ? (
             <p>
               <span className="text-muted-foreground">The court predicted</span>{" "}
-              <span className="font-semibold">{post.dominantVerdict}</span>
+              <span className="font-medium">{post.dominantVerdict}</span>
               {post.dominantPct > 0 && (
                 <span className="text-muted-foreground tabular-nums">
                   {" "}
@@ -1049,7 +1049,7 @@ function HofSurprisingCard({ post, onGate }: { post: HofSurprising; onGate: () =
           )}
           <p>
             <span className="text-muted-foreground">The outcome:</span>{" "}
-            <span className="font-semibold" style={{ color: purple }}>
+            <span className="font-medium" style={{ color: purple }}>
               {post.outcomeType}.
             </span>
           </p>
@@ -1060,7 +1060,7 @@ function HofSurprisingCard({ post, onGate }: { post: HofSurprising; onGate: () =
         <p className="text-[11px] text-muted-foreground italic">
           The court follows stories to their real endings.
         </p>
-        <p className="text-[11px] font-semibold text-primary pt-1">
+        <p className="text-[11px] font-medium text-primary pt-1">
           Read the full case →
         </p>
       </div>
@@ -1077,7 +1077,7 @@ function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
       className="rounded-3xl bg-surface-elevated p-8 text-center"
       style={{ borderColor: purple, borderWidth: 0.5, borderStyle: "solid" }}
     >
-      <p className="text-2xl sm:text-3xl font-bold text-balance">
+      <p className="text-2xl sm:text-3xl font-medium text-balance">
         The court is waiting for your judgment.
       </p>
       <p className="mt-3 text-sm text-muted-foreground text-balance">
@@ -1085,7 +1085,7 @@ function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
       </p>
       <button
         onClick={() => onGate("claim_final")}
-        className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg"
+        className="mt-6 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium text-sm "
       >
         Claim my identity →
       </button>

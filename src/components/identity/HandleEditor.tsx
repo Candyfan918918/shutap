@@ -89,7 +89,7 @@ export function HandleEditor({ currentHandle, onChanged }: { currentHandle: stri
       <button
         onClick={save}
         disabled={isCurrent || !available || saving}
-        className="w-full py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold disabled:opacity-40"
+        className="w-full py-3 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-40"
       >
         {saving ? "saving…" : isCurrent ? "this is your handle" : "save handle"}
       </button>

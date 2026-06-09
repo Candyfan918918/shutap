@@ -198,7 +198,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
         <div className="text-center max-w-sm space-y-3">
           <p className="text-5xl">⚖️</p>
-          <p className="text-xl font-bold text-white">Shutap is for adults 18 and older.</p>
+          <p className="text-xl font-medium text-white">Shutap is for adults 18 and older.</p>
           <p className="text-sm text-white/70">Come back when you're ready.</p>
         </div>
       </div>
@@ -209,12 +209,12 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     <div className="fixed inset-0 z-[100] flex items-end justify-center pointer-events-none">
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-background/70 backdrop-blur-md pointer-events-auto"
+        className="absolute inset-0 bg-background/70  pointer-events-auto"
       />
       <motion.div
         initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full sm:max-w-md bg-card border-t border-x border-border rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden"
+        className="relative w-full sm:max-w-md bg-card border-t border-x border-border rounded-t-3xl  pointer-events-auto overflow-hidden"
       >
         <BenchLine phase={phase} />
         <SlotMachine alias={alias} locks={locks} speed={reelSpeed} phase={phase} />
@@ -252,7 +252,7 @@ function BenchLine({ phase }: { phase: Phase }) {
     : "";
   if (!text) return <div className="h-6" />;
   return (
-    <p className="px-5 pt-4 pb-1 text-center text-[12px] uppercase tracking-wider text-muted-foreground font-semibold">
+    <p className="px-5 pt-4 pb-1 text-center text-[12px] uppercase tracking-wider text-muted-foreground font-medium">
       {text}
     </p>
   );
@@ -294,9 +294,9 @@ function Reel({
     <motion.div
       animate={locked ? { scale: [1, 1.06, 1] } : { scale: 1 }}
       transition={{ duration: 0.2 }}
-      className={`h-14 rounded-xl flex items-center justify-center text-center px-2 font-bold text-[13px] sm:text-sm leading-tight ${
+      className={`h-14 rounded-xl flex items-center justify-center text-center px-2 font-medium text-[13px] sm:text-sm leading-tight ${
         locked
-          ? "bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/50 text-foreground"
+          ? "bg-primary border border-primary/50 text-foreground"
           : "bg-background border border-border text-muted-foreground"
       }`}
     >
@@ -319,7 +319,7 @@ function AliasLine({
   if (locks.c || phase !== "spin") parts.push(alias.creature);
   const text = parts.join(" ") + (locks.c || phase !== "spin" ? "." : "...");
   return (
-    <p className="px-5 pt-3 text-center text-base sm:text-lg font-semibold">{text}</p>
+    <p className="px-5 pt-3 text-center text-base sm:text-lg font-medium">{text}</p>
   );
 }
 
@@ -373,7 +373,7 @@ function AuthCard({ pending }: { pending: PendingAction }) {
 
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-semibold">Continue to claim your identity.</p>
+      <p className="text-sm font-medium">Continue to claim your identity.</p>
       <form onSubmit={onEmail} className="space-y-2">
         <input
           type="email" inputMode="email" autoComplete="email" required
@@ -385,7 +385,7 @@ function AuthCard({ pending }: { pending: PendingAction }) {
         <button
           type="submit"
           disabled={busy !== "idle" || !email.includes("@")}
-          className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
+          className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-2.5 disabled:opacity-50"
         >
           {busy === "email" ? "Sending…" : "Continue with email →"}
         </button>
@@ -399,14 +399,14 @@ function AuthCard({ pending }: { pending: PendingAction }) {
         <button
           onClick={() => onOauth("google")}
           disabled={busy !== "idle"}
-          className="w-full py-2.5 rounded-full bg-background border border-border font-semibold text-sm disabled:opacity-60"
+          className="w-full py-2.5 rounded-full bg-background border border-border font-medium text-sm disabled:opacity-60"
         >
           {busy === "google" ? "…" : "🔵  Continue with Google"}
         </button>
         <button
           onClick={() => onOauth("apple")}
           disabled={busy !== "idle"}
-          className="w-full py-2.5 rounded-full bg-background border border-border font-semibold text-sm disabled:opacity-60"
+          className="w-full py-2.5 rounded-full bg-background border border-border font-medium text-sm disabled:opacity-60"
         >
           {busy === "apple" ? "…" : "🍎  Continue with Apple"}
         </button>
@@ -433,7 +433,7 @@ function DobCard({
   const years = Array.from({ length: 100 }, (_, i) => thisYear - i);
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-semibold">When were you born?</p>
+      <p className="text-sm font-medium">When were you born?</p>
       <div className="flex gap-2">
         <select value={month} onChange={(e) => onMonth(parseInt(e.target.value, 10))}
           className="flex-1 rounded-lg bg-background border border-border px-2 py-2 text-sm">
@@ -445,7 +445,7 @@ function DobCard({
         </select>
       </div>
       <button onClick={onSubmit} disabled={busy}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50">
+        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-2.5 disabled:opacity-50">
         {busy ? "Checking…" : "I'm 18 or older →"}
       </button>
     </div>
@@ -464,7 +464,7 @@ function RevealCard({
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <div>
-        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold text-center mb-2">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium text-center mb-2">
           Pick your mark
         </p>
         <div className="grid grid-cols-6 gap-2">
@@ -482,7 +482,7 @@ function RevealCard({
       </div>
       <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
         onClick={onClaim} disabled={busy}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-3 shadow-lg disabled:opacity-50">
+        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-3  disabled:opacity-50">
         Claim this identity →
       </motion.button>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
@@ -504,7 +504,7 @@ function ConfirmCard({ step }: { step: 0 | 1 | 2 }) {
       <AnimatePresence mode="wait">
         {step >= 1 && (
           <motion.p key="confirmed" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="text-base font-semibold">
+            className="text-base font-medium">
             Identity confirmed.
           </motion.p>
         )}

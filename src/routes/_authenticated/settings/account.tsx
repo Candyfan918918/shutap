@@ -37,7 +37,7 @@ function AccountPage() {
 
       <button
         onClick={signOut}
-        className="w-full py-3 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/30 font-semibold"
+        className="w-full py-3 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/30 font-medium"
       >
         Sign out
       </button>
@@ -48,7 +48,7 @@ function AccountPage() {
 function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-lg font-bold mb-1">{title}</h2>
+      <h2 className="text-lg font-medium mb-1">{title}</h2>
       {sub && <p className="text-sm text-muted-foreground mb-3">{sub}</p>}
       <div className="rounded-2xl border border-border bg-card divide-y divide-border">{children}</div>
     </section>

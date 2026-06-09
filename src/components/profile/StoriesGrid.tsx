@@ -12,7 +12,7 @@ export function StoriesGrid({ posts, isMe }: { posts: PublicPostRow[]; isMe: boo
         {isMe && (
           <Link
             to="/spill"
-            className="inline-block mt-6 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-sm"
+            className="inline-block mt-6 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm"
           >
             ☕ Spill the tea
           </Link>
@@ -33,7 +33,7 @@ export function StoriesGrid({ posts, isMe }: { posts: PublicPostRow[]; isMe: boo
           {p.media_url ? (
             <img src={p.media_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 grid place-items-center text-2xl">
+            <div className="w-full h-full bg-primary grid place-items-center text-2xl">
               {p.score && p.score >= 700 ? "🔥" : p.score && p.score < 300 ? "💚" : "☕"}
             </div>
           )}
@@ -42,7 +42,7 @@ export function StoriesGrid({ posts, isMe }: { posts: PublicPostRow[]; isMe: boo
               <span>👁 {(p.view_count ?? 0).toLocaleString()}</span>
               <span>❤️ {p.like_count}</span>
             </div>
-            <div className="text-xs font-semibold text-white line-clamp-2 mt-0.5">{p.title}</div>
+            <div className="text-xs font-medium text-white line-clamp-2 mt-0.5">{p.title}</div>
           </div>
         </Link>
       ))}
