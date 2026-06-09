@@ -82,10 +82,23 @@ function WelcomePage() {
         if (cancelled) return;
         setIdentity(ident);
         if (ident.locale) localStorage.setItem("md.locale", ident.locale);
-        // If profile is already age-verified AND already has an alias, skip ahead.
+        const aliasAlreadyClaimed = Boolean(ident.nationality && ident.emotion && ident.creature);
+        if (ident.ageVerified && aliasAlreadyClaimed) {
+          const dest = redirectSearch && redirectSearch.startsWith("/") && !redirectSearch.startsWith("//")
+            ? redirectSearch
+            : "/";
+          try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
+          window.location.replace(dest);
+          return;
+        }
+        if (ident.ageVerified) {
+          setPhase("spin");
+          return;
+        }
         setPhase("dob");
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Couldn't finalize");
+        navigate({ to: "/enter", search: { redirect: redirectSearch } });
       }
     })();
     return () => { cancelled = true; };
@@ -96,7 +109,7 @@ function WelcomePage() {
     setBusy(true);
     try {
       const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
-      if (res.error || !res.data?.age_verified) {
+      if (!res.data?.age_verified) {
         setPhase("underage");
         return;
       }
@@ -144,12 +157,17 @@ function WelcomePage() {
     setAlias(null);
     setLocks({ n: false, e: false, c: false });
     setPhase("spin");
-    const fresh = await fetchAlias({
-      data: {
-        countryCode: identity?.countryCode ?? undefined,
-      },
-    });
-    setAlias(fresh);
+    try {
+      const fresh = await fetchAlias({
+        data: {
+          countryCode: identity?.countryCode ?? undefined,
+        },
+      });
+      setAlias(fresh);
+    } catch {
+      toast.error("Couldn't assign your alias. Try again.");
+      setPhase("reveal");
+    }
   };
 
   const onConfirm = async () => {
