@@ -548,3 +548,125 @@ export const getGlobalVerdictCount = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// ──────────────────────────────────────────────────────────────
+// Teaser feed (anonymous landing)
+// ──────────────────────────────────────────────────────────────
+
+export interface TeaserPost {
+  id: string;
+  title: string;
+  storyText: string;
+  score: number | null;
+  scoreCategory: string | null;
+  badges: string[];
+  mediaUrl: string | null;
+  commentCount: number;
+  likeCount: number;
+  shareCount: number;
+  author: { handle: string; nickname: string; avatarUrl: string | null } | null;
+  relateCount: number;
+  verdictTotal: number;
+}
+
+export const getTeaserFeed = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({ excludePostId: z.string().uuid().optional() }).parse,
+  )
+  .handler(async ({ data }): Promise<TeaserPost[]> => {
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    let q = supabaseAdmin
+      .from("posts")
+      .select(
+        "id, author_id, title, story_text, score, score_category, badges, media_url, comment_count, like_count, share_count",
+      )
+      .eq("status", "published")
+      .eq("visibility", "public")
+      .is("deleted_at", null)
+      .order("score", { ascending: false })
+      .limit(10);
+
+    if (data.excludePostId) {
+      q = q.neq("id", data.excludePostId);
+    }
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const posts = (rows ?? []) as Array<{
+      id: string; author_id: string; title: string; story_text: string;
+      score: number | null; score_category: string | null; badges: string[];
+      media_url: string | null; comment_count: number; like_count: number;
+      share_count: number;
+    }>;
+
+    if (posts.length === 0) return [];
+
+    const postIds = posts.map((p) => p.id);
+    const authorIds = Array.from(new Set(posts.map((p) => p.author_id)));
+
+    const [profilesRes, verdictsRes, relatesRes] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("id, handle, nickname, avatar_url")
+        .in("id", authorIds),
+      supabaseAdmin
+        .from("post_verdict_counts")
+        .select("post_id, count")
+        .in("post_id", postIds),
+      supabaseAdmin
+        .from("post_reaction_counts")
+        .select("post_id, count")
+        .in("post_id", postIds)
+        .eq("kind", "been_there"),
+    ]);
+
+    const byAuthor = new Map(
+      (profilesRes.data ?? []).map((p) => [
+        p.id as string,
+        {
+          handle: (p as Record<string, unknown>).handle as string,
+          nickname: (p as Record<string, unknown>).nickname as string,
+          avatarUrl: ((p as Record<string, unknown>).avatar_url as string | null) ?? null,
+        },
+      ]),
+    );
+
+    const verdictTotals = new Map<string, number>();
+    for (const v of (verdictsRes.data ?? []) as Array<{ post_id: string; count: number }>) {
+      verdictTotals.set(v.post_id, (verdictTotals.get(v.post_id) ?? 0) + v.count);
+    }
+
+    const relateTotals = new Map<string, number>();
+    for (const r of (relatesRes.data ?? []) as Array<{ post_id: string; count: number }>) {
+      relateTotals.set(r.post_id, r.count);
+    }
+
+    return posts.slice(0, 3).map((p) => ({
+      id: p.id,
+      title: p.title,
+      storyText: p.story_text,
+      score: p.score,
+      scoreCategory: p.score_category,
+      badges: p.badges,
+      mediaUrl: p.media_url,
+      commentCount: p.comment_count ?? 0,
+      likeCount: p.like_count ?? 0,
+      shareCount: p.share_count ?? 0,
+      author: byAuthor.get(p.author_id) ?? null,
+      relateCount: relateTotals.get(p.id) ?? 0,
+      verdictTotal: verdictTotals.get(p.id) ?? 0,
+    }));
+  });
+
+export const getOpenCaseCount = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ count: number }> => {
+    const { count } = await supabaseAdmin
+      .from("court_cases")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "in_court");
+    return { count: count ?? 0 };
+  },
+);
+
+
