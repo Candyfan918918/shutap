@@ -55,6 +55,30 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
 
   const cast = useServerFn(castVerdict);
+  const router = useRouter();
+  const navigate = useNavigate();
+
+  // Auth state — every CTA in the courtroom requires sign-in.
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setIsAuthed(!!data.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user);
+    });
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
+  }, []);
+
+  function requireAuth(): boolean {
+    if (isAuthed) return true;
+    const redirect = typeof window !== "undefined"
+      ? window.location.pathname + window.location.search
+      : "/court";
+    navigate({ to: "/auth", search: { redirect } as any });
+    return false;
+  }
 
   const [myVote, setMyVote] = useState<VerdictKey | null>(null);
   const [myJudgment, setMyJudgment] = useState<JudgmentKey | null>(null);
