@@ -78,14 +78,27 @@ function AnonymousCourt() {
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
+    const tryResume = (hasSession: boolean) => {
+      if (!hasSession) return;
+      try {
+        const raw = sessionStorage.getItem(RESUME_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as PendingAction;
+        sessionStorage.removeItem(RESUME_KEY);
+        enqueue(parsed);
+      } catch {/* silent */}
+    };
     supabase.auth.getSession().then(({ data }) => {
-      if (active) setAuthed(!!data.session);
+      if (!active) return;
+      setAuthed(!!data.session);
+      tryResume(!!data.session);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
+      tryResume(!!session);
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
-  }, []);
+  }, [enqueue]);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
