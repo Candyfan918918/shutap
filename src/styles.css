@@ -68,13 +68,13 @@
   --popover: var(--c-surface-2);
   --popover-foreground: var(--c-text-1);
   --primary: var(--c-pink);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--c-text-1);
   --secondary: var(--c-surface-3);
   --secondary-foreground: var(--c-text-1);
   --muted: var(--c-surface-3);
   --muted-foreground: var(--c-text-2);
   --accent: var(--c-pink-soft);
-  --accent-foreground: var(--c-pink-deep);
+  --accent-foreground: var(--c-text-1);
   --destructive: var(--c-red);
   --destructive-foreground: #ffffff;
   --border: var(--c-border);
