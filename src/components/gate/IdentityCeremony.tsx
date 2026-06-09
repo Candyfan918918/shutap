@@ -381,11 +381,12 @@ function DobCard({
   onSubmit: () => void; busy: boolean;
 }) {
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const thisYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => thisYear - i);
+  // Spec: year range 1900–2007 (anyone born after 2007 is under 18 by definition).
+  const years = Array.from({ length: 2007 - 1900 + 1 }, (_, i) => 2007 - i);
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-medium">When were you born?</p>
+      <p className="text-sm font-medium">Before we go further.</p>
+      <p className="text-xs text-muted-foreground">Shutap is for adults 18 and older.</p>
       <div className="flex gap-2">
         <select value={month} onChange={(e) => onMonth(parseInt(e.target.value, 10))}
           className="flex-1 rounded-lg bg-background border border-border px-2 py-2 text-sm">
@@ -398,11 +399,12 @@ function DobCard({
       </div>
       <button onClick={onSubmit} disabled={busy}
         className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-2.5 disabled:opacity-50">
-        {busy ? "Checking…" : "I'm 18 or older →"}
+        {busy ? "Checking…" : "Confirm"}
       </button>
     </div>
   );
 }
+
 
 // ── Reveal card
 
@@ -419,10 +421,10 @@ function RevealCard({
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium text-center mb-2">
           Pick your mark
         </p>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-12 gap-1.5">
           {EMOJI_OPTIONS.map((e) => (
             <button key={e} onClick={() => onEmoji(e)}
-              className={`h-10 rounded-lg text-xl transition ${
+              className={`aspect-square rounded-lg text-base sm:text-lg transition flex items-center justify-center ${
                 emoji === e
                   ? "bg-primary/20 border border-primary"
                   : "bg-surface-elevated border border-border hover:border-primary/50"
@@ -434,21 +436,23 @@ function RevealCard({
       </div>
       <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
         onClick={onClaim} disabled={busy}
-        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-3  disabled:opacity-50">
-        Claim this identity →
+        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-3 disabled:opacity-50">
+        This is me →
       </motion.button>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
-        {rerollUsed ? (
-          <p className="text-[11px] text-muted-foreground italic">Re-roll used. This is your identity.</p>
-        ) : (
+      {!rerollUsed && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
           <button onClick={onReroll} className="text-[12px] text-muted-foreground hover:text-foreground underline">
-            Not quite right? Re-roll once.
+            Re-roll (1 left)
           </button>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
+      <p className="text-[11px] text-muted-foreground text-center leading-relaxed pt-1">
+        Your alias is permanent. Your real name never appears here.
+      </p>
     </motion.div>
   );
 }
+
 
 function ConfirmCard({ step }: { step: 0 | 1 | 2 }) {
   return (
