@@ -24,11 +24,11 @@
   --c-text-2: #7a6e78;
   --c-text-3: #b0a4ae;
 
-  /* Pink — logo "ap" + eye gradient */
-  --c-pink:       #e0508a;
+  /* Pink — soft only. Mid and deep saturations are banned. */
+  --c-pink:       #ffd0e8;
   --c-pink-soft:  #ffd0e8;
   --c-pink-mid:   #ffd0e8;
-  --c-pink-deep:  #e0508a;
+  --c-pink-deep:  #ffd0e8;
 
   /* Supporting accents */
   --c-teal:   #1a9e82;
@@ -68,13 +68,13 @@
   --popover: var(--c-surface-2);
   --popover-foreground: var(--c-text-1);
   --primary: var(--c-pink);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--c-text-1);
   --secondary: var(--c-surface-3);
   --secondary-foreground: var(--c-text-1);
   --muted: var(--c-surface-3);
   --muted-foreground: var(--c-text-2);
   --accent: var(--c-pink-soft);
-  --accent-foreground: var(--c-pink-deep);
+  --accent-foreground: var(--c-text-1);
   --destructive: var(--c-red);
   --destructive-foreground: #ffffff;
   --border: var(--c-border);
@@ -111,12 +111,12 @@
   --c-text-1: #fff0f6;
   --c-text-2: #c0a8b8;
   --c-text-3: #6a5868;
-  --c-pink:      #f090b8;
-  --c-pink-soft: #4a1030;
+  --c-pink:      #ffd0e8;
+  --c-pink-soft: #ffd0e8;
   --c-pink-mid:  #ffd0e8;
-  --c-pink-deep: #f090b8;
+  --c-pink-deep: #ffd0e8;
   --accent: var(--c-pink-soft);
-  --accent-foreground: var(--c-pink-deep);
+  --accent-foreground: var(--c-text-1);
 }
 
 @theme inline {
