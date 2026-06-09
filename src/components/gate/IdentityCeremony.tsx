@@ -250,7 +250,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
           creature: alias.creature,
           emoji,
           rerollUsed,
-          phone: fullPhone,
+
         },
       });
       setConfirmingStep(1);
