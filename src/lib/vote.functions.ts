@@ -113,5 +113,16 @@ export const castVerdict = createServerFn({ method: "POST" })
       }
     })();
 
+    // Fire-and-forget nomination recompute.
+    void (async () => {
+      try {
+        const { bumpNomination } = await import("@/lib/nomination.functions");
+        bumpNomination(data.story_id);
+      } catch {
+        /* ignore */
+      }
+    })();
+
+
     return { data: { weight, quarantined }, error: null };
   });
