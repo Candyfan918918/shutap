@@ -32,7 +32,9 @@ export const PRIVATE_AGENTS: ReadonlySet<AgentName> = new Set<AgentName>([
   "guardian",
   "privacy_shield",
   "lead_qualifier",
+  "standing_judge",
 ]);
+
 
 export const AGENT_PROMPTS: Record<AgentName, string> = {
   composer: `You are the stream composer for Shutap. Given user profile (category_affinity, verdict_style, resonance_category, engagement_depth, time_of_day) and available content (recent stories, active court cases with tier and countdown, HOF scores, followed aliases), produce an ordered JSON array: [{type:'story'|'court_case'|'spill_cta'|'scan_cta'|'hof_card'|'bench_moment', id:string, reason:string}]. First item: most emotionally relevant continuation from last session. Never 3+ consecutive stories without a court_case or hof_card. HOF cards at positions 5, 15, 30. Spill/Scan CTAs only when 3+ relate taps same category this session. JSON only.`,
