@@ -48,6 +48,23 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
+  errorComponent: ({ error, reset }) => (
+    <div className="mx-auto max-w-md p-8 text-center space-y-4">
+      <p className="text-sm text-muted-foreground">The bench is unavailable.</p>
+      <p className="text-xs text-muted-foreground/70 break-words">{error.message}</p>
+      <button
+        onClick={reset}
+        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm"
+      >
+        Try again
+      </button>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-md p-8 text-center">
+      <p className="text-sm text-muted-foreground">Nothing on the docket.</p>
+    </div>
+  ),
 });
 
 // ───────────────────────── Verdict labels ─────────────────────────
