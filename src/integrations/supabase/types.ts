@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_call_log: {
+        Row: {
+          agent: string
+          created_at: string
+          error: string | null
+          id: string
+          input_tokens: number | null
+          latency_ms: number | null
+          model: string
+          moment: string | null
+          output_tokens: number | null
+          status: string
+          story_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agent: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_tokens?: number | null
+          latency_ms?: number | null
+          model: string
+          moment?: string | null
+          output_tokens?: number | null
+          status?: string
+          story_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agent?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_tokens?: number | null
+          latency_ms?: number | null
+          model?: string
+          moment?: string | null
+          output_tokens?: number | null
+          status?: string
+          story_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       alias_pool_creatures: {
         Row: {
           name: string
@@ -102,6 +147,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consent: {
+        Row: {
+          consented_at: string
+          created_at: string
+          id: string
+          revoked_at: string | null
+          service_category: string
+          story_id: string | null
+          user_id: string
+        }
+        Insert: {
+          consented_at?: string
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          service_category: string
+          story_id?: string | null
+          user_id: string
+        }
+        Update: {
+          consented_at?: string
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          service_category?: string
+          story_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       court_case_badges: {
         Row: {
@@ -281,6 +356,63 @@ export type Database = {
         }
         Relationships: []
       }
+      hof_scores: {
+        Row: {
+          entity_id: string
+          entity_type: string
+          id: string
+          metrics: Json
+          period: string
+          score: number
+          updated_at: string
+        }
+        Insert: {
+          entity_id: string
+          entity_type: string
+          id?: string
+          metrics?: Json
+          period?: string
+          score?: number
+          updated_at?: string
+        }
+        Update: {
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metrics?: Json
+          period?: string
+          score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hof_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          period: string
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload: Json
+          period: string
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          period?: string
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: []
+      }
       lead_contacts: {
         Row: {
           assigned_to: string | null
@@ -347,6 +479,7 @@ export type Database = {
         Row: {
           case_type: string | null
           city: string | null
+          consent_id: string | null
           contact: Json
           country: string | null
           created_at: string
@@ -361,6 +494,7 @@ export type Database = {
         Insert: {
           case_type?: string | null
           city?: string | null
+          consent_id?: string | null
           contact?: Json
           country?: string | null
           created_at?: string
@@ -375,6 +509,7 @@ export type Database = {
         Update: {
           case_type?: string | null
           city?: string | null
+          consent_id?: string | null
           contact?: Json
           country?: string | null
           created_at?: string
@@ -387,6 +522,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_consent_id_fkey"
+            columns: ["consent_id"]
+            isOneToOne: false
+            referencedRelation: "consent"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_story_id_fkey"
             columns: ["story_id"]
@@ -447,25 +589,52 @@ export type Database = {
         }
         Relationships: []
       }
+      outcome_reminders: {
+        Row: {
+          id: string
+          milestone_day: number
+          sent_at: string
+          story_id: string
+        }
+        Insert: {
+          id?: string
+          milestone_day: number
+          sent_at?: string
+          story_id: string
+        }
+        Update: {
+          id?: string
+          milestone_day?: number
+          sent_at?: string
+          story_id?: string
+        }
+        Relationships: []
+      }
       post_approvals: {
         Row: {
           approved_at: string
+          claimer_id: string | null
           id: string
           post_id: string
+          status: string
           user_id: string
           version_snapshot: Json
         }
         Insert: {
           approved_at?: string
+          claimer_id?: string | null
           id?: string
           post_id: string
+          status?: string
           user_id: string
           version_snapshot?: Json
         }
         Update: {
           approved_at?: string
+          claimer_id?: string | null
           id?: string
           post_id?: string
+          status?: string
           user_id?: string
           version_snapshot?: Json
         }
@@ -782,21 +951,33 @@ export type Database = {
       post_verdict_votes: {
         Row: {
           created_at: string
+          ip_hash: string | null
           kind: string
           post_id: string
+          quarantined: boolean
+          read_depth_percent: number | null
           user_id: string
+          weight: number
         }
         Insert: {
           created_at?: string
+          ip_hash?: string | null
           kind: string
           post_id: string
+          quarantined?: boolean
+          read_depth_percent?: number | null
           user_id: string
+          weight?: number
         }
         Update: {
           created_at?: string
+          ip_hash?: string | null
           kind?: string
           post_id?: string
+          quarantined?: boolean
+          read_depth_percent?: number | null
           user_id?: string
+          weight?: number
         }
         Relationships: [
           {
@@ -995,6 +1176,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_created_at: string
           age_verified: boolean
           anonymous_mode: boolean
           avatar_kind: string
@@ -1010,6 +1192,8 @@ export type Database = {
           descriptor: string | null
           display_name: string | null
           dob: string | null
+          dob_month: number | null
+          dob_year: number | null
           email: string | null
           emoji: string | null
           emotion: string | null
@@ -1037,6 +1221,7 @@ export type Database = {
           wisdom_score: number
         }
         Insert: {
+          account_created_at?: string
           age_verified?: boolean
           anonymous_mode?: boolean
           avatar_kind?: string
@@ -1052,6 +1237,8 @@ export type Database = {
           descriptor?: string | null
           display_name?: string | null
           dob?: string | null
+          dob_month?: number | null
+          dob_year?: number | null
           email?: string | null
           emoji?: string | null
           emotion?: string | null
@@ -1079,6 +1266,7 @@ export type Database = {
           wisdom_score?: number
         }
         Update: {
+          account_created_at?: string
           age_verified?: boolean
           anonymous_mode?: boolean
           avatar_kind?: string
@@ -1094,6 +1282,8 @@ export type Database = {
           descriptor?: string | null
           display_name?: string | null
           dob?: string | null
+          dob_month?: number | null
+          dob_year?: number | null
           email?: string | null
           emoji?: string | null
           emotion?: string | null
@@ -1122,29 +1312,59 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_counters: {
+        Row: {
+          bucket: string
+          count: number
+          id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          id?: string
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       safety_events: {
         Row: {
+          action: string | null
           created_at: string
           draft_id: string | null
           id: string
           post_id: string | null
           reasons: string[]
+          resolved_at: string | null
           user_id: string
         }
         Insert: {
+          action?: string | null
           created_at?: string
           draft_id?: string | null
           id?: string
           post_id?: string | null
           reasons?: string[]
+          resolved_at?: string | null
           user_id: string
         }
         Update: {
+          action?: string | null
           created_at?: string
           draft_id?: string | null
           id?: string
           post_id?: string | null
           reasons?: string[]
+          resolved_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1241,6 +1461,7 @@ export type Database = {
           like_count: number
           locale: string
           media: Json
+          outcome_recorded_at: string | null
           published_at: string | null
           region: string | null
           score: number | null
@@ -1266,6 +1487,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media?: Json
+          outcome_recorded_at?: string | null
           published_at?: string | null
           region?: string | null
           score?: number | null
@@ -1291,6 +1513,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media?: Json
+          outcome_recorded_at?: string | null
           published_at?: string | null
           region?: string | null
           score?: number | null
@@ -1383,6 +1606,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      story_tags: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          source: string
+          story_id: string
+          tag: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          source?: string
+          story_id: string
+          tag: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          source?: string
+          story_id?: string
+          tag?: string
+        }
+        Relationships: []
       }
       tea_drafts: {
         Row: {
@@ -1539,6 +1789,33 @@ export type Database = {
           last_active_date?: string | null
           longest_streak?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_tags: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          last_seen_at: string
+          tag: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          tag: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          tag?: string
           user_id?: string
         }
         Relationships: []
