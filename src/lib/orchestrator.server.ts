@@ -1,8 +1,21 @@
 // Orchestrator — sequences AI agents per moment.
-// Server-only. Never called directly by client; invoked from server fns.
+// Server-only. Never imported by client code; only invoked from server fns.
+//
+// Contract:
+// - Every agent runs with AGENT_PROMPTS[agent] as system prompt, claude-sonnet
+//   via the Lovable AI Gateway.
+// - Every call is logged to ai_call_log via the service-role admin client.
+// - PRIVATE_AGENTS (tagger, guardian, privacy_shield, lead_qualifier) outputs
+//   are kept in pipeline context AND persisted, but stripped from the result
+//   returned to the caller — they must never reach the browser.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { callGatewayJSON } from "@/lib/ai/gateway";
-import { AGENT_PROMPTS, modelFor, type AgentName } from "@/lib/agent-prompts.server";
+import {
+  AGENT_PROMPTS,
+  PRIVATE_AGENTS,
+  modelFor,
+  type AgentName,
+} from "@/lib/agent-prompts.server";
 
 export type Moment =
   | "spill"
@@ -12,18 +25,33 @@ export type Moment =
   | "outcome"
   | "chatbot"
   | "hof_update"
+  | "reputation"
+  | "wisdom_graph"
   | "admin_triage"
   | "admin_briefing";
 
 const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
-  spill: ["spill_questioner"],
-  scan: ["scan_questioner", "scan_scorer", "scan_tagger", "scan_lead_qualifier"],
+  // Spill: ask → check identifying detail → screen for harm → tag the situation.
+  spill: ["spill_copilot", "privacy_shield", "guardian", "tagger"],
+  // Scan: tag the situation, then decide if a service card should surface.
+  scan: ["tagger", "lead_qualifier"],
+  // Compose: one agent picks the stream order.
   compose: ["composer"],
-  court_verdict: ["court_summarizer"],
-  outcome: ["outcome_prompt"],
-  chatbot: ["chatbot_router"],
-  hof_update: ["hof_scorer"],
+  // Court verdict: format the case + speak the Bench line.
+  court_verdict: ["case_formatter", "the_bench"],
+  // Outcome reveal: Bench narration only.
+  outcome: ["the_bench"],
+  // Chatbot: single router agent owns intent + response text.
+  chatbot: ["chatbot_agent"],
+  // HOF score recompute.
+  hof_update: ["hof_scoring_agent"],
+  // Reputation recompute (justice/wisdom/empathy/prediction + title).
+  reputation: ["reputation_engine"],
+  // Wisdom graph node + edges after a case resolves.
+  wisdom_graph: ["wisdom_graph_writer"],
+  // Admin moderation triage.
   admin_triage: ["admin_triage"],
+  // Admin daily briefing.
   admin_briefing: ["admin_briefing"],
 };
 
@@ -41,6 +69,7 @@ export interface AgentResult {
 }
 
 export interface OrchestratorResult {
+  /** Public outputs only — PRIVATE_AGENTS are filtered out. */
   results: AgentResult[];
 }
 
@@ -72,8 +101,10 @@ async function logCall(
 
 export async function runMoment(input: OrchestratorInput): Promise<OrchestratorResult> {
   const agents = MOMENT_AGENTS[input.moment];
-  const results: AgentResult[] = [];
+  const publicResults: AgentResult[] = [];
 
+  // The full pipeline context — includes private agent outputs so downstream
+  // agents can reason over tags / safety flags. Never returned to the caller.
   let context: Record<string, unknown> = { ...input.payload };
 
   for (const agent of agents) {
@@ -84,21 +115,44 @@ export async function runMoment(input: OrchestratorInput): Promise<OrchestratorR
         model,
         messages: [
           { role: "system", content: AGENT_PROMPTS[agent] },
-          { role: "user", content: JSON.stringify({ moment: input.moment, context }) },
+          {
+            role: "user",
+            content: JSON.stringify({ moment: input.moment, context }),
+          },
         ],
       });
       const latency_ms = Date.now() - started;
-      await logCall(input.userId, agent, model, input.moment, input.storyId, latency_ms, "ok");
-      results.push({ agent, output, latency_ms });
-      // Feed prior agent output into the next agent's context.
+      await logCall(
+        input.userId,
+        agent,
+        model,
+        input.moment,
+        input.storyId,
+        latency_ms,
+        "ok",
+      );
+      // Feed prior output into the next agent's context regardless of privacy.
       context = { ...context, [`${agent}_output`]: output };
+      // Only public agent outputs are surfaced to the caller.
+      if (!PRIVATE_AGENTS.has(agent)) {
+        publicResults.push({ agent, output, latency_ms });
+      }
     } catch (e) {
       const latency_ms = Date.now() - started;
       const msg = (e as Error)?.message ?? "unknown";
-      await logCall(input.userId, agent, model, input.moment, input.storyId, latency_ms, "error", msg);
+      await logCall(
+        input.userId,
+        agent,
+        model,
+        input.moment,
+        input.storyId,
+        latency_ms,
+        "error",
+        msg,
+      );
       throw e;
     }
   }
 
-  return { results };
+  return { results: publicResults };
 }
