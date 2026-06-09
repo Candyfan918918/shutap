@@ -195,19 +195,19 @@ export const claimAlias = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { supabase, userId } = context;
     const nickname = `${data.emotion} ${data.creature}`;
-    const update: Record<string, unknown> = {
+    const update = {
       nationality: data.nationality,
       emotion: data.emotion,
       creature: data.creature,
       emoji: data.emoji,
       reroll_used: data.rerollUsed,
       nickname,
+      ...(data.phone ? { phone: data.phone, phone_verified: true } : {}),
     };
-    if (data.phone) {
-      update.phone = data.phone;
-      update.phone_verified = true;
-    }
-    const { error } = await supabase.from("profiles").update(update).eq("id", userId);
+    const { error } = await supabase
+      .from("profiles")
+      .update(update as never)
+      .eq("id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
