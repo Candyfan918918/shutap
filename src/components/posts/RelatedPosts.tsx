@@ -39,6 +39,7 @@ export function RelatedPosts({ postId, autoLoad = false }: { postId: string; aut
             <Link
               to="/post/$postId"
               params={{ postId: p.id }}
+              search={{ shared: undefined }}
               className="block rounded-xl border border-border bg-surface-elevated p-3 hover:border-primary/50 transition"
             >
               <p className="text-xs font-medium line-clamp-2">{p.title}</p>
