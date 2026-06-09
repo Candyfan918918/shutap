@@ -5,25 +5,24 @@ import { CountdownChip } from "./CountdownChip";
 
 const VERDICT_META: Record<
   string,
-  { label: string; emoji: string; color: string }
+  { label: string; color: string }
 > = {
-  red_flag: { label: "Red flag", emoji: "🚩", color: "var(--c-red-flag)" },
-  green_flag: { label: "Green flag", emoji: "💚", color: "var(--c-green-flag)" },
-  run: { label: "Run", emoji: "🏃", color: "var(--c-run)" },
-  talk_it_out: { label: "Talk it out", emoji: "🗣", color: "var(--c-talk)" },
-  lawyer_up: { label: "Lawyer up", emoji: "⚖️", color: "var(--c-lawyer)" },
-  therapy_might_help: { label: "Therapy", emoji: "🛋", color: "var(--c-therapy)" },
-  need_update: { label: "Need update", emoji: "👀", color: "var(--c-update)" },
+  red_flag: { label: "Red flag", color: "var(--c-red-flag)" },
+  green_flag: { label: "Green flag", color: "var(--c-green-flag)" },
+  run: { label: "Run", color: "var(--c-run)" },
+  talk_it_out: { label: "Talk it out", color: "var(--c-talk)" },
+  lawyer_up: { label: "Lawyer up", color: "var(--c-lawyer)" },
+  therapy_might_help: { label: "Therapy", color: "var(--c-therapy)" },
+  need_update: { label: "Need update", color: "var(--c-update)" },
 };
 
-const ORDER = [
+const VERDICT_ORDER = [
   "red_flag",
   "green_flag",
   "run",
   "talk_it_out",
   "lawyer_up",
   "therapy_might_help",
-  "need_update",
 ];
 
 function leading(c: CourtCase): { kind: string; pct: number } | null {
@@ -42,11 +41,11 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   const seated = Math.min(12, Math.max(1, c.verdict.total));
   const seats = Array.from({ length: 12 }, (_, i) => i < seated);
 
-  const statusLabel =
+  const statusLine =
     c.status === "in_court"
-      ? "In session"
+      ? "In session — jury verdict required"
       : c.status === "judgment_pending"
-      ? "Jury deliberating"
+      ? "Bench deliberating"
       : c.status === "decided" || c.status === "legendary"
       ? "Verdict landed"
       : "Calling docket";
@@ -55,250 +54,398 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-border-strong bg-surface-elevated"
+      className="relative overflow-hidden rounded-2xl border border-border-strong bg-card"
     >
-      {/* Courtroom chrome — gold rail + faint scanline */}
+      {/* Ceiling rail — gilded columns */}
       <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px]"
+        className="flex items-end justify-center gap-7 border-b py-1.5"
         style={{
-          background:
-            "linear-gradient(90deg, var(--c-amber), var(--c-purple), var(--c-teal))",
+          background: "color-mix(in oklab, var(--c-amber) 10%, var(--c-surface-3))",
+          borderColor: "color-mix(in oklab, var(--c-amber) 35%, transparent)",
         }}
-      />
-      <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(10,8,15,0.6) 2px, rgba(10,8,15,0.6) 3px)",
-        }}
-      />
-
-      {/* Top docket bar */}
-      <div className="relative flex items-center justify-between gap-2 border-b border-border px-4 py-2 text-[11px]">
-        <span
-          className="rounded-full border px-2 py-0.5 font-medium uppercase tracking-wider"
-          style={{ color: "var(--c-purple)", borderColor: "var(--c-purple)" }}
-        >
-          {statusLabel}
-        </span>
-        {c.status === "in_court" && (
-          <CountdownChip to={c.closesAt} prefix="Judgment in" />
-        )}
-        <span className="text-muted-foreground">
-          Docket · {c.regionLabel}
-        </span>
+      >
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span
+            key={i}
+            className="h-5 w-[5px] rounded-[1px]"
+            style={{ background: "var(--c-amber)" }}
+          />
+        ))}
       </div>
 
-      {/* Bench / emblem */}
-      <div className="relative px-4 pt-5 pb-3 text-center border-b border-border">
-        <div
-          className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] text-xl"
-          style={{ borderColor: "var(--c-amber)", background: "var(--c-surface-3)" }}
-        >
-          ⚖️
+      {/* Court header */}
+      <div className="relative border-b border-border px-4 pt-4 pb-3 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-xl">⚖️</span>
+          <span
+            className="text-lg font-medium tracking-wide"
+            style={{ color: "var(--c-amber)" }}
+          >
+            Relationship Court™
+          </span>
         </div>
-        <div
-          className="text-base font-semibold tracking-wide"
-          style={{ color: "var(--c-amber)" }}
-        >
-          The case before court
-        </div>
-        <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground mt-1">
+        <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
           Where the human decides
         </div>
+        <div
+          className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border-[2px] text-xl"
+          style={{
+            borderColor: "var(--c-amber)",
+            background: "var(--c-surface-3)",
+          }}
+        >
+          👨‍⚖️
+        </div>
       </div>
 
-      {/* Case card */}
+      {/* Case header */}
       <Link
         to="/post/$postId"
         params={{ postId: c.post.id }}
         search={{ shared: 2 }}
-        className="block relative px-4 pt-4 pb-3 hover:bg-surface-elevated/60 transition"
+        className="block border-b border-border bg-surface-elevated/40 px-4 py-3 text-center transition hover:bg-surface-elevated/70"
       >
-        <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground mb-1">
-          Case #{c.id.slice(0, 6).toUpperCase()}
+        <div className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+          Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {statusLine}
         </div>
-        <h3 className="text-lg sm:text-xl font-medium leading-snug text-balance">
+        <h3
+          className="mt-1 text-sm font-medium leading-snug text-balance sm:text-base"
+          style={{ color: "var(--c-amber-strong, var(--c-amber))" }}
+        >
           {c.post.title}
         </h3>
         {c.post.storyText && (
-          <p className="mt-2 text-sm text-muted-foreground line-clamp-3 italic">
-            "{c.post.storyText}"
+          <p className="mt-1.5 text-[11px] italic text-muted-foreground">
+            "{truncate(c.post.storyText, 120)}"
           </p>
+        )}
+        {c.status === "in_court" && (
+          <div className="mt-2 inline-flex">
+            <CountdownChip to={c.closesAt} prefix="Judgment in" />
+          </div>
         )}
       </Link>
 
-      {/* Plaintiff / Defendant chairs */}
-      <div className="relative grid grid-cols-2 gap-2 px-4 pb-3">
-        <ChairCard
-          role="Plaintiff"
-          state="Testimony filed"
-          accent="var(--c-teal)"
-          letter="P"
-          quote={c.post.storyText ? truncate(c.post.storyText, 80) : null}
-        />
-        <ChairCard
-          role="Defendant"
-          state="No response"
-          accent="var(--c-coral)"
-          letter="D"
-          quote={null}
-          empty
-        />
-      </div>
-
-      {/* Jury box */}
-      <div className="relative border-t border-border px-4 py-3">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
-          <span style={{ color: "var(--c-purple)" }}>Jury box</span>
-          <span className="flex-1 h-px bg-border" />
-          <span>{seated} of 12 seated</span>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {seats.map((filled, i) => (
+      {/* Courtroom floor */}
+      <div className="relative px-3 pt-3">
+        {/* Bench zone */}
+        <div
+          className="relative mb-2.5 rounded-lg border px-3 py-3 text-center"
+          style={{
+            background: "color-mix(in oklab, var(--c-amber) 8%, var(--c-surface-3))",
+            borderColor: "color-mix(in oklab, var(--c-amber) 40%, transparent)",
+          }}
+        >
+          <div className="mb-1.5 text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+            The bench
+          </div>
+          <div className="flex items-center justify-center gap-2.5">
             <div
-              key={i}
-              className="h-6 w-6 rounded-md border text-[9px] flex items-center justify-center"
+              className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] text-base"
               style={{
-                background: filled
-                  ? "color-mix(in oklab, var(--c-teal) 12%, transparent)"
-                  : "transparent",
-                borderColor: filled
-                  ? "color-mix(in oklab, var(--c-teal) 40%, transparent)"
-                  : "var(--c-border)",
-                color: filled ? "var(--c-teal)" : "var(--c-text-3)",
+                borderColor: "var(--c-amber)",
+                background: "var(--c-surface-3)",
               }}
             >
-              {filled ? "•" : ""}
+              ⚖️
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Verdict tally */}
-      <div className="relative border-t border-border px-4 py-3">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
-          <span style={{ color: "var(--c-purple)" }}>Verdict tally</span>
-          <span className="flex-1 h-px bg-border" />
-          <span>{c.verdict.total} cast</span>
-        </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {ORDER.map((k) => {
-            const m = VERDICT_META[k];
-            const n = (c.verdict.counts as Record<string, number>)[k] ?? 0;
-            const pct =
-              c.verdict.total > 0 ? Math.round((n / c.verdict.total) * 100) : 0;
-            const isTop = top?.kind === k;
-            return (
+            <div className="text-left">
               <div
-                key={k}
-                className="relative overflow-hidden rounded-md border px-2.5 py-2 text-[11px] flex items-center gap-2"
-                style={{
-                  borderColor: isTop
-                    ? `color-mix(in oklab, ${m.color} 50%, transparent)`
-                    : "var(--c-border)",
-                  background: isTop
-                    ? `color-mix(in oklab, ${m.color} 10%, transparent)`
-                    : "transparent",
-                  color: isTop ? m.color : "var(--c-text-2)",
-                }}
+                className="text-[13px] font-medium"
+                style={{ color: "var(--c-amber)" }}
               >
-                <span
-                  aria-hidden
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: m.color }}
-                />
-                <span className="flex-1 truncate">
-                  {m.emoji} {m.label}
-                </span>
-                <span className="font-medium">{pct}%</span>
+                Hon. Public Opinion
               </div>
-            );
-          })}
+              <div className="text-[10px] text-muted-foreground">
+                Presiding — jury verdict required
+              </div>
+            </div>
+          </div>
+          <div
+            className="absolute -bottom-px left-1/2 h-[3px] w-10 -translate-x-1/2 rounded-t"
+            style={{ background: "var(--c-amber)" }}
+            aria-hidden
+          />
+        </div>
+
+        {/* Parties grid */}
+        <div className="grid grid-cols-2 gap-2">
+          <PartyZone
+            label="Plaintiff"
+            letter="P"
+            name="The Storyteller"
+            status="Testimony filed"
+            accent="var(--c-teal)"
+            quote={c.post.storyText ? truncate(c.post.storyText, 90) : null}
+          />
+          <PartyZone
+            label="Defendant"
+            letter="D"
+            name="The Other Side"
+            status="No response filed"
+            accent="var(--c-coral)"
+            quote={null}
+            empty
+          />
+        </div>
+
+        <div className="h-2.5" />
+
+        {/* Jury zone */}
+        <div className="mb-2.5 rounded-lg border border-border bg-surface-elevated/40 px-3 py-3">
+          <div className="mb-2.5 flex items-center justify-between">
+            <span
+              className="text-[11px] font-medium uppercase tracking-[0.1em]"
+              style={{ color: "var(--c-amber)" }}
+            >
+              Jury box
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {seated} of 12 seated
+            </span>
+          </div>
+          <div className="mb-3 flex justify-center gap-1.5">
+            {seats.map((filled, i) => (
+              <div
+                key={i}
+                className="flex h-[22px] w-[22px] items-center justify-center rounded-full border text-[9px]"
+                style={
+                  i === 0
+                    ? {
+                        background: "color-mix(in oklab, var(--c-amber) 18%, transparent)",
+                        borderColor: "var(--c-amber)",
+                        color: "var(--c-amber)",
+                      }
+                    : filled
+                    ? {
+                        background: "var(--c-surface-3)",
+                        borderColor: "var(--c-amber)",
+                        color: "var(--c-amber)",
+                      }
+                    : {
+                        background: "transparent",
+                        borderColor: "var(--c-border)",
+                        color: "var(--c-text-3)",
+                      }
+                }
+              >
+                {i === 0 ? "Y" : ""}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            {VERDICT_ORDER.map((k) => {
+              const m = VERDICT_META[k];
+              const n = (c.verdict.counts as Record<string, number>)[k] ?? 0;
+              const pct =
+                c.verdict.total > 0
+                  ? Math.round((n / c.verdict.total) * 100)
+                  : 0;
+              const isTop = top?.kind === k;
+              return (
+                <div
+                  key={k}
+                  className="flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[11px]"
+                  style={{
+                    borderColor: isTop
+                      ? `color-mix(in oklab, ${m.color} 55%, transparent)`
+                      : "var(--c-border)",
+                    background: isTop
+                      ? `color-mix(in oklab, ${m.color} 12%, transparent)`
+                      : "transparent",
+                    color: isTop ? m.color : "var(--c-text-2)",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="h-[7px] w-[7px] rounded-full"
+                    style={{ background: m.color }}
+                  />
+                  <span className="flex-1 truncate">{m.label}</span>
+                  <span className="font-medium">{pct}%</span>
+                </div>
+              );
+            })}
+            {/* Leading lane — full row */}
+            <div
+              className="col-span-2 flex items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-[11px] font-medium"
+              style={{
+                borderColor: "color-mix(in oklab, var(--c-update) 50%, transparent)",
+                background: "color-mix(in oklab, var(--c-update) 12%, transparent)",
+                color: "var(--c-update)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="h-[7px] w-[7px] rounded-full"
+                style={{ background: "var(--c-update)" }}
+              />
+              {top
+                ? `${VERDICT_META[top.kind]?.label ?? "Mixed"} · current lead ${top.pct}%`
+                : "Awaiting first verdict"}
+            </div>
+          </div>
+        </div>
+
+        {/* Floor line */}
+        <div
+          className="mb-2.5 h-[2px] rounded"
+          style={{ background: "color-mix(in oklab, var(--c-amber) 35%, transparent)" }}
+          aria-hidden
+        />
+
+        {/* Final judgment */}
+        <div
+          className="mb-3 rounded-lg border px-3 py-3"
+          style={{
+            background: "color-mix(in oklab, var(--c-amber) 8%, var(--c-surface-3))",
+            borderColor: "color-mix(in oklab, var(--c-amber) 40%, transparent)",
+          }}
+        >
+          <div
+            className="mb-2.5 text-center text-[10px] uppercase tracking-[0.12em]"
+            style={{ color: "var(--c-amber)" }}
+          >
+            Final judgment
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <JudgmentOpt label="Guilty" color="var(--c-coral)" />
+            <JudgmentOpt label="Not guilty" color="var(--c-teal)" />
+            <JudgmentOpt label="Both at fault" color="var(--c-update)" />
+            <JudgmentOpt label="Need more" color="var(--c-text-3)" />
+          </div>
         </div>
       </div>
 
-      {/* CTA bar */}
-      <div className="relative border-t border-border px-4 py-3 flex flex-wrap gap-2 justify-center">
+      {/* Public gallery */}
+      <div className="mx-3 mb-3 rounded-lg border border-border bg-surface-elevated/40 px-3 py-3">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+            Public gallery · {c.post.commentCount} {c.post.commentCount === 1 ? "comment" : "comments"}
+          </span>
+          <div className="flex gap-2.5 text-[11px] text-muted-foreground">
+            <span>♥ {c.post.likeCount}</span>
+            <span>💬 {c.post.commentCount}</span>
+          </div>
+        </div>
         <Link
           to="/post/$postId"
           params={{ postId: c.post.id }}
           search={{ shared: 2 }}
-          className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-medium"
+          className="block border-t border-border pt-2 text-[11px] text-muted-foreground hover:text-foreground"
         >
-          ⚖️ Enter the court
+          Address the court →
         </Link>
+      </div>
+
+      {/* Share row */}
+      <div className="flex justify-center gap-2 px-4 pb-4 pt-1">
         <Link
           to="/spill"
-          className="px-4 py-2 rounded-full border border-border-strong text-xs font-medium hover:border-primary/40"
-          style={{ color: "var(--c-coral)" }}
+          className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[11px] font-medium transition"
+          style={{
+            borderColor: "color-mix(in oklab, var(--c-coral) 45%, transparent)",
+            color: "var(--c-coral)",
+          }}
         >
           🚩 It happened to me
+        </Link>
+        <Link
+          to="/post/$postId"
+          params={{ postId: c.post.id }}
+          search={{ shared: 2 }}
+          className="flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+        >
+          ↗ Share this case
         </Link>
       </div>
     </motion.section>
   );
 }
 
-function ChairCard({
-  role,
-  state,
-  accent,
+function PartyZone({
+  label,
   letter,
+  name,
+  status,
+  accent,
   quote,
   empty,
 }: {
-  role: string;
-  state: string;
-  accent: string;
+  label: string;
   letter: string;
+  name: string;
+  status: string;
+  accent: string;
   quote: string | null;
   empty?: boolean;
 }) {
   return (
     <div
-      className="relative overflow-hidden rounded-xl border bg-card p-3 text-center"
+      className="rounded-lg border border-border bg-surface-elevated/40 p-2.5"
       style={{
-        borderColor: `color-mix(in oklab, ${accent} 30%, transparent)`,
-        opacity: empty ? 0.85 : 1,
+        borderTopWidth: 2,
+        borderTopColor: accent,
+        opacity: empty ? 0.78 : 1,
       }}
     >
       <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px]"
-        style={{ background: accent }}
-      />
+        className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.1em]"
+        style={{ color: accent }}
+      >
+        {label}
+      </div>
       <div
-        className="mx-auto mb-1.5 flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] text-xs font-semibold"
+        className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-medium"
         style={{
-          color: accent,
           borderColor: accent,
+          color: accent,
           background: `color-mix(in oklab, ${accent} 10%, transparent)`,
         }}
       >
         {letter}
       </div>
-      <div className="text-[11px] font-medium">{role}</div>
-      <div className="text-[10px]" style={{ color: accent }}>
-        {state}
+      <div
+        className="text-center text-[12px] font-medium"
+        style={{ color: "var(--c-amber)" }}
+      >
+        {name}
+      </div>
+      <div className="text-center text-[10px]" style={{ color: accent }}>
+        {status}
       </div>
       {empty ? (
         <div
-          className="mt-2 rounded-md border border-dashed px-2 py-1.5 text-[10px] italic"
+          className="mt-1.5 rounded-md border border-dashed px-2 py-1.5 text-center text-[10px]"
           style={{
-            borderColor: `color-mix(in oklab, ${accent} 30%, transparent)`,
+            borderColor: `color-mix(in oklab, ${accent} 35%, transparent)`,
             color: `color-mix(in oklab, ${accent} 60%, var(--c-text-3))`,
           }}
         >
-          Empty chair
+          Empty chair — has not responded
         </div>
       ) : quote ? (
-        <div className="mt-2 rounded-md border border-border bg-surface-elevated px-2 py-1.5 text-left text-[10px] italic text-muted-foreground leading-snug">
+        <div className="mt-1.5 rounded-md border border-border bg-card px-2 py-1.5 text-left text-[11px] italic leading-snug text-muted-foreground">
           "{quote}"
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function JudgmentOpt({ label, color }: { label: string; color: string }) {
+  return (
+    <div
+      className="rounded-md border px-2 py-2 text-center text-[12px] font-medium"
+      style={{
+        borderColor: "var(--c-border)",
+        background: "var(--c-surface-3)",
+        color,
+      }}
+    >
+      {label}
     </div>
   );
 }
