@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { CourtCase } from "@/lib/court.functions";
 import { castVerdict } from "@/lib/vote.functions";
+import { useGateStore, type PendingAction } from "@/stores/gate";
 import { CountdownChip } from "./CountdownChip";
 
 type VerdictKey =
