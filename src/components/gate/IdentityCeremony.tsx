@@ -314,26 +314,17 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
         <AliasLine phase={phase} alias={alias} locks={locks} />
 
         <div className="p-5 pt-2 space-y-3">
-          {phase === "phone" && (
-            <PhoneCard
-              countryCode={countryCode}
-              onCountryChange={setCountryCode}
-              phoneNumber={phoneNumber}
-              onPhoneChange={setPhoneNumber}
-              onSubmit={onPhoneSubmit}
+          {phase === "auth" && (
+            <AuthCard
+              email={email}
+              onEmailChange={setEmail}
+              onEmailSubmit={onEmail}
+              onOauth={onOauth}
+              busy={authBusy}
             />
           )}
 
-          {phase === "otp" && (
-            <OtpCard
-              value={otp}
-              onChange={setOtp}
-              onSubmit={onOtpSubmit}
-              error={otpError}
-              busy={busy}
-              phone={fullPhone}
-            />
-          )}
+
 
           {phase === "dob" && (
             <DobCard
