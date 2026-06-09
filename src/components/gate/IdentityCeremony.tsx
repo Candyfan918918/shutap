@@ -465,108 +465,71 @@ function AliasLine({
   );
 }
 
-// ── Phone card
+// ── Auth card (email magic link + Google + Apple)
 
-function PhoneCard({
-  countryCode,
-  onCountryChange,
-  phoneNumber,
-  onPhoneChange,
-  onSubmit,
-}: {
-  countryCode: string;
-  onCountryChange: (v: string) => void;
-  phoneNumber: string;
-  onPhoneChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}) {
-  return (
-    <form
-      onSubmit={onSubmit}
-      className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3"
-    >
-      <p className="text-sm font-semibold">To claim your identity, verify your number.</p>
-      <div className="flex gap-2">
-        <select
-          value={countryCode}
-          onChange={(e) => onCountryChange(e.target.value)}
-          className="rounded-lg bg-background border border-border px-2 py-2 text-sm"
-        >
-          {COUNTRY_CODES.map((c) => (
-            <option key={c.code} value={c.code}>{c.label}</option>
-          ))}
-        </select>
-        <input
-          type="tel"
-          inputMode="numeric"
-          value={phoneNumber}
-          onChange={(e) => onPhoneChange(e.target.value.replace(/[^0-9 \-]/g, ""))}
-          placeholder="555 123 4567"
-          maxLength={16}
-          className="flex-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={phoneNumber.replace(/[^0-9]/g, "").length < 6}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
-      >
-        Send code →
-      </button>
-    </form>
-  );
-}
-
-// ── OTP card
-
-function OtpCard({
-  value,
-  onChange,
-  onSubmit,
-  error,
+function AuthCard({
+  email,
+  onEmailChange,
+  onEmailSubmit,
+  onOauth,
   busy,
-  phone,
 }: {
-  value: string;
-  onChange: (v: string) => void;
-  onSubmit: (codeValue?: string) => void;
-  error: string | null;
-  busy: boolean;
-  phone: string;
+  email: string;
+  onEmailChange: (v: string) => void;
+  onEmailSubmit: (e: React.FormEvent) => void;
+  onOauth: (provider: "google" | "apple") => void;
+  busy: "idle" | "email" | "google" | "apple";
 }) {
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-semibold">
-        Code sent to <span className="text-muted-foreground font-normal">{phone}</span>
-      </p>
-      <p className="text-[11px] text-muted-foreground">
-        Demo mode — any 6 digits will work.
-      </p>
-      <input
-        type="text"
-        inputMode="numeric"
-        maxLength={6}
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
-          onChange(v);
-          if (v.length === 6) onSubmit(v);
-        }}
-        placeholder="• • • • • •"
-        className="w-full text-center tracking-[0.5em] text-lg font-bold rounded-lg bg-background border border-border px-3 py-3"
-        autoFocus
-      />
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      <button
-        onClick={() => onSubmit()}
-        disabled={value.length !== 6 || busy}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
-      >
-        {busy ? "Verifying…" : "Verify →"}
-      </button>
+      <p className="text-sm font-semibold">To claim your identity, sign in.</p>
+
+      <form onSubmit={onEmailSubmit} className="space-y-2">
+        <input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+          placeholder="you@example.com"
+          className="w-full rounded-lg bg-background border border-border px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+        />
+        <button
+          type="submit"
+          disabled={busy !== "idle" || !email.includes("@")}
+          className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "email" ? "Sending…" : "Email me a link →"}
+        </button>
+      </form>
+
+      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+        <div className="flex-1 h-px bg-border" />
+        <span>or</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
+      <div className="space-y-2">
+        <button
+          onClick={() => onOauth("google")}
+          disabled={busy !== "idle"}
+          className="w-full rounded-full bg-background border border-border font-semibold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "google" ? "…" : "🔵  Continue with Google"}
+        </button>
+        <button
+          onClick={() => onOauth("apple")}
+          disabled={busy !== "idle"}
+          className="w-full rounded-full bg-background border border-border font-semibold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "apple" ? "…" : "🍎  Continue with Apple"}
+        </button>
+      </div>
     </div>
   );
 }
+
 
 // ── DOB card
 
