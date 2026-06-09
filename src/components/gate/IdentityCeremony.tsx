@@ -74,13 +74,6 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const sendReact = useServerFn(reactToPost);
   const qc = useQueryClient();
 
-  useEffect(() => {
-    if (phase !== "done") return;
-    void replay(pending).finally(() => {
-      setTimeout(() => onClose(), 100);
-    });
-  }, [onClose, pending, phase]);
-
   // Detect existing session — skip the auth card if already signed in.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -90,9 +83,12 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
           .then((identity) => {
             setCountryCode(identity.countryCode ?? null);
             const aliasAlreadyClaimed = Boolean(identity.nationality && identity.emotion && identity.creature);
+            if (identity.ageVerified && aliasAlreadyClaimed) {
+              void replay(pending).finally(() => onClose());
+              return;
+            }
             setPhase((current) => {
               if (current !== "auth" && current !== "dob") return current;
-              if (identity.ageVerified && aliasAlreadyClaimed) return "done";
               if (identity.ageVerified) return "spin";
               return "dob";
             });
@@ -100,7 +96,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
           .catch(() => {/* silent */});
       }
     });
-  }, [ensureIdentity]);
+  }, [ensureIdentity, onClose, pending]);
 
   // Kick off alias prefetch the moment the ceremony opens.
   useEffect(() => {
