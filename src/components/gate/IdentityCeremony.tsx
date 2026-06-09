@@ -1,13 +1,13 @@
 // Identity ceremony — the soft gate. The reels spin, the user verifies, the alias appears.
 // Nothing in the underlying page executes until the user claims an identity here.
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import {
   generateAlias,
-  mockOtpVerify,
   verifyAge,
   claimAlias,
   type GeneratedAlias,
@@ -15,10 +15,10 @@ import {
 import { castVerdict } from "@/lib/posts/community.functions";
 import { reactToPost } from "@/lib/posts/engagement.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 type Phase =
-  | "phone"
-  | "otp"
+  | "auth"
   | "dob"
   | "underage"
   | "spin"
@@ -28,25 +28,8 @@ type Phase =
 
 const EMOJI_OPTIONS = ["🦊", "🦉", "🐙", "🦋", "🌙", "⚡", "🌸", "🔥", "🎭", "👁", "🪞", "⚖️"];
 
-const COUNTRY_CODES = [
-  { code: "+1", label: "🇺🇸 +1" },
-  { code: "+44", label: "🇬🇧 +44" },
-  { code: "+33", label: "🇫🇷 +33" },
-  { code: "+49", label: "🇩🇪 +49" },
-  { code: "+34", label: "🇪🇸 +34" },
-  { code: "+39", label: "🇮🇹 +39" },
-  { code: "+61", label: "🇦🇺 +61" },
-  { code: "+81", label: "🇯🇵 +81" },
-  { code: "+82", label: "🇰🇷 +82" },
-  { code: "+86", label: "🇨🇳 +86" },
-  { code: "+91", label: "🇮🇳 +91" },
-  { code: "+55", label: "🇧🇷 +55" },
-  { code: "+52", label: "🇲🇽 +52" },
-  { code: "+62", label: "🇮🇩 +62" },
-  { code: "+63", label: "🇵🇭 +63" },
-  { code: "+971", label: "🇦🇪 +971" },
-  { code: "+65", label: "🇸🇬 +65" },
-];
+// Key used to resume the ceremony after an OAuth / email-link redirect.
+const RESUME_KEY = "md.gate.resume";
 
 // Simple click tone — Web Audio, no asset needed.
 function clickTone(hz: number) {
