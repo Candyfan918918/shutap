@@ -246,6 +246,13 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       await new Promise((r) => setTimeout(r, 900));
       setConfirmingStep(2);
       await new Promise((r) => setTimeout(r, 900));
+      // Mark the first session so the home page swaps to the curated
+      // welcome stream on the next render.
+      markFirstSession({
+        aliasLine: `${emoji} ${alias.nationality} ${alias.emotion} ${alias.creature}`,
+        entryPostId: pending.entityId,
+        entryAction: pending.type,
+      });
       await replay(pending);
       setPhase("done");
       // Slide away.
