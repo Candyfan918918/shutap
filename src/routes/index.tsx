@@ -850,3 +850,217 @@ function TeaserCard({
   );
 }
 
+// ───────────────────────── Hall of Fame ─────────────────────────
+
+function HallOfFameSection({
+  hof,
+  isLoading,
+  onGate,
+}: {
+  hof: HallOfFame | null;
+  isLoading: boolean;
+  onGate: (intent: string) => void;
+}) {
+  if (isLoading) {
+    return (
+      <section className="space-y-4 pt-4">
+        <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+          The court has a memory.
+        </p>
+        <div className="space-y-4">
+          <TeaserSkeleton />
+          <TeaserSkeleton />
+          <TeaserSkeleton />
+        </div>
+      </section>
+    );
+  }
+  if (!hof || (!hof.dramatic && !hof.relatable && !hof.surprising)) return null;
+
+  return (
+    <section className="space-y-5 pt-4">
+      <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+        The court has a memory.
+      </p>
+      <div className="space-y-4">
+        {hof.dramatic && (
+          <HofDramaticCard post={hof.dramatic} onGate={() => onGate("hof_dramatic")} />
+        )}
+        {hof.relatable && (
+          <HofRelatableCard post={hof.relatable} onGate={() => onGate("hof_relatable")} />
+        )}
+        {hof.surprising && (
+          <HofSurprisingCard post={hof.surprising} onGate={() => onGate("hof_surprising")} />
+        )}
+      </div>
+
+      <div className="text-center pt-2">
+        <p className="text-sm font-medium text-foreground">
+          Join{" "}
+          <span className="tabular-nums font-bold">
+            {hof.todayVotes.toLocaleString()}
+          </span>{" "}
+          people who've weighed in today.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function HofLabel({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span
+      className="inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full"
+      style={{ color, borderColor: color, borderWidth: 0.5, borderStyle: "solid" }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function HofDramaticCard({ post, onGate }: { post: HofDramatic; onGate: () => void }) {
+  const amber = "oklch(0.78 0.16 75)";
+  return (
+    <button
+      onClick={onGate}
+      className="w-full text-left rounded-2xl bg-card overflow-hidden hover:bg-surface-elevated transition group"
+      style={{ borderColor: amber, borderWidth: 0.5, borderStyle: "solid" }}
+    >
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <HofLabel color={amber}>🔥 Most Dramatic Today</HofLabel>
+          {post.score != null && (
+            <span className="text-[11px] tabular-nums font-semibold" style={{ color: amber }}>
+              {post.score} chaos
+            </span>
+          )}
+        </div>
+        <h3 className="text-xl sm:text-2xl font-bold leading-tight text-balance">
+          {post.title}
+        </h3>
+        <p className="text-[11px] text-muted-foreground tabular-nums">
+          {post.verdictTotal.toLocaleString()} jurors weighed in
+        </p>
+        <VerdictBar counts={post.verdictCounts} total={post.verdictTotal} />
+        <p className="text-sm italic text-foreground/90 pt-1">
+          “{post.benchVerdictLine}”
+        </p>
+        <p className="text-[11px] font-semibold text-primary pt-1">
+          Read the full case →
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function HofRelatableCard({ post, onGate }: { post: HofRelatable; onGate: () => void }) {
+  const teal = "oklch(0.72 0.14 195)";
+  const words = post.storyText?.split(/\s+/) ?? [];
+  const snippet = words.slice(0, 60).join(" ");
+  const hasMore = words.length > 60;
+  const categoryLabel = (post.scoreCategory ?? "Relationship").replace(/_/g, " ");
+  return (
+    <button
+      onClick={onGate}
+      className="w-full text-left rounded-2xl bg-card overflow-hidden hover:bg-surface-elevated transition group"
+      style={{ borderColor: teal, borderWidth: 0.5, borderStyle: "solid" }}
+    >
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <HofLabel color={teal}>💚 Most Relatable This Week</HofLabel>
+          <Pill>💔 {categoryLabel}</Pill>
+        </div>
+        <h3 className="text-lg sm:text-xl font-bold leading-tight text-balance">
+          {post.title}
+        </h3>
+        <p className="text-sm font-semibold" style={{ color: teal }}>
+          {post.relateCount.toLocaleString()} people felt this.
+        </p>
+        <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+          {snippet}
+          {hasMore ? "…" : ""}
+        </p>
+        <p className="text-[11px] font-semibold text-primary pt-1">
+          Read the full case →
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function HofSurprisingCard({ post, onGate }: { post: HofSurprising; onGate: () => void }) {
+  const purple = "oklch(0.68 0.18 295)";
+  return (
+    <button
+      onClick={onGate}
+      className="w-full text-left rounded-2xl bg-card overflow-hidden hover:bg-surface-elevated transition group"
+      style={{ borderColor: purple, borderWidth: 0.5, borderStyle: "solid" }}
+    >
+      <div className="p-5 space-y-3">
+        <HofLabel color={purple}>🌀 Most Surprising Outcome — All Time</HofLabel>
+        <h3 className="text-lg sm:text-xl font-bold leading-tight text-balance">
+          {post.title}
+        </h3>
+        <div className="rounded-xl bg-surface-elevated/60 p-4 space-y-2 text-sm">
+          {post.dominantVerdict ? (
+            <p>
+              <span className="text-muted-foreground">The court predicted</span>{" "}
+              <span className="font-semibold">{post.dominantVerdict}</span>
+              {post.dominantPct > 0 && (
+                <span className="text-muted-foreground tabular-nums">
+                  {" "}
+                  ({post.dominantPct}%)
+                </span>
+              )}
+              <span className="text-muted-foreground">.</span>
+            </p>
+          ) : (
+            <p className="text-muted-foreground">The court was split.</p>
+          )}
+          <p>
+            <span className="text-muted-foreground">The outcome:</span>{" "}
+            <span className="font-semibold" style={{ color: purple }}>
+              {post.outcomeType}.
+            </span>
+          </p>
+          <p className="text-[11px] text-muted-foreground tabular-nums">
+            {post.daysToOutcome} day{post.daysToOutcome === 1 ? "" : "s"} later
+          </p>
+        </div>
+        <p className="text-[11px] text-muted-foreground italic">
+          The court follows stories to their real endings.
+        </p>
+        <p className="text-[11px] font-semibold text-primary pt-1">
+          Read the full case →
+        </p>
+      </div>
+    </button>
+  );
+}
+
+// ───────────────────────── Final CTA ─────────────────────────
+
+function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
+  const purple = "oklch(0.68 0.18 295)";
+  return (
+    <section
+      className="rounded-3xl bg-surface-elevated p-8 text-center"
+      style={{ borderColor: purple, borderWidth: 0.5, borderStyle: "solid" }}
+    >
+      <p className="text-2xl sm:text-3xl font-bold text-balance">
+        The court is waiting for your judgment.
+      </p>
+      <p className="mt-3 text-sm text-muted-foreground text-balance">
+        Anonymous identity. Real verdicts. Real outcomes.
+      </p>
+      <button
+        onClick={() => onGate("claim_final")}
+        className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg"
+      >
+        Claim my identity →
+      </button>
+    </section>
+  );
+}
+
+
