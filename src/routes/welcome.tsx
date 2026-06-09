@@ -8,6 +8,7 @@ import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { finalizeIdentity, type IdentityPayload } from "@/lib/identity.functions";
 import { AvatarSvg } from "@/components/identity/AvatarSvg";
+import { markFirstSession } from "@/lib/firstSession";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
