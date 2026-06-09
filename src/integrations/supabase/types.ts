@@ -113,6 +113,33 @@ export type Database = {
         }
         Relationships: []
       }
+      city_courts: {
+        Row: {
+          active: boolean
+          code: string
+          country_code: string | null
+          created_at: string
+          id: string
+          label: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          label: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           body: string
@@ -222,11 +249,16 @@ export type Database = {
       court_cases: {
         Row: {
           ai_summary: string | null
+          bench_verdict_line: string | null
+          candidacy_paused: boolean
           closes_at: string | null
           controversy_score: number
           created_at: string
+          current_category_court: string | null
+          current_tier: string | null
           decided_at: string | null
           engagement_score: number
+          final_judgment: string | null
           final_verdict: string | null
           id: string
           nominated_at: string
@@ -237,14 +269,20 @@ export type Database = {
           scope: string
           status: string
           updated_at: string
+          verdict_lock_at: string | null
         }
         Insert: {
           ai_summary?: string | null
+          bench_verdict_line?: string | null
+          candidacy_paused?: boolean
           closes_at?: string | null
           controversy_score?: number
           created_at?: string
+          current_category_court?: string | null
+          current_tier?: string | null
           decided_at?: string | null
           engagement_score?: number
+          final_judgment?: string | null
           final_verdict?: string | null
           id?: string
           nominated_at?: string
@@ -255,14 +293,20 @@ export type Database = {
           scope: string
           status?: string
           updated_at?: string
+          verdict_lock_at?: string | null
         }
         Update: {
           ai_summary?: string | null
+          bench_verdict_line?: string | null
+          candidacy_paused?: boolean
           closes_at?: string | null
           controversy_score?: number
           created_at?: string
+          current_category_court?: string | null
+          current_tier?: string | null
           decided_at?: string | null
           engagement_score?: number
+          final_judgment?: string | null
           final_verdict?: string | null
           id?: string
           nominated_at?: string
@@ -273,8 +317,47 @@ export type Database = {
           scope?: string
           status?: string
           updated_at?: string
+          verdict_lock_at?: string | null
         }
         Relationships: []
+      }
+      court_tiers: {
+        Row: {
+          case_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          started_at: string
+          tier: string
+          vote_count: number
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          tier: string
+          vote_count?: number
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          tier?: string
+          vote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "court_tiers_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "court_cases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_cases: {
         Row: {
@@ -1174,9 +1257,14 @@ export type Database = {
           author_id: string
           badges: string[]
           both_sides_heard: boolean
+          candidacy_paused: boolean
           comment_count: number
+          controversy_score: number
+          cool_down_until: string | null
           created_at: string
           deleted_at: string | null
+          drama_score: number
+          expiry_at: string | null
           forward_count: number
           hashtags: string[]
           id: string
@@ -1184,10 +1272,13 @@ export type Database = {
           like_count: number
           locale: string
           media_url: string | null
+          nomination_score: number
           perspective_count: number
           pii_removed: boolean
           platform_captions: Json
+          prediction_options: Json
           published_at: string | null
+          relate_count: number
           save_count: number
           score: number | null
           score_category: string | null
@@ -1205,15 +1296,21 @@ export type Database = {
           updated_at: string
           view_count: number
           visibility: string
+          weighted_vote_sum: number
         }
         Insert: {
           additional_perspectives?: boolean
           author_id: string
           badges?: string[]
           both_sides_heard?: boolean
+          candidacy_paused?: boolean
           comment_count?: number
+          controversy_score?: number
+          cool_down_until?: string | null
           created_at?: string
           deleted_at?: string | null
+          drama_score?: number
+          expiry_at?: string | null
           forward_count?: number
           hashtags?: string[]
           id?: string
@@ -1221,10 +1318,13 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          nomination_score?: number
           perspective_count?: number
           pii_removed?: boolean
           platform_captions?: Json
+          prediction_options?: Json
           published_at?: string | null
+          relate_count?: number
           save_count?: number
           score?: number | null
           score_category?: string | null
@@ -1242,15 +1342,21 @@ export type Database = {
           updated_at?: string
           view_count?: number
           visibility?: string
+          weighted_vote_sum?: number
         }
         Update: {
           additional_perspectives?: boolean
           author_id?: string
           badges?: string[]
           both_sides_heard?: boolean
+          candidacy_paused?: boolean
           comment_count?: number
+          controversy_score?: number
+          cool_down_until?: string | null
           created_at?: string
           deleted_at?: string | null
+          drama_score?: number
+          expiry_at?: string | null
           forward_count?: number
           hashtags?: string[]
           id?: string
@@ -1258,10 +1364,13 @@ export type Database = {
           like_count?: number
           locale?: string
           media_url?: string | null
+          nomination_score?: number
           perspective_count?: number
           pii_removed?: boolean
           platform_captions?: Json
+          prediction_options?: Json
           published_at?: string | null
+          relate_count?: number
           save_count?: number
           score?: number | null
           score_category?: string | null
@@ -1279,6 +1388,7 @@ export type Database = {
           updated_at?: string
           view_count?: number
           visibility?: string
+          weighted_vote_sum?: number
         }
         Relationships: [
           {
@@ -1286,6 +1396,83 @@ export type Database = {
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_results: {
+        Row: {
+          id: string
+          is_correct: boolean
+          post_id: string
+          prediction_id: string
+          scored_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_correct: boolean
+          post_id: string
+          prediction_id: string
+          scored_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_correct?: boolean
+          post_id?: string
+          prediction_id?: string
+          scored_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_results_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_results_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: true
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          post_id: string
+          predicted_outcome: string
+          user_id: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          id?: string
+          post_id: string
+          predicted_outcome: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          post_id?: string
+          predicted_outcome?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
         ]
@@ -1496,6 +1683,51 @@ export type Database = {
           window_start?: string
         }
         Relationships: []
+      }
+      reputation_events: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          delta: Json
+          event_type: string
+          id: string
+          post_id: string | null
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          delta?: Json
+          event_type: string
+          id?: string
+          post_id?: string | null
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          delta?: Json
+          event_type?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "court_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_events_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       safety_events: {
         Row: {
@@ -1809,6 +2041,44 @@ export type Database = {
           },
         ]
       }
+      story_outcomes: {
+        Row: {
+          created_at: string
+          days_elapsed: number | null
+          detail: string | null
+          id: string
+          outcome_type: string
+          post_id: string
+          submitted_by: string
+        }
+        Insert: {
+          created_at?: string
+          days_elapsed?: number | null
+          detail?: string | null
+          id?: string
+          outcome_type: string
+          post_id: string
+          submitted_by: string
+        }
+        Update: {
+          created_at?: string
+          days_elapsed?: number | null
+          detail?: string | null
+          id?: string
+          outcome_type?: string
+          post_id?: string
+          submitted_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_outcomes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       story_tags: {
         Row: {
           confidence: number
@@ -2021,6 +2291,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wisdom_graph_edges: {
+        Row: {
+          created_at: string
+          from_node: string
+          id: string
+          relation: string
+          to_node: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          from_node: string
+          id?: string
+          relation: string
+          to_node: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          from_node?: string
+          id?: string
+          relation?: string
+          to_node?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wisdom_graph_edges_from_node_fkey"
+            columns: ["from_node"]
+            isOneToOne: false
+            referencedRelation: "wisdom_graph_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wisdom_graph_edges_to_node_fkey"
+            columns: ["to_node"]
+            isOneToOne: false
+            referencedRelation: "wisdom_graph_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wisdom_graph_nodes: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          node_type: string
+          payload: Json
+          post_id: string | null
+          weight: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          node_type: string
+          payload?: Json
+          post_id?: string | null
+          weight?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          node_type?: string
+          payload?: Json
+          post_id?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wisdom_graph_nodes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

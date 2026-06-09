@@ -1,129 +1,71 @@
-# Multi-Party Response Flow ("Are you someone in this story?")
+# Court System — Alignment Plan
 
-Lets readers self-identify as named parties, participants, or witnesses to a published story, verify their standing, and add their own perspective. Each verified perspective gets its own engagement (relate, comments, verdict sub-thread), feeds into Court, and lands in the Wisdom Graph.
+The canonical spec is far larger than the current schema (`court_cases` has scope/region/status only, no tiers, category, lock time, or bench line; no nomination scoring; no predictions/outcomes/wisdom graph; partial perspectives just landed). Building it all in one shot would mean 8+ tables, 5 agents, ~15 server fns and major UI churn. I will ship it in 5 reviewable phases, each independently usable. Each phase ends with a smoke test before the next migration goes up.
 
-## User-visible behavior
+## Phase 1 — Schema foundation
 
-- Every published post shows a Bench-voice prompt to readers: "Are you someone in this story?"
-- Tapping it opens a 3-step flow:
-  1. Role select — Named party / Participant / Witness
-  2. Standing verification — short structured prompts (claimed name/role, 2-3 corroborating facts only someone present would know, optional receipts upload) judged by the `standing_judge` agent
-  3. On pass → routed into the right response surface:
-     - Named party → full Spill co-pilot, marks the case `both_sides_heard = true`
-     - Participant → shorter "partial response" Spill, marks `additional_perspectives = true`
-     - Witness → short statement form, shows under "Other Perspectives"
-     - Fail → toast in Bench voice, user becomes a regular commenter
-- Original post page gets a new "Other Perspectives" section listing each verified response with its own relate count, comments, and verdict sub-thread.
-- Court: if the case is in court, jurors see all perspectives side-by-side; the verdict timer locks all perspectives simultaneously when it closes.
-- Outcome reminders fire to the plaintiff and every verified named party.
-- Wisdom Graph node for the resolved case records: number of sides, cross-side verdict consistency, outcome type.
+Single migration adds the missing core columns / tables. No UI yet.
 
-## Voice
+- `posts`: `nomination_score numeric`, `weighted_vote_sum numeric`, `controversy_score numeric`, `candidacy_paused bool`, `cool_down_until timestamptz`, `expiry_at timestamptz`, `drama_score int`, `prediction_options jsonb`, `relate_count int`.
+- `court_cases` additions: `current_tier text check in (city|regional|national|world)`, `current_category_court text`, `verdict_lock_at timestamptz`, `bench_verdict_line text`, `final_judgment text`, `candidacy_paused bool`. Keep legacy `scope/region_*` for backwards compat; map `scope→current_tier` in a one-time UPDATE.
+- New tables: `court_tiers` (case_id, tier, started_at, vote_count, ended_at), `city_courts` (code, label, country_code, active), `verdict_weights` view, `predictions`, `prediction_results`, `story_outcomes`, `outcome_reminders` (already exists — verify), `wisdom_graph_nodes`, `wisdom_graph_edges`, `reputation_events`.
+- Verdict weight stored on `post_verdict_votes.weight` (add column) — computed server-side at vote time.
+- All new public tables follow the four-step GRANT pattern; service-role-only tables (`reputation_events`, wisdom graph writes, `story_tags` already) get no anon/auth grants.
 
-All system copy in The Bench voice. Sample strings:
-- Prompt: "If you were there, the court will hear you."
-- Verify success: "Standing granted. Speak."
-- Verify fail: "The court is not convinced. You may still watch."
-- Lock: "Submissions closed. The verdict stands across all parties."
+## Phase 2 — Nomination + tier engine (server only)
 
-No emojis in Bench lines, no exclamation marks.
+- `src/lib/nomination.functions.ts`
+  - `recalcNomination(postId)` — computes `nomination_score` per formula in spec; writes to `posts`.
+  - `checkNomination(postId)` — if score > p95 of live pool AND no `court_cases` row AND not paused → call `court/nominate`.
+  - Invoked from existing vote/relate/comment/perspective server fns (one line each).
+- `court.functions.ts` additions:
+  - `nominate(postId)` — computes entry tier from vote geo distribution + category from `story_tags.category` → writes `court_cases` + initial `court_tiers` row + plaintiff notification.
+  - `lockCase(caseId)` — runs at `verdict_lock_at`: computes final_verdict/final_judgment, calls Bench agent for `bench_verdict_line`, fans out push notifications, runs escalation check.
+  - `escalateCase(caseId)` — writes new `court_tiers` row, updates `current_tier` + `verdict_lock_at`.
+- New Bench agent prompt `bench_verdict_writer` in `agent-prompts.server.ts`; orchestrator moment `court_verdict_lock` → `[bench_verdict_writer]`.
+- Cron-style trigger: a single pg_cron job (or `/api/public/court-tick` called every minute by Supabase scheduler) calls `lockCase` for any case whose `verdict_lock_at <= now()` and `final_verdict is null`.
 
-## Data model (new tables / columns)
+## Phase 3 — Court UI alignment
+
+- `CourtroomPanel` shows current tier, category badge, countdown to `verdict_lock_at`, perspectives tab (already exists), Bench verdict line when locked.
+- New `WatchParty.tsx` overlay surfaces when `verdict_lock_at - now < 60min`: live verdict bar via Supabase realtime, Bench commentary cards (fetched every 3–5 min from `bench_commentary` agent — added to AGENT_PROMPTS), countdown.
+- `CourtTabs` filters by category (Romance/Family/Work/Friendship/Service/Stranger/Digital) + tier — derived from `court_cases`, not new endpoints.
+- `CourtCaseCard` shows tier ribbon + category chip + `both_sides_heard` badge (reuses Phase-just-shipped flag).
+
+## Phase 4 — Predictions + outcomes + reminders
+
+- `predictions.functions.ts`: `submitPrediction`, `listPredictions`.
+- Outcome submission UI on plaintiff’s closed cases — short overlay drawing options from `posts.prediction_options`. Writes `story_outcomes`, flips `posts.status='closed'`, evaluates `prediction_results`, fires Wisdom Graph writer.
+- `outcome-reminders` cron (daily): pushes Bench reminders to plaintiff + verified named parties at 30/90/180/365 day milestones.
+
+## Phase 5 — Wisdom Graph + reputation
+
+- `wisdom_graph_writer` agent (already prompted earlier) wired to outcome submission only — writes nodes/edges via service role; never returned to client.
+- `reputation.functions.ts` extended: on `court/lock` and on `outcome/submit`, recalc `justice_score`, `wisdom_score`, `prediction_score`, `juror_title` per spec; push when title changes.
+
+## Out of scope for this plan
+
+- Multi-language Bench voice variants (English copy only).
+- Admin tooling for `city_courts.active` toggling (manual SQL for now).
+- AEO sitemap priority bumps and per-case OG image generation (separate SEO pass).
+- Re-vote / flip window UX when `both_sides_heard` flips true — DB allows it; UI prompt deferred.
+- Mod queue for `candidacy_paused` cases (flag is set; review UI later).
+
+## Technical notes (for engineers)
+
+- Vote weight formula stays server-only inside `vote.functions.ts`; client never sees `weight`.
+- `nomination_score` p95 is computed cheaply via `percentile_cont(0.95) within group (order by nomination_score) from posts where status='live' and not candidacy_paused`. Cached for 30s via `rate_limit_counters`-style key to avoid recompute storms.
+- All AI calls go through existing orchestrator + `ai-broker`; no new edge functions, no new secrets.
+- Realtime: Supabase realtime already enabled for `court_cases`; add `post_verdict_votes` for Watch Party.
+
+## Build order summary
 
 ```text
-posts
-+ both_sides_heard         boolean  default false
-+ additional_perspectives  boolean  default false
-+ perspective_count        integer  default 0
-
-post_perspectives                         -- one row per verified response
-  id uuid pk
-  post_id uuid fk posts on delete cascade
-  responder_id uuid fk auth.users
-  role text check in ('named_party','participant','witness')
-  standing_status text check in ('pending','verified','failed')
-  standing_score int                       -- 0-100 from judge
-  standing_notes text                      -- judge reasoning (private)
-  response_text text                       -- the response Spill
-  receipts_urls text[] default '{}'
-  relate_count int default 0
-  comment_count int default 0
-  locked_at timestamptz                    -- set when court closes
-  created_at, updated_at
-
-post_perspective_relates                  -- per-perspective relate taps
-  perspective_id uuid fk, user_id uuid fk, primary key
-post_perspective_comments                 -- sub-thread comments
-  id, perspective_id fk, author_id, body, created_at, deleted_at
-post_perspective_verdicts                 -- jury sub-thread verdicts
-  perspective_id, user_id, kind, weight, created_at, primary key (perspective_id, user_id)
-
-standing_verifications                    -- audit trail; private
-  id, perspective_id fk, attempt_no int, claimed_facts jsonb,
-  agent_output jsonb, decision text, created_at
+Phase 1  migration ────────► review/approve
+Phase 2  server fns + Bench prompt + cron ► smoke: post → vote burst → nomination → lock
+Phase 3  UI: panel + watch party + tabs   ► visual review on /court
+Phase 4  predictions + outcomes           ► plaintiff loop end-to-end
+Phase 5  wisdom graph + reputation        ► leaderboard + graph rows visible
 ```
 
-RLS:
-- `post_perspectives` SELECT public when `standing_status='verified'`; INSERT auth; UPDATE only own row while `standing_status='pending'`.
-- relates/comments/verdicts: same shape as existing `post_*` analogues.
-- `standing_verifications`: SELECT own + admin; INSERT auth; never returned to non-owners.
-- All new public tables get GRANTs for `authenticated` (+ `anon` SELECT only on `post_perspectives` verified rows) and `service_role`.
-
-## Server functions (TanStack `createServerFn`)
-
-`src/lib/perspectives.functions.ts`
-- `startPerspective({post_id, role})` → creates pending row, returns id
-- `submitStandingFacts({perspective_id, claimed_facts, receipts_urls})` → runs orchestrator moment `standing_verify` (new), updates row, returns `{verified|failed}` only
-- `submitPerspectiveResponse({perspective_id, response_text})` → only when verified; flips `posts.both_sides_heard / additional_perspectives / perspective_count`
-- `listPerspectives({post_id})` → public, verified only, strips `standing_notes`
-- `relatePerspective`, `commentPerspective`, `castPerspectiveVerdict` — mirrors of existing post equivalents
-- `lockPerspectivesForCase({case_id})` — called by court cron when `closes_at` hits; sets `locked_at` on all rows for that post
-
-## Agent additions (`src/lib/agent-prompts.server.ts`)
-
-New private agent `standing_judge` (added to `PRIVATE_AGENTS`):
-- Input: `{post_excerpt, role, claimed_facts, receipts_present:boolean}`
-- Output: `{verified:boolean, score:0-100, reasoning:string, missing_signals:string[]}`
-- Never returned to client; only `verified` boolean surfaces.
-
-New orchestrator moment `standing_verify` → `[standing_judge, privacy_shield]` (shield scrubs claimed facts before storage).
-
-Wisdom Graph: extend `wisdom_graph_writer` payload to include `perspective_count`, `verdict_consistency` (0-1 across sub-threads), `sides_heard`. No prompt change required beyond adding fields to the moment payload.
-
-## Court integration
-
-- `CourtroomPanel`: when a case has `perspective_count > 0`, render a tabbed strip of perspectives (Plaintiff + each verified responder by alias). Each tab shows its own verdict bar + comment thread.
-- Cron (`/api/public/hooks/court-tick`): on close, call `lockPerspectivesForCase` then the existing `finalize_court_cases()` SQL fn.
-- Outcome reminder fanout: extend the existing notification block in `finalize_court_cases` to also insert one notification per verified named-party responder.
-
-## UI surfaces (new components)
-
-- `src/components/perspectives/ResponderEntry.tsx` — the "Are you someone in this story?" prompt on every post.
-- `src/components/perspectives/RoleSelectSheet.tsx`
-- `src/components/perspectives/StandingVerify.tsx` — wraps the existing Spill `ChatBubble` for the claimed-facts Q&A.
-- `src/components/perspectives/PerspectiveCard.tsx` — alias header, response excerpt, relate/comment/verdict bar.
-- `src/components/perspectives/OtherPerspectives.tsx` — list on post page + Court tab strip.
-
-All entry CTAs route through the existing `useGateStore.enqueue(...)` so signed-out readers go through `IdentityCeremony`.
-
-## Migrations
-
-Two migrations:
-1. Add columns + new tables + GRANTs + RLS + policies + indexes
-2. Extend `finalize_court_cases()` to fan out notifications & lock perspectives
-
-## Out of scope (this plan)
-
-- No changes to spill_copilot prompt — it already handles short vs full flows by exchange count.
-- No new chatbot intents for perspectives (can come later).
-- No moderator UI for reviewing failed standing attempts (admin SQL only for now).
-
-## Build order
-
-1. Migration 1 (schema + RLS + GRANTs)
-2. Agent prompt + orchestrator moment
-3. Server functions
-4. UI: ResponderEntry → RoleSelect → StandingVerify → PerspectiveCard → OtherPerspectives
-5. Wire into `PostPage` and `CourtroomPanel`
-6. Migration 2 (court close fanout + lock)
-7. Smoke test: publish → respond as named party → verify → submit → see in Other Perspectives → vote → close court → outcome reminder
+Confirm and I’ll start with the Phase 1 migration.
