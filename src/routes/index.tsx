@@ -667,38 +667,8 @@ function CommentSection({ postId, onGate }: { postId: string; onGate: () => void
   );
 }
 
-// ───────────────────────── Bottom CTA ─────────────────────────
 
-function BottomCTA({ onGate }: { onGate: (intent: string) => void }) {
-  return (
-    <section className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card to-accent/10 p-6 text-center">
-      <p className="text-lg font-bold text-balance">
-        The court is in session.
-      </p>
-      <p className="mt-1 text-sm text-muted-foreground text-balance">
-        Claim your identity to vote, relate, and submit your own case.
-      </p>
-      <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <button
-          onClick={() => onGate("claim")}
-          className="px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm shadow-lg"
-        >
-          Claim my identity →
-        </button>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          Keep reading ↑
-        </a>
-      </div>
-    </section>
-  );
-}
+
 
 // ───────────────────────── Teaser Feed ─────────────────────────
 
