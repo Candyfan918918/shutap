@@ -558,9 +558,10 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
         <div className="mt-2.5 flex items-center gap-1.5">
           <input
             value={draft}
+            onFocus={(e) => { if (!isAuthed) { e.currentTarget.blur(); requireAuth(); } }}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }}
-            placeholder="Address the court..."
+            placeholder={isAuthed ? "Address the court..." : "Sign in to address the court"}
             className="flex-1 rounded-xl px-3 py-2.5 text-[12px] outline-none transition"
             style={{
               background: "var(--c-surface)",
