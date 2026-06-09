@@ -61,11 +61,9 @@ export function IdentityCeremony() {
 }
 
 function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () => void }) {
-  const [phase, setPhase] = useState<Phase>("phone");
-  const [countryCode, setCountryCode] = useState("+1");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("auth");
+  const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState<"idle" | "email" | "google" | "apple">("idle");
   const [dobMonth, setDobMonth] = useState<number>(1);
   const [dobYear, setDobYear] = useState<number>(new Date().getFullYear() - 25);
   const [alias, setAlias] = useState<GeneratedAlias | null>(null);
@@ -75,17 +73,21 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const [reelSpeed, setReelSpeed] = useState<"full" | "slow">("full");
   const [confirmingStep, setConfirmingStep] = useState<0 | 1 | 2>(0);
   const [busy, setBusy] = useState(false);
-  const fullPhone = useMemo(() => `${countryCode}${phoneNumber.replace(/[^0-9]/g, "")}`, [countryCode, phoneNumber]);
-  const phoneRef = useRef(fullPhone);
-  phoneRef.current = fullPhone;
 
   const fetchAlias = useServerFn(generateAlias);
-  const verifyOtp = useServerFn(mockOtpVerify);
   const submitAge = useServerFn(verifyAge);
   const claim = useServerFn(claimAlias);
   const sendVerdict = useServerFn(castVerdict);
   const sendReact = useServerFn(reactToPost);
   const qc = useQueryClient();
+
+  // If the user already has a session (e.g. they returned from OAuth and the
+  // gate was re-opened by the resume effect), skip straight to DOB.
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setPhase((p) => (p === "auth" ? "dob" : p));
+    });
+  }, []);
 
   // Kick off alias prefetch the moment the ceremony opens.
   useEffect(() => {
@@ -107,37 +109,64 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       } else if (action.type === "relate" && action.entityId) {
         await sendReact({ data: { postId: action.entityId, kind: "been_there" } });
       }
-      // Other pending types (comment/teaser/hof) — the page will refresh with
-      // the user signed in and show the gated UI unlocked. The draft, when
-      // present, will be picked up by the comment input via the gate store.
       qc.invalidateQueries();
     } catch {/* silent — user is signed in regardless */}
   };
 
-  // ── Phone submit
-  const onPhoneSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (phoneNumber.replace(/[^0-9]/g, "").length < 6) return;
-    setPhase("otp");
+  // ── Stash pending action so we can resume after an OAuth / email redirect.
+  const stashPending = () => {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify(pending));
+    } catch {/* ignore */}
   };
 
-  // ── OTP submit
-  const onOtpSubmit = async (codeValue?: string) => {
-    const code = (codeValue ?? otp).trim();
-    if (!/^\d{6}$/.test(code)) return;
-    setOtpError(null);
-    setBusy(true);
+  // ── Email magic link
+  const onEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (authBusy !== "idle" || !email.includes("@")) return;
+    setAuthBusy("email");
+    stashPending();
     try {
-      const { email, password } = await verifyOtp({ data: { phone: fullPhone, code } });
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message);
-      setPhase("dob");
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: window.location.origin + window.location.pathname,
+        },
+      });
+      if (error) throw error;
+      toast.success("Check your inbox — tap the link to continue.");
+      setAuthBusy("idle");
     } catch {
-      setOtpError("Code incorrect — try again.");
-    } finally {
-      setBusy(false);
+      toast.error("Couldn't send the link. Try again.");
+      sessionStorage.removeItem(RESUME_KEY);
+      setAuthBusy("idle");
     }
   };
+
+  // ── OAuth (Google / Apple)
+  const onOauth = async (provider: "google" | "apple") => {
+    if (authBusy !== "idle") return;
+    setAuthBusy(provider);
+    stashPending();
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin + window.location.pathname,
+      });
+      if (result.error) {
+        toast.error("Sign-in failed.");
+        sessionStorage.removeItem(RESUME_KEY);
+        setAuthBusy("idle");
+      }
+      // On redirect, the browser leaves — state doesn't matter.
+    } catch {
+      toast.error("Sign-in failed.");
+      sessionStorage.removeItem(RESUME_KEY);
+      setAuthBusy("idle");
+    }
+  };
+
+
 
   // ── DOB submit
   const onAgeSubmit = async () => {
