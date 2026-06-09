@@ -84,6 +84,8 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       cityLabel,
       seed,
     });
+    const fallbackNickname = existing?.display_name || displayName;
+    const fallbackHandle = existing?.id ? undefined : `user_${userId.replace(/-/g, "").slice(0, 12)}`;
 
     const patch: Record<string, unknown> = {
       display_name: displayName,
@@ -105,7 +107,12 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
 
     const { data: row, error: updErr } = await supabase
       .from("profiles")
-      .upsert({ id: userId, ...patch } as never, { onConflict: "id" })
+      .upsert({
+        id: userId,
+        handle: fallbackHandle,
+        nickname: fallbackNickname,
+        ...patch,
+      } as never, { onConflict: "id" })
       .select("id, display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .single();
     if (updErr) throw new Error(updErr.message);
