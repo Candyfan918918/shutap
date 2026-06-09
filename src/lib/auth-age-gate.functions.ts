@@ -30,6 +30,43 @@ export const verifyAge = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email")
+      .eq("id", ctx.userId)
+      .maybeSingle();
+
+    if (profileLookupError) {
+      return { data: null, error: profileLookupError.message };
+    }
+
+    if (!existingProfile) {
+      const { data: authUser, error: authUserError } = await supabaseAdmin.auth.admin.getUserById(ctx.userId);
+      if (authUserError) {
+        return { data: null, error: authUserError.message };
+      }
+
+      const fallbackNickname = authUser.user.user_metadata?.full_name
+        || authUser.user.user_metadata?.name
+        || authUser.user.email
+        || `user_${ctx.userId.slice(0, 8)}`;
+
+      const { error: bootstrapError } = await supabaseAdmin
+        .from("profiles")
+        .insert({
+          id: ctx.userId,
+          email: authUser.user.email,
+          handle: `user_${ctx.userId.replace(/-/g, "").slice(0, 12)}`,
+          nickname: fallbackNickname,
+          display_name: fallbackNickname,
+          locale: "en",
+        } as never);
+
+      if (bootstrapError) {
+        return { data: null, error: bootstrapError.message };
+      }
+    }
+
     if (age < 18) {
       // Spec: no retry — delete the auth user.
       await supabaseAdmin.auth.admin.deleteUser(ctx.userId);

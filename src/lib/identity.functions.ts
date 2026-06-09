@@ -84,15 +84,13 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       cityLabel,
       seed,
     });
-    const createProfilePatch: Record<string, unknown> = existing?.id
-      ? {}
-      : {
-          handle: `user_${userId.replace(/-/g, "").slice(0, 12)}`,
-          nickname: displayName,
-        };
+    const aliasAlreadyClaimed = Boolean(existing?.nationality && existing?.emotion && existing?.creature);
+    const lockedDisplayName = aliasAlreadyClaimed
+      ? (existing?.nickname as string | null) ?? (existing?.display_name as string | null) ?? displayName
+      : null;
 
     const patch: Record<string, unknown> = {
-      display_name: displayName,
+      display_name: lockedDisplayName ?? displayName,
       avatar_url: avatarUrl,
       vibe: ident.vibe,
       descriptor: ident.descriptor,
@@ -108,20 +106,32 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       patch.onboarded_at = new Date().toISOString();
     }
 
-    const { data: row, error: updErr } = await supabase
-      .from("profiles")
-      .upsert({
-        id: userId,
-        ...createProfilePatch,
-        ...patch,
-      } as never, { onConflict: "id" })
-      .select("id, display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
+    const profileWrite = existing?.id
+      ? supabase
+          .from("profiles")
+          .update(patch as never)
+          .eq("id", userId)
+      : supabase
+          .from("profiles")
+          .insert({
+            id: userId,
+            handle: `user_${userId.replace(/-/g, "").slice(0, 12)}`,
+            nickname: lockedDisplayName ?? displayName,
+            ...patch,
+          } as never);
+
+    const { data: row, error: updErr } = await profileWrite
+      .select("id, display_name, nickname, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .single();
     if (updErr) throw new Error(updErr.message);
 
+    const resolvedDisplayName = row.nationality && row.emotion && row.creature
+      ? (row.nickname as string | null) ?? (row.display_name as string | null) ?? displayName
+      : row.display_name ?? displayName;
+
     return {
       userId,
-      displayName: row.display_name ?? displayName,
+      displayName: resolvedDisplayName,
       cityLabel: row.city_label ?? cityLabel,
       descriptor: row.descriptor ?? ident.descriptor,
       vibe: row.vibe ?? ident.vibe,
@@ -144,7 +154,7 @@ export const getMyIdentity = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
+      .select("display_name, nickname, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .eq("id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -156,9 +166,13 @@ export const getMyIdentity = createServerFn({ method: "GET" })
       .update({ last_seen_at: new Date().toISOString() } as never)
       .eq("id", userId);
 
+    const resolvedDisplayName = row.nationality && row.emotion && row.creature
+      ? (row.nickname as string | null) ?? row.display_name
+      : row.display_name;
+
     return {
       userId,
-      displayName: row.display_name,
+      displayName: resolvedDisplayName,
       cityLabel: (row.city_label as string | null) ?? "",
       descriptor: (row.descriptor as string | null) ?? "",
       vibe: (row.vibe as string | null) ?? "dreamy",
