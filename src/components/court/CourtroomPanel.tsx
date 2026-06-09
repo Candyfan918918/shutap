@@ -75,7 +75,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
     const redirect = typeof window !== "undefined"
       ? window.location.pathname + window.location.search
       : "/court";
-    navigate({ to: "/auth", search: { redirect } as any });
+    navigate({ to: "/enter", search: { redirect } as any });
     return false;
   }
 
