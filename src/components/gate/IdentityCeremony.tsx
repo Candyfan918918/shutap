@@ -361,7 +361,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
 
 function BenchLine({ phase }: { phase: Phase }) {
   const text =
-    phase === "phone" || phase === "otp"
+    phase === "auth"
       ? "The court is assigning your identity."
       : phase === "dob"
         ? "The court asks one last thing."
