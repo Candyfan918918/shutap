@@ -266,17 +266,37 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
           className="mb-1 text-[10px] uppercase tracking-[0.08em]"
           style={{ color: "var(--c-text-3)" }}
         >
-          Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {c.status === "in_court" ? "In session" : "On record"}
+          Case No. {c.id.slice(0, 6).toUpperCase()} · {tierLabel(c.currentTier)} · {c.regionLabel}
         </div>
         <div className="text-[14px] font-medium leading-snug" style={{ color: "var(--c-text-1)" }}>
           {c.post.title}
         </div>
+        {c.post.bothSidesHeard && (
+          <div className="mt-1.5 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium"
+            style={{ borderColor: "var(--c-teal)", color: "var(--c-teal)", background: "#e8f7f3" }}>
+            Both sides heard
+          </div>
+        )}
         <div className="mt-2 text-[11px] italic" style={{ color: "var(--c-text-2)" }}>
           Question before court: What would you do?
         </div>
-        {c.status === "in_court" && c.closesAt && (
+        {(c.status === "in_court" || c.status === "judgment_pending") && (
           <div className="mt-2 inline-flex">
-            <CountdownChip to={c.closesAt} prefix="Judgment in" />
+            <CountdownChip to={c.verdictLockAt ?? c.closesAt} prefix="Locks in" closedLabel="Locked" />
+          </div>
+        )}
+        {(c.status === "decided" || c.status === "legendary") && c.benchVerdictLine && (
+          <div className="mt-3 mx-auto max-w-[28rem] rounded-lg border px-3 py-2 text-left text-[12px] leading-snug"
+            style={{ borderColor: "var(--c-amber)", background: "#fffaee", color: "var(--c-text-1)" }}>
+            <div className="mb-0.5 text-[9px] uppercase tracking-[0.1em]" style={{ color: "var(--c-text-3)" }}>
+              The Bench
+            </div>
+            <div className="font-medium">{c.benchVerdictLine}</div>
+            {c.finalJudgment && (
+              <div className="mt-1 text-[11px] italic" style={{ color: "var(--c-text-2)" }}>
+                {c.finalJudgment}
+              </div>
+            )}
           </div>
         )}
       </Link>
