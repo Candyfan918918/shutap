@@ -8,6 +8,7 @@ import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { finalizeIdentity, type IdentityPayload } from "@/lib/identity.functions";
 import { AvatarSvg } from "@/components/identity/AvatarSvg";
+import { markFirstSession } from "@/lib/firstSession";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
@@ -79,6 +80,7 @@ function WelcomePage() {
     if (!isSafe) return;
     const t = setTimeout(() => {
       try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+      markFirstSession({ aliasLine: identity.displayName });
       window.location.replace(redirectTo);
     }, 900);
     return () => clearTimeout(t);
@@ -165,6 +167,7 @@ function WelcomePage() {
                   href={redirectTo}
                   onClick={() => {
                     try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+                    markFirstSession({ aliasLine: identity.displayName });
                   }}
                   className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
                 >
@@ -173,6 +176,7 @@ function WelcomePage() {
               ) : (
                 <Link
                   to="/"
+                  onClick={() => markFirstSession({ aliasLine: identity.displayName })}
                   className="block w-full py-3.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-center"
                 >
                   {t("welcome.cta")}

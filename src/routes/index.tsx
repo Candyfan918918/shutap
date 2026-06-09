@@ -23,6 +23,8 @@ import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import { IdentityCeremony } from "@/components/gate/IdentityCeremony";
+import { FirstSessionStream } from "@/components/court/FirstSessionStream";
+import { readFirstSession, type FirstSessionMeta } from "@/lib/firstSession";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
 
@@ -74,6 +76,7 @@ const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
 function AnonymousCourt() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [firstSession, setFirstSessionState] = useState<FirstSessionMeta | null>(null);
   const enqueue = useGateStore((s) => s.enqueue);
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
@@ -84,8 +87,17 @@ function AnonymousCourt() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
     });
+    // Check for first-session meta set by the identity ceremony / welcome page.
+    setFirstSessionState(readFirstSession());
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
+
+  // When the gate closes after a successful claim, refresh first-session state.
+  useEffect(() => {
+    if (!gateOpen) {
+      setFirstSessionState(readFirstSession());
+    }
+  }, [gateOpen]);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
@@ -172,6 +184,12 @@ function AnonymousCourt() {
         className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8"
       >
         <HeroIntro />
+        {authed && firstSession && (
+          <FirstSessionStream
+            meta={firstSession}
+            onDone={() => setFirstSessionState(null)}
+          />
+        )}
         {featuredQ.isLoading ? (
           <CaseSkeleton />
         ) : featuredQ.data ? (
