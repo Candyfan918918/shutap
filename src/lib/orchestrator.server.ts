@@ -28,7 +28,9 @@ export type Moment =
   | "reputation"
   | "wisdom_graph"
   | "admin_triage"
-  | "admin_briefing";
+  | "admin_briefing"
+  | "standing_verify";
+
 
 const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
   // Spill: ask → check identifying detail → screen for harm → tag the situation.
