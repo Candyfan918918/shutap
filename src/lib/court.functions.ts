@@ -669,4 +669,277 @@ export const getOpenCaseCount = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// ──────────────────────────────────────────────────────────────
+// Hall of Fame (anonymous landing) — fully readable, no gates on content
+// ──────────────────────────────────────────────────────────────
+
+export interface HofPostBase {
+  id: string;
+  title: string;
+  storyText: string;
+  scoreCategory: string | null;
+  score: number | null;
+  mediaUrl: string | null;
+  author: { handle: string; nickname: string; avatarUrl: string | null } | null;
+}
+
+export interface HofDramatic extends HofPostBase {
+  verdictCounts: Record<string, number>;
+  verdictTotal: number;
+  benchVerdictLine: string;
+}
+
+export interface HofRelatable extends HofPostBase {
+  relateCount: number;
+}
+
+export interface HofSurprising extends HofPostBase {
+  dominantVerdict: string | null;
+  dominantPct: number;
+  outcomeType: string;
+  daysToOutcome: number;
+  decidedAt: string;
+}
+
+export interface HallOfFame {
+  dramatic: HofDramatic | null;
+  relatable: HofRelatable | null;
+  surprising: HofSurprising | null;
+  todayVotes: number;
+}
+
+const VERDICT_LABEL: Record<string, string> = {
+  red_flag: "🚩 Red Flag",
+  green_flag: "💚 Green Flag",
+  run: "🏃 RUN",
+  talk_it_out: "🗣 Talk It Out",
+  lawyer_up: "⚖️ Lawyer Up",
+  therapy_might_help: "🛋 Therapy",
+  need_update: "👀 Need Update",
+};
+
+async function loadHofAuthorMap(authorIds: string[]) {
+  if (authorIds.length === 0) return new Map<string, HofPostBase["author"]>();
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("id, handle, nickname, avatar_url")
+    .in("id", authorIds);
+  return new Map(
+    (data ?? []).map((p) => [
+      p.id as string,
+      {
+        handle: (p as Record<string, unknown>).handle as string,
+        nickname: (p as Record<string, unknown>).nickname as string,
+        avatarUrl:
+          ((p as Record<string, unknown>).avatar_url as string | null) ?? null,
+      } as HofPostBase["author"],
+    ]),
+  );
+}
+
+export const getHallOfFame = createServerFn({ method: "GET" }).handler(
+  async (): Promise<HallOfFame> => {
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const { count: todayVotes } = await supabaseAdmin
+      .from("post_verdict_votes")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", todayStart.toISOString());
+
+    // Segment 1 — Most Dramatic Today (fallback to 7d)
+    let dramatic: HofDramatic | null = null;
+    for (const since of [since24h, since7d]) {
+      const { data: rows } = await supabaseAdmin
+        .from("posts")
+        .select(
+          "id, author_id, title, story_text, score, score_category, media_url",
+        )
+        .eq("status", "published")
+        .eq("visibility", "public")
+        .is("deleted_at", null)
+        .gte("published_at", since)
+        .order("score", { ascending: false, nullsFirst: false })
+        .limit(1);
+      const p = (rows ?? [])[0] as
+        | {
+            id: string; author_id: string; title: string; story_text: string;
+            score: number | null; score_category: string | null; media_url: string | null;
+          }
+        | undefined;
+      if (!p) continue;
+      const [authors, votesRes] = await Promise.all([
+        loadHofAuthorMap([p.author_id]),
+        supabaseAdmin.from("post_verdict_votes").select("kind").eq("post_id", p.id),
+      ]);
+      const counts: Record<string, number> = {};
+      for (const v of (votesRes.data ?? []) as Array<{ kind: string }>) {
+        counts[v.kind] = (counts[v.kind] ?? 0) + 1;
+      }
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      const benchLine = top
+        ? `The bench: this one's a ${VERDICT_LABEL[top[0]] ?? top[0]}.`
+        : "The bench: the jury's still arriving.";
+      dramatic = {
+        id: p.id,
+        title: p.title,
+        storyText: p.story_text,
+        score: p.score,
+        scoreCategory: p.score_category,
+        mediaUrl: p.media_url,
+        author: authors.get(p.author_id) ?? null,
+        verdictCounts: counts,
+        verdictTotal: total,
+        benchVerdictLine: benchLine,
+      };
+      break;
+    }
+
+    // Segment 2 — Most Relatable This Week (fallback all-time)
+    let relatable: HofRelatable | null = null;
+    {
+      const { data: rRows } = await supabaseAdmin
+        .from("post_reactions")
+        .select("post_id")
+        .eq("kind", "been_there")
+        .gte("created_at", since7d)
+        .limit(5000);
+      const tally = new Map<string, number>();
+      for (const r of (rRows ?? []) as Array<{ post_id: string }>) {
+        tally.set(r.post_id, (tally.get(r.post_id) ?? 0) + 1);
+      }
+      let pickId: string | null = null;
+      let pickCount = 0;
+      for (const [pid, c] of tally) {
+        if (c > pickCount) { pickId = pid; pickCount = c; }
+      }
+      if (!pickId) {
+        const { data: allRows } = await supabaseAdmin
+          .from("post_reaction_counts")
+          .select("post_id, count")
+          .eq("kind", "been_there")
+          .order("count", { ascending: false })
+          .limit(1);
+        const top = (allRows ?? [])[0] as { post_id: string; count: number } | undefined;
+        if (top) { pickId = top.post_id; pickCount = top.count; }
+      }
+      if (pickId) {
+        const { data: postRow } = await supabaseAdmin
+          .from("posts")
+          .select("id, author_id, title, story_text, score, score_category, media_url, status, visibility, deleted_at")
+          .eq("id", pickId)
+          .maybeSingle();
+        const p = postRow as Record<string, unknown> | null;
+        if (p && p.status === "published" && p.visibility === "public" && !p.deleted_at) {
+          const authors = await loadHofAuthorMap([p.author_id as string]);
+          relatable = {
+            id: p.id as string,
+            title: p.title as string,
+            storyText: p.story_text as string,
+            score: (p.score as number | null) ?? null,
+            scoreCategory: (p.score_category as string | null) ?? null,
+            mediaUrl: (p.media_url as string | null) ?? null,
+            author: authors.get(p.author_id as string) ?? null,
+            relateCount: pickCount,
+          };
+        }
+      }
+    }
+
+    // Segment 3 — Most Surprising Outcome (all time)
+    let surprising: HofSurprising | null = null;
+    {
+      const { data: decided } = await supabaseAdmin
+        .from("court_cases")
+        .select("id, post_id, decided_at, final_verdict, engagement_score")
+        .in("status", ["decided", "legendary"])
+        .not("decided_at", "is", null)
+        .order("engagement_score", { ascending: false })
+        .limit(20);
+      const cases = (decided ?? []) as Array<{
+        id: string; post_id: string; decided_at: string;
+        final_verdict: string | null; engagement_score: number;
+      }>;
+      if (cases.length > 0) {
+        const postIds = cases.map((c) => c.post_id);
+        const { data: updates } = await supabaseAdmin
+          .from("post_updates")
+          .select("post_id, kind, created_at")
+          .in("post_id", postIds)
+          .eq("status", "published")
+          .is("deleted_at", null)
+          .order("created_at", { ascending: true });
+        const firstUpdate = new Map<string, { kind: string; created_at: string }>();
+        for (const u of (updates ?? []) as Array<{ post_id: string; kind: string; created_at: string }>) {
+          if (!firstUpdate.has(u.post_id)) firstUpdate.set(u.post_id, { kind: u.kind, created_at: u.created_at });
+        }
+        const pick = cases.find((c) => firstUpdate.has(c.post_id))
+          ?? cases.find((c) => c.final_verdict && c.final_verdict !== "no_verdict")
+          ?? cases[0];
+        const upd = firstUpdate.get(pick.post_id);
+        const { data: postRow } = await supabaseAdmin
+          .from("posts")
+          .select("id, author_id, title, story_text, score, score_category, media_url, status, visibility, deleted_at")
+          .eq("id", pick.post_id)
+          .maybeSingle();
+        const p = postRow as Record<string, unknown> | null;
+        if (p && p.status === "published" && p.visibility === "public" && !p.deleted_at) {
+          const authors = await loadHofAuthorMap([p.author_id as string]);
+          const { data: votes } = await supabaseAdmin
+            .from("post_verdict_votes")
+            .select("kind")
+            .eq("post_id", pick.post_id);
+          const counts: Record<string, number> = {};
+          for (const v of (votes ?? []) as Array<{ kind: string }>) {
+            counts[v.kind] = (counts[v.kind] ?? 0) + 1;
+          }
+          const total = Object.values(counts).reduce((a, b) => a + b, 0);
+          const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+          const dominantKind = top?.[0] ?? pick.final_verdict ?? null;
+          const dominantPct = top && total > 0 ? Math.round((top[1] / total) * 100) : 0;
+          const endTs = upd ? new Date(upd.created_at).getTime() : Date.now();
+          const days = Math.max(
+            1,
+            Math.round((endTs - new Date(pick.decided_at).getTime()) / (24 * 60 * 60 * 1000)),
+          );
+          surprising = {
+            id: p.id as string,
+            title: p.title as string,
+            storyText: p.story_text as string,
+            score: (p.score as number | null) ?? null,
+            scoreCategory: (p.score_category as string | null) ?? null,
+            mediaUrl: (p.media_url as string | null) ?? null,
+            author: authors.get(p.author_id as string) ?? null,
+            dominantVerdict: dominantKind ? (VERDICT_LABEL[dominantKind] ?? dominantKind) : null,
+            dominantPct,
+            outcomeType: upd
+              ? upd.kind === "outcome"
+                ? "the truth came out"
+                : upd.kind === "resolved"
+                  ? "they worked it out"
+                  : upd.kind === "plot_twist"
+                    ? "a plot twist landed"
+                    : "they posted an update"
+              : "the story is still unfolding",
+            daysToOutcome: days,
+            decidedAt: pick.decided_at,
+          };
+        }
+      }
+    }
+
+    return {
+      dramatic,
+      relatable,
+      surprising,
+      todayVotes: todayVotes ?? 0,
+    };
+  },
+);
+
+
+
 
