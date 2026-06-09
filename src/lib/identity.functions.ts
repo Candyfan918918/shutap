@@ -42,7 +42,7 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
 
     const { data: existing, error: getErr } = await supabase
       .from("profiles")
-      .select("id, locale, country, country_code, city, region, display_name, avatar_url, vibe, descriptor, city_label, age_verified, nationality, emotion, creature, onboarded_at")
+      .select("id, locale, country, country_code, city, region, display_name, avatar_url, vibe, descriptor, city_label, age_verified, nationality, emotion, creature, onboarded_at, nickname")
       .eq("id", userId)
       .maybeSingle();
     if (getErr) throw new Error(getErr.message);
@@ -102,7 +102,6 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       region,
       city: cityFromGeo ?? existing?.city ?? null,
       locale: pickedLocale,
-      nickname: displayName, // keep nickname mirror so older code keeps working
       last_seen_at: new Date().toISOString(),
     };
     if (!existing?.onboarded_at) {
