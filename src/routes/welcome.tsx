@@ -80,6 +80,7 @@ function WelcomePage() {
     if (!isSafe) return;
     const t = setTimeout(() => {
       try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
+      markFirstSession({ aliasLine: identity.displayName });
       window.location.replace(redirectTo);
     }, 900);
     return () => clearTimeout(t);
