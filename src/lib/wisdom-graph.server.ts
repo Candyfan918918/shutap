@@ -76,12 +76,19 @@ export async function writeWisdomGraphForPost(args: {
     .order("created_at", { ascending: false })
     .limit(5);
 
+  const tagList = ((tags ?? []) as any[]).map((t) => t.tag).filter(Boolean);
+  const tagSet = new Set(tagList);
+  const category = tagList.find((t: string) => t.startsWith("category:"))?.split(":")[1] ?? null;
+  const severity = tagList.find((t: string) => t.startsWith("severity:"))?.split(":")[1] ?? null;
+  const conflictType =
+    tagList.find((t: string) => t.startsWith("conflict:"))?.split(":")[1] ?? null;
+
   let agentOut: AgentOutput = {};
   try {
     const result = await runMoment({
       moment: "wisdom_graph",
       payload: {
-        story_tags: tags ?? {},
+        story_tags: tagList,
         judgment_distribution: dist,
         community_verdict: cc?.final_verdict ?? null,
         outcome_type: outcomeType,
@@ -104,17 +111,17 @@ export async function writeWisdomGraphForPost(args: {
 
   const node = agentOut.node ?? {};
   const payload = {
-    category: node.category ?? (tags as any)?.category ?? null,
+    category: node.category ?? category,
     relationship_type: node.relationship_type ?? null,
-    conflict_type: node.conflict_type ?? (tags as any)?.conflict_type ?? null,
-    severity: node.severity ?? (tags as any)?.severity ?? null,
+    conflict_type: node.conflict_type ?? conflictType,
+    severity: node.severity ?? severity,
     community_verdict: node.community_verdict ?? cc?.final_verdict ?? null,
     judgment_distribution: node.judgment_distribution ?? dist,
     outcome_type: node.outcome_type ?? outcomeType,
     days_to_outcome: node.days_to_outcome ?? daysElapsed,
-    children_involved: node.children_involved ?? (tags as any)?.children_involved ?? false,
+    children_involved: node.children_involved ?? tagSet.has("children_involved"),
     financial_entanglement:
-      node.financial_entanglement ?? (tags as any)?.financial_entanglement ?? false,
+      node.financial_entanglement ?? tagSet.has("financial_entanglement"),
     region: node.region ?? cc?.region_label ?? null,
   };
 
