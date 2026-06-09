@@ -74,17 +74,19 @@ const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
 function AnonymousCourt() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const enqueue = useGateStore((s) => s.enqueue);
+  const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) setAuthed(!!data.session);
     });
-    return () => { active = false; };
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthed(!!session);
+    });
+    return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  const gate = (intent: string) => {
-    navigate({ to: "/enter", search: { redirect: `/?intent=${intent}` } });
-  };
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
   const fetchGlobal = useServerFn(getGlobalVerdictCount);
