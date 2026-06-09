@@ -55,7 +55,10 @@ const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
   admin_triage: ["admin_triage"],
   // Admin daily briefing.
   admin_briefing: ["admin_briefing"],
+  // Standing verification: judge first, then scrub any identifying detail from claimed facts.
+  standing_verify: ["standing_judge", "privacy_shield"],
 };
+
 
 export interface OrchestratorInput {
   moment: Moment;
