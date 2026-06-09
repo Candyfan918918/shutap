@@ -28,7 +28,9 @@ export type Moment =
   | "reputation"
   | "wisdom_graph"
   | "admin_triage"
-  | "admin_briefing";
+  | "admin_briefing"
+  | "standing_verify";
+
 
 const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
   // Spill: ask → check identifying detail → screen for harm → tag the situation.
@@ -53,7 +55,10 @@ const MOMENT_AGENTS: Record<Moment, AgentName[]> = {
   admin_triage: ["admin_triage"],
   // Admin daily briefing.
   admin_briefing: ["admin_briefing"],
+  // Standing verification: judge first, then scrub any identifying detail from claimed facts.
+  standing_verify: ["standing_judge", "privacy_shield"],
 };
+
 
 export interface OrchestratorInput {
   moment: Moment;
