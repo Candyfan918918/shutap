@@ -158,8 +158,8 @@ function WelcomePage() {
     }
     setLocks({ n: false, e: false, c: false });
     lockTimers.current.forEach((id) => window.clearTimeout(id));
-    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440, 0.3); }, 2000);
-    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(460, 0.3); }, 2200);
+    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(440, 0.3); }, 2000);
+    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(460, 0.3); }, 2200);
     const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(480, 0.3); }, 2400);
     const t4 = window.setTimeout(() => setPhase("reveal"), 2800);
     lockTimers.current = [t1, t2, t3, t4];
@@ -231,8 +231,8 @@ function WelcomePage() {
         {/* Slot reels — present from spin onward */}
         {phase !== "dob" && phase !== "loading" && (
           <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-            <SlotReel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
             <SlotReel pool={alias?.reelPools.emotion} value={alias?.emotion} locked={locks.e} />
+            <SlotReel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
             <SlotReel pool={alias?.reelPools.creature} value={alias?.creature} locked={locks.c} />
           </div>
         )}
