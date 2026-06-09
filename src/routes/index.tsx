@@ -76,6 +76,7 @@ const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
 function AnonymousCourt() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [firstSession, setFirstSessionState] = useState<FirstSessionMeta | null>(null);
   const enqueue = useGateStore((s) => s.enqueue);
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
@@ -86,8 +87,17 @@ function AnonymousCourt() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
     });
+    // Check for first-session meta set by the identity ceremony / welcome page.
+    setFirstSessionState(readFirstSession());
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
+
+  // When the gate closes after a successful claim, refresh first-session state.
+  useEffect(() => {
+    if (!gateOpen) {
+      setFirstSessionState(readFirstSession());
+    }
+  }, [gateOpen]);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
