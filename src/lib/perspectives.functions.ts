@@ -175,19 +175,22 @@ export const submitPerspectiveResponse = createServerFn({ method: "POST" })
       .eq("id", p.id);
 
     // Flip post-level flags + count on first response only.
+    let openedFlip = false;
     if (!p.response_text) {
       const { data: post } = await supabaseAdmin
         .from("posts")
-        .select("perspective_count")
+        .select("perspective_count, both_sides_heard")
         .eq("id", p.post_id)
         .single();
 
+      const flippingBothSides = p.role === "named_party" && !post?.both_sides_heard;
       const update =
         p.role === "named_party"
           ? { both_sides_heard: true, perspective_count: (post?.perspective_count ?? 0) + 1 }
           : { additional_perspectives: true, perspective_count: (post?.perspective_count ?? 0) + 1 };
 
       await supabaseAdmin.from("posts").update(update).eq("id", p.post_id);
+      openedFlip = flippingBothSides;
     }
 
     void (async () => {
@@ -196,6 +199,16 @@ export const submitPerspectiveResponse = createServerFn({ method: "POST" })
         bumpNomination(p.post_id);
       } catch { /* ignore */ }
     })();
+
+    if (openedFlip) {
+      void (async () => {
+        try {
+          const { openFlipWindowForPost } = await import("@/lib/court/flipWindow.server");
+          await openFlipWindowForPost(p.post_id);
+        } catch { /* flip-window failures must not break submission */ }
+      })();
+    }
+
 
     return { ok: true };
   });

@@ -26,14 +26,32 @@ import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types"
 export const Route = createFileRoute("/post/$postId")({
   loader: async ({ params }) => {
     const { post } = await getPublishedPost({ data: { postId: params.postId } });
-    return { post };
+    // Best-effort: surface the active court case so head() can wire a Bench-themed OG image.
+    let caseId: string | null = null;
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase
+        .from("court_cases")
+        .select("id")
+        .eq("post_id", params.postId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      caseId = (data as any)?.id ?? null;
+    } catch {
+      /* fall through to the standard share-card image */
+    }
+    return { post, caseId };
   },
   validateSearch: (s: Record<string, unknown>) => ({ shared: Number(s.shared ?? 2) }),
   component: PostPageShell,
   head: ({ loaderData, params }) => {
     const p = loaderData?.post;
     if (!p) return { meta: [{ title: "Shutap" }] };
-    const ogImage = p.share_card_square ?? `/api/public/share-card/${params.postId}?format=square`;
+    const caseId = loaderData?.caseId;
+    const ogImage = caseId
+      ? `/api/public/og/case/${caseId}`
+      : (p.share_card_square ?? `/api/public/share-card/${params.postId}?format=square`);
     return {
       meta: [
         { title: `${p.title} — Shutap` },

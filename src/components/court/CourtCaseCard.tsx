@@ -10,6 +10,8 @@ const STATUS_PILL: Record<CourtCase["status"], { label: string; cls: string }> =
   judgment_pending: { label: "Judgment pending", cls: "bg-amber-500/15 border-amber-500/40 text-amber-500" },
   decided: { label: "Sealed", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-500" },
   legendary: { label: "Legendary", cls: "bg-primary text-primary-foreground border-transparent" },
+  paused: { label: "Paused", cls: "bg-muted text-muted-foreground border-border" },
+  rejected: { label: "Declined", cls: "bg-destructive/15 border-destructive/40 text-destructive" },
 };
 
 const TIER_RIBBON: Record<CourtTier, { label: string; cls: string }> = {
@@ -98,8 +100,13 @@ function CourtCaseCardImpl({
                 Both sides heard
               </span>
             )}
+            {c.isFlipRound && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border bg-fuchsia-500/15 border-fuchsia-500/40 text-fuchsia-600 dark:text-fuchsia-300">
+                Flip Round
+              </span>
+            )}
             {c.status === "in_court" && (
-              <CountdownChip to={c.verdictLockAt ?? c.closesAt} prefix="Locks in" />
+              <CountdownChip to={c.verdictLockAt ?? c.closesAt} prefix={c.isFlipRound ? "Flip locks in" : "Locks in"} />
             )}
           </div>
 

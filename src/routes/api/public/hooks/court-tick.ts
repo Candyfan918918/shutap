@@ -14,26 +14,42 @@ export const Route = createFileRoute("/api/public/hooks/court-tick")({
         const provided = request.headers.get("x-hook-secret");
         if (provided !== expected) return new Response("Forbidden", { status: 403 });
 
-        const regions: Array<{ scope: "world" | "country"; code: string; label: string }> = [
-          { scope: "world", code: "WORLD", label: "World" },
-          { scope: "country", code: "US", label: "🇺🇸 US" },
-          { scope: "country", code: "GB", label: "🇬🇧 UK" },
-          { scope: "country", code: "CA", label: "🇨🇦 Canada" },
-          { scope: "country", code: "AU", label: "🇦🇺 Australia" },
-          { scope: "country", code: "JP", label: "🇯🇵 Japan" },
-          { scope: "country", code: "IN", label: "🇮🇳 India" },
+        const regions: Array<{ scope: "world" | "country" | "city"; code: string; label: string; cap: number }> = [
+          { scope: "world", code: "WORLD", label: "World", cap: 5 },
+          { scope: "country", code: "US", label: "🇺🇸 US", cap: 3 },
+          { scope: "country", code: "GB", label: "🇬🇧 UK", cap: 3 },
+          { scope: "country", code: "CA", label: "🇨🇦 Canada", cap: 3 },
+          { scope: "country", code: "AU", label: "🇦🇺 Australia", cap: 3 },
+          { scope: "country", code: "JP", label: "🇯🇵 Japan", cap: 3 },
+          { scope: "country", code: "IN", label: "🇮🇳 India", cap: 3 },
         ];
+
+        // City courts come from the admin-managed table — only the active ones.
+        const { data: cityCourts } = await supabaseAdmin
+          .from("city_courts")
+          .select("code, label, nomination_cap, active")
+          .eq("active", true);
+        for (const cc of (cityCourts ?? []) as any[]) {
+          regions.push({
+            scope: "city",
+            code: cc.code,
+            label: cc.label,
+            cap: Math.max(0, cc.nomination_cap ?? 3),
+          });
+        }
 
         let nominated = 0;
         for (const r of regions) {
+          if (r.cap <= 0) continue;
           const { data, error } = await supabaseAdmin.rpc("nominate_court_cases", {
             _scope: r.scope,
             _region_code: r.code,
             _region_label: r.label,
-            _limit: r.scope === "world" ? 5 : 3,
+            _limit: r.cap,
           });
           if (!error && typeof data === "number") nominated += data;
         }
+
 
         const { data: promoted } = await supabaseAdmin.rpc("promote_court_cases");
         const { data: finalized } = await supabaseAdmin.rpc("finalize_court_cases");

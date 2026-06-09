@@ -20,7 +20,9 @@ export type CourtStatus =
   | "in_court"
   | "judgment_pending"
   | "decided"
-  | "legendary";
+  | "legendary"
+  | "paused"
+  | "rejected";
 
 export type CourtTier = "city" | "regional" | "national" | "world";
 
@@ -42,6 +44,10 @@ export interface CourtCase {
   benchVerdictLine: string | null;
   finalJudgment: string | null;
   engagementScore: number;
+  isFlipRound: boolean;
+  flipWindowClosesAt: string | null;
+  preFlipVerdict: string | null;
+  flipRoundCount: number;
   post: {
     id: string;
     title: string;
@@ -60,6 +66,7 @@ export interface CourtCase {
   } | null;
   verdict: { counts: VerdictCounts; total: number };
 }
+
 
 export interface ViewerRegion {
   country: string | null;
@@ -309,6 +316,10 @@ async function attachPostsAndVerdicts(
     benchVerdictLine: (c.bench_verdict_line as string | null) ?? null,
     finalJudgment: (c.final_judgment as string | null) ?? null,
     engagementScore: (c.engagement_score as number) ?? 0,
+    isFlipRound: !!(c as any).is_flip_round,
+    flipWindowClosesAt: ((c as any).flip_window_closes_at as string | null) ?? null,
+    preFlipVerdict: ((c as any).pre_flip_verdict as string | null) ?? null,
+    flipRoundCount: ((c as any).flip_round_count as number) ?? 0,
     post: postMap.get(c.post_id as string) ?? null,
     verdict: {
       counts: tally.get(c.post_id as string) ?? emptyCounts(),
@@ -493,7 +504,10 @@ const STATUS_RANK: Record<CourtStatus, number> = {
   legendary: 2,
   decided: 3,
   nominated: 4,
+  paused: 5,
+  rejected: 6,
 };
+
 
 export interface FeaturedCase {
   case: CourtCase;
