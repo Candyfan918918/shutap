@@ -27,8 +27,8 @@
   /* Pink — logo "ap" + eye gradient */
   --c-pink:       #e0508a;
   --c-pink-soft:  #ffd0e8;
-  --c-pink-mid:   #f060a0;
-  --c-pink-deep:  #880040;
+  --c-pink-mid:   #ffd0e8;
+  --c-pink-deep:  #e0508a;
 
   /* Supporting accents */
   --c-teal:   #1a9e82;
@@ -113,8 +113,8 @@
   --c-text-3: #6a5868;
   --c-pink:      #f090b8;
   --c-pink-soft: #4a1030;
-  --c-pink-mid:  #f060a0;
-  --c-pink-deep: #ffd0e8;
+  --c-pink-mid:  #ffd0e8;
+  --c-pink-deep: #f090b8;
   --accent: var(--c-pink-soft);
   --accent-foreground: var(--c-pink-deep);
 }
