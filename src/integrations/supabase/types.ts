@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      alias_pool_creatures: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      alias_pool_emotions: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      alias_pool_nationalities: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -966,6 +1002,7 @@ export type Database = {
           bio: string | null
           city: string | null
           city_label: string | null
+          counsel_count: number
           country: string | null
           country_code: string | null
           created_at: string
@@ -977,8 +1014,12 @@ export type Database = {
           emoji: string | null
           emotion: string | null
           emotional_embedding: string | null
+          empathy_score: number
           handle: string
           id: string
+          juror_tier: string | null
+          juror_title: string | null
+          justice_score: number
           last_seen_at: string | null
           locale: string
           nationality: string | null
@@ -987,11 +1028,13 @@ export type Database = {
           onboarded_at: string | null
           phone: string | null
           phone_verified: boolean
+          prediction_score: number
           privacy: Json
           region: string | null
           reroll_used: boolean
           updated_at: string
           vibe: string | null
+          wisdom_score: number
         }
         Insert: {
           age_verified?: boolean
@@ -1001,6 +1044,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           city_label?: string | null
+          counsel_count?: number
           country?: string | null
           country_code?: string | null
           created_at?: string
@@ -1012,8 +1056,12 @@ export type Database = {
           emoji?: string | null
           emotion?: string | null
           emotional_embedding?: string | null
+          empathy_score?: number
           handle: string
           id: string
+          juror_tier?: string | null
+          juror_title?: string | null
+          justice_score?: number
           last_seen_at?: string | null
           locale?: string
           nationality?: string | null
@@ -1022,11 +1070,13 @@ export type Database = {
           onboarded_at?: string | null
           phone?: string | null
           phone_verified?: boolean
+          prediction_score?: number
           privacy?: Json
           region?: string | null
           reroll_used?: boolean
           updated_at?: string
           vibe?: string | null
+          wisdom_score?: number
         }
         Update: {
           age_verified?: boolean
@@ -1036,6 +1086,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           city_label?: string | null
+          counsel_count?: number
           country?: string | null
           country_code?: string | null
           created_at?: string
@@ -1047,8 +1098,12 @@ export type Database = {
           emoji?: string | null
           emotion?: string | null
           emotional_embedding?: string | null
+          empathy_score?: number
           handle?: string
           id?: string
+          juror_tier?: string | null
+          juror_title?: string | null
+          justice_score?: number
           last_seen_at?: string | null
           locale?: string
           nationality?: string | null
@@ -1057,11 +1112,13 @@ export type Database = {
           onboarded_at?: string | null
           phone?: string | null
           phone_verified?: boolean
+          prediction_score?: number
           privacy?: Json
           region?: string | null
           reroll_used?: boolean
           updated_at?: string
           vibe?: string | null
+          wisdom_score?: number
         }
         Relationships: []
       }
