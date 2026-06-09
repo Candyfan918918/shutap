@@ -8,7 +8,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getFeaturedCourtCase,
   getGlobalVerdictCount,
+  getTeaserFeed,
+  getOpenCaseCount,
   type FeaturedCase,
+  type TeaserPost,
 } from "@/lib/court.functions";
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,6 +80,8 @@ function AnonymousCourt() {
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
   const fetchGlobal = useServerFn(getGlobalVerdictCount);
+  const fetchTeaser = useServerFn(getTeaserFeed);
+  const fetchOpenCases = useServerFn(getOpenCaseCount);
 
   const featuredQ = useQuery({
     queryKey: ["anon-court", "featured"],
@@ -88,6 +93,18 @@ function AnonymousCourt() {
     queryKey: ["anon-court", "global-verdicts"],
     queryFn: () => fetchGlobal(),
     refetchInterval: 5_000,
+    staleTime: 0,
+  });
+  const teaserQ = useQuery({
+    queryKey: ["anon-court", "teaser", featuredQ.data?.case.post?.id ?? "none"],
+    queryFn: () => fetchTeaser({ data: { excludePostId: featuredQ.data?.case.post?.id } }),
+    enabled: featuredQ.isSuccess,
+    staleTime: 60_000,
+  });
+  const openCasesQ = useQuery({
+    queryKey: ["anon-court", "open-cases"],
+    queryFn: () => fetchOpenCases(),
+    refetchInterval: 30_000,
     staleTime: 0,
   });
 
@@ -105,6 +122,13 @@ function AnonymousCourt() {
         ) : (
           <CourtInRecess />
         )}
+        <TeaserFeedSection
+          posts={teaserQ.data ?? []}
+          isLoading={teaserQ.isLoading}
+          openCases={openCasesQ.data?.count ?? 0}
+          onGate={gate}
+          excludePostId={featuredQ.data?.case.post?.id}
+        />
         <BottomCTA onGate={gate} />
       </main>
 
@@ -659,3 +683,154 @@ function BottomCTA({ onGate }: { onGate: (intent: string) => void }) {
     </section>
   );
 }
+
+// ───────────────────────── Teaser Feed ─────────────────────────
+
+function TeaserFeedSection({
+  posts,
+  isLoading,
+  openCases,
+  onGate,
+}: {
+  posts: TeaserPost[];
+  isLoading: boolean;
+  openCases: number;
+  onGate: (intent: string) => void;
+  excludePostId?: string;
+}) {
+  if (isLoading) {
+    return (
+      <section className="space-y-4">
+        <p className="text-sm font-semibold text-muted-foreground">
+          While you were reading, the court was busy.
+        </p>
+        <div className="space-y-4">
+          <TeaserSkeleton />
+          <TeaserSkeleton />
+          <TeaserSkeleton />
+        </div>
+      </section>
+    );
+  }
+
+  if (posts.length === 0) return null;
+
+  return (
+    <section className="space-y-5 pt-4">
+      <p className="text-sm font-semibold text-muted-foreground tracking-tight">
+        While you were reading, the court was busy.
+      </p>
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <TeaserCard key={post.id} post={post} onGate={() => onGate("teaser")} />
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 text-center space-y-3">
+        <p className="text-sm font-medium text-foreground">
+          <span className="tabular-nums font-bold">{openCases.toLocaleString()}</span>{" "}
+          cases open right now. Every one has a verdict forming.
+        </p>
+        <button
+          onClick={() => onGate("claim")}
+          className="text-sm font-semibold text-primary hover:underline"
+        >
+          Claim your identity to access them all →
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function TeaserSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+      <div className="h-5 w-1/3 bg-surface-elevated rounded animate-pulse" />
+      <div className="h-4 w-3/4 bg-surface-elevated rounded animate-pulse" />
+      <div className="h-16 bg-surface-elevated rounded animate-pulse" />
+    </div>
+  );
+}
+
+function TeaserCard({
+  post,
+  onGate,
+}: {
+  post: TeaserPost;
+  onGate: () => void;
+}) {
+  const categoryLabel = (post.scoreCategory ?? "Relationship").replace(/_/g, " ");
+  const wordLimit = 50;
+  const words = post.storyText?.split(/\s+/) ?? [];
+  const snippet = words.slice(0, wordLimit).join(" ");
+  const hasMore = words.length > wordLimit;
+
+  return (
+    <button
+      onClick={onGate}
+      className="w-full text-left rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/40 transition group"
+    >
+      <div className="p-4 space-y-3">
+        {/* Author + badges */}
+        <div className="flex flex-wrap items-center gap-2">
+          {post.author && (
+            <AliasPill
+              handle={post.author.handle}
+              nickname={post.author.nickname}
+              avatarUrl={post.author.avatarUrl}
+            />
+          )}
+          <Pill>💔 {categoryLabel}</Pill>
+          {post.score != null && <Pill>🔥 {post.score} chaos</Pill>}
+        </div>
+
+        {/* Title */}
+        <h3 className="text-base sm:text-lg font-bold leading-tight text-balance">
+          {post.title}
+        </h3>
+
+        {/* Story snippet with fade */}
+        <div className="relative">
+          <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">
+            {snippet}
+            {hasMore ? "…" : ""}
+          </p>
+          {hasMore && (
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent" />
+          )}
+        </div>
+
+        {/* Equal verdict bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold">Live verdict</span>
+            <span className="text-muted-foreground">
+              — Join to see verdicts →
+            </span>
+          </div>
+          <div className="h-6 w-full rounded-full overflow-hidden flex border border-border bg-surface-elevated opacity-60">
+            {VERDICTS.map((v) => (
+              <div
+                key={v.kind}
+                style={{
+                  width: `${100 / VERDICTS.length}%`,
+                  background: v.color,
+                }}
+                className="h-full"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Engagement counts */}
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+          <span>❤️ {post.relateCount.toLocaleString()} felt this</span>
+          <span>💬 {post.commentCount.toLocaleString()}</span>
+          <span>📤 {post.shareCount.toLocaleString()}</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
