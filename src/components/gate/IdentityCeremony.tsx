@@ -1,13 +1,13 @@
 // Identity ceremony — the soft gate. The reels spin, the user verifies, the alias appears.
 // Nothing in the underlying page executes until the user claims an identity here.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import {
   generateAlias,
-  mockOtpVerify,
   verifyAge,
   claimAlias,
   type GeneratedAlias,
@@ -15,11 +15,10 @@ import {
 import { castVerdict } from "@/lib/posts/community.functions";
 import { reactToPost } from "@/lib/posts/engagement.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { markFirstSession } from "@/lib/firstSession";
+import { lovable } from "@/integrations/lovable";
 
 type Phase =
-  | "phone"
-  | "otp"
+  | "auth"
   | "dob"
   | "underage"
   | "spin"
@@ -29,25 +28,8 @@ type Phase =
 
 const EMOJI_OPTIONS = ["🦊", "🦉", "🐙", "🦋", "🌙", "⚡", "🌸", "🔥", "🎭", "👁", "🪞", "⚖️"];
 
-const COUNTRY_CODES = [
-  { code: "+1", label: "🇺🇸 +1" },
-  { code: "+44", label: "🇬🇧 +44" },
-  { code: "+33", label: "🇫🇷 +33" },
-  { code: "+49", label: "🇩🇪 +49" },
-  { code: "+34", label: "🇪🇸 +34" },
-  { code: "+39", label: "🇮🇹 +39" },
-  { code: "+61", label: "🇦🇺 +61" },
-  { code: "+81", label: "🇯🇵 +81" },
-  { code: "+82", label: "🇰🇷 +82" },
-  { code: "+86", label: "🇨🇳 +86" },
-  { code: "+91", label: "🇮🇳 +91" },
-  { code: "+55", label: "🇧🇷 +55" },
-  { code: "+52", label: "🇲🇽 +52" },
-  { code: "+62", label: "🇮🇩 +62" },
-  { code: "+63", label: "🇵🇭 +63" },
-  { code: "+971", label: "🇦🇪 +971" },
-  { code: "+65", label: "🇸🇬 +65" },
-];
+// Key used to resume the ceremony after an OAuth / email-link redirect.
+const RESUME_KEY = "md.gate.resume";
 
 // Simple click tone — Web Audio, no asset needed.
 function clickTone(hz: number) {
@@ -79,11 +61,9 @@ export function IdentityCeremony() {
 }
 
 function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () => void }) {
-  const [phase, setPhase] = useState<Phase>("phone");
-  const [countryCode, setCountryCode] = useState("+1");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("auth");
+  const [email, setEmail] = useState("");
+  const [authBusy, setAuthBusy] = useState<"idle" | "email" | "google" | "apple">("idle");
   const [dobMonth, setDobMonth] = useState<number>(1);
   const [dobYear, setDobYear] = useState<number>(new Date().getFullYear() - 25);
   const [alias, setAlias] = useState<GeneratedAlias | null>(null);
@@ -93,17 +73,21 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const [reelSpeed, setReelSpeed] = useState<"full" | "slow">("full");
   const [confirmingStep, setConfirmingStep] = useState<0 | 1 | 2>(0);
   const [busy, setBusy] = useState(false);
-  const fullPhone = useMemo(() => `${countryCode}${phoneNumber.replace(/[^0-9]/g, "")}`, [countryCode, phoneNumber]);
-  const phoneRef = useRef(fullPhone);
-  phoneRef.current = fullPhone;
 
   const fetchAlias = useServerFn(generateAlias);
-  const verifyOtp = useServerFn(mockOtpVerify);
   const submitAge = useServerFn(verifyAge);
   const claim = useServerFn(claimAlias);
   const sendVerdict = useServerFn(castVerdict);
   const sendReact = useServerFn(reactToPost);
   const qc = useQueryClient();
+
+  // If the user already has a session (e.g. they returned from OAuth and the
+  // gate was re-opened by the resume effect), skip straight to DOB.
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setPhase((p) => (p === "auth" ? "dob" : p));
+    });
+  }, []);
 
   // Kick off alias prefetch the moment the ceremony opens.
   useEffect(() => {
@@ -125,37 +109,64 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       } else if (action.type === "relate" && action.entityId) {
         await sendReact({ data: { postId: action.entityId, kind: "been_there" } });
       }
-      // Other pending types (comment/teaser/hof) — the page will refresh with
-      // the user signed in and show the gated UI unlocked. The draft, when
-      // present, will be picked up by the comment input via the gate store.
       qc.invalidateQueries();
     } catch {/* silent — user is signed in regardless */}
   };
 
-  // ── Phone submit
-  const onPhoneSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (phoneNumber.replace(/[^0-9]/g, "").length < 6) return;
-    setPhase("otp");
+  // ── Stash pending action so we can resume after an OAuth / email redirect.
+  const stashPending = () => {
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify(pending));
+    } catch {/* ignore */}
   };
 
-  // ── OTP submit
-  const onOtpSubmit = async (codeValue?: string) => {
-    const code = (codeValue ?? otp).trim();
-    if (!/^\d{6}$/.test(code)) return;
-    setOtpError(null);
-    setBusy(true);
+  // ── Email magic link
+  const onEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (authBusy !== "idle" || !email.includes("@")) return;
+    setAuthBusy("email");
+    stashPending();
     try {
-      const { email, password } = await verifyOtp({ data: { phone: fullPhone, code } });
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message);
-      setPhase("dob");
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: window.location.origin + window.location.pathname,
+        },
+      });
+      if (error) throw error;
+      toast.success("Check your inbox — tap the link to continue.");
+      setAuthBusy("idle");
     } catch {
-      setOtpError("Code incorrect — try again.");
-    } finally {
-      setBusy(false);
+      toast.error("Couldn't send the link. Try again.");
+      sessionStorage.removeItem(RESUME_KEY);
+      setAuthBusy("idle");
     }
   };
+
+  // ── OAuth (Google / Apple)
+  const onOauth = async (provider: "google" | "apple") => {
+    if (authBusy !== "idle") return;
+    setAuthBusy(provider);
+    stashPending();
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin + window.location.pathname,
+      });
+      if (result.error) {
+        toast.error("Sign-in failed.");
+        sessionStorage.removeItem(RESUME_KEY);
+        setAuthBusy("idle");
+      }
+      // On redirect, the browser leaves — state doesn't matter.
+    } catch {
+      toast.error("Sign-in failed.");
+      sessionStorage.removeItem(RESUME_KEY);
+      setAuthBusy("idle");
+    }
+  };
+
+
 
   // ── DOB submit
   const onAgeSubmit = async () => {
@@ -239,20 +250,13 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
           creature: alias.creature,
           emoji,
           rerollUsed,
-          phone: fullPhone,
+
         },
       });
       setConfirmingStep(1);
       await new Promise((r) => setTimeout(r, 900));
       setConfirmingStep(2);
       await new Promise((r) => setTimeout(r, 900));
-      // Mark the first session so the home page swaps to the curated
-      // welcome stream on the next render.
-      markFirstSession({
-        aliasLine: `${emoji} ${alias.nationality} ${alias.emotion} ${alias.creature}`,
-        entryPostId: pending.entityId,
-        entryAction: pending.type,
-      });
       await replay(pending);
       setPhase("done");
       // Slide away.
@@ -310,26 +314,17 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
         <AliasLine phase={phase} alias={alias} locks={locks} />
 
         <div className="p-5 pt-2 space-y-3">
-          {phase === "phone" && (
-            <PhoneCard
-              countryCode={countryCode}
-              onCountryChange={setCountryCode}
-              phoneNumber={phoneNumber}
-              onPhoneChange={setPhoneNumber}
-              onSubmit={onPhoneSubmit}
+          {phase === "auth" && (
+            <AuthCard
+              email={email}
+              onEmailChange={setEmail}
+              onEmailSubmit={onEmail}
+              onOauth={onOauth}
+              busy={authBusy}
             />
           )}
 
-          {phase === "otp" && (
-            <OtpCard
-              value={otp}
-              onChange={setOtp}
-              onSubmit={onOtpSubmit}
-              error={otpError}
-              busy={busy}
-              phone={fullPhone}
-            />
-          )}
+
 
           {phase === "dob" && (
             <DobCard
@@ -366,7 +361,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
 
 function BenchLine({ phase }: { phase: Phase }) {
   const text =
-    phase === "phone" || phase === "otp"
+    phase === "auth"
       ? "The court is assigning your identity."
       : phase === "dob"
         ? "The court asks one last thing."
@@ -399,7 +394,7 @@ function SlotMachine({
   phase: Phase;
 }) {
   const pools = alias?.reelPools ?? { nationality: ["…"], emotion: ["…"], creature: ["…"] };
-  const dimmed = phase === "phone" || phase === "otp" || phase === "dob";
+  const dimmed = phase === "auth" || phase === "dob";
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
@@ -470,108 +465,71 @@ function AliasLine({
   );
 }
 
-// ── Phone card
+// ── Auth card (email magic link + Google + Apple)
 
-function PhoneCard({
-  countryCode,
-  onCountryChange,
-  phoneNumber,
-  onPhoneChange,
-  onSubmit,
-}: {
-  countryCode: string;
-  onCountryChange: (v: string) => void;
-  phoneNumber: string;
-  onPhoneChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}) {
-  return (
-    <form
-      onSubmit={onSubmit}
-      className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3"
-    >
-      <p className="text-sm font-semibold">To claim your identity, verify your number.</p>
-      <div className="flex gap-2">
-        <select
-          value={countryCode}
-          onChange={(e) => onCountryChange(e.target.value)}
-          className="rounded-lg bg-background border border-border px-2 py-2 text-sm"
-        >
-          {COUNTRY_CODES.map((c) => (
-            <option key={c.code} value={c.code}>{c.label}</option>
-          ))}
-        </select>
-        <input
-          type="tel"
-          inputMode="numeric"
-          value={phoneNumber}
-          onChange={(e) => onPhoneChange(e.target.value.replace(/[^0-9 \-]/g, ""))}
-          placeholder="555 123 4567"
-          maxLength={16}
-          className="flex-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={phoneNumber.replace(/[^0-9]/g, "").length < 6}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
-      >
-        Send code →
-      </button>
-    </form>
-  );
-}
-
-// ── OTP card
-
-function OtpCard({
-  value,
-  onChange,
-  onSubmit,
-  error,
+function AuthCard({
+  email,
+  onEmailChange,
+  onEmailSubmit,
+  onOauth,
   busy,
-  phone,
 }: {
-  value: string;
-  onChange: (v: string) => void;
-  onSubmit: (codeValue?: string) => void;
-  error: string | null;
-  busy: boolean;
-  phone: string;
+  email: string;
+  onEmailChange: (v: string) => void;
+  onEmailSubmit: (e: React.FormEvent) => void;
+  onOauth: (provider: "google" | "apple") => void;
+  busy: "idle" | "email" | "google" | "apple";
 }) {
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-semibold">
-        Code sent to <span className="text-muted-foreground font-normal">{phone}</span>
-      </p>
-      <p className="text-[11px] text-muted-foreground">
-        Demo mode — any 6 digits will work.
-      </p>
-      <input
-        type="text"
-        inputMode="numeric"
-        maxLength={6}
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
-          onChange(v);
-          if (v.length === 6) onSubmit(v);
-        }}
-        placeholder="• • • • • •"
-        className="w-full text-center tracking-[0.5em] text-lg font-bold rounded-lg bg-background border border-border px-3 py-3"
-        autoFocus
-      />
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      <button
-        onClick={() => onSubmit()}
-        disabled={value.length !== 6 || busy}
-        className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
-      >
-        {busy ? "Verifying…" : "Verify →"}
-      </button>
+      <p className="text-sm font-semibold">To claim your identity, sign in.</p>
+
+      <form onSubmit={onEmailSubmit} className="space-y-2">
+        <input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+          placeholder="you@example.com"
+          className="w-full rounded-lg bg-background border border-border px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+        />
+        <button
+          type="submit"
+          disabled={busy !== "idle" || !email.includes("@")}
+          className="w-full rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "email" ? "Sending…" : "Email me a link →"}
+        </button>
+      </form>
+
+      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+        <div className="flex-1 h-px bg-border" />
+        <span>or</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
+      <div className="space-y-2">
+        <button
+          onClick={() => onOauth("google")}
+          disabled={busy !== "idle"}
+          className="w-full rounded-full bg-background border border-border font-semibold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "google" ? "…" : "🔵  Continue with Google"}
+        </button>
+        <button
+          onClick={() => onOauth("apple")}
+          disabled={busy !== "idle"}
+          className="w-full rounded-full bg-background border border-border font-semibold text-sm py-2.5 disabled:opacity-50"
+        >
+          {busy === "apple" ? "…" : "🍎  Continue with Apple"}
+        </button>
+      </div>
     </div>
   );
 }
+
 
 // ── DOB card
 

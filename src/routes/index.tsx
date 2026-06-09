@@ -23,8 +23,6 @@ import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import { IdentityCeremony } from "@/components/gate/IdentityCeremony";
-import { FirstSessionStream } from "@/components/court/FirstSessionStream";
-import { readFirstSession, type FirstSessionMeta } from "@/lib/firstSession";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
 
@@ -76,28 +74,30 @@ const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
 function AnonymousCourt() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const [firstSession, setFirstSessionState] = useState<FirstSessionMeta | null>(null);
   const enqueue = useGateStore((s) => s.enqueue);
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
+    const resumeGate = () => {
+      try {
+        const raw = sessionStorage.getItem("md.gate.resume");
+        if (!raw) return;
+        sessionStorage.removeItem("md.gate.resume");
+        const pending = JSON.parse(raw) as PendingAction;
+        if (pending && typeof pending.type === "string") enqueue(pending);
+      } catch {/* ignore */}
+    };
     supabase.auth.getSession().then(({ data }) => {
-      if (active) setAuthed(!!data.session);
+      if (!active) return;
+      setAuthed(!!data.session);
+      if (data.session) resumeGate();
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
+      if (session) resumeGate();
     });
-    // Check for first-session meta set by the identity ceremony / welcome page.
-    setFirstSessionState(readFirstSession());
     return () => { active = false; sub.subscription.unsubscribe(); };
-  }, []);
-
-  // When the gate closes after a successful claim, refresh first-session state.
-  useEffect(() => {
-    if (!gateOpen) {
-      setFirstSessionState(readFirstSession());
-    }
-  }, [gateOpen]);
+  }, [enqueue]);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
@@ -184,12 +184,6 @@ function AnonymousCourt() {
         className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8"
       >
         <HeroIntro />
-        {authed && firstSession && (
-          <FirstSessionStream
-            meta={firstSession}
-            onDone={() => setFirstSessionState(null)}
-          />
-        )}
         {featuredQ.isLoading ? (
           <CaseSkeleton />
         ) : featuredQ.data ? (
