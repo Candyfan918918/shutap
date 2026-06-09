@@ -26,7 +26,7 @@ function ScoreBadge({ score, small = false }: { score: number; small?: boolean }
   );
 }
 
-export function FeedCard({ item, index, court }: { item: FeedItem; index: number; court?: CourtRibbon }) {
+function FeedCardImpl({ item, index, court }: { item: FeedItem; index: number; court?: CourtRibbon }) {
   const tall = index % 3 === 1;
   const location = [item.cityLabel, item.countryCode].filter(Boolean).join(" · ");
   return (
