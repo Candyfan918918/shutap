@@ -80,6 +80,8 @@ function AnonymousCourt() {
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
   const fetchGlobal = useServerFn(getGlobalVerdictCount);
+  const fetchTeaser = useServerFn(getTeaserFeed);
+  const fetchOpenCases = useServerFn(getOpenCaseCount);
 
   const featuredQ = useQuery({
     queryKey: ["anon-court", "featured"],
@@ -91,6 +93,18 @@ function AnonymousCourt() {
     queryKey: ["anon-court", "global-verdicts"],
     queryFn: () => fetchGlobal(),
     refetchInterval: 5_000,
+    staleTime: 0,
+  });
+  const teaserQ = useQuery({
+    queryKey: ["anon-court", "teaser", featuredQ.data?.case.post?.id ?? "none"],
+    queryFn: () => fetchTeaser({ data: { excludePostId: featuredQ.data?.case.post?.id } }),
+    enabled: featuredQ.isSuccess,
+    staleTime: 60_000,
+  });
+  const openCasesQ = useQuery({
+    queryKey: ["anon-court", "open-cases"],
+    queryFn: () => fetchOpenCases(),
+    refetchInterval: 30_000,
     staleTime: 0,
   });
 
