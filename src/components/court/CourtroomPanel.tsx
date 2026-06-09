@@ -138,6 +138,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickVote(k: VerdictKey) {
     if (submitted) return;
+    if (!requireAuth()) return;
     setMyVote(k);
     if (fillerSeats.length === 0) {
       const init = JUROR_INITIALS[Math.floor(Math.random() * JUROR_INITIALS.length)];
@@ -147,11 +148,13 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickJudgment(k: JudgmentKey) {
     if (submitted) return;
+    if (!requireAuth()) return;
     setMyJudgment(k);
   }
 
   async function onSubmit() {
     if (!myVote || !myJudgment || submitted) return;
+    if (!requireAuth()) return;
     setSubmitState("submitting");
     setErrorMsg(null);
     try {
@@ -161,14 +164,14 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       setSubmitted(true);
       setSubmitState("done");
     } catch (e: any) {
-      // Likely age-gate / unauth — leave UI as-submitted-locally with a soft notice.
       setSubmitted(true);
       setSubmitState("error");
-      setErrorMsg(e?.message ?? "Verdict not recorded — sign in required.");
+      setErrorMsg(e?.message ?? "Verdict not recorded.");
     }
   }
 
   function submitComment() {
+    if (!requireAuth()) return;
     const t = draft.trim();
     if (!t) return;
     setComments((cs) => [
@@ -179,6 +182,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   async function shareCase() {
+    if (!requireAuth()) return;
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
@@ -195,6 +199,11 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
       setShareLabel("✓ Link copied");
       setTimeout(() => setShareLabel("🔗 Share this case"), 2000);
     } catch { /* ignore */ }
+  }
+
+  function toggleLike() {
+    if (!requireAuth()) return;
+    setLiked((v) => !v);
   }
 
   const benchInsight =
