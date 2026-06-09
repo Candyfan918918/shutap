@@ -32,7 +32,7 @@ function topVerdict(c: CourtCase): { kind: string; pct: number } | null {
   return { kind: k, pct: Math.round((n / c.verdict.total) * 100) };
 }
 
-export function CourtCaseCard({
+function CourtCaseCardImpl({
   c,
   size = "md",
   index = 0,
