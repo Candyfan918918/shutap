@@ -24,11 +24,11 @@
   --c-text-2: #7a6e78;
   --c-text-3: #b0a4ae;
 
-  /* Pink — logo "ap" + eye gradient */
-  --c-pink:       #e0508a;
+  /* Pink — soft only. Mid and deep saturations are banned. */
+  --c-pink:       #ffd0e8;
   --c-pink-soft:  #ffd0e8;
   --c-pink-mid:   #ffd0e8;
-  --c-pink-deep:  #e0508a;
+  --c-pink-deep:  #ffd0e8;
 
   /* Supporting accents */
   --c-teal:   #1a9e82;
