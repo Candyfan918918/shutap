@@ -47,9 +47,9 @@ export async function writeWisdomGraphForPost(args: {
       .maybeSingle(),
     supabaseAdmin
       .from("story_tags")
-      .select("category, conflict_type, severity, children_involved, financial_entanglement")
-      .eq("post_id", postId)
-      .maybeSingle(),
+      .select("tag, source, confidence")
+      .eq("story_id", postId)
+      .limit(20),
     supabaseAdmin
       .from("court_cases")
       .select("region_label, final_verdict, current_tier")

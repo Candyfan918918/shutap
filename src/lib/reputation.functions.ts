@@ -66,7 +66,7 @@ export async function recordReputationEvent(args: {
       supabaseAdmin
         .from("post_comments")
         .select("like_count, status, deleted_at")
-        .eq("author_id", args.userId),
+        .eq("user_id", args.userId),
       supabaseAdmin
         .from("predictions")
         .select("id, post_id")
