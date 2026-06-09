@@ -46,7 +46,7 @@ export async function recordReputationEvent(args: {
     event_type: args.eventType,
     post_id: args.postId ?? null,
     case_id: args.caseId ?? null,
-    delta: args.delta ?? {},
+    delta: (args.delta ?? {}) as never,
   });
 
   // Pull primitive signals in parallel.
