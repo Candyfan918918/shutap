@@ -101,6 +101,39 @@ export const Route = createFileRoute("/api/public/hooks/court-tick")({
                 })
                 .eq("id", c.id);
               bench_lines += 1;
+
+              // Phase 5: recalc reputation for plaintiff + voters on this case.
+              try {
+                const { recordReputationEvent } = await import(
+                  "@/lib/reputation.functions"
+                );
+                if (post?.author_id) {
+                  await recordReputationEvent({
+                    userId: post.author_id,
+                    eventType: "court_locked_plaintiff",
+                    postId: c.post_id,
+                    caseId: c.id,
+                  });
+                }
+                const { data: voters } = await supabaseAdmin
+                  .from("post_verdict_votes")
+                  .select("user_id")
+                  .eq("post_id", c.post_id);
+                const seen = new Set<string>();
+                for (const v of (voters ?? []) as any[]) {
+                  if (!v.user_id || seen.has(v.user_id)) continue;
+                  if (v.user_id === post?.author_id) continue;
+                  seen.add(v.user_id);
+                  await recordReputationEvent({
+                    userId: v.user_id,
+                    eventType: "court_locked_voter",
+                    postId: c.post_id,
+                    caseId: c.id,
+                  });
+                }
+              } catch {
+                /* reputation can retry next tick */
+              }
             } catch {
               /* skip this case, try the rest */
             }
