@@ -74,6 +74,13 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const sendReact = useServerFn(reactToPost);
   const qc = useQueryClient();
 
+  useEffect(() => {
+    if (phase !== "done") return;
+    void replay(pending).finally(() => {
+      setTimeout(() => onClose(), 100);
+    });
+  }, [onClose, pending, phase]);
+
   // Detect existing session — skip the auth card if already signed in.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
