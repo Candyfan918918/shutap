@@ -22,7 +22,7 @@ import {
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useGateStore, type PendingAction } from "@/stores/gate";
-import { IdentityCeremony } from "@/components/gate/IdentityCeremony";
+import { IdentityCeremony, RESUME_KEY } from "@/components/gate/IdentityCeremony";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
 
@@ -78,23 +78,24 @@ function AnonymousCourt() {
   const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
-    const resumeGate = () => {
+    const tryResume = (hasSession: boolean) => {
+      if (!hasSession) return;
       try {
-        const raw = sessionStorage.getItem("md.gate.resume");
+        const raw = sessionStorage.getItem(RESUME_KEY);
         if (!raw) return;
-        sessionStorage.removeItem("md.gate.resume");
-        const pending = JSON.parse(raw) as PendingAction;
-        if (pending && typeof pending.type === "string") enqueue(pending);
-      } catch {/* ignore */}
+        const parsed = JSON.parse(raw) as PendingAction;
+        sessionStorage.removeItem(RESUME_KEY);
+        enqueue(parsed);
+      } catch {/* silent */}
     };
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
       setAuthed(!!data.session);
-      if (data.session) resumeGate();
+      tryResume(!!data.session);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setAuthed(!!session);
-      if (session) resumeGate();
+      tryResume(!!session);
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, [enqueue]);
