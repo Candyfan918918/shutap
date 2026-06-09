@@ -308,7 +308,7 @@ function HeroIntro() {
         👑 Relationship Court™
       </motion.h1>
       <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-        Where the <span className="text-foreground font-medium">internet</span> decides.
+        Where the <span className="text-foreground font-medium">human</span> decides.
       </p>
     </section>
   );
