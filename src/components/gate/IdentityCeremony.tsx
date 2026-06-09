@@ -102,14 +102,14 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   };
 
   const onAgeSubmit = async () => {
-    const dob = `${dobYear}-${String(dobMonth).padStart(2, "0")}-15`;
     setBusy(true);
     try {
-      const res = await submitAge({ data: { dob } });
-      if (!res.ageOk) { setPhase("underage"); return; }
+      const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      if (res.error || !res.data?.age_verified) { setPhase("underage"); return; }
       setPhase("spin");
     } finally { setBusy(false); }
   };
+
 
   // ── Spin sequence: full speed, then lock left/middle/right
   useEffect(() => {
