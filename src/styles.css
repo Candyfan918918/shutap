@@ -233,9 +233,8 @@
 }
 
 @utility bg-grain {
-  background-image:
-    radial-gradient(circle at 15% 0%, color-mix(in oklab, var(--c-pink-soft) 50%, transparent), transparent 55%),
-    radial-gradient(circle at 90% 10%, color-mix(in oklab, var(--c-pink-soft) 35%, transparent), transparent 50%);
+  /* Logo-matched system bans gradients. Flat warm cream surface only. */
+  background-color: var(--c-surface);
 }
 
 @layer utilities {
