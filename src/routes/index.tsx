@@ -143,7 +143,9 @@ function AnonymousCourt() {
           onGate={gate}
           excludePostId={featuredQ.data?.case.post?.id}
         />
-        <BottomCTA onGate={gate} />
+        <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gate} />
+        <FinalCTA onGate={gate} />
+
       </main>
 
       <footer className="border-t border-border">
