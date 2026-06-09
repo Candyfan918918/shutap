@@ -100,9 +100,8 @@ function WelcomePage() {
         setPhase("underage");
         return;
       }
-      // Call /alias-generate BEFORE the slot machine mounts
-      const fresh = await fetchAlias({ data: {} });
-      setAlias(fresh);
+      setAlias(null);
+      setLocks({ n: false, e: false, c: false });
       setPhase("spin");
     } catch {
       toast.error("Couldn't verify. Try again.");
@@ -115,7 +114,20 @@ function WelcomePage() {
   // Each lock: 1.0→1.06→1.0 over 200ms + click 440/460/480Hz @ vol 0.3.
   const lockTimers = useRef<number[]>([]);
   useEffect(() => {
-    if (phase !== "spin" || !alias) return;
+    if (phase !== "spin") return;
+    if (!alias) {
+      void fetchAlias({
+        data: {
+          countryCode: identity?.countryCode ?? undefined,
+        },
+      })
+        .then((fresh) => setAlias(fresh))
+        .catch(() => {
+          toast.error("Couldn't assign your alias. Try again.");
+          setPhase("dob");
+        });
+      return;
+    }
     setLocks({ n: false, e: false, c: false });
     lockTimers.current.forEach((id) => window.clearTimeout(id));
     const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440, 0.3); }, 2000);
@@ -124,7 +136,7 @@ function WelcomePage() {
     const t4 = window.setTimeout(() => setPhase("reveal"), 2800);
     lockTimers.current = [t1, t2, t3, t4];
     return () => { lockTimers.current.forEach((id) => window.clearTimeout(id)); };
-  }, [phase, alias]);
+  }, [phase, alias, fetchAlias, identity?.countryCode]);
 
   const onReroll = async () => {
     if (rerollUsed) return;
@@ -132,7 +144,11 @@ function WelcomePage() {
     setAlias(null);
     setLocks({ n: false, e: false, c: false });
     setPhase("spin");
-    const fresh = await fetchAlias({ data: {} });
+    const fresh = await fetchAlias({
+      data: {
+        countryCode: identity?.countryCode ?? undefined,
+      },
+    });
     setAlias(fresh);
   };
 
