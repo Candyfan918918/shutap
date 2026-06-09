@@ -1,3 +1,5 @@
+// /welcome — the alias reveal flow after auth. Order: ensure session → DOB → spin → reveal.
+// The DOB step calls /auth-age-gate (server fn) before alias generation.
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
@@ -7,8 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { I18nProvider, useT } from "@/lib/i18n/context";
 import { detectBrowserLocale, isLocale, type Locale } from "@/lib/i18n";
 import { finalizeIdentity, type IdentityPayload } from "@/lib/identity.functions";
-import { generateAlias, type GeneratedAlias } from "@/lib/alias.functions";
+import { generateAlias, claimAlias, type GeneratedAlias } from "@/lib/alias.functions";
+import { verifyAge } from "@/lib/auth-age-gate.functions";
 import { AvatarSvg } from "@/components/identity/AvatarSvg";
+import { SlotReel, clickTone } from "@/components/identity/SlotReel";
+import { UnderageBlock } from "@/components/gate/UnderageBlock";
+
+const EMOJI_OPTIONS = ["🦊", "🦉", "🐙", "🦋", "🌙", "⚡", "🌸", "🔥", "🎭", "👁", "🪞", "⚖️"];
+
+type Phase = "loading" | "dob" | "underage" | "spin" | "reveal" | "saving" | "done";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
@@ -37,12 +46,20 @@ function WelcomePage() {
   const { redirect: redirectSearch } = Route.useSearch();
   const finalize = useServerFn(finalizeIdentity);
   const fetchAlias = useServerFn(generateAlias);
+  const submitAge = useServerFn(verifyAge);
+  const claim = useServerFn(claimAlias);
 
+  const [phase, setPhase] = useState<Phase>("loading");
   const [identity, setIdentity] = useState<IdentityPayload | null>(null);
   const [alias, setAlias] = useState<GeneratedAlias | null>(null);
+  const [rerollUsed, setRerollUsed] = useState(false);
+  const [emoji, setEmoji] = useState<string>(EMOJI_OPTIONS[0]);
   const [locks, setLocks] = useState({ n: false, e: false, c: false });
-  const [phase, setPhase] = useState<"spin" | "reveal">("spin");
+  const [busy, setBusy] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
+  const [dobMonth, setDobMonth] = useState<number>(1);
+  const [dobYear, setDobYear] = useState<number>(2000);
 
   // Resolve redirect destination from search or sessionStorage.
   useEffect(() => {
@@ -51,7 +68,7 @@ function WelcomePage() {
     setRedirectTo(redirectSearch || stored || null);
   }, [redirectSearch]);
 
-  // Kick off: ensure session, fetch alias + finalize in parallel.
+  // Ensure session, finalize identity, then go to DOB step.
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -61,46 +78,93 @@ function WelcomePage() {
         return;
       }
       try {
-        const [ident, al] = await Promise.all([
-          finalize({ data: {} }),
-          fetchAlias({ data: {} }).catch(() => null),
-        ]);
+        const ident = await finalize({ data: {} });
         if (cancelled) return;
-        if (al) setAlias(al);
         setIdentity(ident);
         if (ident.locale) localStorage.setItem("md.locale", ident.locale);
+        // If profile is already age-verified AND already has an alias, skip ahead.
+        setPhase("dob");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Failed");
+        toast.error(e instanceof Error ? e.message : "Couldn't finalize");
       }
     })();
     return () => { cancelled = true; };
-  }, [finalize, fetchAlias, navigate, redirectSearch]);
+  }, [finalize, navigate, redirectSearch]);
 
-  // Run lock sequence once both alias + identity are ready.
+  // DOB submit → call /auth-age-gate → either underage or start slot machine
+  const onAgeSubmit = async () => {
+    setBusy(true);
+    try {
+      const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      if (res.error || !res.data?.age_verified) {
+        setPhase("underage");
+        return;
+      }
+      // Call /alias-generate BEFORE the slot machine mounts
+      const fresh = await fetchAlias({ data: {} });
+      setAlias(fresh);
+      setPhase("spin");
+    } catch {
+      toast.error("Couldn't verify. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Slot machine: simultaneous spin 2000ms, then lock L/M/R at 2000/2200/2400
+  // Each lock: 1.0→1.06→1.0 over 200ms + click 440/460/480Hz @ vol 0.3.
   const lockTimers = useRef<number[]>([]);
   useEffect(() => {
-    if (!alias || !identity || phase !== "spin") return;
+    if (phase !== "spin" || !alias) return;
+    setLocks({ n: false, e: false, c: false });
     lockTimers.current.forEach((id) => window.clearTimeout(id));
-    lockTimers.current = [];
-    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440); }, 900);
-    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(520); }, 1500);
-    const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(620); }, 2100);
-    const t4 = window.setTimeout(() => setPhase("reveal"), 2700);
+    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440, 0.3); }, 2000);
+    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(460, 0.3); }, 2200);
+    const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(480, 0.3); }, 2400);
+    const t4 = window.setTimeout(() => setPhase("reveal"), 2800);
     lockTimers.current = [t1, t2, t3, t4];
     return () => { lockTimers.current.forEach((id) => window.clearTimeout(id)); };
-  }, [alias, identity, phase]);
+  }, [phase, alias]);
 
-  // Auto-continue to redirect once revealed.
-  useEffect(() => {
-    if (phase !== "reveal" || !redirectTo) return;
-    const safe = redirectTo.startsWith("/") && !redirectTo.startsWith("//");
-    if (!safe) return;
-    const id = window.setTimeout(() => {
-      try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {}
-      window.location.replace(redirectTo);
-    }, 1600);
-    return () => window.clearTimeout(id);
-  }, [phase, redirectTo]);
+  const onReroll = async () => {
+    if (rerollUsed) return;
+    setRerollUsed(true);
+    setAlias(null);
+    setLocks({ n: false, e: false, c: false });
+    setPhase("spin");
+    const fresh = await fetchAlias({ data: {} });
+    setAlias(fresh);
+  };
+
+  const onConfirm = async () => {
+    if (!alias || busy) return;
+    setBusy(true);
+    setPhase("saving");
+    try {
+      await claim({
+        data: {
+          nationality: alias.nationality,
+          emotion: alias.emotion,
+          creature: alias.creature,
+          emoji,
+          rerollUsed,
+        },
+      });
+      setPhase("done");
+      const dest = redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+        ? redirectTo
+        : "/";
+      try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
+      setTimeout(() => { window.location.replace(dest); }, 600);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save");
+      setPhase("reveal");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (phase === "underage") return <UnderageBlock />;
 
   const flag = identity?.countryCode ? countryFlag(identity.countryCode) : "";
 
@@ -108,58 +172,119 @@ function WelcomePage() {
     <div className="min-h-screen bg-background text-foreground bg-grain flex flex-col items-center justify-center px-6 py-12 overflow-hidden">
       <div className="w-full max-w-sm">
         <p className="text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          {phase === "spin" ? "The court is assigning your identity" : "The court has spoken"}
+          {phase === "loading" ? "One moment."
+            : phase === "dob" ? "Before we go further."
+            : phase === "spin" ? "The court is assigning your identity"
+            : phase === "saving" ? "Sealing your identity"
+            : "The court has spoken"}
         </p>
 
-        <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-          <Reel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
-          <Reel pool={alias?.reelPools.emotion} value={alias?.emotion} locked={locks.e} />
-          <Reel pool={alias?.reelPools.creature} value={alias?.creature} locked={locks.c} />
-        </div>
+        {/* Slot reels — present from spin onward */}
+        {phase !== "dob" && phase !== "loading" && (
+          <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
+            <SlotReel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
+            <SlotReel pool={alias?.reelPools.emotion} value={alias?.emotion} locked={locks.e} />
+            <SlotReel pool={alias?.reelPools.creature} value={alias?.creature} locked={locks.c} />
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
-          {phase === "reveal" && identity ? (
+          {phase === "dob" && (
+            <motion.div
+              key="dob"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="mt-6 space-y-3"
+            >
+              <p className="text-sm text-muted-foreground text-center">
+                Shutap is for adults 18 and older.
+              </p>
+              <div className="flex gap-2">
+                <select value={dobMonth} onChange={(e) => setDobMonth(parseInt(e.target.value, 10))}
+                  className="flex-1 rounded-lg bg-surface-elevated border border-border px-2 py-2.5 text-sm">
+                  {["January","February","March","April","May","June","July","August","September","October","November","December"].map((m, i) => (
+                    <option key={m} value={i + 1}>{m}</option>
+                  ))}
+                </select>
+                <select value={dobYear} onChange={(e) => setDobYear(parseInt(e.target.value, 10))}
+                  className="w-32 rounded-lg bg-surface-elevated border border-border px-2 py-2.5 text-sm">
+                  {Array.from({ length: 2007 - 1900 + 1 }, (_, i) => 2007 - i).map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+              <button onClick={onAgeSubmit} disabled={busy}
+                className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-50">
+                {busy ? "Checking…" : "Confirm"}
+              </button>
+            </motion.div>
+          )}
+
+          {(phase === "reveal" || phase === "saving" || phase === "done") && alias && (
             <motion.div
               key="reveal"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="mt-8 text-center"
+              className="mt-6 text-center space-y-4"
             >
-              <motion.div
-                initial={{ scale: 0.6, opacity: 0, filter: "blur(16px)" }}
-                animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                transition={{ type: "spring", damping: 14, stiffness: 110 }}
-                className="mx-auto"
-              >
-                <AvatarSvg src={identity.avatarUrl} size={140} alt={identity.displayName} />
-              </motion.div>
-              <h1 className="mt-5 text-2xl sm:text-3xl font-medium text-balance leading-tight">
-                {identity.displayName}
-              </h1>
-              {(flag || identity.city) && (
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  {flag} {identity.city ?? identity.countryCode ?? ""}
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">You are</p>
+                <p className="mt-1 text-xl sm:text-2xl font-medium leading-tight">
+                  {alias.nationality} {alias.emotion} {alias.creature}
                 </p>
-              )}
-              <div className="mt-8 space-y-2">
-                {redirectTo ? (
-                  <a
-                    href={redirectTo}
-                    onClick={() => { try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {} }}
-                    className="block w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium text-center"
-                  >
-                    Continue →
-                  </a>
-                ) : (
-                  <Link
-                    to="/"
-                    className="block w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium text-center"
-                  >
-                    {t("welcome.cta")}
-                  </Link>
-                )}
               </div>
+
+              {identity && (
+                <motion.div
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", damping: 14, stiffness: 110 }}
+                  className="mx-auto"
+                >
+                  <AvatarSvg src={identity.avatarUrl} size={96} alt={identity.displayName} />
+                  {(flag || identity.city) && (
+                    <p className="mt-1.5 text-[11px] text-muted-foreground">
+                      {flag} {identity.city ?? identity.countryCode ?? ""}
+                    </p>
+                  )}
+                </motion.div>
+              )}
+
+              {/* 12-option emoji picker, single row */}
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Pick your mark</p>
+                <div className="grid grid-cols-12 gap-1">
+                  {EMOJI_OPTIONS.map((e) => (
+                    <button key={e} onClick={() => setEmoji(e)}
+                      disabled={phase !== "reveal"}
+                      className={`aspect-square rounded-md text-base flex items-center justify-center transition ${
+                        emoji === e
+                          ? "bg-primary/20 border border-primary"
+                          : "bg-surface-elevated border border-border hover:border-primary/50"
+                      }`}>
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button onClick={onConfirm} disabled={busy || phase !== "reveal"}
+                className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-50">
+                {phase === "saving" ? "Sealing…" : phase === "done" ? "✓" : "This is me →"}
+              </button>
+
+              {!rerollUsed && phase === "reveal" && (
+                <button onClick={onReroll}
+                  className="text-xs text-muted-foreground hover:text-foreground underline">
+                  Re-roll (1 left)
+                </button>
+              )}
+
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Your alias is permanent. Your real name never appears here.
+              </p>
             </motion.div>
-          ) : (
+          )}
+
+          {phase === "spin" && (
             <motion.p
               key="spinning"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -169,55 +294,13 @@ function WelcomePage() {
             </motion.p>
           )}
         </AnimatePresence>
+
+        {phase === "done" && redirectTo && (
+          <Link to="/" className="sr-only">{t("welcome.cta")}</Link>
+        )}
       </div>
     </div>
   );
-}
-
-function Reel({
-  pool, value, locked,
-}: { pool: string[] | undefined; value: string | undefined; locked: boolean }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    if (locked) return;
-    const id = window.setInterval(() => setTick((t) => t + 1), 70);
-    return () => window.clearInterval(id);
-  }, [locked]);
-  const fallback = ["…", "·", "·"];
-  const list = pool && pool.length > 0 ? pool : fallback;
-  const display = locked && value ? value : list[tick % list.length];
-  return (
-    <motion.div
-      animate={locked ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-      transition={{ duration: 0.25 }}
-      className={`h-14 rounded-xl flex items-center justify-center text-center px-2 font-medium text-[13px] sm:text-sm leading-tight ${
-        locked
-          ? "bg-primary border border-primary/50 text-foreground"
-          : "bg-background border border-border text-muted-foreground"
-      }`}
-    >
-      <span className="truncate">{display}</span>
-    </motion.div>
-  );
-}
-
-function clickTone(hz: number) {
-  if (typeof window === "undefined") return;
-  try {
-    const Ctx = window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = hz;
-    osc.type = "triangle";
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.08);
-    setTimeout(() => ctx.close(), 200);
-  } catch {/* silent */}
 }
 
 function countryFlag(cc: string): string {

@@ -7,15 +7,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useGateStore, type PendingAction } from "@/stores/gate";
 import {
   generateAlias,
-  verifyAge,
   claimAlias,
   type GeneratedAlias,
 } from "@/lib/alias.functions";
+import { verifyAge } from "@/lib/auth-age-gate.functions";
 import { castVerdict } from "@/lib/posts/community.functions";
 import { reactToPost } from "@/lib/posts/engagement.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { SlotReel, clickTone } from "@/components/identity/SlotReel";
+import { UnderageBlock } from "@/components/gate/UnderageBlock";
 import { toast } from "sonner";
+
 
 type Phase =
   | "auth"
@@ -36,25 +39,8 @@ function stashPending(p: PendingAction) {
   } catch {/* silent */}
 }
 
-// Simple click tone — Web Audio, no asset needed.
-function clickTone(hz: number) {
-  if (typeof window === "undefined") return;
-  try {
-    const Ctx = window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = hz;
-    osc.type = "triangle";
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.08);
-    setTimeout(() => ctx.close(), 200);
-  } catch {/* silent */}
-}
+// Click tone now imported from SlotReel for one canonical implementation.
+
 
 export function IdentityCeremony() {
   const open = useGateStore((s) => s.open);
@@ -116,14 +102,14 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   };
 
   const onAgeSubmit = async () => {
-    const dob = `${dobYear}-${String(dobMonth).padStart(2, "0")}-15`;
     setBusy(true);
     try {
-      const res = await submitAge({ data: { dob } });
-      if (!res.ageOk) { setPhase("underage"); return; }
+      const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      if (res.error || !res.data?.age_verified) { setPhase("underage"); return; }
       setPhase("spin");
     } finally { setBusy(false); }
   };
+
 
   // ── Spin sequence: full speed, then lock left/middle/right
   useEffect(() => {
@@ -192,18 +178,9 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     }
   };
 
-  // ── Underage hard block
-  if (phase === "underage") {
-    return (
-      <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
-        <div className="text-center max-w-sm space-y-3">
-          <p className="text-5xl">⚖️</p>
-          <p className="text-xl font-medium text-white">Shutap is for adults 18 and older.</p>
-          <p className="text-sm text-white/70">Come back when you're ready.</p>
-        </div>
-      </div>
-    );
-  }
+  // ── Underage hard block (full-screen black, no retry, no back button)
+  if (phase === "underage") return <UnderageBlock />;
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center pointer-events-none">
@@ -246,7 +223,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
 function BenchLine({ phase }: { phase: Phase }) {
   const text =
     phase === "auth" ? "The court is assigning your identity."
-    : phase === "dob" ? "The court asks one last thing."
+    : phase === "dob" ? "Before we go further."
     : phase === "spin" ? "Hold. The reels are deciding."
     : phase === "reveal" ? "The court has spoken."
     : "";
@@ -259,11 +236,11 @@ function BenchLine({ phase }: { phase: Phase }) {
 }
 
 function SlotMachine({
-  alias, locks, speed, phase,
+  alias, locks, phase,
 }: {
   alias: GeneratedAlias | null;
   locks: { n: boolean; e: boolean; c: boolean };
-  speed: "full" | "slow";
+  speed?: "full" | "slow";
   phase: Phase;
 }) {
   const pools = alias?.reelPools ?? { nationality: ["…"], emotion: ["…"], creature: ["…"] };
@@ -271,39 +248,14 @@ function SlotMachine({
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-        <Reel pool={pools.nationality} locked={locks.n} value={alias?.nationality ?? "…"} speed={speed} />
-        <Reel pool={pools.emotion} locked={locks.e} value={alias?.emotion ?? "…"} speed={speed} />
-        <Reel pool={pools.creature} locked={locks.c} value={alias?.creature ?? "…"} speed={speed} />
+        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
+        <SlotReel pool={pools.emotion} locked={locks.e} value={alias?.emotion} />
+        <SlotReel pool={pools.creature} locked={locks.c} value={alias?.creature} />
       </div>
     </div>
   );
 }
 
-function Reel({
-  pool, locked, value, speed,
-}: { pool: string[]; locked: boolean; value: string; speed: "full" | "slow" }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    if (locked) return;
-    const interval = speed === "full" ? 70 : 130;
-    const id = window.setInterval(() => setTick((t) => t + 1), interval);
-    return () => window.clearInterval(id);
-  }, [locked, speed]);
-  const display = locked ? value : pool[tick % pool.length] ?? "…";
-  return (
-    <motion.div
-      animate={locked ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-      transition={{ duration: 0.2 }}
-      className={`h-14 rounded-xl flex items-center justify-center text-center px-2 font-medium text-[13px] sm:text-sm leading-tight ${
-        locked
-          ? "bg-primary border border-primary/50 text-foreground"
-          : "bg-background border border-border text-muted-foreground"
-      }`}
-    >
-      <span className="truncate">{display}</span>
-    </motion.div>
-  );
-}
 
 function AliasLine({
   phase, alias, locks,
@@ -429,11 +381,12 @@ function DobCard({
   onSubmit: () => void; busy: boolean;
 }) {
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const thisYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => thisYear - i);
+  // Spec: year range 1900–2007 (anyone born after 2007 is under 18 by definition).
+  const years = Array.from({ length: 2007 - 1900 + 1 }, (_, i) => 2007 - i);
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
-      <p className="text-sm font-medium">When were you born?</p>
+      <p className="text-sm font-medium">Before we go further.</p>
+      <p className="text-xs text-muted-foreground">Shutap is for adults 18 and older.</p>
       <div className="flex gap-2">
         <select value={month} onChange={(e) => onMonth(parseInt(e.target.value, 10))}
           className="flex-1 rounded-lg bg-background border border-border px-2 py-2 text-sm">
@@ -446,11 +399,12 @@ function DobCard({
       </div>
       <button onClick={onSubmit} disabled={busy}
         className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-2.5 disabled:opacity-50">
-        {busy ? "Checking…" : "I'm 18 or older →"}
+        {busy ? "Checking…" : "Confirm"}
       </button>
     </div>
   );
 }
+
 
 // ── Reveal card
 
@@ -467,10 +421,10 @@ function RevealCard({
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium text-center mb-2">
           Pick your mark
         </p>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-12 gap-1.5">
           {EMOJI_OPTIONS.map((e) => (
             <button key={e} onClick={() => onEmoji(e)}
-              className={`h-10 rounded-lg text-xl transition ${
+              className={`aspect-square rounded-lg text-base sm:text-lg transition flex items-center justify-center ${
                 emoji === e
                   ? "bg-primary/20 border border-primary"
                   : "bg-surface-elevated border border-border hover:border-primary/50"
@@ -482,21 +436,23 @@ function RevealCard({
       </div>
       <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
         onClick={onClaim} disabled={busy}
-        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-3  disabled:opacity-50">
-        Claim this identity →
+        className="w-full rounded-full bg-primary text-primary-foreground font-medium text-sm py-3 disabled:opacity-50">
+        This is me →
       </motion.button>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
-        {rerollUsed ? (
-          <p className="text-[11px] text-muted-foreground italic">Re-roll used. This is your identity.</p>
-        ) : (
+      {!rerollUsed && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
           <button onClick={onReroll} className="text-[12px] text-muted-foreground hover:text-foreground underline">
-            Not quite right? Re-roll once.
+            Re-roll (1 left)
           </button>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
+      <p className="text-[11px] text-muted-foreground text-center leading-relaxed pt-1">
+        Your alias is permanent. Your real name never appears here.
+      </p>
     </motion.div>
   );
 }
+
 
 function ConfirmCard({ step }: { step: 0 | 1 | 2 }) {
   return (

@@ -123,62 +123,8 @@ export const generateAlias = createServerFn({ method: "GET" })
     };
   });
 
-// ── Mock OTP — creates a real auth user from a phone via deterministic email
-// (No SMS provider is wired; any 6-digit code is accepted.)
-
-export const mockOtpVerify = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      phone: z.string().min(6).max(20).regex(/^\+?[0-9 \-]+$/),
-      code: z.string().regex(/^[0-9]{6}$/),
-    }).parse,
-  )
-  .handler(async ({ data }): Promise<{ email: string; password: string }> => {
-    const normalized = data.phone.replace(/[^0-9]/g, "");
-    const email = `phone-${normalized}@shutap-mock.local`;
-    // Deterministic password derived from phone so re-login works.
-    const password = `mock!${normalized}!shutap`;
-
-    // Check if user already exists; if not, create.
-    const { data: list } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 200,
-    });
-    const exists = (list?.users ?? []).some((u) => u.email === email);
-    if (!exists) {
-      const { error } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { phone: data.phone, source: "mock_otp" },
-      });
-      if (error && !/already/i.test(error.message)) throw new Error(error.message);
-    }
-    return { email, password };
-  });
-
-// ── Age verification
-
-export const verifyAge = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse)
-  .handler(async ({ data, context }): Promise<{ ok: true; ageOk: boolean }> => {
-    const { supabase, userId } = context;
-    const dobDate = new Date(data.dob);
-    const now = new Date();
-    let age = now.getUTCFullYear() - dobDate.getUTCFullYear();
-    const m = now.getUTCMonth() - dobDate.getUTCMonth();
-    if (m < 0 || (m === 0 && now.getUTCDate() < dobDate.getUTCDate())) age--;
-    const ageOk = age >= 18;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ dob: data.dob, age_verified: ageOk })
-      .eq("id", userId);
-    if (error) throw new Error(error.message);
-    return { ok: true, ageOk };
-  });
-
 // ── Claim the alias (writes to profile)
+// Phone is intentionally NOT collected — Shutap auth is Email OTP + Google + Apple only.
 
 export const claimAlias = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -189,7 +135,6 @@ export const claimAlias = createServerFn({ method: "POST" })
       creature: z.string().min(2).max(40),
       emoji: z.string().min(1).max(8),
       rerollUsed: z.boolean(),
-      phone: z.string().min(6).max(20).optional(),
     }).parse,
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
@@ -202,7 +147,6 @@ export const claimAlias = createServerFn({ method: "POST" })
       emoji: data.emoji,
       reroll_used: data.rerollUsed,
       nickname,
-      ...(data.phone ? { phone: data.phone, phone_verified: true } : {}),
     };
     const { error } = await supabase
       .from("profiles")
@@ -211,3 +155,4 @@ export const claimAlias = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
