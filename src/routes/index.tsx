@@ -723,7 +723,7 @@ function CommentSection({ postId, onGate }: { postId: string; onGate: () => void
                 {c.author?.avatarUrl ? (
                   <img src={c.author.avatarUrl} alt="" className="h-5 w-5 rounded-full" />
                 ) : (
-                  <div className="h-5 w-5 rounded-full bg-primary" />
+                  <div className="h-5 w-5 rounded-full bg-c-surface-3 border border-c-border" />
                 )}
                 <span className="font-medium text-foreground">
                   {c.author?.nickname ?? "Anonymous"}
