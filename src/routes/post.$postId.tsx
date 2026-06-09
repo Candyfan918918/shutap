@@ -179,12 +179,14 @@ function PostPage() {
           {t("post.landingCta")}
         </Link>
         <StoryArc postId={post.id} />
+        <OtherPerspectives postId={post.id} plaintiffId={post.author_id} />
         <CommentThread
           ref={commentsRef}
           postId={post.id}
           onCommentPosted={() => setShowRelated(true)}
         />
         <RelatedPosts postId={post.id} autoLoad={showRelated} />
+
       </main>
 
 
