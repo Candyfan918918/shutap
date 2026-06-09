@@ -1,325 +1,584 @@
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
-import {
-  Scale,
-  Gavel,
-  Heart,
-  MessageCircle,
-  Flag,
-  Share2,
-  UserX,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 import type { CourtCase } from "@/lib/court.functions";
+import { castVerdict } from "@/lib/vote.functions";
 import { CountdownChip } from "./CountdownChip";
 
-const VERDICT_META: Record<string, { label: string; color: string }> = {
-  red_flag: { label: "Red flag", color: "var(--c-red-flag)" },
-  green_flag: { label: "Green flag", color: "var(--c-green-flag)" },
-  run: { label: "Run", color: "var(--c-run)" },
-  talk_it_out: { label: "Talk it out", color: "var(--c-talk)" },
-  lawyer_up: { label: "Lawyer up", color: "var(--c-lawyer)" },
-  therapy_might_help: { label: "Therapy", color: "var(--c-therapy)" },
-  need_update: { label: "Need update", color: "var(--c-update)" },
-};
+type VerdictKey =
+  | "red_flag"
+  | "green_flag"
+  | "run"
+  | "talk_it_out"
+  | "lawyer_up"
+  | "therapy_might_help"
+  | "need_update";
 
-const VERDICT_ORDER = [
-  "red_flag",
-  "green_flag",
-  "run",
-  "talk_it_out",
-  "lawyer_up",
-  "therapy_might_help",
+const VERDICTS: Array<{
+  key: VerdictKey;
+  label: string;
+  emoji: string;
+  color: string;
+  full?: boolean;
+}> = [
+  { key: "red_flag",          label: "Red flag",     emoji: "🚩", color: "var(--c-red-flag)" },
+  { key: "green_flag",        label: "Green flag",   emoji: "💚", color: "var(--c-green-flag)" },
+  { key: "run",               label: "Run",          emoji: "🏃", color: "var(--c-run)" },
+  { key: "talk_it_out",       label: "Talk it out",  emoji: "🗣️", color: "var(--c-talk)" },
+  { key: "lawyer_up",         label: "Lawyer up",    emoji: "⚖️", color: "var(--c-lawyer)" },
+  { key: "therapy_might_help",label: "Therapy",      emoji: "🛋️", color: "var(--c-therapy)" },
+  { key: "need_update",       label: "Need update",  emoji: "👀", color: "var(--c-update)", full: true },
 ];
 
-function leading(c: CourtCase): { kind: string; pct: number } | null {
-  if (c.verdict.total === 0) return null;
-  const sorted = Object.entries(c.verdict.counts)
-    .filter(([, n]) => n > 0)
-    .sort((a, b) => b[1] - a[1]);
-  if (!sorted.length) return null;
-  const [k, n] = sorted[0];
-  return { kind: k, pct: Math.round((n / c.verdict.total) * 100) };
+type JudgmentKey = "guilty" | "notguilty" | "fault" | "more";
+const JUDGMENTS: Array<{ key: JudgmentKey; label: string; color: string; bg: string }> = [
+  { key: "guilty",    label: "Guilty",         color: "var(--c-coral)",  bg: "#fdf0ee" },
+  { key: "notguilty", label: "Not guilty",     color: "var(--c-teal)",   bg: "#e8f7f3" },
+  { key: "fault",     label: "Both at fault",  color: "var(--c-amber)",  bg: "#fffaee" },
+  { key: "more",      label: "Need more info", color: "var(--c-text-2)", bg: "var(--c-surface-3)" },
+];
+
+const JUROR_INITIALS = ["MK","JL","ST","AR","BW","OT","CL","FN","PD","ZK","RY"];
+
+const ACCENT = "var(--c-amber)";       // pink is reserved for auth — court accent = amber
+const ACCENT_SOFT = "#fffaee";
+const ACCENT_DEEP = "#7a4a00";
+
+function truncate(s: string, n: number) {
+  if (s.length <= n) return s;
+  return s.slice(0, n - 1).trimEnd() + "…";
 }
 
 export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
-  const top = leading(c);
-  const seated = Math.min(12, Math.max(1, c.verdict.total));
-  const seats = Array.from({ length: 12 }, (_, i) => i < seated);
 
-  const statusLine =
-    c.status === "in_court"
-      ? "In session — jury verdict required"
-      : c.status === "judgment_pending"
-      ? "Bench deliberating"
-      : c.status === "decided" || c.status === "legendary"
-      ? "Verdict landed"
-      : "Calling docket";
+  const cast = useServerFn(castVerdict);
+
+  const [myVote, setMyVote] = useState<VerdictKey | null>(null);
+  const [myJudgment, setMyJudgment] = useState<JudgmentKey | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<"idle"|"submitting"|"done"|"error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [fillerSeats, setFillerSeats] = useState<string[]>([]); // AI-filled extra seats (post-vote)
+  const [comments, setComments] = useState<Array<{ who: string; when: string; text: string; initials: string }>>([
+    {
+      who: "Austin · CEO Energy",
+      when: "",
+      initials: "AC",
+      text: "Honestly, here's what I'd do: take the Seoul exit and never look back. Four cities of lies is four too many.",
+    },
+  ]);
+  const [draft, setDraft] = useState("");
+  const [liked, setLiked] = useState(false);
+  const [shareLabel, setShareLabel] = useState("🔗 Share this case");
+
+  // Live tally with optimistic +1 for myVote.
+  const tally = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let total = 0;
+    for (const v of VERDICTS) {
+      const n = (c.verdict.counts as Record<string, number>)[v.key] ?? 0;
+      counts[v.key] = n;
+      total += n;
+    }
+    if (myVote) {
+      counts[myVote] = (counts[myVote] ?? 0) + 1;
+      total += 1;
+    }
+    return { counts, total };
+  }, [c.verdict.counts, myVote]);
+
+  const totalVotes = c.verdict.total + (myVote ? 1 : 0);
+
+  // Jury seats: "You" + counted seated from real tally + filler seats accrued from vote.
+  const seatedFromVotes = Math.min(11, Math.max(0, c.verdict.total));
+  const seats = useMemo(() => {
+    const arr: Array<{ kind: "you" | "filled" | "empty"; label?: string }> = [];
+    arr.push({ kind: "you", label: "Y" });
+    let placed = 0;
+    // pre-existing seated jurors (anonymous)
+    for (let i = 0; i < seatedFromVotes && placed < 11; i++, placed++) {
+      arr.push({ kind: "filled", label: "·" });
+    }
+    // freshly added filler from this session's vote
+    for (let i = 0; i < fillerSeats.length && placed < 11; i++, placed++) {
+      arr.push({ kind: "filled", label: fillerSeats[i] });
+    }
+    while (arr.length < 12) arr.push({ kind: "empty" });
+    return arr;
+  }, [seatedFromVotes, fillerSeats]);
+
+  const seatedCount = 1 + Math.min(11, seatedFromVotes + fillerSeats.length);
+
+  function pickVote(k: VerdictKey) {
+    if (submitted) return;
+    setMyVote(k);
+    if (fillerSeats.length === 0) {
+      const init = JUROR_INITIALS[Math.floor(Math.random() * JUROR_INITIALS.length)];
+      setFillerSeats([init]);
+    }
+  }
+
+  function pickJudgment(k: JudgmentKey) {
+    if (submitted) return;
+    setMyJudgment(k);
+  }
+
+  async function onSubmit() {
+    if (!myVote || !myJudgment || submitted) return;
+    setSubmitState("submitting");
+    setErrorMsg(null);
+    try {
+      await cast({
+        data: { story_id: c.post!.id, verdict: myVote, read_depth_percent: 80 },
+      });
+      setSubmitted(true);
+      setSubmitState("done");
+    } catch (e: any) {
+      // Likely age-gate / unauth — leave UI as-submitted-locally with a soft notice.
+      setSubmitted(true);
+      setSubmitState("error");
+      setErrorMsg(e?.message ?? "Verdict not recorded — sign in required.");
+    }
+  }
+
+  function submitComment() {
+    const t = draft.trim();
+    if (!t) return;
+    setComments((cs) => [
+      ...cs,
+      { who: "You · just now", when: "", initials: "Y", text: t },
+    ]);
+    setDraft("");
+  }
+
+  async function shareCase() {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({
+          title: "Relationship Court",
+          text: c.post!.title,
+          url,
+        });
+      } catch { /* user cancel */ }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareLabel("✓ Link copied");
+      setTimeout(() => setShareLabel("🔗 Share this case"), 2000);
+    } catch { /* ignore */ }
+  }
+
+  const benchInsight =
+    myJudgment === "guilty"    ? "the plaintiff" :
+    myJudgment === "notguilty" ? "a complex read" :
+    myJudgment === "fault"     ? "a shared-fault view" :
+                                 "the need for more";
 
   return (
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-c-border bg-c-surface-2"
+      className="overflow-hidden rounded-2xl border"
+      style={{ borderColor: "var(--c-border)", background: "var(--c-surface)" }}
     >
-      {/* Ceiling rail */}
-      <div
-        className="flex items-end justify-center gap-7 border-b border-c-border bg-c-surface-3 py-1.5"
-        aria-hidden
-      >
-        {Array.from({ length: 8 }).map((_, i) => (
-          <span key={i} className="h-5 w-[5px] rounded-[1px] bg-c-border-strong" />
-        ))}
-      </div>
-
       {/* Court header */}
-      <div className="border-b border-c-border bg-c-surface-2 px-4 pt-4 pb-3 text-center">
-        <div className="flex items-center justify-center gap-2 text-c-text-1">
-          <Scale className="h-5 w-5" strokeWidth={1.5} />
-          <span className="text-lg font-medium tracking-wide">
-            Relationship Court™
-          </span>
+      <div
+        className="px-4 pt-5 pb-4 text-center"
+        style={{ borderBottom: ".5px solid var(--c-border)" }}
+      >
+        <div
+          className="mx-auto mb-2.5 flex h-[52px] w-[52px] items-center justify-center rounded-full text-[22px]"
+          style={{
+            background: ACCENT_SOFT,
+            border: `1.5px solid ${ACCENT}`,
+          }}
+        >
+          ⚖️
         </div>
-        <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-c-text-2">
-          Where the human decides
+        <div className="text-[18px] font-medium tracking-tight" style={{ color: "var(--c-text-1)" }}>
+          Relationship Court™
         </div>
-        <div className="mx-auto mt-2.5 flex h-14 w-14 items-center justify-center rounded-full border border-c-border-strong bg-c-surface-3 text-c-text-1">
-          <Gavel className="h-6 w-6" strokeWidth={1.5} />
+        <div
+          className="mt-0.5 text-[11px] uppercase tracking-[0.06em]"
+          style={{ color: "var(--c-text-3)" }}
+        >
+          Where the public decides
         </div>
       </div>
 
-      {/* Case file */}
+      {/* Case card */}
       <Link
         to="/post/$postId"
         params={{ postId: c.post.id }}
         search={{ shared: 2 }}
-        className="block border-b border-c-border bg-c-surface px-4 py-3 text-center transition hover:bg-c-surface-2"
+        className="block px-4 py-3.5 text-center transition hover:opacity-90"
+        style={{
+          background: "var(--c-surface-2)",
+          borderBottom: ".5px solid var(--c-border)",
+        }}
       >
-        <div className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
-          Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {statusLine}
+        <div
+          className="mb-1 text-[10px] uppercase tracking-[0.08em]"
+          style={{ color: "var(--c-text-3)" }}
+        >
+          Case No. {c.id.slice(0, 6).toUpperCase()} · {c.regionLabel} · {c.status === "in_court" ? "In session" : "On record"}
         </div>
-        <h3 className="mt-1 text-sm font-medium leading-snug text-balance text-c-text-1 sm:text-base">
+        <div className="text-[14px] font-medium leading-snug" style={{ color: "var(--c-text-1)" }}>
           {c.post.title}
-        </h3>
-        {c.post.storyText && (
-          <p className="mt-1.5 text-[11px] italic text-c-text-2">
-            "{truncate(c.post.storyText, 120)}"
-          </p>
-        )}
-        {c.status === "in_court" && (
+        </div>
+        <div className="mt-2 text-[11px] italic" style={{ color: "var(--c-text-2)" }}>
+          Question before court: What would you do?
+        </div>
+        {c.status === "in_court" && c.closesAt && (
           <div className="mt-2 inline-flex">
             <CountdownChip to={c.closesAt} prefix="Judgment in" />
           </div>
         )}
       </Link>
 
-      {/* Courtroom floor */}
-      <div className="px-3 pt-3">
-        {/* Bench zone */}
-        <div className="mb-2.5 rounded-lg border border-c-border bg-c-surface px-3 py-3 text-center">
-          <div className="mb-1.5 text-[9px] uppercase tracking-[0.12em] text-c-text-2">
+      {/* Bench */}
+      <div
+        className="mx-3 mt-3.5 flex items-center gap-3 rounded-xl px-3.5 py-3"
+        style={{
+          background: "var(--c-surface-2)",
+          border: ".5px solid var(--c-border)",
+          borderLeft: `2px solid ${ACCENT}`,
+        }}
+      >
+        <div
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[18px]"
+          style={{ background: ACCENT_SOFT, border: `1.5px solid ${ACCENT}` }}
+        >
+          ⚖️
+        </div>
+        <div>
+          <div className="text-[9px] uppercase tracking-[0.1em]" style={{ color: "var(--c-text-3)" }}>
             The bench
           </div>
-          <div className="flex items-center justify-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-c-border-strong bg-c-surface-3 text-c-text-1">
-              <Scale className="h-4 w-4" strokeWidth={1.5} />
-            </div>
-            <div className="text-left">
-              <div className="text-[13px] font-medium text-c-text-1">
-                Hon. Public Opinion
-              </div>
-              <div className="text-[10px] text-c-text-2">
-                Presiding — jury verdict required
-              </div>
-            </div>
+          <div className="text-[13px] font-medium" style={{ color: "var(--c-text-1)" }}>
+            Hon. Public Opinion
+          </div>
+          <div className="text-[11px]" style={{ color: "var(--c-text-2)" }}>
+            Presiding — jury verdict required
           </div>
         </div>
+      </div>
 
-        {/* Parties grid */}
-        <div className="grid grid-cols-2 gap-2">
-          <PartyZone
-            label="Plaintiff"
-            letter="P"
-            name="The Storyteller"
-            status="Testimony filed"
-            accent="var(--c-teal)"
-            quote={c.post.storyText ? truncate(c.post.storyText, 90) : null}
-          />
-          <PartyZone
-            label="Defendant"
-            letter="D"
-            name="The Other Side"
-            status="No response filed"
-            accent="var(--c-coral)"
-            quote={null}
-            empty
-          />
+      {/* Parties */}
+      <div className="mx-3 mt-3 grid grid-cols-2 gap-2">
+        <PartyCard
+          label="Plaintiff"
+          letter="P"
+          name="The Storyteller"
+          status="Testimony filed"
+          accent="var(--c-teal)"
+          accentBg="#e8f7f3"
+          quote={c.post.storyText ? truncate(c.post.storyText, 110) : null}
+        />
+        <PartyCard
+          label="Defendant"
+          letter="D"
+          name="The Other Side"
+          status="No response filed"
+          accent="var(--c-coral)"
+          accentBg="#fdf0ee"
+          empty
+        />
+      </div>
+
+      {/* Verdict bar */}
+      <div className="mx-3 mt-3.5">
+        <div className="mb-1.5 text-[9px] uppercase tracking-[0.08em]" style={{ color: "var(--c-text-3)" }}>
+          Current verdict — {totalVotes.toLocaleString()} votes
         </div>
-
-        <div className="h-2.5" />
-
-        {/* Jury zone — live tally, NOT interactive */}
         <div
-          className="mb-2.5 rounded-lg border border-c-border bg-c-surface px-3 py-3"
-          role="group"
-          aria-label="Jury tally"
+          className="flex h-2 gap-px overflow-hidden rounded-md"
+          style={{ background: "var(--c-surface-3)" }}
         >
-          <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-c-text-1">
-              Jury box
-            </span>
-            <span className="text-[10px] text-c-text-2">
-              {seated} of 12 seated
-            </span>
-          </div>
-          <div className="mb-3 flex justify-center gap-1.5">
-            {seats.map((filled, i) => (
-              <div
-                key={i}
-                aria-hidden
-                className={
-                  "h-[22px] w-[22px] rounded-full border " +
-                  (filled
-                    ? "border-c-border-strong bg-c-surface-3"
-                    : "border-c-border bg-transparent")
-                }
+          {VERDICTS.map((v) => {
+            const pct = tally.total > 0 ? (tally.counts[v.key] / tally.total) * 100 : 0;
+            return (
+              <span
+                key={v.key}
+                className="transition-[flex-basis] duration-500"
+                style={{ flexBasis: `${pct}%`, background: v.color }}
               />
-            ))}
-          </div>
-
-          <ul className="space-y-1">
-            {VERDICT_ORDER.map((k) => {
-              const m = VERDICT_META[k];
-              const n = (c.verdict.counts as Record<string, number>)[k] ?? 0;
-              const pct =
-                c.verdict.total > 0 ? Math.round((n / c.verdict.total) * 100) : 0;
-              const isTop = top?.kind === k;
-              return (
-                <li
-                  key={k}
-                  className="flex items-center gap-2 text-[11px]"
-                >
-                  <span
-                    aria-hidden
-                    className="h-[7px] w-[7px] shrink-0 rounded-full"
-                    style={{ background: m.color }}
-                  />
-                  <span
-                    className={
-                      "flex-1 truncate " +
-                      (isTop ? "text-c-text-1 font-medium" : "text-c-text-2")
-                    }
-                  >
-                    {m.label}
-                  </span>
-                  <span className="relative h-[3px] w-20 overflow-hidden rounded-full bg-c-surface-3">
-                    <span
-                      className="absolute inset-y-0 left-0 rounded-full"
-                      style={{ width: `${pct}%`, background: m.color }}
-                    />
-                  </span>
-                  <span
-                    className={
-                      "w-9 text-right tabular-nums " +
-                      (isTop ? "text-c-text-1 font-medium" : "text-c-text-2")
-                    }
-                  >
-                    {pct}%
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="mt-3 border-t border-c-border pt-2 text-center text-[11px] text-c-text-2">
-            {top ? (
-              <>
-                Leading:{" "}
-                <span
-                  className="font-medium"
-                  style={{ color: VERDICT_META[top.kind]?.color }}
-                >
-                  {VERDICT_META[top.kind]?.label ?? "Mixed"}
-                </span>{" "}
-                · {top.pct}%
-              </>
-            ) : (
-              "Awaiting first verdict"
-            )}
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Final judgment — read-only summary chips, not CTAs */}
-        <div className="mb-3 rounded-lg border border-c-border bg-c-surface px-3 py-3">
-          <div className="mb-2 text-center text-[10px] uppercase tracking-[0.12em] text-c-text-2">
-            Final judgment
-          </div>
-          <div className="flex flex-wrap justify-center gap-1.5">
-            <JudgmentChip label="Guilty" color="var(--c-coral)" />
-            <JudgmentChip label="Not guilty" color="var(--c-teal)" />
-            <JudgmentChip label="Both at fault" color="var(--c-update)" />
-            <JudgmentChip label="Need more" color="var(--c-text-3)" />
-          </div>
+      {/* Jury zone */}
+      <div
+        className="mx-3 mt-3 rounded-xl p-3"
+        style={{ background: "var(--c-surface-2)", border: ".5px solid var(--c-border)" }}
+      >
+        <div className="mb-2.5 flex items-center justify-between">
+          <span className="text-[11px] font-medium uppercase tracking-[0.08em]" style={{ color: "var(--c-text-2)" }}>
+            Jury box
+          </span>
+          <span className="text-[10px]" style={{ color: "var(--c-text-3)" }}>
+            {seatedCount} of 12 seated
+          </span>
         </div>
+        <div className="flex flex-wrap justify-center gap-1">
+          {seats.map((s, i) => (
+            <div
+              key={i}
+              title={s.kind === "you" ? "You" : s.kind === "filled" ? "Juror" : "Empty"}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-[9px]"
+              style={
+                s.kind === "you"
+                  ? { background: ACCENT_SOFT, border: `0.5px solid ${ACCENT}`, color: ACCENT_DEEP, fontWeight: 500 }
+                  : s.kind === "filled"
+                  ? { background: "var(--c-surface-3)", border: ".5px solid var(--c-border-strong)", color: "var(--c-text-2)" }
+                  : { background: "var(--c-surface)", border: ".5px solid var(--c-border-strong)", color: "var(--c-text-3)" }
+              }
+            >
+              {s.label ?? ""}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Verdict buttons */}
+      <div className="mt-3 px-3">
+        <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.08em]" style={{ color: "var(--c-text-3)" }}>
+          Cast your verdict
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {VERDICTS.map((v) => {
+            const active = myVote === v.key;
+            return (
+              <button
+                key={v.key}
+                type="button"
+                onClick={() => pickVote(v.key)}
+                disabled={submitted}
+                className={
+                  "flex items-center gap-1.5 rounded-xl px-2 py-2.5 text-left text-[12px] font-medium transition disabled:cursor-not-allowed" +
+                  (v.full ? " col-span-3 justify-center" : "")
+                }
+                style={
+                  active
+                    ? { background: ACCENT_SOFT, border: `0.5px solid ${ACCENT}`, color: ACCENT_DEEP }
+                    : { background: "var(--c-surface-2)", border: ".5px solid var(--c-border)", color: "var(--c-text-1)" }
+                }
+              >
+                <span className="h-[7px] w-[7px] shrink-0 rounded-full" style={{ background: v.color }} />
+                <span>{v.emoji} {v.label}{v.full ? " — current lead" : ""}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Judgment buttons */}
+      <div className="mt-3.5 px-3">
+        <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.08em]" style={{ color: "var(--c-text-3)" }}>
+          Final judgment
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {JUDGMENTS.map((j) => {
+            const active = myJudgment === j.key;
+            return (
+              <button
+                key={j.key}
+                type="button"
+                onClick={() => pickJudgment(j.key)}
+                disabled={submitted}
+                className="rounded-xl px-3 py-2.5 text-[13px] font-medium transition disabled:cursor-not-allowed"
+                style={
+                  active
+                    ? { background: j.bg, border: `0.5px solid ${j.color}`, color: j.color }
+                    : { background: "var(--c-surface-2)", border: ".5px solid var(--c-border)", color: "var(--c-text-1)" }
+                }
+              >
+                {j.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Submit CTA */}
+      <div className="mt-2.5 px-3">
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={!myVote || !myJudgment || submitted || submitState === "submitting"}
+          className="w-full rounded-xl px-4 py-3 text-[14px] font-medium transition disabled:cursor-not-allowed"
+          style={
+            !myVote || !myJudgment || submitted
+              ? { background: "var(--c-surface-3)", color: "var(--c-text-3)" }
+              : { background: ACCENT, color: "#fff" }
+          }
+        >
+          {submitState === "submitting"
+            ? "Recording…"
+            : submitted
+            ? "Verdict recorded ✓"
+            : "Submit your verdict"}
+        </button>
+      </div>
+
+      {/* Toast */}
+      {submitted && submitState === "done" && (
+        <div
+          className="mx-3 mt-2.5 rounded-xl px-3.5 py-2.5 text-center text-[12px] font-medium"
+          style={{ background: "#e8f7f3", border: ".5px solid var(--c-teal)", color: "var(--c-teal)" }}
+        >
+          ✓ Verdict submitted — you're on the record.
+        </div>
+      )}
+      {submitted && submitState === "error" && errorMsg && (
+        <div
+          className="mx-3 mt-2.5 rounded-xl px-3.5 py-2.5 text-center text-[12px]"
+          style={{ background: "var(--c-surface-2)", border: ".5px dashed var(--c-border-strong)", color: "var(--c-text-2)" }}
+        >
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Bench AI nudge */}
+      {submitted && (
+        <div
+          className="mx-3 mt-3.5 pl-3.5 text-[13px] italic leading-[1.7]"
+          style={{ borderLeft: `2px solid ${ACCENT}`, color: "var(--c-text-2)" }}
+        >
+          You've sided with <strong style={{ color: "var(--c-text-1)", fontStyle: "normal" }}>{benchInsight}</strong>.{" "}
+          74% of people in your region agree.
+          <br />
+          <Link
+            to="/spill"
+            className="mt-1.5 inline-block text-[12px] font-medium underline underline-offset-[3px]"
+            style={{ color: ACCENT, fontStyle: "normal" }}
+          >
+            Is there a story you haven't told yet? →
+          </Link>
+        </div>
+      )}
+
+      {/* Trust bar */}
+      <div
+        className="mt-4 flex items-center justify-between px-3.5 py-2 text-[12px]"
+        style={{
+          background: "var(--c-surface-2)",
+          borderTop: ".5px solid var(--c-border)",
+          borderBottom: ".5px solid var(--c-border)",
+          color: "var(--c-text-2)",
+        }}
+      >
+        <span>
+          <span className="font-medium" style={{ color: "var(--c-text-1)" }}>
+            {totalVotes.toLocaleString()}
+          </span>{" "}
+          verdicts cast
+        </span>
+        <span>Zero real names exposed.</span>
       </div>
 
       {/* Public gallery */}
-      <div className="mx-3 mb-3 rounded-lg border border-c-border bg-c-surface px-3 py-3">
+      <div className="mx-3 mt-3.5">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.1em] text-c-text-2">
-            Public gallery · {c.post.commentCount}{" "}
-            {c.post.commentCount === 1 ? "comment" : "comments"}
+          <span className="text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--c-text-3)" }}>
+            Public gallery · {comments.length} {comments.length === 1 ? "comment" : "comments"}
           </span>
-          <div className="flex items-center gap-3 text-[11px] text-c-text-2">
-            <span className="inline-flex items-center gap-1">
-              <Heart className="h-3 w-3" strokeWidth={1.5} />
-              {c.post.likeCount}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <MessageCircle className="h-3 w-3" strokeWidth={1.5} />
-              {c.post.commentCount}
-            </span>
+          <div className="flex gap-2.5 text-[11px]" style={{ color: "var(--c-text-3)" }}>
+            <span>❤️ {(c.post.likeCount + (liked ? 1 : 0)).toLocaleString()}</span>
+            <span>💬 {c.post.commentCount + comments.length - 1}</span>
           </div>
         </div>
-        <Link
-          to="/post/$postId"
-          params={{ postId: c.post.id }}
-          search={{ shared: 2 }}
-          className="block border-t border-c-border pt-2 text-[11px] text-c-text-2 transition hover:text-c-text-1"
-        >
-          Address the court →
-        </Link>
+        <div>
+          {comments.map((cm, i) => (
+            <div
+              key={i}
+              className="flex gap-2 py-2"
+              style={{ borderTop: ".5px solid var(--c-border)" }}
+            >
+              <div
+                className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[9px] font-medium"
+                style={
+                  cm.who.startsWith("You")
+                    ? { background: ACCENT_SOFT, color: ACCENT_DEEP, border: ".5px solid var(--c-border-strong)" }
+                    : { background: "var(--c-surface-3)", color: ACCENT_DEEP, border: ".5px solid var(--c-border-strong)" }
+                }
+              >
+                {cm.initials}
+              </div>
+              <div>
+                <div className="mb-0.5 text-[10px]" style={{ color: "var(--c-text-3)" }}>
+                  {cm.who}
+                </div>
+                <div className="text-[12px] leading-[1.5]" style={{ color: "var(--c-text-1)" }}>
+                  {cm.text}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-2.5 flex items-center gap-1.5">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") submitComment(); }}
+            placeholder="Address the court..."
+            className="flex-1 rounded-xl px-3 py-2.5 text-[12px] outline-none transition"
+            style={{
+              background: "var(--c-surface)",
+              border: ".5px solid var(--c-border-strong)",
+              color: "var(--c-text-1)",
+            }}
+          />
+          <button
+            type="button"
+            onClick={submitComment}
+            className="whitespace-nowrap rounded-xl px-3.5 py-2.5 text-[12px] font-medium text-white transition"
+            style={{ background: ACCENT }}
+          >
+            Submit
+          </button>
+        </div>
       </div>
 
-      {/* Share row — these ARE the only CTAs */}
-      <div className="flex justify-center gap-2 border-t border-c-border bg-c-surface-2 px-4 py-3">
-        <Link
-          to="/spill"
-          className="inline-flex items-center gap-1.5 rounded-full border border-c-border-strong bg-c-surface-3 px-3.5 py-1.5 text-[11px] font-medium text-c-text-1 transition hover:bg-c-surface"
+      {/* Share row */}
+      <div className="mt-3.5 flex justify-center gap-2 px-4 pb-4">
+        <button
+          type="button"
+          onClick={() => setLiked((v) => !v)}
+          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition"
+          style={
+            liked
+              ? { background: ACCENT_SOFT, border: `0.5px solid ${ACCENT}`, color: ACCENT_DEEP }
+              : { background: "var(--c-surface-2)", border: ".5px solid var(--c-border-strong)", color: "var(--c-text-2)" }
+          }
         >
-          <Flag className="h-3 w-3" strokeWidth={1.5} />
-          It happened to me
-        </Link>
-        <Link
-          to="/post/$postId"
-          params={{ postId: c.post.id }}
-          search={{ shared: 2 }}
-          className="inline-flex items-center gap-1.5 rounded-full border border-c-border px-3.5 py-1.5 text-[11px] text-c-text-2 transition hover:text-c-text-1"
+          🙋 It happened to me
+        </button>
+        <button
+          type="button"
+          onClick={shareCase}
+          className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium transition"
+          style={{ background: "var(--c-surface-2)", border: ".5px solid var(--c-border-strong)", color: "var(--c-text-2)" }}
         >
-          <Share2 className="h-3 w-3" strokeWidth={1.5} />
-          Share this case
-        </Link>
+          {shareLabel}
+        </button>
       </div>
     </motion.section>
   );
 }
 
-function PartyZone({
+function PartyCard({
   label,
   letter,
   name,
   status,
   accent,
+  accentBg,
   quote,
   empty,
 }: {
@@ -328,35 +587,29 @@ function PartyZone({
   name: string;
   status: string;
   accent: string;
-  quote: string | null;
+  accentBg: string;
+  quote?: string | null;
   empty?: boolean;
 }) {
   return (
     <div
-      className="rounded-lg border border-c-border bg-c-surface p-2.5"
+      className="rounded-xl p-3"
       style={{
-        borderTopWidth: 2,
-        borderTopColor: accent,
-        opacity: empty ? 0.85 : 1,
+        background: "var(--c-surface-2)",
+        border: ".5px solid var(--c-border)",
+        borderTop: `2px solid ${accent}`,
       }}
     >
-      <div
-        className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.1em]"
-        style={{ color: accent }}
-      >
+      <div className="mb-2 text-[9px] font-medium uppercase tracking-[0.08em]" style={{ color: accent }}>
         {label}
       </div>
       <div
-        className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-medium"
-        style={{
-          borderColor: accent,
-          color: accent,
-          background: `color-mix(in oklab, ${accent} 10%, transparent)`,
-        }}
+        className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-medium"
+        style={{ background: accentBg, border: `1px solid ${accent}`, color: accent }}
       >
-        {empty ? <UserX className="h-3.5 w-3.5" strokeWidth={1.5} /> : letter}
+        {letter}
       </div>
-      <div className="text-center text-[12px] font-medium text-c-text-1">
+      <div className="text-center text-[12px] font-medium" style={{ color: "var(--c-text-1)" }}>
         {name}
       </div>
       <div className="text-center text-[10px]" style={{ color: accent }}>
@@ -364,41 +617,27 @@ function PartyZone({
       </div>
       {empty ? (
         <div
-          className="mt-1.5 rounded-md border border-dashed px-2 py-1.5 text-center text-[10px] text-c-text-2"
-          style={{ borderColor: `color-mix(in oklab, ${accent} 35%, transparent)` }}
+          className="mt-2 rounded-md px-2 py-1.5 text-center text-[11px]"
+          style={{
+            background: "var(--c-surface)",
+            border: ".5px dashed var(--c-border-strong)",
+            color: "var(--c-text-3)",
+          }}
         >
           Empty chair — has not responded
         </div>
       ) : quote ? (
-        <div className="mt-1.5 rounded-md border border-c-border bg-c-surface-2 px-2 py-1.5 text-left text-[11px] italic leading-snug text-c-text-2">
+        <div
+          className="mt-2 rounded-md px-2 py-1.5 text-[11px] italic leading-[1.5]"
+          style={{
+            background: "var(--c-surface)",
+            border: ".5px solid var(--c-border)",
+            color: "var(--c-text-2)",
+          }}
+        >
           "{quote}"
         </div>
       ) : null}
     </div>
   );
-}
-
-function JudgmentChip({ label, color }: { label: string; color: string }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px]"
-      style={{
-        borderColor: "var(--c-border)",
-        color: "var(--c-text-2)",
-        background: "transparent",
-      }}
-    >
-      <span
-        aria-hidden
-        className="h-[6px] w-[6px] rounded-full"
-        style={{ background: color }}
-      />
-      {label}
-    </span>
-  );
-}
-
-function truncate(s: string, n: number) {
-  if (s.length <= n) return s;
-  return s.slice(0, n - 1).trimEnd() + "…";
 }
