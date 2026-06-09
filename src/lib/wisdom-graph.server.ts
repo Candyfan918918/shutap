@@ -68,20 +68,20 @@ export async function writeWisdomGraphForPost(args: {
   const dist: Record<string, number> = {};
   for (const v of (votes ?? []) as any[]) dist[v.kind] = (dist[v.kind] ?? 0) + 1;
 
-  // 5 most recent prior nodes in the same category as candidates for edges.
-  const { data: candidates } = await supabaseAdmin
-    .from("wisdom_graph_nodes")
-    .select("id, category, payload")
-    .eq("category", (tags as any)?.category ?? null)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
   const tagList = ((tags ?? []) as any[]).map((t) => t.tag).filter(Boolean);
   const tagSet = new Set(tagList);
   const category = tagList.find((t: string) => t.startsWith("category:"))?.split(":")[1] ?? null;
   const severity = tagList.find((t: string) => t.startsWith("severity:"))?.split(":")[1] ?? null;
   const conflictType =
     tagList.find((t: string) => t.startsWith("conflict:"))?.split(":")[1] ?? null;
+
+  // 5 most recent prior nodes in the same category as candidates for edges.
+  const { data: candidates } = await supabaseAdmin
+    .from("wisdom_graph_nodes")
+    .select("id, category, payload")
+    .eq("category", category ?? "")
+    .order("created_at", { ascending: false })
+    .limit(5);
 
   let agentOut: AgentOutput = {};
   try {
