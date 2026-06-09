@@ -80,7 +80,16 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       if (data.session) {
         setPhase((p) => (p === "auth" ? "dob" : p));
         ensureIdentity({ data: {} })
-          .then((identity) => setCountryCode(identity.countryCode ?? null))
+          .then((identity) => {
+            setCountryCode(identity.countryCode ?? null);
+            const aliasAlreadyClaimed = Boolean(identity.nationality && identity.emotion && identity.creature);
+            setPhase((current) => {
+              if (current !== "auth" && current !== "dob") return current;
+              if (identity.ageVerified && aliasAlreadyClaimed) return "done";
+              if (identity.ageVerified) return "spin";
+              return "dob";
+            });
+          })
           .catch(() => {/* silent */});
       }
     });
@@ -114,7 +123,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     setBusy(true);
     try {
       const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
-      if (res.error || !res.data?.age_verified) { setPhase("underage"); return; }
+      if (!res.data?.age_verified) { setPhase("underage"); return; }
       setPhase("spin");
     } finally { setBusy(false); }
   };
@@ -130,7 +139,10 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
           relationshipType: pending.context?.relationshipType,
           countryCode: countryCode ?? undefined,
         },
-      }).then((a) => setAlias(a));
+      }).then((a) => setAlias(a)).catch(() => {
+        toast.error("Couldn't assign your alias. Try again.");
+        setPhase("dob");
+      });
       return;
     }
     setLocks({ n: false, e: false, c: false });
