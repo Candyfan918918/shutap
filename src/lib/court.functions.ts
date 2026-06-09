@@ -20,7 +20,9 @@ export type CourtStatus =
   | "in_court"
   | "judgment_pending"
   | "decided"
-  | "legendary";
+  | "legendary"
+  | "paused"
+  | "rejected";
 
 export type CourtTier = "city" | "regional" | "national" | "world";
 
@@ -42,6 +44,10 @@ export interface CourtCase {
   benchVerdictLine: string | null;
   finalJudgment: string | null;
   engagementScore: number;
+  isFlipRound: boolean;
+  flipWindowClosesAt: string | null;
+  preFlipVerdict: string | null;
+  flipRoundCount: number;
   post: {
     id: string;
     title: string;
@@ -60,6 +66,7 @@ export interface CourtCase {
   } | null;
   verdict: { counts: VerdictCounts; total: number };
 }
+
 
 export interface ViewerRegion {
   country: string | null;
