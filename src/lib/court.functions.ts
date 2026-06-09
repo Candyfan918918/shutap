@@ -22,6 +22,8 @@ export type CourtStatus =
   | "decided"
   | "legendary";
 
+export type CourtTier = "city" | "regional" | "national" | "world";
+
 export interface CourtCase {
   id: string;
   postId: string;
@@ -29,12 +31,16 @@ export interface CourtCase {
   regionCode: string;
   regionLabel: string;
   status: CourtStatus;
+  currentTier: CourtTier;
   nominatedAt: string;
   opensAt: string | null;
   closesAt: string | null;
   decidedAt: string | null;
+  verdictLockAt: string | null;
   finalVerdict: string | null;
   aiSummary: string | null;
+  benchVerdictLine: string | null;
+  finalJudgment: string | null;
   engagementScore: number;
   post: {
     id: string;
@@ -49,6 +55,8 @@ export interface CourtCase {
     shareCount: number;
     saveCount: number;
     authorId: string;
+    bothSidesHeard: boolean;
+    perspectiveCount: number;
   } | null;
   verdict: { counts: VerdictCounts; total: number };
 }
@@ -221,30 +229,16 @@ export const getViewerRegion = createServerFn({ method: "GET" }).handler(
 // ──────────────────────────────────────────────────────────────
 
 async function attachPostsAndVerdicts(
-  cases: Array<{
-    id: string;
-    post_id: string;
-    scope: CourtScope;
-    region_code: string;
-    region_label: string;
-    status: CourtStatus;
-    nominated_at: string;
-    opens_at: string | null;
-    closes_at: string | null;
-    decided_at: string | null;
-    final_verdict: string | null;
-    ai_summary: string | null;
-    engagement_score: number;
-  }>
+  cases: Array<Record<string, any>>,
 ): Promise<CourtCase[]> {
   if (cases.length === 0) return [];
-  const postIds = Array.from(new Set(cases.map((c) => c.post_id)));
+  const postIds = Array.from(new Set(cases.map((c) => c.post_id as string)));
 
   const [{ data: posts }, { data: votes }] = await Promise.all([
     supabaseAdmin
       .from("posts")
       .select(
-        "id, title, story_text, media_url, score_category, score, badges, comment_count, like_count, share_count, save_count, author_id, status, visibility, deleted_at"
+        "id, title, story_text, media_url, score_category, score, badges, comment_count, like_count, share_count, save_count, author_id, status, visibility, deleted_at, both_sides_heard, perspective_count",
       )
       .in("id", postIds),
     supabaseAdmin
@@ -274,6 +268,8 @@ async function attachPostsAndVerdicts(
       shareCount: (p.share_count as number) ?? 0,
       saveCount: (p.save_count as number) ?? 0,
       authorId: p.author_id as string,
+      bothSidesHeard: !!p.both_sides_heard,
+      perspectiveCount: (p.perspective_count as number) ?? 0,
     });
   }
 
@@ -288,24 +284,35 @@ async function attachPostsAndVerdicts(
     }
   }
 
+  const ALLOWED_TIERS: ReadonlyArray<CourtTier> = ["city", "regional", "national", "world"];
+  const resolveTier = (c: Record<string, any>): CourtTier => {
+    const t = c.current_tier as string | null;
+    if (t && (ALLOWED_TIERS as string[]).includes(t)) return t as CourtTier;
+    return (c.scope as string) === "country" ? "national" : (c.scope as CourtTier) ?? "city";
+  };
+
   return cases.map((c) => ({
-    id: c.id,
-    postId: c.post_id,
-    scope: c.scope,
-    regionCode: c.region_code,
-    regionLabel: c.region_label,
-    status: c.status,
-    nominatedAt: c.nominated_at,
-    opensAt: c.opens_at,
-    closesAt: c.closes_at,
-    decidedAt: c.decided_at,
-    finalVerdict: c.final_verdict,
-    aiSummary: c.ai_summary,
-    engagementScore: c.engagement_score,
-    post: postMap.get(c.post_id) ?? null,
+    id: c.id as string,
+    postId: c.post_id as string,
+    scope: c.scope as CourtScope,
+    regionCode: c.region_code as string,
+    regionLabel: c.region_label as string,
+    status: c.status as CourtStatus,
+    currentTier: resolveTier(c),
+    nominatedAt: c.nominated_at as string,
+    opensAt: (c.opens_at as string | null) ?? null,
+    closesAt: (c.closes_at as string | null) ?? null,
+    decidedAt: (c.decided_at as string | null) ?? null,
+    verdictLockAt: (c.verdict_lock_at as string | null) ?? (c.closes_at as string | null) ?? null,
+    finalVerdict: (c.final_verdict as string | null) ?? null,
+    aiSummary: (c.ai_summary as string | null) ?? null,
+    benchVerdictLine: (c.bench_verdict_line as string | null) ?? null,
+    finalJudgment: (c.final_judgment as string | null) ?? null,
+    engagementScore: (c.engagement_score as number) ?? 0,
+    post: postMap.get(c.post_id as string) ?? null,
     verdict: {
-      counts: tally.get(c.post_id) ?? emptyCounts(),
-      total: totals.get(c.post_id) ?? 0,
+      counts: tally.get(c.post_id as string) ?? emptyCounts(),
+      total: totals.get(c.post_id as string) ?? 0,
     },
   }));
 }
