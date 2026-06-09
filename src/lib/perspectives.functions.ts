@@ -297,13 +297,22 @@ export const commentPerspective = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const { data: row } = await supabaseAdmin
       .from("post_perspectives")
-      .select("comment_count")
+      .select("post_id, comment_count")
       .eq("id", data.perspective_id)
       .single();
     await supabaseAdmin
       .from("post_perspectives")
-      .update({ comment_count: (row?.comment_count ?? 0) + 1 })
+      .update({ comment_count: ((row as any)?.comment_count ?? 0) + 1 })
       .eq("id", data.perspective_id);
+    const postId = (row as any)?.post_id as string | undefined;
+    if (postId) {
+      void (async () => {
+        try {
+          const { bumpNomination } = await import("@/lib/nomination.functions");
+          bumpNomination(postId);
+        } catch { /* ignore */ }
+      })();
+    }
     return { ok: true };
   });
 
