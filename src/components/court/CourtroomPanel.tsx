@@ -52,6 +52,16 @@ function truncate(s: string, n: number) {
   return s.slice(0, n - 1).trimEnd() + "…";
 }
 
+const TIER_LABEL: Record<string, string> = {
+  city: "City Court",
+  regional: "Regional Court",
+  national: "National Court",
+  world: "World Court",
+};
+function tierLabel(t: string): string {
+  return TIER_LABEL[t] ?? "Court";
+}
+
 export function CourtroomPanel({ c }: { c: CourtCase }) {
   if (!c.post) return null;
 
