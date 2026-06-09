@@ -959,6 +959,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_verified: boolean
           anonymous_mode: boolean
           avatar_kind: string
           avatar_url: string | null
@@ -968,23 +969,32 @@ export type Database = {
           country: string | null
           country_code: string | null
           created_at: string
+          creature: string | null
           descriptor: string | null
           display_name: string | null
+          dob: string | null
           email: string | null
+          emoji: string | null
+          emotion: string | null
           emotional_embedding: string | null
           handle: string
           id: string
           last_seen_at: string | null
           locale: string
+          nationality: string | null
           nickname: string
           notif_prefs: Json
           onboarded_at: string | null
+          phone: string | null
+          phone_verified: boolean
           privacy: Json
           region: string | null
+          reroll_used: boolean
           updated_at: string
           vibe: string | null
         }
         Insert: {
+          age_verified?: boolean
           anonymous_mode?: boolean
           avatar_kind?: string
           avatar_url?: string | null
@@ -994,23 +1004,32 @@ export type Database = {
           country?: string | null
           country_code?: string | null
           created_at?: string
+          creature?: string | null
           descriptor?: string | null
           display_name?: string | null
+          dob?: string | null
           email?: string | null
+          emoji?: string | null
+          emotion?: string | null
           emotional_embedding?: string | null
           handle: string
           id: string
           last_seen_at?: string | null
           locale?: string
+          nationality?: string | null
           nickname: string
           notif_prefs?: Json
           onboarded_at?: string | null
+          phone?: string | null
+          phone_verified?: boolean
           privacy?: Json
           region?: string | null
+          reroll_used?: boolean
           updated_at?: string
           vibe?: string | null
         }
         Update: {
+          age_verified?: boolean
           anonymous_mode?: boolean
           avatar_kind?: string
           avatar_url?: string | null
@@ -1020,19 +1039,27 @@ export type Database = {
           country?: string | null
           country_code?: string | null
           created_at?: string
+          creature?: string | null
           descriptor?: string | null
           display_name?: string | null
+          dob?: string | null
           email?: string | null
+          emoji?: string | null
+          emotion?: string | null
           emotional_embedding?: string | null
           handle?: string
           id?: string
           last_seen_at?: string | null
           locale?: string
+          nationality?: string | null
           nickname?: string
           notif_prefs?: Json
           onboarded_at?: string | null
+          phone?: string | null
+          phone_verified?: boolean
           privacy?: Json
           region?: string | null
+          reroll_used?: boolean
           updated_at?: string
           vibe?: string | null
         }

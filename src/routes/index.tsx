@@ -21,6 +21,8 @@ import {
 
 import { listComments, type CommentRow } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useGateStore, type PendingAction } from "@/stores/gate";
+import { IdentityCeremony } from "@/components/gate/IdentityCeremony";
 import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
 import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
 
@@ -72,17 +74,19 @@ const JUDGMENTS: Array<{ kind: string; emoji: string; label: string }> = [
 function AnonymousCourt() {
   const navigate = useNavigate();
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const enqueue = useGateStore((s) => s.enqueue);
+  const gateOpen = useGateStore((s) => s.open);
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) setAuthed(!!data.session);
     });
-    return () => { active = false; };
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthed(!!session);
+    });
+    return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  const gate = (intent: string) => {
-    navigate({ to: "/enter", search: { redirect: `/?intent=${intent}` } });
-  };
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
   const fetchGlobal = useServerFn(getGlobalVerdictCount);
@@ -121,18 +125,57 @@ function AnonymousCourt() {
     staleTime: 30_000,
   });
 
+  const featuredPost = featuredQ.data?.case.post;
+  const featuredContext = useMemo(
+    () => ({
+      category: featuredPost?.scoreCategory ?? undefined,
+      relationshipType: featuredPost?.scoreCategory ?? undefined,
+    }),
+    [featuredPost?.scoreCategory],
+  );
+
+  // Universal gate — every action funnels here. If already authed, run replay-ish (no-op for now;
+  // the underlying UI will route the user via the appropriate signed-in flow).
+  const gate = (intent: string, action?: Partial<PendingAction>) => {
+    if (authed) {
+      // Already signed in — let the underlying control handle the real call.
+      // For top-of-page CTAs, drop them into the authenticated court view.
+      if (intent === "claim" || intent === "claim_final") {
+        navigate({ to: "/court" });
+      }
+      return;
+    }
+    const pending: PendingAction = {
+      type: (action?.type ?? intent) as PendingAction["type"],
+      entityId: action?.entityId ?? featuredPost?.id,
+      verdictKind: action?.verdictKind,
+      draftText: action?.draftText,
+      context: action?.context ?? featuredContext,
+    };
+    enqueue(pending);
+  };
+
+  const gateForCard = (intent: string) => gate(intent);
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain">
       <TrustSignalBar total={globalQ.data?.total ?? null} />
       <TopChrome authed={authed} />
 
-      <main className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8">
+      <motion.main
+        animate={
+          gateOpen
+            ? { filter: "blur(4px)", y: 40 }
+            : { filter: "blur(0px)", y: 0 }
+        }
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8"
+      >
         <HeroIntro />
         {featuredQ.isLoading ? (
           <CaseSkeleton />
         ) : featuredQ.data ? (
-          <CaseView featured={featuredQ.data} onGate={gate} />
+          <CaseView featured={featuredQ.data} onGate={gateForCard} />
         ) : (
           <CourtInRecess />
         )}
@@ -140,13 +183,12 @@ function AnonymousCourt() {
           posts={teaserQ.data ?? []}
           isLoading={teaserQ.isLoading}
           openCases={openCasesQ.data?.count ?? 0}
-          onGate={gate}
-          excludePostId={featuredQ.data?.case.post?.id}
+          onGate={gateForCard}
+          excludePostId={featuredPost?.id}
         />
-        <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gate} />
-        <FinalCTA onGate={gate} />
-
-      </main>
+        <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gateForCard} />
+        <FinalCTA onGate={gateForCard} />
+      </motion.main>
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-3xl px-4 py-8 text-center text-xs text-muted-foreground space-y-1">
@@ -154,9 +196,14 @@ function AnonymousCourt() {
           <p>Made with chaos, worldwide.</p>
         </div>
       </footer>
+
+      <AnimatePresence>
+        {gateOpen && <IdentityCeremony key="ceremony" />}
+      </AnimatePresence>
     </div>
   );
 }
+
 
 // ───────────────────────── Trust signal bar ─────────────────────────
 
