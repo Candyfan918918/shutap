@@ -145,7 +145,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickVote(k: VerdictKey) {
     if (submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "vote", entityId: c.post!.id, verdictKind: k })) return;
     setMyVote(k);
     if (fillerSeats.length === 0) {
       const init = JUROR_INITIALS[Math.floor(Math.random() * JUROR_INITIALS.length)];
@@ -155,13 +155,13 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
 
   function pickJudgment(k: JudgmentKey) {
     if (submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "judgment", entityId: c.post!.id })) return;
     setMyJudgment(k);
   }
 
   async function onSubmit() {
     if (!myVote || !myJudgment || submitted) return;
-    if (!requireAuth()) return;
+    if (!gate({ type: "vote", entityId: c.post!.id, verdictKind: myVote })) return;
     setSubmitState("submitting");
     setErrorMsg(null);
     try {
@@ -178,8 +178,8 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   function submitComment() {
-    if (!requireAuth()) return;
     const t = draft.trim();
+    if (!gate({ type: "comment", entityId: c.post!.id, draftText: t })) return;
     if (!t) return;
     setComments((cs) => [
       ...cs,
@@ -189,7 +189,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   async function shareCase() {
-    if (!requireAuth()) return;
+    if (!gate({ type: "teaser", entityId: c.post!.id })) return;
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
@@ -209,7 +209,7 @@ export function CourtroomPanel({ c }: { c: CourtCase }) {
   }
 
   function toggleLike() {
-    if (!requireAuth()) return;
+    if (!gate({ type: "relate", entityId: c.post!.id })) return;
     setLiked((v) => !v);
   }
 
