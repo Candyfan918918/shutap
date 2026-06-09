@@ -161,6 +161,12 @@ export const addComment = createServerFn({ method: "POST" })
       .select("id, created_at")
       .single();
     if (error) throw new Error(error.message);
+    void (async () => {
+      try {
+        const { bumpNomination } = await import("@/lib/nomination.functions");
+        bumpNomination(data.postId);
+      } catch { /* ignore */ }
+    })();
     return { id: row.id as string, createdAt: row.created_at as string };
   });
 

@@ -190,6 +190,12 @@ export const submitPerspectiveResponse = createServerFn({ method: "POST" })
       await supabaseAdmin.from("posts").update(update).eq("id", p.post_id);
     }
 
+    void (async () => {
+      try {
+        const { bumpNomination } = await import("@/lib/nomination.functions");
+        bumpNomination(p.post_id);
+      } catch { /* ignore */ }
+    })();
 
     return { ok: true };
   });
@@ -221,43 +227,51 @@ export const togglePerspectiveRelate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const ctx = context as AnyCtx;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: persp } = await supabaseAdmin
+      .from("post_perspectives")
+      .select("post_id, relate_count")
+      .eq("id", data.perspective_id)
+      .single();
+    const postId = (persp as any)?.post_id as string | undefined;
+
     const { data: existing } = await supabaseAdmin
       .from("post_perspective_relates")
       .select("perspective_id")
       .eq("perspective_id", data.perspective_id)
       .eq("user_id", ctx.userId)
       .maybeSingle();
+
+    const fireBump = () => {
+      if (!postId) return;
+      void (async () => {
+        try {
+          const { bumpNomination } = await import("@/lib/nomination.functions");
+          bumpNomination(postId);
+        } catch { /* ignore */ }
+      })();
+    };
+
     if (existing) {
       await supabaseAdmin
         .from("post_perspective_relates")
         .delete()
         .eq("perspective_id", data.perspective_id)
         .eq("user_id", ctx.userId);
-      const { data: row } = await supabaseAdmin
-        .from("post_perspectives")
-        .select("relate_count")
-        .eq("id", data.perspective_id)
-        .single();
       await supabaseAdmin
         .from("post_perspectives")
-        .update({ relate_count: Math.max(0, (row?.relate_count ?? 1) - 1) })
+        .update({ relate_count: Math.max(0, ((persp as any)?.relate_count ?? 1) - 1) })
         .eq("id", data.perspective_id);
-
+      fireBump();
       return { related: false };
     }
     await supabaseAdmin
       .from("post_perspective_relates")
       .insert({ perspective_id: data.perspective_id, user_id: ctx.userId });
-    // Fallback: best-effort counter bump via direct update.
-    const { data: row } = await supabaseAdmin
-      .from("post_perspectives")
-      .select("relate_count")
-      .eq("id", data.perspective_id)
-      .single();
     await supabaseAdmin
       .from("post_perspectives")
-      .update({ relate_count: (row?.relate_count ?? 0) + 1 })
+      .update({ relate_count: ((persp as any)?.relate_count ?? 0) + 1 })
       .eq("id", data.perspective_id);
+    fireBump();
     return { related: true };
   });
 
@@ -283,13 +297,22 @@ export const commentPerspective = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const { data: row } = await supabaseAdmin
       .from("post_perspectives")
-      .select("comment_count")
+      .select("post_id, comment_count")
       .eq("id", data.perspective_id)
       .single();
     await supabaseAdmin
       .from("post_perspectives")
-      .update({ comment_count: (row?.comment_count ?? 0) + 1 })
+      .update({ comment_count: ((row as any)?.comment_count ?? 0) + 1 })
       .eq("id", data.perspective_id);
+    const postId = (row as any)?.post_id as string | undefined;
+    if (postId) {
+      void (async () => {
+        try {
+          const { bumpNomination } = await import("@/lib/nomination.functions");
+          bumpNomination(postId);
+        } catch { /* ignore */ }
+      })();
+    }
     return { ok: true };
   });
 
