@@ -100,8 +100,13 @@ function CourtCaseCardImpl({
                 Both sides heard
               </span>
             )}
+            {c.isFlipRound && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border bg-fuchsia-500/15 border-fuchsia-500/40 text-fuchsia-600 dark:text-fuchsia-300">
+                Flip Round
+              </span>
+            )}
             {c.status === "in_court" && (
-              <CountdownChip to={c.verdictLockAt ?? c.closesAt} prefix="Locks in" />
+              <CountdownChip to={c.verdictLockAt ?? c.closesAt} prefix={c.isFlipRound ? "Flip locks in" : "Locks in"} />
             )}
           </div>
 
