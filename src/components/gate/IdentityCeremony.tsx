@@ -39,25 +39,8 @@ function stashPending(p: PendingAction) {
   } catch {/* silent */}
 }
 
-// Simple click tone — Web Audio, no asset needed.
-function clickTone(hz: number) {
-  if (typeof window === "undefined") return;
-  try {
-    const Ctx = window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.frequency.value = hz;
-    osc.type = "triangle";
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.08);
-    setTimeout(() => ctx.close(), 200);
-  } catch {/* silent */}
-}
+// Click tone now imported from SlotReel for one canonical implementation.
+
 
 export function IdentityCeremony() {
   const open = useGateStore((s) => s.open);
