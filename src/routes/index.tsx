@@ -391,7 +391,7 @@ function CaseView({
         </p>
       </div>
 
-      <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-3 text-xs text-amber-200">
+      <div className="cta-card cta-card--amber text-xs text-c-text-2">
         ⚠️ One person's account — the other party has not responded.
       </div>
 
