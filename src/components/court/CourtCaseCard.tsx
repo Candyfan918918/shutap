@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import type { CourtCase } from "@/lib/court.functions";
