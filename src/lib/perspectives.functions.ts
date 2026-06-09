@@ -233,10 +233,16 @@ export const togglePerspectiveRelate = createServerFn({ method: "POST" })
         .delete()
         .eq("perspective_id", data.perspective_id)
         .eq("user_id", ctx.userId);
-      await supabaseAdmin.rpc("pp_bump_relate", {
-        _id: data.perspective_id,
-        _delta: -1,
-      } as never).then(() => {}, () => {});
+      const { data: row } = await supabaseAdmin
+        .from("post_perspectives")
+        .select("relate_count")
+        .eq("id", data.perspective_id)
+        .single();
+      await supabaseAdmin
+        .from("post_perspectives")
+        .update({ relate_count: Math.max(0, (row?.relate_count ?? 1) - 1) })
+        .eq("id", data.perspective_id);
+
       return { related: false };
     }
     await supabaseAdmin
