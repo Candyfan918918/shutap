@@ -34,6 +34,12 @@ const EMOJI_OPTIONS = ["🦊", "🦉", "🐙", "🦋", "🌙", "⚡", "🌸", "�
 
 export const RESUME_KEY = "md.gate.resume";
 
+const MIN_BIRTH_YEAR = 1900;
+
+function getAdultCutoffYear() {
+  return new Date().getUTCFullYear() - 18;
+}
+
 function stashPending(p: PendingAction) {
   try {
     sessionStorage.setItem(RESUME_KEY, JSON.stringify(p));
@@ -65,6 +71,7 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
   const [confirmingStep, setConfirmingStep] = useState<0 | 1 | 2>(0);
   const [busy, setBusy] = useState(false);
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  const latestAdultYear = getAdultCutoffYear();
 
   const ensureIdentity = useServerFn(finalizeIdentity);
   const fetchAlias = useServerFn(generateAlias);
@@ -126,6 +133,14 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
     setBusy(true);
     try {
       const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      if (res.error) {
+        if (res.error === "age_gate_failed") {
+          setPhase("underage");
+          return;
+        }
+        toast.error(res.error);
+        return;
+      }
       if (!res.data?.age_verified) { setPhase("underage"); return; }
       setPhase("spin");
     } finally { setBusy(false); }
@@ -149,8 +164,8 @@ function Ceremony({ pending, onClose }: { pending: PendingAction; onClose: () =>
       return;
     }
     setLocks({ n: false, e: false, c: false });
-    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440); }, 2000);
-    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(460); }, 2200);
+    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(440); }, 2000);
+    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(460); }, 2200);
     const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(480); }, 2400);
     const t4 = window.setTimeout(() => setPhase("reveal"), 3200);
     return () => {
@@ -279,8 +294,8 @@ function SlotMachine({
   return (
     <div className={`px-5 pt-3 transition ${dimmed ? "opacity-70" : ""}`}>
       <div className="grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
         <SlotReel pool={pools.emotion} locked={locks.e} value={alias?.emotion} />
+        <SlotReel pool={pools.nationality} locked={locks.n} value={alias?.nationality} />
         <SlotReel pool={pools.creature} locked={locks.c} value={alias?.creature} />
       </div>
     </div>
@@ -297,8 +312,8 @@ function AliasLine({
   if (phase !== "spin" && phase !== "reveal" && phase !== "confirming") return null;
   if (!alias) return null;
   const parts: string[] = ["You are"];
-  if (locks.n || phase !== "spin") parts.push(alias.nationality);
   if (locks.e || phase !== "spin") parts.push(alias.emotion);
+  if (locks.n || phase !== "spin") parts.push(alias.nationality);
   if (locks.c || phase !== "spin") parts.push(alias.creature);
   const text = parts.join(" ") + (locks.c || phase !== "spin" ? "." : "...");
   return (
@@ -412,8 +427,8 @@ function DobCard({
   onSubmit: () => void; busy: boolean;
 }) {
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  // Spec: year range 1900–2007 (anyone born after 2007 is under 18 by definition).
-  const years = Array.from({ length: 2007 - 1900 + 1 }, (_, i) => 2007 - i);
+  const latestAdultYear = getAdultCutoffYear();
+  const years = Array.from({ length: latestAdultYear - MIN_BIRTH_YEAR + 1 }, (_, i) => latestAdultYear - i);
   return (
     <div className="rounded-2xl border border-border bg-surface-elevated p-4 space-y-3">
       <p className="text-sm font-medium">Before we go further.</p>

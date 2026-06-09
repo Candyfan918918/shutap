@@ -141,7 +141,7 @@ export const claimAlias = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { supabase, userId } = context;
-    const nickname = `${data.emotion} ${data.creature}`;
+    const nickname = `${data.emotion} ${data.nationality} ${data.creature}`;
     const update = {
       nationality: data.nationality,
       emotion: data.emotion,

@@ -19,6 +19,12 @@ const EMOJI_OPTIONS = ["🦊", "🦉", "🐙", "🦋", "🌙", "⚡", "🌸", "�
 
 type Phase = "loading" | "dob" | "underage" | "spin" | "reveal" | "saving" | "done";
 
+const MIN_BIRTH_YEAR = 1900;
+
+function getAdultCutoffYear() {
+  return new Date().getUTCFullYear() - 18;
+}
+
 export const Route = createFileRoute("/welcome")({
   head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
   validateSearch: (search: Record<string, unknown>) => ({
@@ -57,9 +63,10 @@ function WelcomePage() {
   const [locks, setLocks] = useState({ n: false, e: false, c: false });
   const [busy, setBusy] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const latestAdultYear = getAdultCutoffYear();
 
   const [dobMonth, setDobMonth] = useState<number>(1);
-  const [dobYear, setDobYear] = useState<number>(2000);
+  const [dobYear, setDobYear] = useState<number>(Math.max(MIN_BIRTH_YEAR, latestAdultYear - 7));
 
   // Resolve redirect destination from search or sessionStorage.
   useEffect(() => {
@@ -109,6 +116,14 @@ function WelcomePage() {
     setBusy(true);
     try {
       const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      if (res.error) {
+        if (res.error === "age_gate_failed") {
+          setPhase("underage");
+          return;
+        }
+        toast.error(res.error);
+        return;
+      }
       if (!res.data?.age_verified) {
         setPhase("underage");
         return;
@@ -143,8 +158,8 @@ function WelcomePage() {
     }
     setLocks({ n: false, e: false, c: false });
     lockTimers.current.forEach((id) => window.clearTimeout(id));
-    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(440, 0.3); }, 2000);
-    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(460, 0.3); }, 2200);
+    const t1 = window.setTimeout(() => { setLocks((l) => ({ ...l, e: true })); clickTone(440, 0.3); }, 2000);
+    const t2 = window.setTimeout(() => { setLocks((l) => ({ ...l, n: true })); clickTone(460, 0.3); }, 2200);
     const t3 = window.setTimeout(() => { setLocks((l) => ({ ...l, c: true })); clickTone(480, 0.3); }, 2400);
     const t4 = window.setTimeout(() => setPhase("reveal"), 2800);
     lockTimers.current = [t1, t2, t3, t4];
@@ -216,8 +231,8 @@ function WelcomePage() {
         {/* Slot reels — present from spin onward */}
         {phase !== "dob" && phase !== "loading" && (
           <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
-            <SlotReel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
             <SlotReel pool={alias?.reelPools.emotion} value={alias?.emotion} locked={locks.e} />
+            <SlotReel pool={alias?.reelPools.nationality} value={alias?.nationality} locked={locks.n} />
             <SlotReel pool={alias?.reelPools.creature} value={alias?.creature} locked={locks.c} />
           </div>
         )}
@@ -241,7 +256,7 @@ function WelcomePage() {
                 </select>
                 <select value={dobYear} onChange={(e) => setDobYear(parseInt(e.target.value, 10))}
                   className="w-32 rounded-lg bg-surface-elevated border border-border px-2 py-2.5 text-sm">
-                  {Array.from({ length: 2007 - 1900 + 1 }, (_, i) => 2007 - i).map((y) => (
+                  {Array.from({ length: latestAdultYear - MIN_BIRTH_YEAR + 1 }, (_, i) => latestAdultYear - i).map((y) => (
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
@@ -262,7 +277,7 @@ function WelcomePage() {
               <div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">You are</p>
                 <p className="mt-1 text-xl sm:text-2xl font-medium leading-tight">
-                  {alias.nationality} {alias.emotion} {alias.creature}
+                    {alias.emotion} {alias.nationality} {alias.creature}
                 </p>
               </div>
 
