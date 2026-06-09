@@ -281,18 +281,12 @@ function TopChrome({ authed }: { authed: boolean | null }) {
         {authed ? (
           <Link
             to="/court"
-            className="text-xs px-3 py-1.5 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 font-medium hover:bg-c-surface-3 transition"
+            className="text-xs px-3 py-1.5 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 font-medium hover:bg-c-surface-3 transition mr-12"
           >
             Enter Court →
           </Link>
         ) : (
-          <Link
-            to="/enter"
-            search={{ redirect: "/" }}
-            className="text-xs px-3.5 py-1.5 rounded-md bg-c-pink text-white font-medium hover:opacity-90 transition"
-          >
-            Claim my identity →
-          </Link>
+          <span className="mr-12" aria-hidden />
         )}
       </div>
     </header>
