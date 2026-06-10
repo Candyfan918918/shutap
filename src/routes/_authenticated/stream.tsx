@@ -70,11 +70,14 @@ function StreamPage() {
       data: { sort: "trending", limit: 24 },
     }),
   });
-  const meQ = useSuspenseQuery({ ...meQO, queryFn: () => fetchMe() });
+  const meQ = useSuspenseQuery({
+    ...meQO,
+    queryFn: () => (fetchMe as unknown as () => Promise<Record<string, unknown> | null>)(),
+  });
 
   const me = meQ.data;
-  const aliasEmoji = me?.emoji ?? "🦉";
-  const aliasName = me?.nickname ?? "Anonymous Juror";
+  const aliasEmoji = (me?.emoji as string | undefined) ?? "🦉";
+  const aliasName = (me?.nickname as string | undefined) ?? "Anonymous Juror";
 
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1">
