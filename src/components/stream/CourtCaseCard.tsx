@@ -171,12 +171,18 @@ export function CourtCaseCard({ payload }: Props) {
             </div>
           )}
 
-          {/* Locked → bench line */}
-          {isLocked && payload.bench_verdict_line && (
-            <p className="text-[11px] pt-1 italic" style={{ color: "var(--c-text-2)" }}>
-              {payload.bench_verdict_line}
-            </p>
+          {/* Locked → bench line + prediction bar */}
+          {isLocked && (
+            <div className="space-y-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
+              {payload.bench_verdict_line && (
+                <p className="text-[11px] italic" style={{ color: "var(--c-text-2)" }}>
+                  {payload.bench_verdict_line}
+                </p>
+              )}
+              <PredictionBar postId={payload.post_id} />
+            </div>
           )}
+
 
           <p className="stream-card__meta">
             {payload.region_label ?? "Open hearing"} · {isLocked ? "verdict in" : "tap to weigh in"}
