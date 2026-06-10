@@ -8,6 +8,8 @@ import { composeStream, type StreamItem } from "@/lib/stream.functions";
 import { StoryCard } from "./StoryCard";
 import { CourtCaseCard } from "./CourtCaseCard";
 import { SpillCTACard, ScanCTACard, ServiceCard, HOFCard, BenchMomentCard } from "./Cards";
+import { BenchResponseCard } from "./BenchResponseCard";
+import { useStreamStore } from "@/stores/stream";
 
 interface Props {
   anonymous: boolean;
@@ -30,16 +32,20 @@ export function StreamList({ anonymous }: Props) {
     staleTime: 30_000,
   });
 
-  const items: StreamItem[] = useMemo(
+  const overrideActive = useStreamStore((s) => s.chatbot_override_active);
+  const overrideItems = useStreamStore((s) => s.override_items);
+
+  const baseItems: StreamItem[] = useMemo(
     () => (query.data?.pages ?? []).flatMap((p) => p.items),
     [query.data],
   );
+  const items: StreamItem[] = overrideActive ? overrideItems : baseItems;
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || overrideActive) return;
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -52,7 +58,7 @@ export function StreamList({ anonymous }: Props) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [query]);
+  }, [query, overrideActive]);
 
   // Pull-to-refresh (touch only)
   const startY = useRef<number | null>(null);
