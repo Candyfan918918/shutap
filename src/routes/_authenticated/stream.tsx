@@ -84,7 +84,7 @@ function StreamPage() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-[480px] px-4 py-3 flex items-center justify-between">
           <span className="text-lg font-medium tracking-tight">shutap</span>
           <Link to="/me" className="alias-pill">
             <span className="text-base leading-none">{aliasEmoji}</span>
@@ -93,7 +93,7 @@ function StreamPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-3 pt-3 pb-32 space-y-3">
+      <main className="mx-auto max-w-[480px] px-3 pt-3 pb-32 space-y-3">
         {/* Bench inline nudge */}
         <p className="bench-line !my-0 mx-1 text-[12px]">
           Three stories in. Two verdicts cast. The bench is watching.
@@ -139,7 +139,7 @@ function BenchPillMenu() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
-      <div className="mx-auto max-w-xl px-3 pb-3">
+      <div className="mx-auto max-w-[480px] px-3 pb-3">
         {open && (
           <>
             <button
