@@ -288,14 +288,14 @@ export const castVerdict = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const row: Record<string, unknown> = {
+    const row = {
       post_id: data.postId,
       user_id: userId,
       kind: data.kind,
+      ...(typeof data.read_depth_percent === "number"
+        ? { read_depth_percent: data.read_depth_percent }
+        : {}),
     };
-    if (typeof data.read_depth_percent === "number") {
-      row.read_depth_percent = data.read_depth_percent;
-    }
     const { error } = await supabase
       .from("post_verdict_votes")
       .upsert(row, { onConflict: "post_id,user_id" });

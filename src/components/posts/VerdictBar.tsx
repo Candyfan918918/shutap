@@ -138,7 +138,7 @@ export function VerdictBar({
   }, [postId]);
 
   const onVote = async (kind: VerdictKind) => {
-    if (!authed) { softGate("verdict", { entityId: postId, verdictKind: kind }); return; }
+    if (!authed) { softGate("vote", { entityId: postId, verdictKind: kind }); return; }
     const prev = mine;
     // Optimistic update
     setCounts((c) => {
