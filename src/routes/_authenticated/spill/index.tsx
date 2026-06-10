@@ -1,7 +1,7 @@
 // Spill composer — pick type + voice, drop the dump, submit. Visual: shutap_spill_flow.html
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { createTeaDraft } from "@/lib/spill.functions";
 import { detectBrowserLocale, isLocale } from "@/lib/i18n";
