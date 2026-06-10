@@ -85,7 +85,9 @@ function StreamPage() {
     <div className="min-h-screen bg-c-surface text-c-text-1">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
         <div className="mx-auto max-w-[480px] px-4 py-3 flex items-center justify-between">
-          <span className="text-lg font-medium tracking-tight">shutap</span>
+          <span className="text-lg font-medium tracking-tight">
+            shut<span className="text-c-pink-deep">ap</span>
+          </span>
           <Link to="/me" className="alias-pill">
             <span className="text-base leading-none">{aliasEmoji}</span>
             <span className="text-c-pink-ink">{aliasName}</span>
@@ -93,7 +95,27 @@ function StreamPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[480px] px-3 pt-3 pb-32 space-y-3">
+      {/* Stream hero — cream + pink-deep, matches Court */}
+      <section className="mx-auto max-w-[480px] border-x border-b border-c-border relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2">
+        <span
+          aria-hidden
+          className="absolute left-1/2 -translate-x-1/2 top-[-10px] text-[88px] font-medium text-c-pink-soft/70 whitespace-nowrap pointer-events-none tracking-tighter select-none"
+        >
+          STREAM
+        </span>
+        <div className="relative text-[10px] font-medium tracking-[0.12em] uppercase text-c-pink-deep mb-2">
+          The Stream · One feed. No filters.
+        </div>
+        <h1 className="relative text-[16px] font-medium text-c-text-1 leading-snug mb-1.5 text-balance">
+          Today's stories. In the order the Bench thinks you need them.
+        </h1>
+        <p className="relative text-[12px] italic text-c-text-2 leading-snug">
+          Read. Weigh in. Move on.
+        </p>
+      </section>
+
+      <main className="mx-auto max-w-[480px] border-x border-c-border px-3 pt-4 pb-32 space-y-3">
+
         {/* Bench inline nudge */}
         <p className="bench-line !my-0 mx-1 text-[12px]">
           Three stories in. Two verdicts cast. The bench is watching.
