@@ -1,73 +1,87 @@
-# Onboarding & Auth Hardening Plan
+# Rebuild the 5 pillars to match the attached HTML mockups
 
-The biggest win is structural: **one onboarding route, one profile bootstrap, one session check**. Everything else hangs off that. I'll batch this into 4 phases so each phase is independently shippable and reviewable.
+## Scope
 
-## Decisions (need confirmation before phase 1)
+The 5 attached HTML files are full design references with hand-tuned CSS, hero banners, animated bars, dynamic input cards, score reveals, timelines, etc. Total reference: ~3,200 lines of pure styling + markup across the 5 files.
 
-1. **Canonical onboarding surface:** `/welcome` (full page). Delete the DOB/alias logic from `IdentityCeremony`; keep the overlay only as a *sign-in* prompt for anonymous users hitting a protected action. After sign-in, the overlay closes and the resume key sends them through `/welcome` if onboarding is incomplete.
-2. **Canonical post-onboarding destination:** `/court` (you mentioned it; current code defaults to `/`). Make `/` redirect signed-in fully-onboarded users to `/court` only if no explicit `redirect` is set.
-3. **Underage handling:** mark `profiles.blocked_reason = 'underage'` + sign out; do **not** delete the auth user. Block sign-in attempts at the gate for that user_id.
-4. **Session truth:** `supabase.auth.getUser()` everywhere identity matters (it re-validates). `getSession()` only for token attachment.
+The rebuild will preserve every existing route's data wiring (loaders, server functions, mutations). Only the presentation layer is replaced. No backend changes.
 
-If any of these are wrong, tell me before I start phase 1.
+## Pass 1 — Unified design tokens (one file)
 
----
+Edit `src/styles.css` to align with the mockups' shared root:
 
-## Phase 1 — Structural unification
+- Add missing palette deeps: `--c-coral-soft/border/ink` already exist; add `--c-gold-soft/border/deep` (HOF only uses this — `#fef9ec / #f5d97a / #5a3d00`).
+- Add ink scale used in heroes: `--c-ink: #0a080f`, `--c-ink-2: #3a3040`, `--c-ink-3: #7a6880` — used by every dark hero in Scan / Spill / HOF.
+- Add shared utility classes used across multiple pillars: `.hero-dark` (black hero with two coloured orb blobs), `.section-eyebrow`, `.live-pill`, `.cat-pill--*` (already partial — extend to all five categories with consistent border/ink), and `.vbar` segments.
+- Map Tailwind utilities for the new tokens so route files can use `bg-c-ink`, `text-c-ink-3`, `bg-c-gold-soft`, etc.
 
-- **Strip onboarding from `IdentityCeremony`**: remove DOB, spin, reveal, claim, age-gate code. Keep only the auth card (email OTP + Google/Apple) for replay-pending-action sign-in. After successful sign-in, the resume handler in `GateRoot` checks `getMyIdentity()`; if onboarding incomplete → `window.location.assign('/welcome?redirect=…')`.
-- **Single profile bootstrap**: create `src/lib/profile/bootstrap.server.ts` exporting `ensureProfile(userId)` used by `finalizeIdentity`, `verifyAge`, and the SQL `handle_new_user` trigger stays as defense-in-depth but is no longer relied on. Remove inline profile insert from `verifyAge`.
-- **Single session helper**: `src/lib/auth/get-valid-user.ts` becomes the only client-side check. Internally use `getUser()`. Delete ad-hoc `getSession()` calls in onboarding code.
-- **Welcome resumability**: on mount, branch on `(ageVerified, aliasClaimed)`:
-  - `(false, *)` → DOB
-  - `(true, false)` → spin
-  - `(true, true)` → redirect
+## Pass 2 — Rebuild each pillar (one route file each)
 
-## Phase 2 — Server-side correctness
+For every pillar I will rebuild the primary screen (Screen 1 of each mockup, which is the canonical view). Variant screens shown in the mockups (timeline builder, score reveal, share sheet, "how the HOF works") become collapsible sub-sections or follow-up flows only where the route already supports them — I won't invent new sub-routes.
 
-- **Protect `generateAlias`** with `requireSupabaseAuth` + require `age_verified=true` in handler (return `{error: 'age_not_verified'}` if not). Update `welcome.tsx` to only call after `verifyAge` succeeds.
-- **Race-safe `claimAlias`**: catch unique-violation (`23505`) and return `{ ok: false, reason: 'taken' }`. Client shows "Someone else just claimed that. Spin again." and resets to spin.
-- **Underage path**: `verifyAge` writes `profiles.blocked_reason = 'underage'`, `blocked_at = now()`, then `supabase.auth.signOut()` server-side. No `deleteUser`. Add a check at top of `requireSupabaseAuth` (or a thin wrapper) that 403s blocked users.
-- **Migration**: add `profiles.blocked_reason text`, `profiles.blocked_at timestamptz`; add partial unique index on `(nationality, emotion, creature)` where all three are not null (it may already exist — verify and add only if missing).
+### A. Story Stream — `src/routes/_authenticated/stream.tsx`
+Replace the current card layout with the mockup's:
+- Sticky cream topbar with logo + alias pill.
+- Stories rendered as `.story` cards with header (author bubble + name/sub + category pill), body with italic question, verdict bar + dot legend, action row (`Judge this` / `Happened to me` / share).
+- Interleaved `.bench-line` nudges every ~2 cards (uses real counts).
+- Inline `.hof-strip` card and `.scan-card` interleaved at fixed positions.
+- Footer `.chatbot-pill` (already present as BenchPillMenu — keep, restyle to match the cream pill in the mockup).
 
-## Phase 3 — Error visibility & UX
+### B. Court — `src/routes/court.tsx`
+Rebuild around the mockup's case room:
+- Topbar with live-pill ("Family Court · Live") tied to the current case tier.
+- `.case-hero` (pink) with eyebrow / title / italic question / `⏱ N left` timer.
+- `.parties-grid` (Plaintiff / vs / Defendant) cards, teal-top / coral-top borders, with quote or empty-chair note.
+- `.section` for live verdict with 7-segment `.vbar` + dot legend (Red flag / Green flag / Run / Talk it out / Lawyer up / Therapy / Need update).
+- Jury box: `.bench-strip` for The Bench, `.seats-row` with seat states (you / filled / empty + voted-* tint).
+- 2-col verdict grid `.vgrid` with `.vbtn vk-*` active styles.
+- Judgment grid `.jgrid` (Guilty / Not guilty / Both at fault / Need more info).
+- Bench reaction strip + CTA button. Wires to existing verdict mutation.
 
-- Remove every silent `.catch(() => {})` in `IdentityCeremony` and `welcome.tsx`. All catches log + set a visible error state (already started this in welcome.tsx).
-- DOB form: wrap in `<form onSubmit={…}>`, button `type="submit"`. Same for OAuth buttons stay as `type="button"`.
-- Add a "post-redirect session diagnostics" panel on `/welcome` (dev-only, behind `import.meta.env.DEV`) showing: session present, userId, ageVerified, aliasClaimed.
-- Toast + inline error for: finalizeIdentity, verifyAge, generateAlias, claimAlias. Retry button always re-runs the failed step, not the whole flow.
+### C. Scan — `src/routes/_authenticated/scan/index.tsx`
+Rebuild as the dramatic chat entry:
+- `.hero-banner` (ink) with pink orbs, "What happened? Don't soften it.", live-dot count of cases assessed today.
+- Chat column with `.brow-msg` AI bubbles, `.user-msg` user bubbles, `.react-msg` dramatic AI reactions (pink left border on `.pk-l`).
+- Dynamic input cards: emoji intensity row, tag cloud, tap-card 2×2 grid — wired to the existing scan question state machine. Each scan step picks the input type the mockup defines for that step.
+- Score reveal screen (route `scan/result.$scanId.tsx`): `.score-hero` (ink with 120px ghost number), big score, gradient bar, `.insights` list, verdict preview card, action row (Save / Post to feed).
 
-## Phase 4 — Tests & operational checks
+### D. Spill — `src/routes/_authenticated/spill/index.tsx`
+Rebuild matching the Spill flow:
+- `.spill-hero` (ink) — "Tell the court what happened." with the three rules dots.
+- `.prog` 5-step progress bar (Opening / Context / The incident / After / Ready).
+- Chat column with `.ai-row` / `.usr-row` and the critical `.short-card` ("The court needs more than this") that fires when the user types < ~40 words — wired to client-side word count.
+- `.depth-prompt` (purple) for The Bench's drill-down questions.
+- `.richness` meter card showing 4 facets (What happened / Context / His response / After) — driven by per-step completion.
+- Input area with character count + send button (already wired).
+- Privacy scan card + review card + auth block (existing logic, restyled).
 
-- Vitest suites in `src/__tests__/onboarding/`:
-  - `new-oauth-user.test.ts` — new user → DOB → alias → /court
-  - `returning-age-verified-no-alias.test.ts` — skip DOB, land on spin
-  - `fully-onboarded.test.ts` — bypass /welcome entirely
-  - `underage.test.ts` — block screen + signed out + profile flagged
-  - `alias-conflict.test.ts` — second claimer gets `taken` → resets to spin
-  - `missing-auth-header.test.ts` — protected fns return 401
-- Add `src/lib/health/schema-check.server.ts` server fn that selects 1 row touching `age_verified, dob_month, dob_year, nationality, emotion, creature, blocked_reason` and returns missing columns. Wire into `/admin` page.
-- Document required OAuth redirect URLs in `docs/auth-setup.md`:
-  - `https://shutap.lovable.app/welcome`
-  - `https://id-preview--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app/welcome`
-  - `http://localhost:5173/welcome`
-  - (legacy IdentityCeremony paths removed in phase 1, so no extra URLs needed)
+### E. Hall of Fame — new route `src/routes/_authenticated/hof.tsx`
+HOF doesn't exist as a standalone route yet. Create it:
+- `.hof-hero` (ink) — gold crown, "Hall of Fame", three stat tiles.
+- `.period-row` (Today / This week / This month / All time) — local state, no server filter yet.
+- Legend (gold / teal / purple) explaining the 3 source types.
+- Three category sections, each fed by an existing server function or temporary stub when no data exists:
+  - **Court verdict** card (gold tint, gavel flag, bench declaration, outcome row) — `topByCategory("court")`.
+  - **Stream story** card (teal tint, "Why it's here" resonance block) — top by relate count.
+  - **Top juror** card (purple tint, avatar, 4 score stats, badges) — top from `user_scores` / `user_roles`.
+- Wire the existing "🏆 Hall of Fame" strip in stream + the BenchPillMenu HOF item to `/hof` instead of `/court`.
 
----
+## Pass 3 — Glue
 
-## Technical details
+- Update `BenchPillMenu` HOF entry → `/hof`.
+- Ensure every new route file has `head()` meta (title + description) per the route-architecture rules. None get an `og:image` (no hero image yet).
+- Smoke-check the build (route IDs match filenames, no missing imports).
 
-- `requireSupabaseAuth` enhancement: extend context to `{ supabase, userId, claims, profile: { age_verified, alias_claimed, blocked_reason } }` via a single profile fetch, so handlers don't each re-query. One round trip per protected call.
-- `ensureProfile(userId, supabaseAdmin)`: upsert on conflict `id` do nothing, returning the row. Used only in `finalizeIdentity` after auth. The DB trigger remains as a safety net.
-- Unique index: `CREATE UNIQUE INDEX IF NOT EXISTS profiles_alias_unique ON profiles (nationality, emotion, creature) WHERE nationality IS NOT NULL;`
-- Blocked check: cheapest in middleware (already fetching profile). Returns 403 `{error:'account_blocked'}`. Client catches and routes to `/blocked` page.
-- Test infra: mock `@/integrations/supabase/client` and the server-fn wrappers; assert state transitions and toasts.
+## What I will NOT do in this pass
 
-## Out of scope (call out, don't fix here)
+- Will not redesign auth/onboarding/profile routes (out of scope).
+- Will not add new database tables or RLS policies — HOF reads from what already exists; if a stat has no source, it renders with a Bench-voice empty state, not a fake number.
+- Will not implement the secondary "How the HOF works" explainer page, the Scan share sheet, or the Spill auth-block sub-screens — those exist in the mockups as supporting screens; I'll add them in a follow-up if you want.
+- Will not change the existing chat-pill menu's 5-CTA structure; only the HOF target route changes.
 
-- Item 7 (OAuth redirect URL allowlist) is a dashboard config, not code. I'll document the exact URLs but you'll need to add them in Lovable Cloud → Users → Auth Settings → Google.
-- Phasing out `lovable.auth.signInWithOAuth` for raw `supabase.auth.signInWithOAuth` — not recommended; the broker is the supported path for managed OAuth on Lovable Cloud.
+## Estimated change size
 
----
+~1 token-and-utility pass + 5 route rewrites + 1 small glue edit. Each route file lands around 250–400 lines.
 
-**Smallest atomic ship:** Phase 1 alone removes 90% of "works in one place not the other" bugs. I'd recommend approving phase 1, shipping, smoke-testing, then approving phase 2.
+## Approve to proceed?
+Once you say go, I'll execute all 5 rebuilds in parallel batches and report back with the routes touched.

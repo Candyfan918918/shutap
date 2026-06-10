@@ -585,3 +585,137 @@
 .vbar { height: 6px; border-radius: 3px; display: flex; overflow: hidden; background: var(--c-surface-3); margin-bottom: 6px; }
 .vbar > .vs { height: 100%; }
 
+
+/* ─── Mockup-aligned tokens (gold for HOF, ink scale for dark heroes) ─── */
+:root {
+  --c-ink:    #0a080f;
+  --c-ink-2:  #3a3040;
+  --c-ink-3:  #7a6880;
+  --c-gold-soft:   #fef9ec;
+  --c-gold-border: #f5d97a;
+  --c-gold-deep:   #5a3d00;
+  --c-gold:        #c8960a;
+}
+@theme inline {
+  --color-c-ink:    var(--c-ink);
+  --color-c-ink-2:  var(--c-ink-2);
+  --color-c-ink-3:  var(--c-ink-3);
+  --color-c-gold:        var(--c-gold);
+  --color-c-gold-soft:   var(--c-gold-soft);
+  --color-c-gold-border: var(--c-gold-border);
+  --color-c-gold-deep:   var(--c-gold-deep);
+}
+
+/* Dark hero with two colored orb blobs (used by Scan, Spill, HOF, score reveal) */
+.hero-dark {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-ink);
+  padding: 20px 16px 16px;
+}
+.hero-dark__orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+}
+.hero-dark__orb--tr { top: -24px; right: -24px; width: 110px; height: 110px; background: var(--c-pink); opacity: 0.10; }
+.hero-dark__orb--bl { bottom: -30px; left: -20px; width: 80px;  height: 80px;  background: var(--c-pink); opacity: 0.07; }
+.hero-dark__tag {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--c-pink); margin-bottom: 6px;
+}
+.hero-dark__q   { font-size: 18px; font-weight: 500; color: #fff; line-height: 1.3; margin-bottom: 6px; }
+.hero-dark__sub { font-size: 12px; color: var(--c-ink-3); line-height: 1.5; }
+
+/* Live pulse pill */
+.live-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--c-pink-soft); color: var(--c-pink-ink);
+  border: 0.5px solid var(--c-pink-border);
+  border-radius: var(--r-pill); padding: 3px 10px;
+  font-size: 11px; font-weight: 500;
+}
+.live-pill__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-pink);
+  animation: shutap-blink 1.4s ease-in-out infinite;
+}
+@keyframes shutap-blink { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+
+/* Section eyebrow */
+.section-eyebrow {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--c-text-3);
+  margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+}
+.section-eyebrow > span { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--c-pink); font-size: 11px; }
+
+/* HOF-specific cards */
+.hof-period {
+  flex: 1; text-align: center; padding: 7px 0; border-radius: 10px;
+  border: 0.5px solid var(--c-surface-3);
+  font-size: 12px; font-weight: 500; color: var(--c-text-2);
+  background: var(--c-surface-2); cursor: pointer;
+}
+.hof-period--on { background: var(--c-gold-soft); color: var(--c-gold-deep); border-color: var(--c-gold-border); }
+
+.court-card {
+  border-radius: 16px; overflow: hidden;
+  border: 0.5px solid var(--c-gold-border); background: var(--c-surface);
+}
+.court-card__flag {
+  background: var(--c-gold-soft); border-bottom: 0.5px solid var(--c-gold-border);
+  padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.court-card__rank {
+  font-size: 11px; font-weight: 500; color: var(--c-gold-deep);
+  background: var(--c-gold-border); padding: 2px 8px; border-radius: 20px;
+}
+
+.stream-card {
+  border-radius: 16px; overflow: hidden;
+  border: 0.5px solid var(--c-teal-border); background: var(--c-surface);
+}
+.stream-card__flag {
+  background: var(--c-teal-soft); border-bottom: 0.5px solid var(--c-teal-border);
+  padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.stream-card__rank {
+  font-size: 11px; font-weight: 500; color: var(--c-teal-deep);
+  background: var(--c-teal-border); padding: 2px 8px; border-radius: 20px;
+}
+
+.user-card {
+  border-radius: 16px; overflow: hidden;
+  border: 0.5px solid var(--c-purple-border); background: var(--c-surface);
+}
+.user-card__flag {
+  background: var(--c-purple-soft); border-bottom: 0.5px solid var(--c-purple-border);
+  padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.user-card__rank {
+  font-size: 11px; font-weight: 500; color: var(--c-purple-deep);
+  background: var(--c-purple-border); padding: 2px 8px; border-radius: 20px;
+}
+
+/* Bench AI bubble (used by Scan, Spill) */
+.brow-bubble {
+  background: #fff; border: 0.5px solid var(--c-surface-3);
+  border-radius: 4px 16px 16px 16px;
+  padding: 10px 14px; font-size: 13px; color: var(--c-ink-2); line-height: 1.55;
+}
+.user-bubble {
+  background: var(--c-pink); color: #fff;
+  border-radius: 16px 4px 16px 16px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.55;
+}
+.react-bubble {
+  border-left: 2px solid var(--c-pink);
+  border-radius: 0 12px 12px 0;
+  background: var(--c-pink-soft);
+  padding: 10px 14px; font-size: 12px; color: var(--c-pink-ink); line-height: 1.6;
+}
+.brow-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--c-pink-soft); border: 0.5px solid var(--c-pink-border);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}

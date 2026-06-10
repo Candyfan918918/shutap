@@ -20,6 +20,7 @@ import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AuthenticatedStreamRouteImport } from './routes/_authenticated/stream'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedHofRouteImport } from './routes/_authenticated/hof'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -105,6 +106,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHofRoute = AuthenticatedHofRouteImport.update({
+  id: '/hof',
+  path: '/hof',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
+  '/hof': typeof AuthenticatedHofRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/stream': typeof AuthenticatedStreamRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
+  '/hof': typeof AuthenticatedHofRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
@@ -385,6 +393,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
+  '/_authenticated/hof': typeof AuthenticatedHofRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/stream': typeof AuthenticatedStreamRoute
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/compose'
     | '/friends'
+    | '/hof'
     | '/me'
     | '/settings'
     | '/stream'
@@ -474,6 +484,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/compose'
     | '/friends'
+    | '/hof'
     | '/me'
     | '/stream'
     | '/enter/verify'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/compose'
     | '/_authenticated/friends'
+    | '/_authenticated/hof'
     | '/_authenticated/me'
     | '/_authenticated/settings'
     | '/_authenticated/stream'
@@ -647,6 +659,13 @@ declare module '@tanstack/react-router' {
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/hof': {
+      id: '/_authenticated/hof'
+      path: '/hof'
+      fullPath: '/hof'
+      preLoaderRoute: typeof AuthenticatedHofRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/friends': {
@@ -937,6 +956,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
+  AuthenticatedHofRoute: typeof AuthenticatedHofRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedStreamRoute: typeof AuthenticatedStreamRoute
@@ -957,6 +977,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
+  AuthenticatedHofRoute: AuthenticatedHofRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedStreamRoute: AuthenticatedStreamRoute,

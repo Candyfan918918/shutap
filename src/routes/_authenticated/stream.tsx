@@ -134,7 +134,7 @@ function BenchPillMenu() {
     { to: "/court",  emoji: "⚖️", label: "Court",        sub: "cast verdicts",        cls: "bg-c-teal-soft text-c-teal-deep border-c-teal-border" },
     { to: "/scan",   emoji: "🧠", label: "Scan",         sub: "read the room",        cls: "bg-c-purple-soft text-c-purple-deep border-c-purple-border" },
     { to: "/stream", emoji: "🌊", label: "Story Stream", sub: "the feed",             cls: "bg-c-amber-soft text-c-amber-deep border-c-amber-border" },
-    { to: "/court",  emoji: "🏆", label: "Hall of Fame", sub: "the legends",          cls: "bg-c-coral-soft text-c-coral-deep border-c-coral-border" },
+    { to: "/hof",    emoji: "🏆", label: "Hall of Fame", sub: "the legends",          cls: "bg-c-coral-soft text-c-coral-deep border-c-coral-border" },
   ];
 
   return (
@@ -222,7 +222,7 @@ function FeedStoryCard({ item, insertHof }: { item: FeedItem; insertHof: boolean
       </article>
 
       {insertHof && (
-        <Link to="/court" className="hof-strip block mx-1">
+        <Link to="/hof" className="hof-strip block mx-1">
           <div className="hof-strip__label">🏆 Hall of Fame · This week</div>
           <div className="hof-strip__title">Most dramatic case of the week is up for grabs.</div>
           <div className="hof-strip__meta">Cast a verdict → climb the ladder</div>
