@@ -249,6 +249,7 @@ export const composeStream = createServerFn({ method: "POST" })
           author_emotion: a.emotion ?? null,
           author_creature: a.creature ?? null,
           is_nominated: nominatedSet.has(s.id),
+          media_url: s.media_url ?? null,
           case: null,
         },
       });
