@@ -20,6 +20,7 @@ import { StoryArc } from "@/components/posts/StoryArc";
 import { OtherPerspectives } from "@/components/perspectives/OtherPerspectives";
 import { PredictionsPanel } from "@/components/court/PredictionsPanel";
 import { OutcomePrompt } from "@/components/court/OutcomePrompt";
+import { WisdomGraphPanel } from "@/components/court/WisdomGraphPanel";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 
