@@ -14,6 +14,7 @@ import { StoriesGrid } from "@/components/profile/StoriesGrid";
 import { ChaosHistory } from "@/components/profile/ChaosHistory";
 import { SavedTea } from "@/components/profile/SavedTea";
 import { BadgesGrid } from "@/components/profile/BadgesGrid";
+import { HofBadges } from "@/components/hof/HofBadges";
 
 type Tab = "stories" | "history" | "saved" | "badges";
 
