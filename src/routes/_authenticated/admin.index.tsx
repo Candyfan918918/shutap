@@ -133,6 +133,8 @@ function CityCourtsPage() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   );
 }
