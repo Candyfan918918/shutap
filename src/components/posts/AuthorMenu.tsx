@@ -33,24 +33,27 @@ export function AuthorMenu({ postId }: Props) {
       {open && (
         <div className="absolute right-0 mt-1 w-44 rounded-xl border border-border bg-card shadow-lg z-20 overflow-hidden">
           <Link
-            to="/me/posts/$postId/retract"
+            to="/me/posts/$postId"
             params={{ postId }}
+            search={{ action: "retract" } as any}
             className="block px-3 py-2 text-xs hover:bg-surface-elevated"
             onClick={() => setOpen(false)}
           >
             Retract
           </Link>
           <Link
-            to="/me/posts/$postId/update"
+            to="/me/posts/$postId"
             params={{ postId }}
+            search={{ action: "update" } as any}
             className="block px-3 py-2 text-xs hover:bg-surface-elevated"
             onClick={() => setOpen(false)}
           >
             Post update
           </Link>
           <Link
-            to="/me/posts/$postId/close"
+            to="/me/posts/$postId"
             params={{ postId }}
+            search={{ action: "close" } as any}
             className="block px-3 py-2 text-xs hover:bg-surface-elevated"
             onClick={() => setOpen(false)}
           >
