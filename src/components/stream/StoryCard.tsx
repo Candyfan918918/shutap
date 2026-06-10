@@ -150,11 +150,17 @@ export function StoryCard({ payload, index, anonymous }: Props) {
           { key: "debate", icon: "🗣️", label: "Debate with a friend", onSelect: () => {
               void navigate({ to: "/post/$postId", params: { postId: payload.id } });
             } },
-          { key: "hof", icon: "🏛️", label: "Nominate to HOF", onSelect: () => {
+          { key: "hof", icon: "🏛️", label: "Nominate for Hall of Fame", onSelect: () => {
               if (anonymous) softGate("hof_dramatic", { entityId: payload.id });
-              else toast("Nomination noted.");
+              else setNomOpen(true);
             } },
         ]}
+      />
+      <NominateActionSheet
+        open={nomOpen}
+        onClose={() => setNomOpen(false)}
+        entityType="story"
+        entityId={payload.id}
       />
     </article>
   );
