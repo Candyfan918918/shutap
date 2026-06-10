@@ -49,8 +49,9 @@ export function StoryCard({ payload, index, anonymous }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const tone = scoreTone(payload.score);
-  // Alternating XHS-style cover aspect ratios — tall portrait & square mix.
-  const coverAspect = index % 3 === 0 ? "3/4" : index % 3 === 1 ? "4/5" : "1/1";
+  // XHS-style alternating cover ratios — portraits dominate, with occasional square/4:3 to break rhythm.
+  const ratios = ["3/4", "4/5", "1/1", "3/4", "4/5", "4/3"];
+  const coverAspect = ratios[index % ratios.length];
   const teal = payload.both_sides_heard ? "2px solid var(--c-teal, #3aa48f)" : undefined;
 
   const longPress = useLongPress(() => setSheetOpen(true), 450);
@@ -90,8 +91,14 @@ export function StoryCard({ payload, index, anonymous }: Props) {
         />
         {/* Score chip */}
         <span
-          className="absolute top-2.5 left-2.5 px-2 h-6 inline-flex items-center gap-1 text-[10px] font-semibold rounded-full backdrop-blur-sm"
-          style={{ background: tone.bg, color: tone.fg }}
+          className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 font-semibold rounded-full backdrop-blur-sm"
+          style={{
+            background: tone.bg,
+            color: tone.fg,
+            fontSize: "clamp(9px, 1.6vw, 11px)",
+            padding: "2px 7px",
+            lineHeight: 1.4,
+          }}
         >
           <span className="tabular-nums">{payload.score}</span>
           <span className="opacity-80">· {tone.label}</span>
@@ -99,19 +106,32 @@ export function StoryCard({ payload, index, anonymous }: Props) {
         {/* Category bubble */}
         {payload.score_category && (
           <span
-            className="absolute top-2.5 right-2.5 px-2 h-6 inline-flex items-center text-[10px] font-medium rounded-full"
-            style={{ background: "rgba(255,255,255,0.7)", color: "var(--c-text-1)", backdropFilter: "blur(4px)" }}
+            className="absolute top-1.5 right-1.5 inline-flex items-center font-medium rounded-full"
+            style={{
+              background: "rgba(255,255,255,0.78)",
+              color: "var(--c-text-1)",
+              backdropFilter: "blur(4px)",
+              fontSize: "clamp(9px, 1.5vw, 11px)",
+              padding: "2px 7px",
+              lineHeight: 1.4,
+            }}
           >
             {payload.score_category}
           </span>
         )}
         {/* Emoji anchor */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[64px] drop-shadow-sm select-none" aria-hidden>{emoji}</span>
+          <span
+            className="drop-shadow-sm select-none"
+            style={{ fontSize: "clamp(40px, 11vw, 76px)" }}
+            aria-hidden
+          >
+            {emoji}
+          </span>
         </div>
         {/* Court ribbon (when nominated) */}
         {payload.is_nominated && payload.case?.lock_at && (
-          <div className="absolute bottom-2 left-2 right-2">
+          <div className="absolute bottom-1.5 left-1.5 right-1.5">
             <CourtRibbon
               category={payload.case.category}
               tier={payload.case.tier}
@@ -121,42 +141,56 @@ export function StoryCard({ payload, index, anonymous }: Props) {
         )}
       </div>
 
-      {/* Content */}
-      <div className="px-3 pt-2.5 pb-2 flex flex-col gap-1.5">
+      {/* Content — XHS tight padding */}
+      <div className="flex flex-col" style={{ padding: "8px 10px", gap: "4px" }}>
         {payload.title && (
           <h3
-            className="text-[14px] font-semibold leading-snug line-clamp-2"
-            style={{ color: "var(--c-text-1)" }}
+            className="font-semibold line-clamp-2"
+            style={{
+              color: "var(--c-text-1)",
+              fontSize: "clamp(12.5px, 1.9vw, 14.5px)",
+              lineHeight: 1.3,
+            }}
           >
             {payload.title}
           </h3>
         )}
         <p
-          className="text-[12.5px] leading-snug line-clamp-2"
-          style={{ color: "var(--c-text-2, #555)" }}
+          className="line-clamp-2"
+          style={{
+            color: "var(--c-text-2, #555)",
+            fontSize: "clamp(11px, 1.7vw, 12.5px)",
+            lineHeight: 1.35,
+          }}
         >
           {payload.snippet}
         </p>
 
         {oneSided && (
-          <p className="text-[10px] italic" style={{ color: "var(--c-text-3, #888)" }}>
+          <p
+            className="italic"
+            style={{ color: "var(--c-text-3, #888)", fontSize: "clamp(9px, 1.4vw, 10.5px)" }}
+          >
             one side · the other hasn't spoken
           </p>
         )}
 
         {/* Verdict pulse */}
-        <div className="pt-1">
+        <div className="pt-0.5">
           <CompactVerdictBar
             postId={payload.id}
             initialCounts={payload.verdicts as any}
-            height={5}
+            height={4}
             live
           />
         </div>
 
         {/* Footer meta — XHS style: author left, relate right */}
-        <div className="flex items-center justify-between pt-1.5 mt-0.5 border-t" style={{ borderColor: "var(--c-border, #efe9dd)" }}>
-          <div className="min-w-0 flex-1 mr-2">
+        <div
+          className="flex items-center justify-between pt-1 mt-0.5 border-t"
+          style={{ borderColor: "var(--c-border, #efe9dd)" }}
+        >
+          <div className="min-w-0 flex-1 mr-1.5">
             <AliasPill
               emoji={payload.author_emoji}
               nationality={payload.author_nationality}

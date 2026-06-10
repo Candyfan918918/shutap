@@ -103,17 +103,18 @@ export function StreamList({ anonymous }: Props) {
         {refreshing ? "The bench reshuffles." : pull > 64 ? "release to refresh" : "pull"}
       </div>
 
-      {/* Masonry — Xiaohongshu style. 2 cols mobile, 2 tablet, 3 desktop. */}
-      <div
-        className="px-3 pt-2 pb-32"
-        style={{ columnGap: "12px", columnCount: 2 }}
-      >
+      {/* Masonry — Xiaohongshu style. Fluid columns + gaps across all widths. */}
+      <div className="stream-wrap pb-32">
         <style>{`
-          @media (min-width: 768px) { .stream-cols { column-count: 2 !important; } }
-          @media (min-width: 1024px) { .stream-cols { column-count: 3 !important; } }
-          .stream-cell { break-inside: avoid; margin-bottom: 12px; display: block; }
+          .stream-wrap { padding-left: 8px; padding-right: 8px; padding-top: 6px; }
+          .stream-cols { column-count: 2; column-gap: 8px; }
+          .stream-cell { break-inside: avoid; margin-bottom: 8px; display: block; }
+          @media (min-width: 420px) { .stream-wrap { padding-left: 10px; padding-right: 10px; } .stream-cols { column-gap: 10px; } .stream-cell { margin-bottom: 10px; } }
+          @media (min-width: 640px) { .stream-wrap { padding-left: 14px; padding-right: 14px; } .stream-cols { column-count: 3; column-gap: 12px; } .stream-cell { margin-bottom: 12px; } }
+          @media (min-width: 1024px) { .stream-cols { column-count: 4; column-gap: 14px; } .stream-cell { margin-bottom: 14px; } }
+          @media (min-width: 1536px) { .stream-wrap { max-width: 1480px; margin-left: auto; margin-right: auto; } .stream-cols { column-count: 5; column-gap: 16px; } .stream-cell { margin-bottom: 16px; } }
         `}</style>
-        <div className="stream-cols" style={{ columnGap: "12px", columnCount: 2 }}>
+        <div className="stream-cols">
           {items.map((item, idx) => (
             <div key={item.key} className="stream-cell">
               {renderItem(item, idx, anonymous)}
