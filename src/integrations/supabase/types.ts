@@ -2530,7 +2530,16 @@ export type Database = {
         Args: { _col: string; _delta: number; _post_id: string }
         Returns: undefined
       }
+      _resolve_entry_tier: {
+        Args: { _post_id: string }
+        Returns: {
+          region_code: string
+          region_label: string
+          tier: string
+        }[]
+      }
       _slugify_handle: { Args: { _text: string }; Returns: string }
+      _tier_duration: { Args: { _tier: string }; Returns: string }
       bump_streak: {
         Args: { _today: string; _user_id: string }
         Returns: {
@@ -2546,6 +2555,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      compute_post_nomination_score: {
+        Args: { _post_id: string }
+        Returns: undefined
       }
       ensure_daily_case: {
         Args: { _date: string }
@@ -2579,6 +2592,7 @@ export type Database = {
       }
       is_friend: { Args: { _a: string; _b: string }; Returns: boolean }
       is_handle_available: { Args: { _handle: string }; Returns: boolean }
+      maybe_nominate_post: { Args: { _post_id: string }; Returns: boolean }
       nominate_court_cases: {
         Args: {
           _limit?: number
