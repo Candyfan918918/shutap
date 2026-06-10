@@ -121,11 +121,12 @@ export const composeStream = createServerFn({ method: "POST" })
     const { data: courtRows } = await supabaseAdmin
       .from("court_cases")
       .select(
-        "id, post_id, scope, region_label, status, current_tier, current_category_court, verdict_lock_at, controversy_score",
+        "id, post_id, scope, region_label, status, current_tier, current_category_court, verdict_lock_at, controversy_score, final_verdict, bench_verdict_line",
       )
-      .eq("status", "in_court")
+      .in("status", ["in_court", "decided", "legendary"])
       .order("verdict_lock_at", { ascending: true })
       .limit(4);
+
 
     const postIds = [
       ...stories.map((s) => s.id as string),
