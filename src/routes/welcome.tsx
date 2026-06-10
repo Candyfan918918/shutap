@@ -63,6 +63,7 @@ function WelcomePage() {
   const [locks, setLocks] = useState({ n: false, e: false, c: false });
   const [busy, setBusy] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const latestAdultYear = getAdultCutoffYear();
 
   const [dobMonth, setDobMonth] = useState<number>(1);
@@ -79,14 +80,18 @@ function WelcomePage() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
+      console.log("[welcome] checking session…");
       const { session } = await getValidUserSession();
       if (!session) {
+        console.warn("[welcome] no session — redirecting to /enter");
         navigate({ to: "/enter", search: { redirect: redirectSearch } });
         return;
       }
+      console.log("[welcome] session ok, finalizing identity…");
       try {
         const ident = await finalize({ data: {} });
         if (cancelled) return;
+        console.log("[welcome] finalizeIdentity ok", ident);
         setIdentity(ident);
         if (ident.locale) localStorage.setItem("md.locale", ident.locale);
         const aliasAlreadyClaimed = Boolean(ident.nationality && ident.emotion && ident.creature);
@@ -104,8 +109,10 @@ function WelcomePage() {
         }
         setPhase("dob");
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Couldn't finalize");
-        navigate({ to: "/enter", search: { redirect: redirectSearch } });
+        console.error("[welcome] finalizeIdentity failed", e);
+        const msg = e instanceof Error ? e.message : "Couldn't finalize";
+        setErrorMsg(`finalizeIdentity: ${msg}`);
+        toast.error(msg);
       }
     })();
     return () => { cancelled = true; };
@@ -113,14 +120,18 @@ function WelcomePage() {
 
   // DOB submit → call /auth-age-gate → either underage or start slot machine
   const onAgeSubmit = async () => {
+    console.log("[welcome] DOB confirm clicked", { dobMonth, dobYear });
     setBusy(true);
+    setErrorMsg(null);
     try {
       const res = await submitAge({ data: { dob_month: dobMonth, dob_year: dobYear } });
+      console.log("[welcome] verifyAge response", res);
       if (res.error) {
         if (res.error === "age_gate_failed") {
           setPhase("underage");
           return;
         }
+        setErrorMsg(`verifyAge: ${res.error}`);
         toast.error(res.error);
         return;
       }
@@ -131,27 +142,36 @@ function WelcomePage() {
       setAlias(null);
       setLocks({ n: false, e: false, c: false });
       setPhase("spin");
-    } catch {
-      toast.error("Couldn't verify. Try again.");
+    } catch (e) {
+      console.error("[welcome] verifyAge threw", e);
+      const msg = e instanceof Error ? e.message : "Couldn't verify. Try again.";
+      setErrorMsg(`verifyAge: ${msg}`);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
   };
 
   // Slot machine: simultaneous spin 2000ms, then lock L/M/R at 2000/2200/2400
-  // Each lock: 1.0→1.06→1.0 over 200ms + click 440/460/480Hz @ vol 0.3.
   const lockTimers = useRef<number[]>([]);
   useEffect(() => {
     if (phase !== "spin") return;
     if (!alias) {
+      console.log("[welcome] generateAlias…", { countryCode: identity?.countryCode });
       void fetchAlias({
         data: {
           countryCode: identity?.countryCode ?? undefined,
         },
       })
-        .then((fresh) => setAlias(fresh))
-        .catch(() => {
-          toast.error("Couldn't assign your alias. Try again.");
+        .then((fresh) => {
+          console.log("[welcome] generateAlias ok", fresh);
+          setAlias(fresh);
+        })
+        .catch((e) => {
+          console.error("[welcome] generateAlias failed", e);
+          const msg = e instanceof Error ? e.message : "Couldn't assign your alias.";
+          setErrorMsg(`generateAlias: ${msg}`);
+          toast.error(msg);
           setPhase("dob");
         });
       return;
@@ -179,15 +199,20 @@ function WelcomePage() {
         },
       });
       setAlias(fresh);
-    } catch {
-      toast.error("Couldn't assign your alias. Try again.");
+    } catch (e) {
+      console.error("[welcome] reroll generateAlias failed", e);
+      const msg = e instanceof Error ? e.message : "Couldn't assign your alias.";
+      setErrorMsg(`generateAlias: ${msg}`);
+      toast.error(msg);
       setPhase("reveal");
     }
   };
 
   const onConfirm = async () => {
     if (!alias || busy) return;
+    console.log("[welcome] claimAlias…", alias);
     setBusy(true);
+    setErrorMsg(null);
     setPhase("saving");
     try {
       await claim({
@@ -199,6 +224,7 @@ function WelcomePage() {
           rerollUsed,
         },
       });
+      console.log("[welcome] claimAlias ok");
       setPhase("done");
       const dest = redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
         ? redirectTo
@@ -206,7 +232,10 @@ function WelcomePage() {
       try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
       setTimeout(() => { window.location.replace(dest); }, 600);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't save");
+      console.error("[welcome] claimAlias failed", e);
+      const msg = e instanceof Error ? e.message : "Couldn't save";
+      setErrorMsg(`claimAlias: ${msg}`);
+      toast.error(msg);
       setPhase("reveal");
     } finally {
       setBusy(false);
@@ -227,6 +256,18 @@ function WelcomePage() {
             : phase === "saving" ? "Sealing your identity"
             : "The court has spoken"}
         </p>
+
+        {errorMsg && (
+          <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            <p className="font-mono break-words">{errorMsg}</p>
+            <button
+              onClick={() => { setErrorMsg(null); if (phase === "saving") setPhase("reveal"); }}
+              className="mt-1 underline text-[11px]"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* Slot reels — present from spin onward */}
         {phase !== "dob" && phase !== "loading" && (
