@@ -49,6 +49,23 @@ export function ChatbotPill() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
+                  const input = (e.currentTarget.elements.namedItem("q") as HTMLInputElement | null);
+                  const q = (input?.value ?? "").toLowerCase().trim();
+                  if (/(hall of fame|leaderboard|\bhof\b|top juror|most dramatic|most controversial)/.test(q)) {
+                    const entity = /juror|user|predictor|steelman/.test(q) ? "user" : /story|stories/.test(q) ? "story" : "case";
+                    const period = /today|daily/.test(q) ? "daily" : /all.?time/.test(q) ? "all" : /month/.test(q) ? "monthly" : "weekly";
+                    let category = "most_dramatic";
+                    if (/controversial/.test(q)) category = "most_controversial";
+                    else if (/relatable/.test(q)) category = "most_relatable";
+                    else if (/predictor/.test(q)) category = "most_accurate_predictor";
+                    else if (/juror/.test(q)) category = "top_juror";
+                    else if (/shocking/.test(q)) category = "most_shocking";
+                    else if (/red.?flag/.test(q)) category = "biggest_red_flag";
+                    else if (/green.?flag/.test(q)) category = "biggest_green_flag";
+                    window.dispatchEvent(new CustomEvent("open-hof-leaderboard", { detail: { entity, period, category } }));
+                    setOpen(false);
+                    return;
+                  }
                   toast("The bench will respond when chat goes live.");
                   setOpen(false);
                 }}
@@ -56,6 +73,7 @@ export function ChatbotPill() {
               >
                 <input
                   autoFocus
+                  name="q"
                   type="text"
                   placeholder="Ask The Bench…"
                   className="flex-1 px-3 h-10 text-[13px] rounded-full"
