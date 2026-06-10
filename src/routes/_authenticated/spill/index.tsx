@@ -299,7 +299,21 @@ function SpillLanding() {
               className="w-full min-h-[80px] resize-none bg-transparent text-[14px] leading-relaxed text-c-ink placeholder:text-c-text-3 placeholder:italic focus:outline-none"
             />
             <div className="flex items-center justify-between mt-2">
-              <div className="text-[11px] text-c-text-3">{wordCount} words</div>
+              <div className="text-[11px] text-c-text-3 flex items-center gap-2">
+                <span>{wordCount} words</span>
+                {savedAt && (
+                  <span className="text-c-text-3/80">· {formatSavedAt(savedAt)}</span>
+                )}
+                {(text.trim() || caseType) && (
+                  <button
+                    type="button"
+                    onClick={clearDraft}
+                    className="text-c-text-3 hover:text-c-pink underline underline-offset-2"
+                  >
+                    clear
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={onSpill}
