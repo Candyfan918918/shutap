@@ -222,10 +222,12 @@ function CourtPage() {
             items={grouped.decided}
           />
         )}
+        </div>
       </main>
     </div>
   );
 }
+
 
 function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
