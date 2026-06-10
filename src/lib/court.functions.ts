@@ -561,7 +561,7 @@ export const getFeaturedCourtCase = createServerFn({ method: "GET" })
   },
 );
 
-export const getGlobalVerdictCount = createServerFn({ method: "GET" }).handler(
+export const getGlobalVerdictTally = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ total: number }> => {
     const { count } = await supabaseAdmin
       .from("post_verdict_votes")
