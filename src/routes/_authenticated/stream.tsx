@@ -3,8 +3,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
 import { getMyProfile } from "@/lib/profile.functions";
+
 
 const feedQO = queryOptions({
   queryKey: ["home-stream", "trending"],
