@@ -1366,6 +1366,7 @@ export type Database = {
           badges: string[]
           both_sides_heard: boolean
           candidacy_paused: boolean
+          case_title: string | null
           comment_count: number
           controversy_score: number
           cool_down_until: string | null
@@ -1386,6 +1387,7 @@ export type Database = {
           platform_captions: Json
           prediction_options: Json
           published_at: string | null
+          question_before_court: string | null
           relate_count: number
           save_count: number
           score: number | null
@@ -1412,6 +1414,7 @@ export type Database = {
           badges?: string[]
           both_sides_heard?: boolean
           candidacy_paused?: boolean
+          case_title?: string | null
           comment_count?: number
           controversy_score?: number
           cool_down_until?: string | null
@@ -1432,6 +1435,7 @@ export type Database = {
           platform_captions?: Json
           prediction_options?: Json
           published_at?: string | null
+          question_before_court?: string | null
           relate_count?: number
           save_count?: number
           score?: number | null
@@ -1458,6 +1462,7 @@ export type Database = {
           badges?: string[]
           both_sides_heard?: boolean
           candidacy_paused?: boolean
+          case_title?: string | null
           comment_count?: number
           controversy_score?: number
           cool_down_until?: string | null
@@ -1478,6 +1483,7 @@ export type Database = {
           platform_captions?: Json
           prediction_options?: Json
           published_at?: string | null
+          question_before_court?: string | null
           relate_count?: number
           save_count?: number
           score?: number | null
