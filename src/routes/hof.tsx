@@ -19,7 +19,7 @@ const feedQO = queryOptions({
   staleTime: 60_000,
 });
 
-export const Route = createFileRoute("/_authenticated/hof")({
+export const Route = createFileRoute("/hof")({
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(feedQO);
   },
