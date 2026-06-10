@@ -55,11 +55,20 @@ export interface CourtCasePayload {
 
 
 export interface HofPayload {
-  entity_type: string;
+  entity_type: "story" | "case" | "user";
   entity_id: string;
   period: string;
+  category: string;
+  rank: number;
   score: number;
   title: string | null;
+  alias_label: string | null;
+  alias_emoji: string | null;
+  verdict_pct: number | null;
+  juror_count: number | null;
+  juror_title: string | null;
+  bench_line: string | null;
+  post_id: string | null;
 }
 
 const CursorSchema = z
