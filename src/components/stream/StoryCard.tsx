@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { StoryPayload } from "@/lib/stream.functions";
-import { generateStoryCoverSVG } from "@/lib/stream/generate-cover";
+import { generateScoreCardCoverSVG } from "@/lib/stream/generate-cover";
 import { AliasPill } from "./AliasPill";
 import { CompactVerdictBar } from "./CompactVerdictBar";
 import { CourtRibbon } from "./CourtRibbon";
@@ -40,12 +40,16 @@ export function StoryCard({ payload, index, anonymous }: Props) {
 
   const coverUrl = useMemo(() => {
     if (payload.media_url) return payload.media_url;
-    return generateStoryCoverSVG({
+    return generateScoreCardCoverSVG({
       seed: payload.id,
       category: payload.score_category,
       emoji,
+      score: payload.score,
+      title: payload.title,
+      snippet: payload.snippet,
+      badges: payload.score_category ? [payload.score_category, tone.label] : [tone.label],
     });
-  }, [payload.id, payload.media_url, payload.score_category, emoji]);
+  }, [payload.id, payload.media_url, payload.score_category, payload.score, payload.title, payload.snippet, emoji, tone.label]);
 
   const longPress = useLongPress(() => setSheetOpen(true), 450);
   const goDetail = () => { void navigate({ to: "/post/$postId", params: { postId: payload.id } }); };
