@@ -922,3 +922,26 @@
   .cf-vbar    { height: 14px; }
   .cf-seat    { width: 32px; height: 32px; font-size: 16px; }
 }
+
+/* ─── Story Stream desktop scaling ────────────────────────── */
+@media (min-width: 768px) {
+  .feed-card { border-radius: 18px; }
+  .feed-card__header { padding: 14px 18px 0; margin-bottom: 10px; }
+  .feed-card__body   { padding: 0 18px 14px; font-size: 14px; line-height: 1.65; }
+  .feed-card__body em { font-size: 13px; }
+  .feed-card__verdict-row { padding: 10px 18px; }
+  .feed-card__actions { padding: 10px 18px; gap: 8px; }
+  .author-bubble { width: 34px; height: 34px; font-size: 16px; }
+  .cat-pill { font-size: 11px; padding: 3px 11px; }
+  .vbar { height: 8px; border-radius: 4px; }
+  .act-btn { font-size: 12px; padding: 6px 12px; }
+  .act-btn--icon { width: 32px; height: 32px; padding: 0; }
+  .hof-strip { padding: 14px 18px; border-radius: 18px; }
+  .hof-strip__label { font-size: 11px; }
+  .hof-strip__title { font-size: 14px; }
+  .hof-strip__meta { font-size: 12px; }
+  .scan-strip { border-radius: 18px; }
+  .scan-strip__score   { font-size: 26px; padding: 0 18px 6px; }
+  .scan-strip__summary { font-size: 13px; padding: 0 18px 14px; }
+  .bench-line { font-size: 13px; padding: 12px 14px; }
+}
