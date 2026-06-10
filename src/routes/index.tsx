@@ -178,9 +178,9 @@ function AnonymousCourt() {
   const gateForCard = (intent: string) => gate(intent);
 
   return (
-    <div className="min-h-screen bg-background text-foreground bg-grain">
-      <TrustSignalBar total={globalQ.data?.total ?? null} />
+    <div className="min-h-screen bg-c-surface text-c-text-1 pb-32">
       <TopChrome authed={authed} />
+      <TrustSignalBar total={globalQ.data?.total ?? null} />
 
       <motion.main
         animate={
@@ -189,34 +189,73 @@ function AnonymousCourt() {
             : { filter: "blur(0px)", y: 0 }
         }
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto max-w-3xl px-4 pb-32 pt-6 space-y-8"
+        className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-c-surface-3 bg-c-surface"
       >
-        <HeroIntro />
-        {featuredQ.isLoading ? (
-          <CaseSkeleton />
-        ) : featuredQ.data ? (
-          <CourtroomPanel c={featuredQ.data.case} />
-        ) : (
-          <CourtInRecess />
-        )}
-        <TeaserFeedSection
-          posts={teaserQ.data ?? []}
-          isLoading={teaserQ.isLoading}
-          openCases={openCasesQ.data?.count ?? 0}
-          onGate={gateForCard}
-          excludePostId={featuredPost?.id}
-        />
-        <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gateForCard} />
-        <FinalCTA onGate={gateForCard} />
+        {/* HERO */}
+        <section className="hero-dark hub-hero">
+          <div className="hero-dark__orb hero-dark__orb--tr" />
+          <div className="hero-dark__orb hero-dark__orb--bl" />
+          <div className="hub-hero__crown">👑</div>
+          <div className="hub-hero__tag">Relationship Court™</div>
+          <h1 className="hub-hero__title">Where the human decides.</h1>
+          <p className="hub-hero__sub">
+            Real cases. Real verdicts. Zero real names.
+          </p>
+        </section>
+
+        {/* COURT — LIVE TRIAL */}
+        <SectionDivider icon="⚖️" tint="var(--c-gold)" label="The case before the bench" />
+        <div className="px-3.5 pb-5">
+          {featuredQ.isLoading ? (
+            <CaseSkeleton />
+          ) : featuredQ.data ? (
+            <CourtroomPanel c={featuredQ.data.case} />
+          ) : (
+            <CourtInRecess />
+          )}
+        </div>
+
+        {/* STORY STREAM */}
+        <SectionDivider icon="📜" tint="var(--c-teal)" label="What the room is saying" />
+        <div className="px-3.5 pb-5">
+          <TeaserFeedSection
+            posts={teaserQ.data ?? []}
+            isLoading={teaserQ.isLoading}
+            openCases={openCasesQ.data?.count ?? 0}
+            onGate={gateForCard}
+            excludePostId={featuredPost?.id}
+          />
+        </div>
+
+        {/* HALL OF FAME */}
+        <SectionDivider icon="👑" tint="var(--c-purple)" label="The court has a memory" />
+        <div className="px-3.5 pb-5">
+          <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gateForCard} />
+        </div>
+
+        {/* FINAL CTA */}
+        <SectionDivider icon="✦" tint="var(--c-pink-deep)" label="Your turn" />
+        <div className="px-3.5 pb-8">
+          <FinalCTA onGate={gateForCard} />
+        </div>
       </motion.main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-4 py-8 text-center text-xs text-muted-foreground space-y-1">
-          <p>⚠️ Real stories, real opinions. Not legal or therapeutic advice.</p>
-          <p>Made with chaos, worldwide.</p>
-        </div>
+      <footer className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-8 text-center text-[11px] text-c-text-3 space-y-1">
+        <p>Real stories. Real opinions. Not legal or therapeutic advice.</p>
+        <p>Made with chaos, worldwide.</p>
       </footer>
+    </div>
+  );
+}
 
+function SectionDivider({ icon, tint, label }: { icon: string; tint: string; label: string }) {
+  return (
+    <div className="px-3.5 pt-5 pb-3 flex items-center gap-2">
+      <span className="flex-1 h-px bg-c-surface-3" />
+      <span className="text-[11px] font-medium text-c-text-3 whitespace-nowrap flex items-center gap-1.5 uppercase tracking-wider">
+        <span style={{ color: tint }}>{icon}</span> {label}
+      </span>
+      <span className="flex-1 h-px bg-c-surface-3" />
     </div>
   );
 }
