@@ -163,17 +163,23 @@ export const composeStream = createServerFn({ method: "POST" })
     }
 
     // 4. Fetch titles for court cases (so the card has something to render)
-    let courtTitles: Record<string, { title: string | null; category: string | null }> = {};
+    let courtTitles: Record<string, { title: string | null; category: string | null; case_title: string | null; question_before_court: string | null }> = {};
     const courtPostIds = (courtRows ?? []).map((c: any) => c.post_id as string);
     if (courtPostIds.length > 0) {
       const { data: cp } = await supabaseAdmin
         .from("posts")
-        .select("id, title, score_category")
+        .select("id, title, score_category, case_title, question_before_court")
         .in("id", courtPostIds);
       for (const r of cp ?? []) {
-        courtTitles[(r as any).id] = { title: (r as any).title, category: (r as any).score_category };
+        courtTitles[(r as any).id] = {
+          title: (r as any).title,
+          category: (r as any).score_category,
+          case_title: (r as any).case_title ?? null,
+          question_before_court: (r as any).question_before_court ?? null,
+        };
       }
     }
+
 
     // 5. HOF tile (top entry, current week)
     let hof: HofPayload | null = null;
