@@ -69,6 +69,30 @@ export const listComments = createServerFn({ method: "GET" })
       .parse(i),
   )
   .handler(async ({ data }): Promise<CommentRow[]> => {
+    // Visibility gate: never expose comments on posts the viewer can't access.
+    const { data: post } = await supabaseAdmin
+      .from("posts")
+      .select("visibility, author_id, status, deleted_at")
+      .eq("id", data.postId)
+      .maybeSingle();
+    if (!post || (post as { status: string }).status !== "published" || (post as { deleted_at: string | null }).deleted_at) {
+      return [];
+    }
+    const visibility = (post as { visibility: string }).visibility;
+    const authorId = (post as { author_id: string }).author_id;
+    const earlyViewerId = await resolveViewerId();
+    if (visibility !== "public") {
+      if (!earlyViewerId) return [];
+      if (earlyViewerId !== authorId) {
+        if (visibility === "friends") {
+          const { data: friend } = await supabaseAdmin.rpc("is_friend", { _a: earlyViewerId, _b: authorId });
+          if (friend !== true) return [];
+        } else {
+          return [];
+        }
+      }
+    }
+
     let q = supabaseAdmin
       .from("post_comments")
       .select("id, post_id, user_id, parent_id, body, created_at, like_count, funny_count")
