@@ -291,21 +291,21 @@ function TrustSignalBar({ total }: { total: number | null }) {
   }, [total]);
 
   return (
-    <div className="w-full border-b border-border bg-surface-elevated/80 ">
-      <div className="mx-auto max-w-3xl px-4 py-1.5 flex items-center justify-between text-[12px] text-muted-foreground font-normal">
+    <div className="w-full bg-c-surface-2 border-b border-c-surface-3">
+      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-1.5 flex items-center justify-between text-[11px] text-c-text-2 font-normal">
         <span className="flex items-center gap-1.5">
           <span className="relative inline-block h-1.5 w-1.5">
-            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75" />
-            <span className="absolute inset-0 rounded-full bg-emerald-500" />
+            <span className="absolute inset-0 rounded-full bg-c-teal animate-ping opacity-75" />
+            <span className="absolute inset-0 rounded-full bg-c-teal" />
           </span>
           <span>
-            <span className="font-medium text-foreground tabular-nums">
+            <span className="font-medium text-c-text-1 tabular-nums">
               {display != null ? display.toLocaleString() : "—"}
             </span>{" "}
             verdicts cast
           </span>
         </span>
-        <span>Zero real names exposed.</span>
+        <span className="text-c-text-3">Zero real names exposed.</span>
       </div>
     </div>
   );
@@ -313,13 +313,13 @@ function TrustSignalBar({ total }: { total: number | null }) {
 
 function TopChrome({ authed }: { authed: boolean | null }) {
   return (
-    <header className="sticky top-0 z-40 bg-background/75 backdrop-blur border-b border-border">
-      <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-40 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
+      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
-          <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-7 w-auto" />
-          <img src={shutapIcon.url} alt="Shutap" className="sm:hidden h-7 w-auto" />
+          <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-6 w-auto" />
+          <img src={shutapIcon.url} alt="Shutap" className="sm:hidden h-6 w-auto" />
         </div>
-        <span className="text-[11px] text-muted-foreground italic mr-12 hidden sm:inline">
+        <span className="text-[11px] text-c-text-3 italic hidden sm:inline">
           {authed ? "The bench remembers you." : "The bench does not check IDs at the door."}
         </span>
       </div>
@@ -346,10 +346,10 @@ function HeroIntro() {
 
 function CourtInRecess() {
   return (
-    <section className="rounded-3xl border border-dashed border-border bg-card p-8 text-center">
+    <section className="rounded-2xl border border-dashed border-c-border bg-c-surface-2 p-8 text-center">
       <p className="text-2xl">⚖️</p>
-      <p className="mt-2 font-medium">Court is in recess.</p>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-2 font-medium text-c-text-1">Court is in recess.</p>
+      <p className="mt-1 text-sm text-c-text-2">
         The jury is between cases. The next one drops shortly.
       </p>
     </section>
@@ -359,9 +359,9 @@ function CourtInRecess() {
 function CaseSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="h-8 w-2/3 bg-surface-elevated rounded animate-pulse" />
-      <div className="h-40 bg-surface-elevated rounded-2xl animate-pulse" />
-      <div className="h-24 bg-surface-elevated rounded-2xl animate-pulse" />
+      <div className="h-8 w-2/3 bg-c-surface-2 rounded animate-pulse" />
+      <div className="h-40 bg-c-surface-2 rounded-2xl animate-pulse" />
+      <div className="h-24 bg-c-surface-2 rounded-2xl animate-pulse" />
     </div>
   );
 }
