@@ -179,27 +179,41 @@ export const claimAlias = createServerFn({ method: "POST" })
     if (!profile?.age_verified) return { ok: false, reason: "age_not_verified" };
 
     const nickname = `${data.emotion} ${data.nationality} ${data.creature}`;
-    const update = {
-      nationality: data.nationality,
-      emotion: data.emotion,
-      creature: data.creature,
-      emoji: data.emoji,
-      reroll_used: data.rerollUsed,
-      nickname,
-    };
-    const { error } = await supabase
-      .from("profiles")
-      .update(update as never)
-      .eq("id", userId);
+    // Derive a handle from the alias so @handle stays consistent with the
+    // assigned display name (e.g. "relentless_american_butterfly").
+    const baseHandle = nickname
+      .toLowerCase()
+      .replace(/[^a-z0-9_]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 24) || `user_${userId.slice(0, 6)}`;
 
-    if (error) {
-      // Postgres unique_violation — someone else claimed this exact combo
-      // between generateAlias and claimAlias. Tell the client to re-spin.
+    const tryUpdate = async (handleCandidate: string) => {
+      const update = {
+        nationality: data.nationality,
+        emotion: data.emotion,
+        creature: data.creature,
+        emoji: data.emoji,
+        reroll_used: data.rerollUsed,
+        nickname,
+        display_name: nickname,
+        handle: handleCandidate,
+      };
+      return supabase.from("profiles").update(update as never).eq("id", userId);
+    };
+
+    let attempt = 0;
+    let candidate = baseHandle;
+    // Retry up to 5 times on handle collision with a random suffix.
+    while (attempt < 5) {
+      const { error } = await tryUpdate(candidate);
+      if (!error) return { ok: true };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).code === "23505") {
-        return { ok: false, reason: "taken" };
-      }
-      return { ok: false, reason: "unknown", message: error.message };
+      const code = (error as any).code;
+      if (code !== "23505") return { ok: false, reason: "unknown", message: error.message };
+      // 23505: could be alias combo OR handle collision. Re-spin handle, keep alias.
+      const suffix = Math.floor(Math.random() * 9999).toString();
+      candidate = (baseHandle.slice(0, 24 - suffix.length - 1) + "_" + suffix).slice(0, 24);
+      attempt += 1;
     }
-    return { ok: true };
+    return { ok: false, reason: "taken" };
   });
