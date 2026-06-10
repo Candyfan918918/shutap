@@ -57,6 +57,8 @@ function formatSavedAt(ts: number): string {
   return `saved ${Math.floor(diff / 3_600_000)}h ago`;
 }
 
+type SaveStatus = "idle" | "saving" | "saved" | "failed";
+
 function SpillLanding() {
   const navigate = useNavigate();
   const create = useServerFn(createTeaDraft);
@@ -67,6 +69,8 @@ function SpillLanding() {
   const [phIdx, setPhIdx] = useState(0);
   const [restored, setRestored] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const retryCountRef = useRef(0);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
   // Restore draft from localStorage on mount
@@ -90,27 +94,44 @@ function SpillLanding() {
     }
   }, []);
 
-  // Debounced autosave
-  useEffect(() => {
-    const t = setTimeout(() => {
+  const attemptSave = useCallback(() => {
+    if (!text.trim() && !caseType) {
       try {
-        if (!text.trim() && !caseType) {
-          localStorage.removeItem(DRAFT_KEY);
-          setSavedAt(null);
-          return;
-        }
-        const now = Date.now();
-        localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({ text, caseType, voice, savedAt: now }),
-        );
-        setSavedAt(now);
+        localStorage.removeItem(DRAFT_KEY);
       } catch {
         /* ignore */
       }
-    }, 500);
-    return () => clearTimeout(t);
+      setSavedAt(null);
+      setSaveStatus("idle");
+      retryCountRef.current = 0;
+      return;
+    }
+
+    setSaveStatus("saving");
+    try {
+      const now = Date.now();
+      const payload = JSON.stringify({ text, caseType, voice, savedAt: now });
+      localStorage.setItem(DRAFT_KEY, payload);
+      setSavedAt(now);
+      setSaveStatus("saved");
+      retryCountRef.current = 0;
+    } catch {
+      const attempts = retryCountRef.current;
+      if (attempts < 2) {
+        retryCountRef.current = attempts + 1;
+        const delay = 800 * (attempts + 1);
+        setTimeout(() => attemptSave(), delay);
+      } else {
+        setSaveStatus("failed");
+      }
+    }
   }, [text, caseType, voice]);
+
+  // Debounced autosave
+  useEffect(() => {
+    const t = setTimeout(() => attemptSave(), 500);
+    return () => clearTimeout(t);
+  }, [text, caseType, voice, attemptSave]);
 
   useEffect(() => {
     const id = setInterval(() => setPhIdx((i) => (i + 1) % PLACEHOLDERS.length), 2800);
@@ -136,6 +157,8 @@ function SpillLanding() {
     setVoice("honest");
     setRestored(false);
     setSavedAt(null);
+    setSaveStatus("idle");
+    retryCountRef.current = 0;
     try {
       localStorage.removeItem(DRAFT_KEY);
     } catch {
