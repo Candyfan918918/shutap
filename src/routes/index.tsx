@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGateStore } from "@/stores/gate";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { getGlobalVerdictCount } from "@/lib/court.functions";
+import { getGlobalVerdictTally } from "@/lib/court.functions";
 import { CourtBody } from "@/components/sections/CourtBody";
 import { StreamBody } from "@/components/sections/StreamBody";
 import { HofBody } from "@/components/sections/HofBody";
@@ -72,7 +72,7 @@ function AnonymousCourt() {
     else navigate({ to: "/enter", search: { redirect: to } });
   };
 
-  const fetchGlobal = useServerFn(getGlobalVerdictCount);
+  const fetchGlobal = useServerFn(getGlobalVerdictTally);
   const globalQ = useQuery({
     queryKey: ["landing", "global-verdicts"],
     queryFn: () => fetchGlobal(),
