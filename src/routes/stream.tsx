@@ -1,6 +1,6 @@
 // The home story stream for signed-in users.
 // Visual reference: shutap_stream_feed.html (unified design system v3).
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
