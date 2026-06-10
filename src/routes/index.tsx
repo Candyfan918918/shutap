@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGateStore } from "@/stores/gate";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { getGlobalVerdictTally } from "@/lib/court.functions";
+import { getGlobalVerdictTally } from "@/lib/court.functions"
+import { getGlobalVerdictTally as _g } from "@/lib/landing.functions";
 import { CourtBody } from "@/components/sections/CourtBody";
 import { StreamBody } from "@/components/sections/StreamBody";
 import { HofBody } from "@/components/sections/HofBody";
