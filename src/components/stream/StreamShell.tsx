@@ -64,6 +64,13 @@ export function StreamShell() {
 
       <ChatbotPill />
       <AliasOverlay open={overlay} onClose={() => setOverlay(false)} authed={!!authed} />
+      <HofLeaderboardOverlay
+        open={hofOpen}
+        onClose={() => setHofOpen(false)}
+        initialCategory={hofInit.category}
+        initialEntity={hofInit.entity}
+        initialPeriod={hofInit.period}
+      />
     </div>
   );
 }
