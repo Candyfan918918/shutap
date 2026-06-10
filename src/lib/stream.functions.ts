@@ -39,13 +39,20 @@ export interface CourtCasePayload {
   case_id: string;
   post_id: string;
   title: string | null;
+  case_title: string | null;
+  question_before_court: string | null;
   tier: string | null;
   region_label: string | null;
   category: string | null;
   lock_at: string | null;
   status: string;
   controversy_score: number | null;
+  final_verdict: string | null;
+  bench_verdict_line: string | null;
+  verdicts: Record<string, number>;
+  verdict_total: number;
 }
+
 
 export interface HofPayload {
   entity_type: string;
