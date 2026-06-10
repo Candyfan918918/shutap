@@ -14,8 +14,10 @@ export function ProfileHeader({ p, onChanged }: { p: PublicProfile; onChanged: (
   return (
     <div className="px-5 pt-6 pb-4">
       <div className="flex items-start gap-4">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-surface-elevated border border-border grid place-items-center text-3xl shrink-0">
-          {p.avatarUrl ? <img src={p.avatarUrl} alt="" className="w-full h-full object-cover" /> : "👤"}
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-surface-elevated border border-border grid place-items-center text-4xl sm:text-5xl shrink-0">
+          {p.avatarUrl
+            ? <img src={p.avatarUrl} alt="" className="w-full h-full object-cover" />
+            : (p.emoji ?? "👤")}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
