@@ -29,6 +29,8 @@ import { CaseSummaryToggle } from "@/components/posts/CaseSummaryToggle";
 import { SpillScanCTA } from "@/components/posts/SpillScanCTA";
 import { AuthorMenu } from "@/components/posts/AuthorMenu";
 import { ServiceCard } from "@/components/posts/ServiceCard";
+import { FinalVerdictScreen } from "@/components/posts/FinalVerdictScreen";
+
 import { RelateButton } from "@/components/stream/RelateButton";
 import { useSoftGate } from "@/components/stream/useSoftGate";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
@@ -117,7 +119,14 @@ function PostPage() {
   const [devilsAdvocate, setDevilsAdvocate] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [viewerId, setViewerId] = useState<string | null>(null);
+  const [finalVerdict, setFinalVerdict] = useState<null | {
+    caseId: string; tier: string | null; regionLabel: string | null;
+    finalVerdict: string | null; benchVerdictLine: string | null;
+    total: number; dominantPct: number;
+  }>(null);
+  const [verdictDismissed, setVerdictDismissed] = useState(false);
   const commentsRef = useRef<CommentThreadHandle | null>(null);
+
   const recordView = useServerFn(recordPostView);
   const react = useServerFn(reactToPost);
   const softGate = useSoftGate();
