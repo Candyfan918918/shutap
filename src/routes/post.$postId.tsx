@@ -31,7 +31,7 @@ import { AuthorMenu } from "@/components/posts/AuthorMenu";
 import { ServiceCard } from "@/components/posts/ServiceCard";
 import { RelateButton } from "@/components/stream/RelateButton";
 import { useSoftGate } from "@/components/stream/useSoftGate";
-import { reactToPost } from "@/lib/posts/engagement.functions";
+import { useSoftGate } from "@/components/stream/useSoftGate";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 
