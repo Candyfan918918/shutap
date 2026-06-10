@@ -53,14 +53,15 @@ export function StreamBody() {
         </p>
       </section>
 
-      <div
-        className="px-3 pt-3 pb-4"
-        style={{ columnGap: "12px", columnCount: 2 }}
-      >
+      <div className="stream-wrap-preview pb-4">
         <style>{`
-          @media (min-width: 1024px) { .stream-cols-preview { column-count: 3 !important; } }
-          .stream-cols-preview { column-gap: 12px; column-count: 2; }
-          .stream-cell-preview { break-inside: avoid; margin-bottom: 12px; display: block; }
+          .stream-wrap-preview { padding-left: 8px; padding-right: 8px; padding-top: 10px; }
+          .stream-cols-preview { column-count: 2; column-gap: 8px; }
+          .stream-cell-preview { break-inside: avoid; margin-bottom: 8px; display: block; }
+          @media (min-width: 420px) { .stream-wrap-preview { padding-left: 10px; padding-right: 10px; } .stream-cols-preview { column-gap: 10px; } .stream-cell-preview { margin-bottom: 10px; } }
+          @media (min-width: 640px) { .stream-wrap-preview { padding-left: 14px; padding-right: 14px; } .stream-cols-preview { column-count: 3; column-gap: 12px; } .stream-cell-preview { margin-bottom: 12px; } }
+          @media (min-width: 1024px) { .stream-cols-preview { column-count: 4; column-gap: 14px; } .stream-cell-preview { margin-bottom: 14px; } }
+          @media (min-width: 1536px) { .stream-wrap-preview { max-width: 1480px; margin-left: auto; margin-right: auto; } .stream-cols-preview { column-count: 5; column-gap: 16px; } .stream-cell-preview { margin-bottom: 16px; } }
         `}</style>
 
         {items.length === 0 ? (
