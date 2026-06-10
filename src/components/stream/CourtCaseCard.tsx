@@ -11,49 +11,57 @@ interface Props {
 
 export function CourtCaseCard({ payload, index }: Props) {
   const navigate = useNavigate();
-  const isPortrait = index % 2 === 0;
-  const aspect = isPortrait ? "3/4" : "4/3";
+  const coverAspect = index % 2 === 0 ? "4/5" : "1/1";
 
   return (
     <article
       role="button"
       tabIndex={0}
       onClick={() => void navigate({ to: "/post/$postId", params: { postId: payload.post_id } })}
-      className="relative flex flex-col overflow-hidden cursor-pointer transition active:scale-[0.995] p-3"
+      className="relative flex flex-col overflow-hidden cursor-pointer transition active:scale-[0.99] hover:shadow-md"
       style={{
-        background: "linear-gradient(165deg, var(--c-amber-soft, #fef0d0) 0%, var(--c-surface-2, #faf6f1) 100%)",
+        background: "var(--c-surface, #fff)",
         borderRadius: "var(--r-md, 14px)",
         border: "0.5px solid var(--c-border, #e3ddd2)",
-        aspectRatio: aspect,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}
     >
-      <div className="flex items-start justify-between">
-        <span
-          className="px-2 h-5 inline-flex items-center text-[9.5px] font-semibold uppercase tracking-[0.05em] rounded-full"
-          style={{ background: "var(--c-surface-3)", color: "var(--c-text-2)" }}
-        >
-          In Court
-        </span>
-      </div>
-
-      <h3
-        className="mt-3 text-[14px] font-medium leading-snug line-clamp-3 flex-1"
-        style={{ color: "var(--c-text-1)" }}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          aspectRatio: coverAspect,
+          background: "linear-gradient(155deg, #fff4d1 0%, #fbcf6b 55%, #b07a18 100%)",
+        }}
       >
-        {payload.title ?? "Case opened — verdict pending."}
-      </h3>
-
-      <div className="mt-2">
-        <CourtRibbon
-          category={payload.category}
-          tier={payload.tier}
-          lockAt={payload.lock_at}
-        />
+        <span
+          className="absolute top-2.5 left-2.5 px-2 h-6 inline-flex items-center text-[10px] font-semibold uppercase tracking-[0.05em] rounded-full"
+          style={{ background: "rgba(255,255,255,0.85)", color: "var(--c-amber, #b07a18)" }}
+        >
+          ⚖️ In Court
+        </span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[72px] drop-shadow-sm select-none" aria-hidden>⚖️</span>
+        </div>
+        <div className="absolute bottom-2 left-2 right-2">
+          <CourtRibbon
+            category={payload.category}
+            tier={payload.tier}
+            lockAt={payload.lock_at}
+          />
+        </div>
       </div>
 
-      <p className="mt-1 text-[10px]" style={{ color: "var(--c-text-3)" }}>
-        {payload.region_label ?? "Open hearing"} · tap to weigh in
-      </p>
+      <div className="px-3 pt-2.5 pb-2.5">
+        <h3
+          className="text-[14px] font-semibold leading-snug line-clamp-3"
+          style={{ color: "var(--c-text-1)" }}
+        >
+          {payload.title ?? "Case opened — verdict pending."}
+        </h3>
+        <p className="mt-1.5 text-[11px]" style={{ color: "var(--c-text-3)" }}>
+          {payload.region_label ?? "Open hearing"} · tap to weigh in
+        </p>
+      </div>
     </article>
   );
 }
