@@ -1,8 +1,9 @@
-// StoryCard — stream variant. Surface-2 / 0.5px border / --r-md.
-// Aspect 4:3 vs 3:4 by index parity. Teal left border when both_sides_heard.
-// Long-press / right-click opens action sheet; tap opens detail.
+// StoryCard — Xiaohongshu-style: cover-led, full-width within its column.
+// Cover uses a category gradient + score + author emoji as visual anchor
+// (we don't have real images yet). Content flows below: title, snippet, meta.
+// Teal left border when both_sides_heard. Long-press / right-click → action sheet.
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { StoryPayload } from "@/lib/stream.functions";
 import { AliasPill } from "./AliasPill";
@@ -13,11 +14,27 @@ import { ActionSheet } from "./ActionSheet";
 import { useLongPress } from "./useLongPress";
 import { useSoftGate } from "./useSoftGate";
 
-function scoreTone(score: number): { bg: string; fg: string } {
-  if (score >= 800) return { bg: "var(--c-amber-soft, #fef0d0)", fg: "var(--c-amber, #b07a18)" };
-  if (score >= 500) return { bg: "var(--c-coral-soft, #ffe2dc)", fg: "var(--c-coral, #c0392b)" };
-  if (score >= 200) return { bg: "var(--c-purple-soft, #ece5fa)", fg: "var(--c-purple, #6e54b3)" };
-  return { bg: "var(--c-surface-3, #eee)", fg: "var(--c-text-2, #555)" };
+function scoreTone(score: number): { bg: string; fg: string; label: string } {
+  if (score >= 800) return { bg: "var(--c-amber, #b07a18)", fg: "#fff", label: "On fire" };
+  if (score >= 500) return { bg: "var(--c-coral, #c0392b)", fg: "#fff", label: "Hot" };
+  if (score >= 200) return { bg: "var(--c-purple, #6e54b3)", fg: "#fff", label: "Warm" };
+  return { bg: "var(--c-surface-3, #eee)", fg: "var(--c-text-2, #555)", label: "Quiet" };
+}
+
+function categoryGradient(cat: string | null): string {
+  const c = (cat ?? "").toLowerCase();
+  if (c.includes("famil") || c.includes("mother") || c.includes("mil"))
+    return "linear-gradient(155deg, #fde7f0 0%, #f6c1d3 55%, #e89bb6 100%)";
+  if (c.includes("work") || c.includes("money"))
+    return "linear-gradient(155deg, #fff4d1 0%, #fbe08a 55%, #e9bd4f 100%)";
+  if (c.includes("stranger") || c.includes("neigh"))
+    return "linear-gradient(155deg, #ffe6df 0%, #ffb7a6 55%, #e8826b 100%)";
+  if (c.includes("digital") || c.includes("online"))
+    return "linear-gradient(155deg, #ece5fa 0%, #c8b8f1 55%, #9c83df 100%)";
+  if (c.includes("friend"))
+    return "linear-gradient(155deg, #defaf0 0%, #aae6cf 55%, #5fbf9d 100%)";
+  // romance / default
+  return "linear-gradient(155deg, #ffe1ec 0%, #ffb3cd 55%, #ec7aa6 100%)";
 }
 
 interface Props {
@@ -32,76 +49,121 @@ export function StoryCard({ payload, index, anonymous }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const tone = scoreTone(payload.score);
-  const isPortrait = index % 2 === 0; // alternate 3:4 / 4:3
-  const aspect = isPortrait ? "3/4" : "4/3";
+  // Alternating XHS-style cover aspect ratios — tall portrait & square mix.
+  const coverAspect = index % 3 === 0 ? "3/4" : index % 3 === 1 ? "4/5" : "1/1";
   const teal = payload.both_sides_heard ? "2px solid var(--c-teal, #3aa48f)" : undefined;
 
   const longPress = useLongPress(() => setSheetOpen(true), 450);
-
   const goDetail = () => { void navigate({ to: "/post/$postId", params: { postId: payload.id } }); };
 
   const oneSided = !payload.both_sides_heard && payload.is_seed;
+  const cover = categoryGradient(payload.score_category);
+  const emoji = payload.author_emoji ?? "🌊";
 
   return (
     <article
-      className="relative flex flex-col overflow-hidden cursor-pointer transition active:scale-[0.995]"
+      className="relative flex flex-col overflow-hidden cursor-pointer transition active:scale-[0.99] hover:shadow-md"
       style={{
-        background: "var(--c-surface-2, #faf6f1)",
+        background: "var(--c-surface, #fff)",
         borderRadius: "var(--r-md, 14px)",
         border: "0.5px solid var(--c-border, #e3ddd2)",
         borderLeft: teal,
-        aspectRatio: aspect,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}
       {...longPress.handlers}
       onClick={(e) => { if (longPress.didTrigger()) { e.preventDefault(); return; } goDetail(); }}
       onContextMenu={(e) => { e.preventDefault(); setSheetOpen(true); }}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2 px-3 pt-2.5">
-        <AliasPill
-          emoji={payload.author_emoji}
-          nationality={payload.author_nationality}
-          emotion={payload.author_emotion}
-          creature={payload.author_creature}
+      {/* Cover — XHS-style image stand-in */}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{ aspectRatio: coverAspect, background: cover }}
+      >
+        {/* Decorative paper texture */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-30 mix-blend-overlay"
+          style={{
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(0,0,0,0.18) 0%, transparent 50%)",
+          }}
         />
+        {/* Score chip */}
         <span
-          className="px-2 h-5 inline-flex items-center text-[9.5px] font-semibold uppercase tracking-[0.05em] rounded-full"
+          className="absolute top-2.5 left-2.5 px-2 h-6 inline-flex items-center gap-1 text-[10px] font-semibold rounded-full backdrop-blur-sm"
           style={{ background: tone.bg, color: tone.fg }}
         >
-          {payload.score}
+          <span className="tabular-nums">{payload.score}</span>
+          <span className="opacity-80">· {tone.label}</span>
         </span>
+        {/* Category bubble */}
+        {payload.score_category && (
+          <span
+            className="absolute top-2.5 right-2.5 px-2 h-6 inline-flex items-center text-[10px] font-medium rounded-full"
+            style={{ background: "rgba(255,255,255,0.7)", color: "var(--c-text-1)", backdropFilter: "blur(4px)" }}
+          >
+            {payload.score_category}
+          </span>
+        )}
+        {/* Emoji anchor */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[64px] drop-shadow-sm select-none" aria-hidden>{emoji}</span>
+        </div>
+        {/* Court ribbon (when nominated) */}
+        {payload.is_nominated && payload.case?.lock_at && (
+          <div className="absolute bottom-2 left-2 right-2">
+            <CourtRibbon
+              category={payload.case.category}
+              tier={payload.case.tier}
+              lockAt={payload.case.lock_at}
+            />
+          </div>
+        )}
       </div>
 
-      {oneSided && (
-        <p className="px-3 mt-1 text-[10px] italic" style={{ color: "var(--c-text-3, #888)" }}>
-          one side · the other hasn't spoken
-        </p>
-      )}
-
-      {/* Body */}
-      <div className="px-3 pt-2 flex-1 min-h-0">
+      {/* Content */}
+      <div className="px-3 pt-2.5 pb-2 flex flex-col gap-1.5">
         {payload.title && (
-          <h3 className="text-[13px] font-medium leading-snug line-clamp-2" style={{ color: "var(--c-text-1)" }}>
+          <h3
+            className="text-[14px] font-semibold leading-snug line-clamp-2"
+            style={{ color: "var(--c-text-1)" }}
+          >
             {payload.title}
           </h3>
         )}
         <p
-          className="text-[12px] leading-snug mt-1 line-clamp-3"
+          className="text-[12.5px] leading-snug line-clamp-2"
           style={{ color: "var(--c-text-2, #555)" }}
         >
           {payload.snippet}
         </p>
-      </div>
 
-      {/* Footer */}
-      <div className="px-3 pb-2.5 pt-2 space-y-1.5">
-        <CompactVerdictBar
-          postId={payload.id}
-          initialCounts={payload.verdicts as any}
-          height={6}
-          live
-        />
-        <div className="flex items-center justify-between text-[11px]" style={{ color: "var(--c-text-3)" }}>
+        {oneSided && (
+          <p className="text-[10px] italic" style={{ color: "var(--c-text-3, #888)" }}>
+            one side · the other hasn't spoken
+          </p>
+        )}
+
+        {/* Verdict pulse */}
+        <div className="pt-1">
+          <CompactVerdictBar
+            postId={payload.id}
+            initialCounts={payload.verdicts as any}
+            height={5}
+            live
+          />
+        </div>
+
+        {/* Footer meta — XHS style: author left, relate right */}
+        <div className="flex items-center justify-between pt-1.5 mt-0.5 border-t" style={{ borderColor: "var(--c-border, #efe9dd)" }}>
+          <div className="min-w-0 flex-1 mr-2">
+            <AliasPill
+              emoji={payload.author_emoji}
+              nationality={payload.author_nationality}
+              emotion={payload.author_emotion}
+              creature={payload.author_creature}
+            />
+          </div>
           <RelateButton
             count={payload.relate_count}
             compact
@@ -119,20 +181,8 @@ export function StoryCard({ payload, index, anonymous }: Props) {
               }
             }}
           />
-          <span className="tabular-nums">💬 {payload.comment_count}</span>
         </div>
       </div>
-
-      {/* Court ribbon overlay */}
-      {payload.is_nominated && payload.case?.lock_at && (
-        <div className="absolute bottom-2 right-2">
-          <CourtRibbon
-            category={payload.case.category}
-            tier={payload.case.tier}
-            lockAt={payload.case.lock_at}
-          />
-        </div>
-      )}
 
       <ActionSheet
         open={sheetOpen}
