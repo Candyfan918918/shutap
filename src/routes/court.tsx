@@ -118,35 +118,41 @@ function CourtPage() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1 pb-24">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-3xl px-4 py-2.5 flex items-center justify-between">
+        <div className="mx-auto max-w-[480px] px-4 py-2.5 flex items-center justify-between">
           <Link to="/stream" className="text-[17px] font-medium tracking-tight">
-            shut<span className="text-c-pink">ap</span>
+            shut<span className="text-c-pink-deep">ap</span>
           </Link>
           <span className="live-pill"><span className="live-pill__dot" />Family Court · Live</span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl">
-        <section className="relative overflow-hidden text-center px-4 pt-5 pb-4" style={{ background: "var(--c-pink)" }}>
+      <main className="mx-auto max-w-[480px] border-x border-c-border">
+        {/* Hero — soft palette: cream surface, pink-deep ink, ghost wordmark in pink-soft */}
+        <section className="relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2 border-b border-c-border">
           <span
             aria-hidden
-            className="absolute left-1/2 -translate-x-1/2 top-[-8px] text-[72px] font-medium text-white/[0.06] whitespace-nowrap pointer-events-none tracking-tighter"
+            className="absolute left-1/2 -translate-x-1/2 top-[-10px] text-[88px] font-medium text-c-pink-soft/70 whitespace-nowrap pointer-events-none tracking-tighter select-none"
           >
             COURT
           </span>
-          <div className="text-[10px] font-medium tracking-[0.10em] uppercase text-white/60 mb-1.5">
+          <div className="relative text-[10px] font-medium tracking-[0.12em] uppercase text-c-pink-deep mb-2">
             Relationship Court™ · Where the human decides
           </div>
-          <h1 className="text-[15px] sm:text-base font-medium text-white leading-snug mb-1.5">
+          <h1 className="relative text-[16px] font-medium text-c-text-1 leading-snug mb-1.5 text-balance">
             The cases the algorithm couldn't ignore.
           </h1>
-          <p className="text-[12px] italic text-white/70 leading-snug">What would you do if you were her?</p>
-          <span className="inline-flex items-center gap-1.5 mt-2.5 bg-white/15 rounded-full px-2.5 py-1 text-[11px] text-white font-medium">
-            ⏱ Live deliberations
+          <p className="relative text-[12px] italic text-c-text-2 leading-snug">
+            What would you do if you were her?
+          </p>
+          <span className="relative inline-flex items-center gap-1.5 mt-3 bg-c-surface border border-c-pink-border rounded-full px-2.5 py-1 text-[11px] text-c-pink-deep font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-c-pink-deep animate-pulse" />
+            Live deliberations
           </span>
         </section>
 
         <div className="px-4 pt-6 space-y-6">
+
+
 
 
         <CourtTabs
