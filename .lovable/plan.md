@@ -1,87 +1,78 @@
-# Rebuild the 5 pillars to match the attached HTML mockups
+## Goal
 
-## Scope
+Replace the current `/stream` with the spec'd single-surface feed: one full-viewport scroller, typed cards rendered by `item.type`, infinite scroll, pull-to-refresh, plus persistent alias pill and Bench chatbot pill. No header, tabs, sidebar, or bottom nav. the cards in story stream should keep current design in color and fonts, but change horizontal layout to cards like xiaohongshu scrolling. view multiple story cards at the same time. 
 
-The 5 attached HTML files are full design references with hand-tuned CSS, hero banners, animated bars, dynamic input cards, score reveals, timelines, etc. Total reference: ~3,200 lines of pure styling + markup across the 5 files.
+A `/stream` route already exists with a sticky header and `StreamBody` rendering a flat list of `FeedStoryCard`s. It does not match the spec and will be rewritten end-to-end. Existing `VerdictBar`, `CourtCaseCard`, `CountdownChip`, and `AliasPill` building blocks will be reused where they match; otherwise replaced.
 
-The rebuild will preserve every existing route's data wiring (loaders, server functions, mutations). Only the presentation layer is replaced. No backend changes.
+## Scope decisions (please confirm)
 
-## Pass 1 — Unified design tokens (one file)
+1. **Stream feed source.** Spec mentions `/orchestrator compose`. There is no such endpoint today. I will add one server function `composeStream({ cursor, limit, anonymous })` that mixes types from existing tables (posts → StoryCard, court_cases → CourtCaseCard, hof_scores → HOFCard, bench_voice_strings → BenchMomentCard, plus injected SpillCTA / ScanCTA / ServiceCard slots). A future orchestrator can replace its internals without touching the UI.
+2. **ServiceCard content.** Not defined yet. I will render a placeholder "Service" tile that links to a future services route, gated behind a feature flag so it ships dormant.
+3. **Pull-to-refresh.** Mobile-first gesture only (touch). On desktop a small "New stories" pill appears when fresh items are available.
+4. **Long-press quick actions.** Mobile long-press + desktop right-click both open the same action sheet.
 
-Edit `src/styles.css` to align with the mockups' shared root:
+If any of these are wrong, tell me and I will revise before building.
 
-- Add missing palette deeps: `--c-coral-soft/border/ink` already exist; add `--c-gold-soft/border/deep` (HOF only uses this — `#fef9ec / #f5d97a / #5a3d00`).
-- Add ink scale used in heroes: `--c-ink: #0a080f`, `--c-ink-2: #3a3040`, `--c-ink-3: #7a6880` — used by every dark hero in Scan / Spill / HOF.
-- Add shared utility classes used across multiple pillars: `.hero-dark` (black hero with two coloured orb blobs), `.section-eyebrow`, `.live-pill`, `.cat-pill--*` (already partial — extend to all five categories with consistent border/ink), and `.vbar` segments.
-- Map Tailwind utilities for the new tokens so route files can use `bg-c-ink`, `text-c-ink-3`, `bg-c-gold-soft`, etc.
+## Plan
 
-## Pass 2 — Rebuild each pillar (one route file each)
+### 1. Stream store
 
-For every pillar I will rebuild the primary screen (Screen 1 of each mockup, which is the canonical view). Variant screens shown in the mockups (timeline builder, score reveal, share sheet, "how the HOF works") become collapsible sub-sections or follow-up flows only where the route already supports them — I won't invent new sub-routes.
+- `src/stores/stream.ts` (zustand): `items[]`, `cursor`, `loading`, `chatbot_override_active`, plus actions `prepend`, `append`, `setCursor`, `reset`.
 
-### A. Story Stream — `src/routes/_authenticated/stream.tsx`
-Replace the current card layout with the mockup's:
-- Sticky cream topbar with logo + alias pill.
-- Stories rendered as `.story` cards with header (author bubble + name/sub + category pill), body with italic question, verdict bar + dot legend, action row (`Judge this` / `Happened to me` / share).
-- Interleaved `.bench-line` nudges every ~2 cards (uses real counts).
-- Inline `.hof-strip` card and `.scan-card` interleaved at fixed positions.
-- Footer `.chatbot-pill` (already present as BenchPillMenu — keep, restyle to match the cream pill in the mockup).
+### 2. Server fn: compose stream
 
-### B. Court — `src/routes/court.tsx`
-Rebuild around the mockup's case room:
-- Topbar with live-pill ("Family Court · Live") tied to the current case tier.
-- `.case-hero` (pink) with eyebrow / title / italic question / `⏱ N left` timer.
-- `.parties-grid` (Plaintiff / vs / Defendant) cards, teal-top / coral-top borders, with quote or empty-chair note.
-- `.section` for live verdict with 7-segment `.vbar` + dot legend (Red flag / Green flag / Run / Talk it out / Lawyer up / Therapy / Need update).
-- Jury box: `.bench-strip` for The Bench, `.seats-row` with seat states (you / filled / empty + voted-* tint).
-- 2-col verdict grid `.vgrid` with `.vbtn vk-*` active styles.
-- Judgment grid `.jgrid` (Guilty / Not guilty / Both at fault / Need more info).
-- Bench reaction strip + CTA button. Wires to existing verdict mutation.
+- `src/lib/stream.functions.ts` → `composeStream({ data: { cursor?, limit?, anonymous } })`.
+- Returns `{ items: StreamItem[], next_cursor: string | null }`.
+- `StreamItem` is a discriminated union on `type`: `story | court_case | spill_cta | scan_cta | hof | bench_moment | service`.
+- Anonymous: only `court_case`, `hof`, `bench_moment`, `scan_cta`, `service`.
+- Authed: full mix, with CTAs sprinkled every ~7 items.
 
-### C. Scan — `src/routes/_authenticated/scan/index.tsx`
-Rebuild as the dramatic chat entry:
-- `.hero-banner` (ink) with pink orbs, "What happened? Don't soften it.", live-dot count of cases assessed today.
-- Chat column with `.brow-msg` AI bubbles, `.user-msg` user bubbles, `.react-msg` dramatic AI reactions (pink left border on `.pk-l`).
-- Dynamic input cards: emoji intensity row, tag cloud, tap-card 2×2 grid — wired to the existing scan question state machine. Each scan step picks the input type the mockup defines for that step.
-- Score reveal screen (route `scan/result.$scanId.tsx`): `.score-hero` (ink with 120px ghost number), big score, gradient bar, `.insights` list, verdict preview card, action row (Save / Post to feed).
+### 3. Card components (`src/components/stream/`)
 
-### D. Spill — `src/routes/_authenticated/spill/index.tsx`
-Rebuild matching the Spill flow:
-- `.spill-hero` (ink) — "Tell the court what happened." with the three rules dots.
-- `.prog` 5-step progress bar (Opening / Context / The incident / After / Ready).
-- Chat column with `.ai-row` / `.usr-row` and the critical `.short-card` ("The court needs more than this") that fires when the user types < ~40 words — wired to client-side word count.
-- `.depth-prompt` (purple) for The Bench's drill-down questions.
-- `.richness` meter card showing 4 facets (What happened / Context / His response / After) — driven by per-step completion.
-- Input area with character count + send button (already wired).
-- Privacy scan card + review card + auth block (existing logic, restyled).
+- `StoryCard.tsx` — surface-2 / 0.5px border / `--r-md`. 4:3 vs 3:4 by index parity. Teal left border when `both_sides_heard`. Alias pill (left) + relationship + category badge (right). 3-line snippet. Score badge (gray/purple/coral/amber bands). Compact `VerdictBar` (6px). Relate + comment counts. `CourtRibbon` overlay if nominated. One-sided disclosure line. Long-press / right-click → action sheet. Tap → `/post/$postId`.
+- `CourtCaseCard.tsx` — reuse existing where compatible; otherwise stream variant with `CourtRibbon`.
+- `SpillCTACard.tsx`, `ScanCTACard.tsx` — Bench-voice CTA tiles, route to `/spill` / `/scan`.
+- `HOFCard.tsx` — surfaces a HOF entry.
+- `BenchMomentCard.tsx` — pulls a `bench_voice_strings` line, no actions.
+- `ServiceCard.tsx` — dormant placeholder.
 
-### E. Hall of Fame — new route `src/routes/_authenticated/hof.tsx`
-HOF doesn't exist as a standalone route yet. Create it:
-- `.hof-hero` (ink) — gold crown, "Hall of Fame", three stat tiles.
-- `.period-row` (Today / This week / This month / All time) — local state, no server filter yet.
-- Legend (gold / teal / purple) explaining the 3 source types.
-- Three category sections, each fed by an existing server function or temporary stub when no data exists:
-  - **Court verdict** card (gold tint, gavel flag, bench declaration, outcome row) — `topByCategory("court")`.
-  - **Stream story** card (teal tint, "Why it's here" resonance block) — top by relate count.
-  - **Top juror** card (purple tint, avatar, 4 score stats, badges) — top from `user_scores` / `user_roles`.
-- Wire the existing "🏆 Hall of Fame" strip in stream + the BenchPillMenu HOF item to `/hof` instead of `/court`.
+### 4. Shared widgets
 
-## Pass 3 — Glue
+- `CourtRibbon.tsx` — pill, amber background, 1s countdown tick. Pulse <60min. Coral + faster pulse <10min.
+- `RelateButton.tsx` — distinct icon, "N felt this", teal fill when active. Calls `relateToPost` or fires `SoftGate`.
+- Rework `VerdictBar` to spec: 7 animated segments, Realtime subscription on `post_verdict_votes` filtered by post_id, user's vote = white 1px outline, compact (6px) / full (32px) variants.
+- `AliasPill` — three states (full / reduced / anonymous), surface-3 + pill radius.
 
-- Update `BenchPillMenu` HOF entry → `/hof`.
-- Ensure every new route file has `head()` meta (title + description) per the route-architecture rules. None get an `og:image` (no hero image yet).
-- Smoke-check the build (route IDs match filenames, no missing imports).
+### 5. Persistent UI shell
 
-## What I will NOT do in this pass
+- `src/components/stream/StreamShell.tsx`: full-viewport scroller, fixed `AliasPill` top-right (hidden when anonymous), fixed `ChatbotPill` bottom-center ("Ask The Bench...", text-only).
+- `AliasOverlay` and `ChatbotOverlay` mounted lazily on tap. Existing overlays reused if present, else stub scaffolding with the four sections (profile, bookmarks, journal, settings) for alias, and a placeholder chat surface that calls a future `askBench` server fn.
 
-- Will not redesign auth/onboarding/profile routes (out of scope).
-- Will not add new database tables or RLS policies — HOF reads from what already exists; if a stat has no source, it renders with a Bench-voice empty state, not a fake number.
-- Will not implement the secondary "How the HOF works" explainer page, the Scan share sheet, or the Spill auth-block sub-screens — those exist in the mockups as supporting screens; I'll add them in a follow-up if you want.
-- Will not change the existing chat-pill menu's 5-CTA structure; only the HOF target route changes.
+### 6. Stream page
 
-## Estimated change size
+- Rewrite `src/routes/stream.tsx`: no header. Renders `<StreamShell>` with `<StreamList />`.
+- `StreamList` uses `useInfiniteQuery` with `composeStream`, page size 20, primes via loader (`ensureInfiniteQueryData`). `IntersectionObserver` sentinel triggers `fetchNextPage`.
+- Pull-to-refresh: touch gesture handler invokes `queryClient.resetQueries(['stream'])`, then refetch.
 
-~1 token-and-utility pass + 5 route rewrites + 1 small glue edit. Each route file lands around 250–400 lines.
+### 7. SoftGate
 
-## Approve to proceed?
-Once you say go, I'll execute all 5 rebuilds in parallel batches and report back with the routes touched.
+- Reuse existing soft-gate component if available; otherwise a small `<SoftGate trigger=...>` wrapper that opens a sign-in sheet for anonymous taps on vote / relate / comment / bookmark.
+
+## Technical details
+
+- Realtime: enable publication for `post_verdict_votes` if not already (verify in a migration first; skip if it is).
+- `composeStream` is a public server fn using `supabaseAdmin` inside the handler (public reads + safe column projection). Bench-voice copy comes from `bench_voice_strings`.
+- All copy goes through the Bench voice rules — no "Loading…", no exclamation marks.
+- Score color bands implemented as a `scoreTone(score)` helper returning a CSS variable name.
+- Long-press: `pointerdown` 450ms timer; cancelled on `pointermove` / `pointerup`. Right-click `onContextMenu` opens the same sheet.
+- Infinite scroll: cursor encoded as `${published_at}|${id}` for stability.
+- Anonymous detection: `supabase.auth.getSession()` (client) + `anonymous` flag passed to `composeStream` so SSR returns the right mix.
+
+## Out of scope (later steps)
+
+- Real `/orchestrator compose` mixing logic (current server fn is the seam).
+- Bench chatbot reply pipeline (overlay ships with input + scaffold).
+- Journal feature inside the alias overlay (link only).
+- Service catalogue (`ServiceCard` is placeholder).
+
+Confirm the four scope decisions above and I will build straight through.
