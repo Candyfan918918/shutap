@@ -5,10 +5,11 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ensureProfile } from "@/lib/profile/bootstrap.server";
 
-const InputSchema = z.object({
-  dob_month: z.number().int().min(1).max(12),
-  dob_year: z.number().int().min(1900).max(new Date().getUTCFullYear()),
-});
+const makeInputSchema = () =>
+  z.object({
+    dob_month: z.number().int().min(1).max(12),
+    dob_year: z.number().int().min(1900).max(new Date().getUTCFullYear()),
+  });
 
 export type AgeGateResult = {
   data: { age_verified: true } | null;
