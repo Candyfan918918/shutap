@@ -181,14 +181,17 @@ function PostPage() {
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain pb-24">
       <header className="sticky top-0 z-30  bg-background/75 border-b border-border">
-        <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between gap-2">
           <Link to="/" className="text-sm text-muted-foreground">← {t("appName")}</Link>
-          <button
-            onClick={() => setShowShare(true)}
-            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
-          >
-            Share
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowShare(true)}
+              className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
+            >
+              Share
+            </button>
+            {viewerId && viewerId === post.author_id && <AuthorMenu postId={post.id} />}
+          </div>
         </div>
       </header>
 
@@ -212,6 +215,16 @@ function PostPage() {
             </button>
           </motion.div>
         )}
+
+        {/* Alias + side-of-story */}
+        <StoryAliasBlock
+          emoji={(post as any).author_emoji}
+          nationality={(post as any).author_nationality}
+          emotion={(post as any).author_emotion}
+          creature={(post as any).author_creature}
+          bothSidesHeard={(post as any).both_sides_heard}
+        />
+
         <ScoreCard
           score={post.score ?? 0}
           category={post.score_category ?? ""}
@@ -219,11 +232,54 @@ function PostPage() {
           badges={post.badges}
           mediaUrl={post.media_url}
         />
+
+        {/* Case title + question-before-court (graceful when columns absent) */}
+        {(post as any).case_title && (
+          <h2 className="text-lg font-medium leading-snug">{(post as any).case_title}</h2>
+        )}
+        {(post as any).question_before_court && (
+          <p className="italic text-base leading-relaxed" style={{ color: "var(--c-text-2)" }}>
+            “{(post as any).question_before_court}”
+          </p>
+        )}
+
         <p className="text-lg leading-relaxed text-balance">{post.story_text}</p>
+
+        <CaseSummaryToggle summary={(post as any).case_summary ?? null} />
+
         <VerdictBar
           postId={post.id}
-          onVoted={() => commentsRef.current?.focus("Honestly… here's what I'd do: ")}
+          relationshipType={(post as any).relationship_type ?? null}
+          readDepthPercent={readDepth}
+          devilsAdvocate={devilsAdvocate}
+          onVoted={() => {
+            setHasVoted(true);
+            commentsRef.current?.focus("Honestly… here's what I'd do: ");
+          }}
         />
+
+        <JudgmentButtons onCast={() => setHasVoted(true)} />
+
+        <div className="flex items-center justify-between gap-3 px-1">
+          <RelateButton
+            count={(post as any).relate_count ?? 0}
+            onActivate={async () => {
+              if (!viewerId) { softGate("relate", { entityId: post.id }); return; }
+              try { await react({ data: { postId: post.id, kind: "been_there" } }); }
+              catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't record"); }
+            }}
+          />
+        </div>
+
+        <DevilsAdvocateToggle active={devilsAdvocate} onToggle={setDevilsAdvocate} />
+
+        <SteelmanCard
+          hasSteelman={(post as any).has_steelman}
+          body={(post as any).steelman_body ?? null}
+        />
+
+        {hasVoted && <SpillScanCTA />}
+
         <ReactionsBar postId={post.id} />
         <div className="pt-2 grid grid-cols-3 gap-3">
           <button
@@ -252,6 +308,7 @@ function PostPage() {
         />
         <RelatedPosts postId={post.id} autoLoad={showRelated} />
 
+        <ServiceCard tags={(post as any).tags ?? null} />
       </main>
 
 
