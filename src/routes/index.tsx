@@ -97,14 +97,10 @@ function AnonymousCourt() {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      const signedIn = !!data.session;
-      setAuthed(signedIn);
-      if (signedIn) navigate({ to: "/stream" });
+      setAuthed(!!data.session);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      const signedIn = !!session;
-      setAuthed(signedIn);
-      if (signedIn) navigate({ to: "/stream" });
+      setAuthed(!!session);
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, [navigate]);
@@ -276,22 +272,15 @@ function TrustSignalBar({ total }: { total: number | null }) {
 
 function TopChrome({ authed }: { authed: boolean | null }) {
   return (
-    <header className="sticky top-0 z-40  bg-background/75 border-b border-border">
+    <header className="sticky top-0 z-40 bg-background/75 backdrop-blur border-b border-border">
       <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-7 w-auto" />
           <img src={shutapIcon.url} alt="Shutap" className="sm:hidden h-7 w-auto" />
         </div>
-        {authed ? (
-          <Link
-            to="/court"
-            className="text-xs px-3 py-1.5 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 font-medium hover:bg-c-surface-3 transition mr-12"
-          >
-            Enter Court →
-          </Link>
-        ) : (
-          <span className="mr-12" aria-hidden />
-        )}
+        <span className="text-[11px] text-muted-foreground italic mr-12 hidden sm:inline">
+          {authed ? "The bench remembers you." : "The bench does not check IDs at the door."}
+        </span>
       </div>
     </header>
   );
@@ -1077,20 +1066,54 @@ function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
   const purple = "oklch(0.68 0.18 295)";
   return (
     <section
-      className="rounded-3xl bg-surface-elevated p-8 text-center"
+      className="rounded-3xl bg-surface-elevated p-8 text-center space-y-6"
       style={{ borderColor: purple, borderWidth: 0.5, borderStyle: "solid" }}
     >
-      <p className="text-2xl sm:text-3xl font-medium text-balance">
-        The court is waiting for your judgment.
-      </p>
-      <p className="mt-3 text-sm text-muted-foreground text-balance">
-        Anonymous identity. Real verdicts. Real outcomes.
-      </p>
+      <div className="space-y-3">
+        <p className="text-2xl sm:text-3xl font-medium text-balance">
+          The bench is waiting on you.
+        </p>
+        <p className="text-sm text-muted-foreground text-balance">
+          No name. No photo. An alias and a verdict. That is the price of entry.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3 text-left">
+        <button
+          onClick={() => onGate("spill")}
+          className="group rounded-2xl border border-c-pink-border bg-c-pink-soft p-4 hover:brightness-95 transition"
+        >
+          <div className="text-[10px] uppercase tracking-wider font-medium text-c-pink-ink/80">
+            Bring a case
+          </div>
+          <div className="mt-1 text-base font-medium text-c-pink-ink">
+            Spill yours →
+          </div>
+          <p className="mt-2 text-xs text-c-pink-ink/80 leading-snug">
+            Type it out. Voice it out. The bench shapes it. The room rules.
+          </p>
+        </button>
+        <button
+          onClick={() => onGate("scan")}
+          className="group rounded-2xl border border-c-coral-border bg-c-coral-soft p-4 hover:brightness-95 transition"
+        >
+          <div className="text-[10px] uppercase tracking-wider font-medium text-c-coral-deep/80">
+            Read the dynamic
+          </div>
+          <div className="mt-1 text-base font-medium text-c-coral-deep">
+            Run the scan →
+          </div>
+          <p className="mt-2 text-xs text-c-coral-deep/80 leading-snug">
+            Answer a few. Get a read. The bench does not flatter.
+          </p>
+        </button>
+      </div>
+
       <button
         onClick={() => onGate("claim_final")}
-        className="mt-6 px-6 py-3 rounded-md bg-c-pink-soft text-c-pink-ink border border-c-pink-border font-medium text-sm hover:bg-c-pink-soft/80 transition"
+        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition"
       >
-        Claim my identity →
+        Or just step in and watch the court.
       </button>
     </section>
   );
