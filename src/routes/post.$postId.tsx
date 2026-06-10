@@ -113,8 +113,39 @@ function PostPage() {
   const justPublished = shared === 1;
   const [showShare, setShowShare] = useState(false);
   const [showRelated, setShowRelated] = useState(false);
+  const [readDepth, setReadDepth] = useState(0);
+  const [devilsAdvocate, setDevilsAdvocate] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [viewerId, setViewerId] = useState<string | null>(null);
   const commentsRef = useRef<CommentThreadHandle | null>(null);
   const recordView = useServerFn(recordPostView);
+  const react = useServerFn(reactToPost);
+  const softGate = useSoftGate();
+
+  // Identify viewer (for author-only menu).
+  useEffect(() => {
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        setViewerId(data.user?.id ?? null);
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
+  // Scroll-depth tracking — weights the user's verdict by how much they read.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      if (max <= 0) { setReadDepth(100); return; }
+      const pct = Math.min(100, Math.max(0, Math.round((h.scrollTop / max) * 100)));
+      setReadDepth((prev) => (pct > prev ? pct : prev));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Fire-and-forget view tracking (deduped per session via sessionStorage + 24h DB dedupe).
   useEffect(() => {
