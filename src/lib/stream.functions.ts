@@ -31,6 +31,7 @@ export interface StoryPayload {
   author_emotion: string | null;
   author_creature: string | null;
   is_nominated: boolean;
+  media_url: string | null;
   case?: { tier: string | null; lock_at: string | null; region_label: string | null; category: string | null } | null;
 }
 
