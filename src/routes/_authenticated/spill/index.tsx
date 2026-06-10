@@ -47,6 +47,16 @@ const PLACEHOLDERS = [
   "She said she was working late. She wasn't.",
 ];
 
+const DRAFT_KEY = "shutap.spill.draft.v1";
+
+function formatSavedAt(ts: number): string {
+  const diff = Math.max(0, Date.now() - ts);
+  if (diff < 5_000) return "saved just now";
+  if (diff < 60_000) return `saved ${Math.floor(diff / 1000)}s ago`;
+  if (diff < 3_600_000) return `saved ${Math.floor(diff / 60_000)}m ago`;
+  return `saved ${Math.floor(diff / 3_600_000)}h ago`;
+}
+
 function SpillLanding() {
   const navigate = useNavigate();
   const create = useServerFn(createTeaDraft);
@@ -55,7 +65,52 @@ function SpillLanding() {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [phIdx, setPhIdx] = useState(0);
+  const [restored, setRestored] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as {
+        text?: string;
+        caseType?: string | null;
+        voice?: Voice["id"];
+        savedAt?: number;
+      };
+      if (d.text) setText(d.text);
+      if (d.caseType !== undefined) setCaseType(d.caseType);
+      if (d.voice) setVoice(d.voice);
+      if (d.savedAt) setSavedAt(d.savedAt);
+      if (d.text && d.text.trim()) setRestored(true);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Debounced autosave
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (!text.trim() && !caseType) {
+          localStorage.removeItem(DRAFT_KEY);
+          setSavedAt(null);
+          return;
+        }
+        const now = Date.now();
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ text, caseType, voice, savedAt: now }),
+        );
+        setSavedAt(now);
+      } catch {
+        /* ignore */
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [text, caseType, voice]);
 
   useEffect(() => {
     const id = setInterval(() => setPhIdx((i) => (i + 1) % PLACEHOLDERS.length), 2800);
@@ -74,6 +129,19 @@ function SpillLanding() {
     [text],
   );
   const progress = Math.min(100, 8 + Math.min(80, wordCount * 1.5) + (caseType ? 8 : 0));
+
+  const clearDraft = () => {
+    setText("");
+    setCaseType(null);
+    setVoice("honest");
+    setRestored(false);
+    setSavedAt(null);
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const onSpill = async () => {
     if (submitting) return;
@@ -97,6 +165,7 @@ function SpillLanding() {
       const { draftId } = await create({
         data: { rawDump, attachments: [], locale },
       });
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       navigate({ to: "/spill/$draftId/chat", params: { draftId } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't open the case. Try again.");
@@ -221,6 +290,18 @@ function SpillLanding() {
 
         {/* COMPOSER */}
         <div className="mt-2 border-t border-c-surface-3 bg-c-surface px-3.5 pt-3 pb-4">
+          {restored && (
+            <div className="mb-2 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-c-surface-2 border border-c-surface-3 text-[11px] text-c-text-2">
+              <span>Picked up where you left off.</span>
+              <button
+                type="button"
+                onClick={clearDraft}
+                className="text-c-pink font-medium hover:underline"
+              >
+                Start over
+              </button>
+            </div>
+          )}
           <div className="bg-white border border-c-surface-3 rounded-2xl px-3.5 py-3 focus-within:border-c-pink/60 transition">
             <textarea
               ref={taRef}
@@ -230,7 +311,21 @@ function SpillLanding() {
               className="w-full min-h-[80px] resize-none bg-transparent text-[14px] leading-relaxed text-c-ink placeholder:text-c-text-3 placeholder:italic focus:outline-none"
             />
             <div className="flex items-center justify-between mt-2">
-              <div className="text-[11px] text-c-text-3">{wordCount} words</div>
+              <div className="text-[11px] text-c-text-3 flex items-center gap-2">
+                <span>{wordCount} words</span>
+                {savedAt && (
+                  <span className="text-c-text-3/80">· {formatSavedAt(savedAt)}</span>
+                )}
+                {(text.trim() || caseType) && (
+                  <button
+                    type="button"
+                    onClick={clearDraft}
+                    className="text-c-text-3 hover:text-c-pink underline underline-offset-2"
+                  >
+                    clear
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={onSpill}
