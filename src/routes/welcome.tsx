@@ -98,7 +98,7 @@ function WelcomePage() {
         if (ident.ageVerified && aliasAlreadyClaimed) {
           const dest = redirectSearch && redirectSearch.startsWith("/") && !redirectSearch.startsWith("//")
             ? redirectSearch
-            : "/";
+            : "/court";
           try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
           window.location.replace(dest);
           return;
