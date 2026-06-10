@@ -156,11 +156,13 @@ function AnonymousCourt() {
   // the underlying UI will route the user via the appropriate signed-in flow).
   const gate = (intent: string, action?: Partial<PendingAction>) => {
     if (authed) {
-      // Already signed in — let the underlying control handle the real call.
-      // For top-of-page CTAs, drop them into the authenticated court view.
+      if (intent === "spill") { navigate({ to: "/spill" }); return; }
+      if (intent === "scan")  { navigate({ to: "/scan" });  return; }
       if (intent === "claim" || intent === "claim_final") {
         navigate({ to: "/court" });
+        return;
       }
+      navigate({ to: "/stream" });
       return;
     }
     const pending: PendingAction = {
