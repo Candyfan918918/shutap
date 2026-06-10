@@ -3,8 +3,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
 import { getMyProfile } from "@/lib/profile.functions";
+
 
 const feedQO = queryOptions({
   queryKey: ["home-stream", "trending"],
@@ -111,14 +113,71 @@ function StreamPage() {
           feedQ.data.map((p, i) => <FeedStoryCard key={p.id} item={p} insertHof={i === 4} />)
         )}
 
-        {/* Chatbot pill — replaces traditional bottom nav */}
-        <Link to="/spill" className="chatbot-pill mx-1 mt-2 justify-center w-[calc(100%-8px)] italic">
-          Ask Bench anything · or spill →
-        </Link>
+        {/* Chatbot pill — expands into the 5-CTA menu (replaces traditional nav) */}
+        <BenchPillMenu />
       </main>
     </div>
   );
 }
+
+function BenchPillMenu() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const items: Array<{ to: string; emoji: string; label: string; sub: string; cls: string }> = [
+    { to: "/spill",  emoji: "✍️", label: "Spill",        sub: "drop a story",         cls: "bg-c-pink-soft text-c-pink-ink border-c-pink-border" },
+    { to: "/court",  emoji: "⚖️", label: "Court",        sub: "cast verdicts",        cls: "bg-c-teal-soft text-c-teal-deep border-c-teal-border" },
+    { to: "/scan",   emoji: "🧠", label: "Scan",         sub: "read the room",        cls: "bg-c-purple-soft text-c-purple-deep border-c-purple-border" },
+    { to: "/stream", emoji: "🌊", label: "Story Stream", sub: "the feed",             cls: "bg-c-amber-soft text-c-amber-deep border-c-amber-border" },
+    { to: "/court",  emoji: "🏆", label: "Hall of Fame", sub: "the legends",          cls: "bg-c-coral-soft text-c-coral-deep border-c-coral-border" },
+  ];
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
+      <div className="mx-auto max-w-xl px-3 pb-3">
+        {open && (
+          <>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm pointer-events-auto"
+            />
+            <div className="relative pointer-events-auto mb-2 grid grid-cols-2 gap-2 rounded-3xl border border-c-surface-3 bg-c-surface p-2 shadow-2xl">
+              {items.map((it) => (
+                <Link
+                  key={it.label}
+                  to={it.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-2 rounded-2xl border px-3 py-3 text-left ${it.cls}`}
+                >
+                  <span className="text-xl leading-none">{it.emoji}</span>
+                  <span className="leading-tight">
+                    <span className="block text-sm font-semibold">{it.label}</span>
+                    <span className="block text-[11px] opacity-80">{it.sub}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="chatbot-pill pointer-events-auto w-full justify-center italic"
+        >
+          {open ? "Close" : "Ask Bench anything · or pick a room →"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 function FeedStoryCard({ item, insertHof }: { item: FeedItem; insertHof: boolean }) {
   const cat = categoryFor(item.scoreCategory);
