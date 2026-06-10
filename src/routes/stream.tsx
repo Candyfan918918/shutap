@@ -32,7 +32,6 @@ const meQO = queryOptions({
 export const Route = createFileRoute("/stream")({
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(feedQO);
-    void context.queryClient.ensureQueryData(meQO);
   },
   component: StreamPage,
   head: () => ({
