@@ -217,7 +217,7 @@ function AnonymousCourt() {
 
         {/* STORY STREAM */}
         <SectionDivider icon="📜" tint="var(--c-teal)" label="What the room is saying" />
-        <div className="px-3.5 pb-5">
+        <div className="px-3.5 pb-3">
           <TeaserFeedSection
             posts={teaserQ.data ?? []}
             isLoading={teaserQ.isLoading}
@@ -226,12 +226,29 @@ function AnonymousCourt() {
             excludePostId={featuredPost?.id}
           />
         </div>
+        <div className="px-3.5 pb-5">
+          <Link
+            to="/stream"
+            className="block w-full text-center rounded-2xl border border-c-teal-border bg-c-teal-soft px-4 py-3 text-sm font-medium text-c-teal-deep hover:brightness-95 transition"
+          >
+            🌊 Browse the full Story Stream →
+          </Link>
+        </div>
 
         {/* HALL OF FAME */}
         <SectionDivider icon="👑" tint="var(--c-purple)" label="The court has a memory" />
-        <div className="px-3.5 pb-5">
+        <div className="px-3.5 pb-3">
           <HallOfFameSection hof={hofQ.data ?? null} isLoading={hofQ.isLoading} onGate={gateForCard} />
         </div>
+        <div className="px-3.5 pb-5">
+          <Link
+            to="/hof"
+            className="block w-full text-center rounded-2xl border border-c-purple-border bg-c-purple-soft px-4 py-3 text-sm font-medium text-c-purple-deep hover:brightness-95 transition"
+          >
+            🏆 Browse the full Hall of Fame →
+          </Link>
+        </div>
+
 
         {/* FINAL CTA */}
         <SectionDivider icon="✦" tint="var(--c-pink-deep)" label="Your turn" />

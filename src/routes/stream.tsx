@@ -2,10 +2,11 @@
 // Visual reference: shutap_stream_feed.html (unified design system v3).
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { listTrendingFeed, type FeedItem } from "@/lib/posts/feed.functions";
 import { getMyProfile } from "@/lib/profile.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 
 const feedQO = queryOptions({
@@ -28,10 +29,9 @@ const meQO = queryOptions({
   staleTime: 60_000,
 });
 
-export const Route = createFileRoute("/_authenticated/stream")({
+export const Route = createFileRoute("/stream")({
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(feedQO);
-    void context.queryClient.ensureQueryData(meQO);
   },
   component: StreamPage,
   head: () => ({
@@ -63,17 +63,30 @@ function categoryFor(scoreCategory: string | null): { label: string; cls: string
   return { label: "Romance", cls: "cat-pill--romance" };
 }
 
+function useAuthed() {
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => { if (active) setAuthed(!!data.session); });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAuthed(!!s));
+    return () => { active = false; sub.subscription.unsubscribe(); };
+  }, []);
+  return authed;
+}
+
 function StreamPage() {
   const fetchFeed = useServerFn(listTrendingFeed);
   const fetchMe = useServerFn(getMyProfile);
+  const authed = useAuthed();
   const feedQ = useSuspenseQuery({
     ...feedQO,
     queryFn: () => (fetchFeed as unknown as (a: { data: { sort: "trending"; limit: 24 } }) => Promise<FeedItem[]>)({
       data: { sort: "trending", limit: 24 },
     }),
   });
-  const meQ = useSuspenseQuery({
+  const meQ = useQuery({
     ...meQO,
+    enabled: !!authed,
     queryFn: () => (fetchMe as unknown as () => Promise<Record<string, unknown> | null>)(),
   });
 
@@ -85,15 +98,23 @@ function StreamPage() {
     <div className="min-h-screen bg-c-surface text-c-text-1">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
         <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-2xl px-4 py-3 flex items-center justify-between">
-          <span className="text-lg font-medium tracking-tight">
+          <Link to="/" className="text-lg font-medium tracking-tight">
             shut<span className="text-c-pink-deep">ap</span>
-          </span>
-          <Link to="/me" className="alias-pill">
-            <span className="text-base leading-none">{aliasEmoji}</span>
-            <span className="text-c-pink-ink">{aliasName}</span>
           </Link>
+          {authed ? (
+            <Link to="/me" className="alias-pill">
+              <span className="text-base leading-none">{aliasEmoji}</span>
+              <span className="text-c-pink-ink">{aliasName}</span>
+            </Link>
+          ) : (
+            <Link to="/enter" className="alias-pill">
+              <span className="text-base leading-none">👋</span>
+              <span className="text-c-pink-ink">Step inside</span>
+            </Link>
+          )}
         </div>
       </header>
+
 
       {/* Stream hero — cream + pink-deep, matches Court */}
       <section className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-2xl border-x border-b border-c-border relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2">

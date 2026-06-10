@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as StreamRouteImport } from './routes/stream'
+import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
 import { Route as CourtRouteImport } from './routes/court'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -17,10 +19,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
-import { Route as AuthenticatedStreamRouteImport } from './routes/_authenticated/stream'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
-import { Route as AuthenticatedHofRouteImport } from './routes/_authenticated/hof'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -59,6 +59,16 @@ const WelcomeRoute = WelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StreamRoute = StreamRouteImport.update({
+  id: '/stream',
+  path: '/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HofRoute = HofRouteImport.update({
+  id: '/hof',
+  path: '/hof',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnterRoute = EnterRouteImport.update({
   id: '/enter',
   path: '/enter',
@@ -93,11 +103,6 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => EnterRoute,
 } as any)
-const AuthenticatedStreamRoute = AuthenticatedStreamRouteImport.update({
-  id: '/stream',
-  path: '/stream',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -106,11 +111,6 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedHofRoute = AuthenticatedHofRouteImport.update({
-  id: '/hof',
-  path: '/hof',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
@@ -299,14 +299,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
+  '/hof': typeof HofRoute
+  '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
-  '/hof': typeof AuthenticatedHofRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
-  '/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -344,12 +344,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
+  '/hof': typeof HofRoute
+  '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
-  '/hof': typeof AuthenticatedHofRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
-  '/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -389,14 +389,14 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
+  '/hof': typeof HofRoute
+  '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
-  '/_authenticated/hof': typeof AuthenticatedHofRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
-  '/_authenticated/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -436,14 +436,14 @@ export interface FileRouteTypes {
     | '/'
     | '/court'
     | '/enter'
+    | '/hof'
+    | '/stream'
     | '/welcome'
     | '/admin'
     | '/compose'
     | '/friends'
-    | '/hof'
     | '/me'
     | '/settings'
-    | '/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -481,12 +481,12 @@ export interface FileRouteTypes {
     | '/'
     | '/court'
     | '/enter'
+    | '/hof'
+    | '/stream'
     | '/welcome'
     | '/compose'
     | '/friends'
-    | '/hof'
     | '/me'
-    | '/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -525,14 +525,14 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/court'
     | '/enter'
+    | '/hof'
+    | '/stream'
     | '/welcome'
     | '/_authenticated/admin'
     | '/_authenticated/compose'
     | '/_authenticated/friends'
-    | '/_authenticated/hof'
     | '/_authenticated/me'
     | '/_authenticated/settings'
-    | '/_authenticated/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -572,6 +572,8 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CourtRoute: typeof CourtRoute
   EnterRoute: typeof EnterRouteWithChildren
+  HofRoute: typeof HofRoute
+  StreamRoute: typeof StreamRoute
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
@@ -589,6 +591,20 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stream': {
+      id: '/stream'
+      path: '/stream'
+      fullPath: '/stream'
+      preLoaderRoute: typeof StreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hof': {
+      id: '/hof'
+      path: '/hof'
+      fullPath: '/hof'
+      preLoaderRoute: typeof HofRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/enter': {
@@ -640,13 +656,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
     }
-    '/_authenticated/stream': {
-      id: '/_authenticated/stream'
-      path: '/stream'
-      fullPath: '/stream'
-      preLoaderRoute: typeof AuthenticatedStreamRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -659,13 +668,6 @@ declare module '@tanstack/react-router' {
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof AuthenticatedMeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/hof': {
-      id: '/_authenticated/hof'
-      path: '/hof'
-      fullPath: '/hof'
-      preLoaderRoute: typeof AuthenticatedHofRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/friends': {
@@ -956,10 +958,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
-  AuthenticatedHofRoute: typeof AuthenticatedHofRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
-  AuthenticatedStreamRoute: typeof AuthenticatedStreamRoute
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
@@ -977,10 +977,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
-  AuthenticatedHofRoute: AuthenticatedHofRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
-  AuthenticatedStreamRoute: AuthenticatedStreamRoute,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,
@@ -1013,6 +1011,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CourtRoute: CourtRoute,
   EnterRoute: EnterRouteWithChildren,
+  HofRoute: HofRoute,
+  StreamRoute: StreamRoute,
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
