@@ -197,7 +197,7 @@ export const composeStream = createServerFn({ method: "POST" })
     // 7. Assemble items
     const items: StreamItem[] = [];
 
-    for (const c of (courtRows ?? []).slice(0, anonymous ? limit : 2)) {
+    for (const c of (courtRows ?? []).slice(0, 2)) {
       const t = courtTitles[c.post_id] ?? { title: null, category: null };
       items.push({
         type: "court_case",
