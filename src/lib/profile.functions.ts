@@ -219,8 +219,9 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const patch: Record<string, unknown> = {};
     if (data.displayName !== undefined) {
+      // Only update display_name (real-name override shown when anonymity is
+      // off). Never overwrite `nickname` — that's the immutable assigned alias.
       patch.display_name = data.displayName;
-      patch.nickname = data.displayName;
     }
     if (data.bio !== undefined) patch.bio = data.bio;
     if (data.anonymousMode !== undefined) patch.anonymous_mode = data.anonymousMode;
