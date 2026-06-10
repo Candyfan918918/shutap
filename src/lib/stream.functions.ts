@@ -39,13 +39,20 @@ export interface CourtCasePayload {
   case_id: string;
   post_id: string;
   title: string | null;
+  case_title: string | null;
+  question_before_court: string | null;
   tier: string | null;
   region_label: string | null;
   category: string | null;
   lock_at: string | null;
   status: string;
   controversy_score: number | null;
+  final_verdict: string | null;
+  bench_verdict_line: string | null;
+  verdicts: Record<string, number>;
+  verdict_total: number;
 }
+
 
 export interface HofPayload {
   entity_type: string;
@@ -114,11 +121,12 @@ export const composeStream = createServerFn({ method: "POST" })
     const { data: courtRows } = await supabaseAdmin
       .from("court_cases")
       .select(
-        "id, post_id, scope, region_label, status, current_tier, current_category_court, verdict_lock_at, controversy_score",
+        "id, post_id, scope, region_label, status, current_tier, current_category_court, verdict_lock_at, controversy_score, final_verdict, bench_verdict_line",
       )
-      .eq("status", "in_court")
+      .in("status", ["in_court", "decided", "legendary"])
       .order("verdict_lock_at", { ascending: true })
       .limit(4);
+
 
     const postIds = [
       ...stories.map((s) => s.id as string),
@@ -156,17 +164,23 @@ export const composeStream = createServerFn({ method: "POST" })
     }
 
     // 4. Fetch titles for court cases (so the card has something to render)
-    let courtTitles: Record<string, { title: string | null; category: string | null }> = {};
+    let courtTitles: Record<string, { title: string | null; category: string | null; case_title: string | null; question_before_court: string | null }> = {};
     const courtPostIds = (courtRows ?? []).map((c: any) => c.post_id as string);
     if (courtPostIds.length > 0) {
       const { data: cp } = await supabaseAdmin
         .from("posts")
-        .select("id, title, score_category")
+        .select("id, title, score_category, case_title, question_before_court")
         .in("id", courtPostIds);
       for (const r of cp ?? []) {
-        courtTitles[(r as any).id] = { title: (r as any).title, category: (r as any).score_category };
+        courtTitles[(r as any).id] = {
+          title: (r as any).title,
+          category: (r as any).score_category,
+          case_title: (r as any).case_title ?? null,
+          question_before_court: (r as any).question_before_court ?? null,
+        };
       }
     }
+
 
     // 5. HOF tile (top entry, current week)
     let hof: HofPayload | null = null;
@@ -199,7 +213,9 @@ export const composeStream = createServerFn({ method: "POST" })
     const items: StreamItem[] = [];
 
     for (const c of (courtRows ?? []).slice(0, 2)) {
-      const t = courtTitles[c.post_id] ?? { title: null, category: null };
+      const t = courtTitles[c.post_id] ?? { title: null, category: null, case_title: null, question_before_court: null };
+      const verdicts = verdictCounts[c.post_id] ?? {};
+      const verdict_total = Object.values(verdicts).reduce((a: number, n: any) => a + (n as number), 0);
       items.push({
         type: "court_case",
         id: c.id,
@@ -208,15 +224,22 @@ export const composeStream = createServerFn({ method: "POST" })
           case_id: c.id,
           post_id: c.post_id,
           title: t.title,
+          case_title: t.case_title,
+          question_before_court: t.question_before_court,
           tier: c.current_tier,
           region_label: c.region_label,
           category: c.current_category_court ?? t.category,
           lock_at: c.verdict_lock_at,
           status: c.status,
           controversy_score: c.controversy_score,
+          final_verdict: (c as any).final_verdict ?? null,
+          bench_verdict_line: (c as any).bench_verdict_line ?? null,
+          verdicts,
+          verdict_total,
         },
       });
     }
+
 
     const sliceStories = stories.slice(0, storyLimit);
     let lastPublished: string | null = null;

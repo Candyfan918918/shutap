@@ -29,6 +29,8 @@ import { CaseSummaryToggle } from "@/components/posts/CaseSummaryToggle";
 import { SpillScanCTA } from "@/components/posts/SpillScanCTA";
 import { AuthorMenu } from "@/components/posts/AuthorMenu";
 import { ServiceCard } from "@/components/posts/ServiceCard";
+import { FinalVerdictScreen } from "@/components/posts/FinalVerdictScreen";
+
 import { RelateButton } from "@/components/stream/RelateButton";
 import { useSoftGate } from "@/components/stream/useSoftGate";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
@@ -117,7 +119,14 @@ function PostPage() {
   const [devilsAdvocate, setDevilsAdvocate] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [viewerId, setViewerId] = useState<string | null>(null);
+  const [finalVerdict, setFinalVerdict] = useState<null | {
+    caseId: string; tier: string | null; regionLabel: string | null;
+    finalVerdict: string | null; benchVerdictLine: string | null;
+    total: number; dominantPct: number;
+  }>(null);
+  const [verdictDismissed, setVerdictDismissed] = useState(false);
   const commentsRef = useRef<CommentThreadHandle | null>(null);
+
   const recordView = useServerFn(recordPostView);
   const react = useServerFn(reactToPost);
   const softGate = useSoftGate();
@@ -166,6 +175,48 @@ function PostPage() {
       } catch { /* ignore */ }
     })();
   }, [post, recordView]);
+
+  // Author-only: surface the FinalVerdictScreen once per decided case.
+  useEffect(() => {
+    if (!post || !viewerId || viewerId !== (post as any).author_id) return;
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    (async () => {
+      const { data: cc } = await supabase
+        .from("court_cases")
+        .select("id, current_tier, region_label, final_verdict, bench_verdict_line, status")
+        .eq("post_id", post.id)
+        .in("status", ["decided", "legendary"])
+        .order("decided_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !cc) return;
+      const seenKey = `mv:fv:${(cc as any).id}`;
+      if (localStorage.getItem(seenKey)) return;
+      // tally
+      const { data: votes } = await supabase
+        .from("post_verdict_votes")
+        .select("kind")
+        .eq("post_id", post.id);
+      const tally: Record<string, number> = {};
+      for (const v of (votes ?? []) as Array<{ kind: string }>) tally[v.kind] = (tally[v.kind] ?? 0) + 1;
+      const total = (votes ?? []).length;
+      const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
+      const pct = top && total > 0 ? Math.round((top[1] / total) * 100) : 0;
+      if (cancelled) return;
+      setFinalVerdict({
+        caseId: (cc as any).id,
+        tier: (cc as any).current_tier ?? null,
+        regionLabel: (cc as any).region_label ?? null,
+        finalVerdict: (cc as any).final_verdict ?? top?.[0] ?? null,
+        benchVerdictLine: (cc as any).bench_verdict_line ?? null,
+        total,
+        dominantPct: pct,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [post, viewerId]);
+
 
   if (!post) {
     return (
@@ -315,9 +366,29 @@ function PostPage() {
       <AnimatePresence>
         {showShare && <SharePopup post={post} onClose={() => setShowShare(false)} />}
       </AnimatePresence>
+
+      {finalVerdict && !verdictDismissed && (
+        <FinalVerdictScreen
+          caseId={finalVerdict.caseId}
+          postId={post.id}
+          tier={finalVerdict.tier}
+          regionLabel={finalVerdict.regionLabel}
+          caseTitle={(post as any).case_title || post.title}
+          finalVerdict={finalVerdict.finalVerdict}
+          benchVerdictLine={finalVerdict.benchVerdictLine}
+          total={finalVerdict.total}
+          dominantPct={finalVerdict.dominantPct}
+          alias={null}
+          onClose={() => {
+            try { localStorage.setItem(`mv:fv:${finalVerdict.caseId}`, "1"); } catch { /* ignore */ }
+            setVerdictDismissed(true);
+          }}
+        />
+      )}
     </div>
   );
 }
+
 
 function ReactionsBar({ postId }: { postId: string }) {
   const { t } = useT();
