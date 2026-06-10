@@ -9,6 +9,7 @@ import {
   updateCityCourtCap,
   type CityCourtRow,
 } from "@/lib/admin/cityCourts.functions";
+import { schemaCheck, type SchemaCheckResult } from "@/lib/health/schema-check.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
