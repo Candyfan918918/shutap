@@ -9,6 +9,8 @@ import { CourtRibbon } from "./CourtRibbon";
 import { generateStoryCoverSVG } from "@/lib/stream/generate-cover";
 import { supabase } from "@/integrations/supabase/client";
 import { WatchPartyOverlay } from "./WatchPartyOverlay";
+import { PredictionBar } from "@/components/posts/PredictionBar";
+
 
 interface Props {
   payload: CourtCasePayload;
