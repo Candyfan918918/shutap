@@ -945,3 +945,41 @@
   .scan-strip__summary { font-size: 13px; padding: 0 18px 14px; }
   .bench-line { font-size: 13px; padding: 12px 14px; }
 }
+
+/* ─── HOF hero typography ──────────────────────────────────── */
+.hof-hero__crown { font-size: 28px; margin-bottom: 6px; line-height: 1; }
+.hof-hero__tag   { font-size: 10px; font-weight: 500; letter-spacing: 0.10em; text-transform: uppercase; color: var(--c-gold); margin-bottom: 5px; }
+.hof-hero__title { font-size: 20px; font-weight: 500; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+.hof-hero__sub   { font-size: 12px; color: var(--c-ink-3); line-height: 1.45; }
+.hof-hero__stats {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+  margin-top: 12px;
+  border: 0.5px solid rgba(255,255,255,0.10); border-radius: 12px; overflow: hidden;
+}
+
+/* ─── HOF desktop scaling ──────────────────────────────────── */
+@media (min-width: 768px) {
+  .hof-hero      { padding: 32px 28px 26px; }
+  .hof-hero__crown { font-size: 36px; margin-bottom: 10px; }
+  .hof-hero__tag   { font-size: 11px; margin-bottom: 8px; }
+  .hof-hero__title { font-size: 28px; margin-bottom: 8px; }
+  .hof-hero__sub   { font-size: 14px; max-width: 540px; }
+  .hof-hero__stats > div > div:first-child { font-size: 20px !important; }
+  .hof-hero__stats > div > div:last-child  { font-size: 11px !important; }
+  .hof-period    { font-size: 13px; padding: 9px 0; border-radius: 12px; }
+  .court-card, .stream-card, .user-card { border-radius: 20px; margin-left: 18px; margin-right: 18px; }
+  .court-card__flag, .stream-card__flag, .user-card__flag { padding: 10px 18px; }
+  .court-card__flag .text-\[10px\],
+  .stream-card__flag .text-\[10px\],
+  .user-card__flag .text-\[10px\] { font-size: 11px; }
+  .court-card > div:last-child,
+  .stream-card > div:last-child { padding: 16px 18px; }
+  .cc-bar { height: 10px !important; border-radius: 5px !important; }
+}
+@media (min-width: 1024px) {
+  .hof-hero      { padding: 44px 36px 32px; }
+  .hof-hero__title { font-size: 32px; }
+  .hof-hero__sub   { font-size: 15px; }
+  .hof-hero__stats > div > div:first-child { font-size: 22px !important; }
+}
+
