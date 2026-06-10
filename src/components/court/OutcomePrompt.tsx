@@ -71,6 +71,7 @@ export function OutcomePrompt({
       });
       if (r.error || !r.data) throw new Error(r.error ?? "Outcome not recorded.");
       setOutcome({ outcome_type: type, detail: detail.trim() || null });
+      if (typeof window !== "undefined") window.dispatchEvent(new Event("wg:refresh"));
       toast(
         r.data.totalPredictions > 0
           ? `${r.data.correctCount}/${r.data.totalPredictions} predictions called it.`
