@@ -853,11 +853,12 @@
 .cf-jbtn--more      { background:var(--c-purple-soft);border-color:var(--c-purple); color:var(--c-purple-deep); }
 
 /* CTA */
-.cf-cta { width:100%; padding:13px; border-radius:var(--r-md); border:none;
-  background:var(--c-pink); color:var(--c-pink-ink); font:inherit; font-size:14px; font-weight:500;
-  cursor:pointer; transition:background var(--t-fast),transform var(--t-fast); }
-.cf-cta:hover:not(:disabled) { background:var(--c-pink-mid); transform:translateY(-1px); }
-.cf-cta:disabled { background:var(--c-surface-3); color:var(--c-text-3); cursor:not-allowed; }
+.cf-cta { width:100%; padding:13px; border-radius:var(--r-md);
+  background:var(--c-pink-soft); border:.5px solid var(--c-pink-border); color:var(--c-pink-deep);
+  font:inherit; font-size:14px; font-weight:500;
+  cursor:pointer; transition:background var(--t-fast),transform var(--t-fast),border-color var(--t-fast); }
+.cf-cta:hover:not(:disabled) { background:#ffe4ef; border-color:var(--c-pink-deep); transform:translateY(-1px); }
+.cf-cta:disabled { background:var(--c-surface-3); border-color:var(--c-border); color:var(--c-text-3); cursor:not-allowed; }
 
 /* REACTION */
 .cf-reaction { margin-top:10px; border-left:2px solid var(--c-pink);
