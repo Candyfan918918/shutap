@@ -112,7 +112,8 @@ export function StoryCard({ payload, index, anonymous }: Props) {
               }
               try {
                 const { reactToPost } = await import("@/lib/posts/engagement.functions");
-                await reactToPost({ data: { postId: payload.id, kind: "like" } } as any);
+                await reactToPost({ data: { postId: payload.id, kind: "been_there" } } as any);
+                toast("Felt this.");
               } catch {
                 toast("Couldn't record that.");
               }
