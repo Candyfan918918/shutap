@@ -84,8 +84,9 @@ export const composeStream = createServerFn({ method: "POST" })
     const { cursor, limit, anonymous } = data;
     const cur = decodeCursor(cursor);
 
-    // 1. Pull stories (skip when anonymous — anon only sees court+public mixes)
-    const storyLimit = anonymous ? 0 : Math.ceil(limit * 0.6);
+    // 1. Pull stories. Anonymous viewers (landing) still see the docket —
+    // posts are public; only personal/CTAs are gated below.
+    const storyLimit = anonymous ? Math.ceil(limit * 0.7) : Math.ceil(limit * 0.6);
     let stories: any[] = [];
     if (storyLimit > 0) {
       let q = supabaseAdmin
@@ -116,7 +117,7 @@ export const composeStream = createServerFn({ method: "POST" })
       )
       .eq("status", "in_court")
       .order("verdict_lock_at", { ascending: true })
-      .limit(anonymous ? limit : 4);
+      .limit(4);
 
     const postIds = [
       ...stories.map((s) => s.id as string),
@@ -196,7 +197,7 @@ export const composeStream = createServerFn({ method: "POST" })
     // 7. Assemble items
     const items: StreamItem[] = [];
 
-    for (const c of (courtRows ?? []).slice(0, anonymous ? limit : 2)) {
+    for (const c of (courtRows ?? []).slice(0, 2)) {
       const t = courtTitles[c.post_id] ?? { title: null, category: null };
       items.push({
         type: "court_case",
