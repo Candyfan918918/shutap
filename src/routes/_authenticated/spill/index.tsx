@@ -290,6 +290,18 @@ function SpillLanding() {
 
         {/* COMPOSER */}
         <div className="mt-2 border-t border-c-surface-3 bg-c-surface px-3.5 pt-3 pb-4">
+          {restored && (
+            <div className="mb-2 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-c-surface-2 border border-c-surface-3 text-[11px] text-c-text-2">
+              <span>Picked up where you left off.</span>
+              <button
+                type="button"
+                onClick={clearDraft}
+                className="text-c-pink font-medium hover:underline"
+              >
+                Start over
+              </button>
+            </div>
+          )}
           <div className="bg-white border border-c-surface-3 rounded-2xl px-3.5 py-3 focus-within:border-c-pink/60 transition">
             <textarea
               ref={taRef}
