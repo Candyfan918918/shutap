@@ -12,7 +12,7 @@ import {
 } from "@/lib/court.functions";
 import { CourtCaseCard } from "@/components/court/CourtCaseCard";
 import { CourtTabs, type CourtTab, type CourtCategory } from "@/components/court/CourtTabs";
-import { CourtroomPanel } from "@/components/court/CourtroomPanel";
+import { CaseFlow } from "@/components/court/CaseFlow";
 import { WatchParty, shouldShowWatchParty } from "@/components/court/WatchParty";
 
 export const Route = createFileRoute("/court")({
@@ -188,7 +188,7 @@ function CourtPage() {
 
         {featured && shouldShowWatchParty(featured) && <WatchParty c={featured} />}
 
-        {featured && <CourtroomPanel c={featured} />}
+        {featured && <CaseFlow c={featured} />}
 
         {grouped.inCourt.length > 1 && (
           <Section
