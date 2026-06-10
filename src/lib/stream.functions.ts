@@ -213,7 +213,9 @@ export const composeStream = createServerFn({ method: "POST" })
     const items: StreamItem[] = [];
 
     for (const c of (courtRows ?? []).slice(0, 2)) {
-      const t = courtTitles[c.post_id] ?? { title: null, category: null };
+      const t = courtTitles[c.post_id] ?? { title: null, category: null, case_title: null, question_before_court: null };
+      const verdicts = verdictCounts[c.post_id] ?? {};
+      const verdict_total = Object.values(verdicts).reduce((a: number, n: any) => a + (n as number), 0);
       items.push({
         type: "court_case",
         id: c.id,
@@ -222,15 +224,22 @@ export const composeStream = createServerFn({ method: "POST" })
           case_id: c.id,
           post_id: c.post_id,
           title: t.title,
+          case_title: t.case_title,
+          question_before_court: t.question_before_court,
           tier: c.current_tier,
           region_label: c.region_label,
           category: c.current_category_court ?? t.category,
           lock_at: c.verdict_lock_at,
           status: c.status,
           controversy_score: c.controversy_score,
+          final_verdict: (c as any).final_verdict ?? null,
+          bench_verdict_line: (c as any).bench_verdict_line ?? null,
+          verdicts,
+          verdict_total,
         },
       });
     }
+
 
     const sliceStories = stories.slice(0, storyLimit);
     let lastPublished: string | null = null;
