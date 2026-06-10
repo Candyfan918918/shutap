@@ -92,7 +92,7 @@ export const composeStream = createServerFn({ method: "POST" })
       let q = supabaseAdmin
         .from("posts")
         .select(
-          "id, title, story_text, score, score_category, relate_count, comment_count, both_sides_heard, is_seed, published_at, author_id",
+          "id, title, story_text, score, score_category, relate_count, comment_count, both_sides_heard, is_seed, published_at, author_id, media_url",
         )
         .eq("status", "published")
         .eq("visibility", "public")
