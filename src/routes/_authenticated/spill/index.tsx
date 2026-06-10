@@ -55,7 +55,52 @@ function SpillLanding() {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [phIdx, setPhIdx] = useState(0);
+  const [restored, setRestored] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as {
+        text?: string;
+        caseType?: string | null;
+        voice?: Voice["id"];
+        savedAt?: number;
+      };
+      if (d.text) setText(d.text);
+      if (d.caseType !== undefined) setCaseType(d.caseType);
+      if (d.voice) setVoice(d.voice);
+      if (d.savedAt) setSavedAt(d.savedAt);
+      if (d.text && d.text.trim()) setRestored(true);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Debounced autosave
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (!text.trim() && !caseType) {
+          localStorage.removeItem(DRAFT_KEY);
+          setSavedAt(null);
+          return;
+        }
+        const now = Date.now();
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ text, caseType, voice, savedAt: now }),
+        );
+        setSavedAt(now);
+      } catch {
+        /* ignore */
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [text, caseType, voice]);
 
   useEffect(() => {
     const id = setInterval(() => setPhIdx((i) => (i + 1) % PLACEHOLDERS.length), 2800);
@@ -74,6 +119,19 @@ function SpillLanding() {
     [text],
   );
   const progress = Math.min(100, 8 + Math.min(80, wordCount * 1.5) + (caseType ? 8 : 0));
+
+  const clearDraft = () => {
+    setText("");
+    setCaseType(null);
+    setVoice("honest");
+    setRestored(false);
+    setSavedAt(null);
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const onSpill = async () => {
     if (submitting) return;
