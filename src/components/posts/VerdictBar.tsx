@@ -1,3 +1,6 @@
+// VerdictBar — story-detail full version. 7 verdicts in a 3+3+1 grid,
+// selected state = filled bg + 1px white outline, Realtime counts via
+// Supabase channel, soft-gate for anonymous users, read-depth weighted vote.
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -12,16 +15,34 @@ import {
   type VerdictCounts,
 } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useSoftGate } from "@/components/stream/useSoftGate";
 
-const LABELS: Record<VerdictKind, { emoji: string; label: string }> = {
+type RelationshipType = "marriage" | "dating" | "breakup" | "situationship" | "family" | "other";
+
+const BASE_LABELS: Record<VerdictKind, { emoji: string; label: string }> = {
   red_flag: { emoji: "🚩", label: "Red flag" },
   green_flag: { emoji: "💚", label: "Green flag" },
   run: { emoji: "🏃", label: "Run" },
   talk_it_out: { emoji: "🗣️", label: "Talk it out" },
   lawyer_up: { emoji: "⚖️", label: "Lawyer up" },
   therapy_might_help: { emoji: "🛋️", label: "Therapy" },
-  need_update: { emoji: "👀", label: "Need update!" },
+  need_update: { emoji: "👀", label: "Need update" },
 };
+
+// Per-relationship label overrides; missing entries fall back to BASE_LABELS.
+const RELATIONSHIP_LABELS: Partial<Record<RelationshipType, Partial<Record<VerdictKind, string>>>> = {
+  marriage: { run: "File", talk_it_out: "Couples counseling", lawyer_up: "Divorce attorney" },
+  dating: { run: "Break it off", lawyer_up: "Block & move on" },
+  breakup: { run: "No contact", talk_it_out: "Closure talk", need_update: "Need closure" },
+  situationship: { run: "Walk away", talk_it_out: "Define it" },
+  family: { run: "Low contact", lawyer_up: "Mediation", therapy_might_help: "Family therapy" },
+};
+
+function labelFor(kind: VerdictKind, rel?: RelationshipType | null) {
+  const base = BASE_LABELS[kind];
+  const override = rel ? RELATIONSHIP_LABELS[rel]?.[kind] : undefined;
+  return { emoji: base.emoji, label: override ?? base.label };
+}
 
 function fmt(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`;
@@ -30,14 +51,29 @@ function fmt(n: number): string {
 
 interface Props {
   postId: string;
+  relationshipType?: RelationshipType | null;
+  readDepthPercent?: number;
+  devilsAdvocate?: boolean;
   onVoted?: (kind: VerdictKind) => void;
 }
 
-export function VerdictBar({ postId, onVoted }: Props) {
+// 3 + 3 + 1 layout
+const ROW_1: VerdictKind[] = ["red_flag", "green_flag", "run"];
+const ROW_2: VerdictKind[] = ["talk_it_out", "lawyer_up", "therapy_might_help"];
+const ROW_3: VerdictKind[] = ["need_update"];
+
+export function VerdictBar({
+  postId,
+  relationshipType,
+  readDepthPercent = 0,
+  devilsAdvocate = false,
+  onVoted,
+}: Props) {
   const getCounts = useServerFn(getVerdictCounts);
   const getMine = useServerFn(getMyVerdict);
   const cast = useServerFn(castVerdict);
   const remove = useServerFn(removeVerdict);
+  const softGate = useSoftGate();
 
   const empty = (): VerdictCounts =>
     VERDICT_KINDS.reduce((acc, k) => ({ ...acc, [k]: 0 }), {} as VerdictCounts);
@@ -47,6 +83,7 @@ export function VerdictBar({ postId, onVoted }: Props) {
   const [total, setTotal] = useState(0);
   const [showNudge, setShowNudge] = useState(false);
 
+  // Initial load + auth check
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -65,17 +102,50 @@ export function VerdictBar({ postId, onVoted }: Props) {
     return () => { cancelled = true; };
   }, [postId, getCounts, getMine]);
 
+  // Realtime subscription — keep counts fresh without polling.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`vbar-full:${postId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "post_verdict_votes", filter: `post_id=eq.${postId}` },
+        (payload: any) => {
+          setCounts((prev) => {
+            const next = { ...prev };
+            if (payload.eventType === "INSERT") {
+              const k = payload.new?.kind as VerdictKind | undefined;
+              if (k) next[k] = (next[k] ?? 0) + 1;
+            } else if (payload.eventType === "DELETE") {
+              const k = payload.old?.kind as VerdictKind | undefined;
+              if (k) next[k] = Math.max(0, (next[k] ?? 0) - 1);
+            } else if (payload.eventType === "UPDATE") {
+              const oldK = payload.old?.kind as VerdictKind | undefined;
+              const newK = payload.new?.kind as VerdictKind | undefined;
+              if (oldK) next[oldK] = Math.max(0, (next[oldK] ?? 0) - 1);
+              if (newK) next[newK] = (next[newK] ?? 0) + 1;
+            }
+            return next;
+          });
+          setTotal((t) => {
+            if (payload.eventType === "INSERT") return t + 1;
+            if (payload.eventType === "DELETE") return Math.max(0, t - 1);
+            return t;
+          });
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [postId]);
+
   const onVote = async (kind: VerdictKind) => {
-    if (!authed) { toast.message("Sign in to vote"); return; }
+    if (!authed) { softGate("verdict", { entityId: postId, verdictKind: kind }); return; }
     const prev = mine;
+    // Optimistic update
     setCounts((c) => {
       const next = { ...c };
       if (prev && prev !== kind) next[prev] = Math.max(0, next[prev] - 1);
-      if (prev === kind) {
-        next[kind] = Math.max(0, next[kind] - 1);
-      } else {
-        next[kind] = next[kind] + 1;
-      }
+      if (prev === kind) next[kind] = Math.max(0, next[kind] - 1);
+      else next[kind] = next[kind] + 1;
       return next;
     });
     setTotal((t) => {
@@ -87,7 +157,7 @@ export function VerdictBar({ postId, onVoted }: Props) {
     setMine(nextMine);
     try {
       if (prev === kind) await remove({ data: { postId } });
-      else await cast({ data: { postId, kind } });
+      else await cast({ data: { postId, kind, read_depth_percent: readDepthPercent } as any });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Vote failed");
       return;
@@ -100,47 +170,43 @@ export function VerdictBar({ postId, onVoted }: Props) {
     }
   };
 
-  // Compute max for bar fill
-  const maxCount = Math.max(1, ...VERDICT_KINDS.map((k) => counts[k]));
+  const renderBtn = (k: VerdictKind) => {
+    const active = mine === k;
+    const { emoji, label } = labelFor(k, relationshipType);
+    return (
+      <motion.button
+        key={k}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => onVote(k)}
+        className={`relative flex flex-col items-center justify-center gap-1 px-2 py-3 rounded-xl border text-center transition ${
+          active
+            ? "bg-primary text-primary-foreground border-primary outline outline-1 outline-white/80"
+            : "bg-surface-elevated border-border hover:border-primary/50"
+        }`}
+      >
+        <span className="text-lg leading-none" aria-hidden>{emoji}</span>
+        <span className="text-[11px] font-medium leading-tight">{label}</span>
+        <span className={`text-[10px] tabular-nums ${active ? "opacity-90" : "text-muted-foreground"}`}>
+          {fmt(counts[k])}
+        </span>
+      </motion.button>
+    );
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-baseline justify-between mb-3">
-        <p className="text-sm font-medium">⚖️ Your verdict?</p>
-        <span className="text-xs text-muted-foreground">{fmt(total)} {total === 1 ? "vote" : "votes"}</span>
+        <p className="text-sm font-medium">
+          ⚖️ {devilsAdvocate ? "Voting as the other person" : "Your verdict?"}
+        </p>
+        <span className="text-xs text-muted-foreground">
+          {fmt(total)} {total === 1 ? "vote" : "votes"}
+        </span>
       </div>
-      <div className="space-y-1.5">
-        {VERDICT_KINDS.map((k) => {
-          const active = mine === k;
-          const pct = (counts[k] / maxCount) * 100;
-          return (
-            <motion.button
-              key={k}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onVote(k)}
-              className={`relative w-full overflow-hidden rounded-full border text-left px-3 py-2 transition ${
-                active
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-surface-elevated hover:border-primary/50"
-              }`}
-            >
-              <span
-                className={`absolute inset-y-0 left-0 ${
-                  active ? "bg-primary/25" : "bg-primary/10"
-                }`}
-                style={{ width: `${pct}%` }}
-              />
-              <span className="relative flex items-center justify-between text-xs">
-                <span className="font-medium">
-                  {LABELS[k].emoji} {LABELS[k].label}
-                </span>
-                <span className={`tabular-nums ${active ? "font-medium" : "text-muted-foreground"}`}>
-                  {fmt(counts[k])}
-                </span>
-              </span>
-            </motion.button>
-          );
-        })}
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2">{ROW_1.map(renderBtn)}</div>
+        <div className="grid grid-cols-3 gap-2">{ROW_2.map(renderBtn)}</div>
+        <div className="grid grid-cols-1 gap-2">{ROW_3.map(renderBtn)}</div>
       </div>
 
       <AnimatePresence>
@@ -149,7 +215,7 @@ export function VerdictBar({ postId, onVoted }: Props) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary p-3"
+            className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3"
           >
             <p className="text-xs font-medium">Wait… what would YOU do? 👀</p>
             <button
