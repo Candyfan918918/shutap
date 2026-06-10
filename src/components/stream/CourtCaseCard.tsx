@@ -11,7 +11,8 @@ interface Props {
 
 export function CourtCaseCard({ payload, index }: Props) {
   const navigate = useNavigate();
-  const coverAspect = index % 2 === 0 ? "4/5" : "1/1";
+  const ratios = ["4/5", "1/1", "3/4", "4/5"];
+  const coverAspect = ratios[index % ratios.length];
 
   return (
     <article
@@ -34,15 +35,27 @@ export function CourtCaseCard({ payload, index }: Props) {
         }}
       >
         <span
-          className="absolute top-2.5 left-2.5 px-2 h-6 inline-flex items-center text-[10px] font-semibold uppercase tracking-[0.05em] rounded-full"
-          style={{ background: "rgba(255,255,255,0.85)", color: "var(--c-amber, #b07a18)" }}
+          className="absolute top-1.5 left-1.5 inline-flex items-center font-semibold uppercase tracking-[0.05em] rounded-full"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            color: "var(--c-amber, #b07a18)",
+            fontSize: "clamp(9px, 1.5vw, 10.5px)",
+            padding: "2px 7px",
+            lineHeight: 1.4,
+          }}
         >
           ⚖️ In Court
         </span>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[72px] drop-shadow-sm select-none" aria-hidden>⚖️</span>
+          <span
+            className="drop-shadow-sm select-none"
+            style={{ fontSize: "clamp(48px, 13vw, 88px)" }}
+            aria-hidden
+          >
+            ⚖️
+          </span>
         </div>
-        <div className="absolute bottom-2 left-2 right-2">
+        <div className="absolute bottom-1.5 left-1.5 right-1.5">
           <CourtRibbon
             category={payload.category}
             tier={payload.tier}
@@ -51,14 +64,25 @@ export function CourtCaseCard({ payload, index }: Props) {
         </div>
       </div>
 
-      <div className="px-3 pt-2.5 pb-2.5">
+      <div style={{ padding: "8px 10px" }}>
         <h3
-          className="text-[14px] font-semibold leading-snug line-clamp-3"
-          style={{ color: "var(--c-text-1)" }}
+          className="font-semibold line-clamp-3"
+          style={{
+            color: "var(--c-text-1)",
+            fontSize: "clamp(12.5px, 1.9vw, 14.5px)",
+            lineHeight: 1.3,
+          }}
         >
           {payload.title ?? "Case opened — verdict pending."}
         </h3>
-        <p className="mt-1.5 text-[11px]" style={{ color: "var(--c-text-3)" }}>
+        <p
+          className="mt-1"
+          style={{
+            color: "var(--c-text-3)",
+            fontSize: "clamp(10px, 1.5vw, 11.5px)",
+            lineHeight: 1.35,
+          }}
+        >
           {payload.region_label ?? "Open hearing"} · tap to weigh in
         </p>
       </div>

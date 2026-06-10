@@ -49,8 +49,9 @@ export function StoryCard({ payload, index, anonymous }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const tone = scoreTone(payload.score);
-  // Alternating XHS-style cover aspect ratios — tall portrait & square mix.
-  const coverAspect = index % 3 === 0 ? "3/4" : index % 3 === 1 ? "4/5" : "1/1";
+  // XHS-style alternating cover ratios — portraits dominate, with occasional square/4:3 to break rhythm.
+  const ratios = ["3/4", "4/5", "1/1", "3/4", "4/5", "4/3"];
+  const coverAspect = ratios[index % ratios.length];
   const teal = payload.both_sides_heard ? "2px solid var(--c-teal, #3aa48f)" : undefined;
 
   const longPress = useLongPress(() => setSheetOpen(true), 450);
