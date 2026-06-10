@@ -117,7 +117,7 @@ export const composeStream = createServerFn({ method: "POST" })
       )
       .eq("status", "in_court")
       .order("verdict_lock_at", { ascending: true })
-      .limit(anonymous ? limit : 4);
+      .limit(4);
 
     const postIds = [
       ...stories.map((s) => s.id as string),
