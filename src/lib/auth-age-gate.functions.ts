@@ -1,7 +1,9 @@
-// Age gate: <18 → delete auth user, 403. ≥18 → mark profile age_verified.
+// Age gate: <18 → mark profile blocked + sign out (do NOT delete the auth user;
+// that creates confusing OAuth re-auth behaviour). ≥18 → mark age_verified.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ensureProfile } from "@/lib/profile/bootstrap.server";
 
 const InputSchema = z.object({
   dob_month: z.number().int().min(1).max(12),
@@ -30,46 +32,32 @@ export const verifyAge = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email")
-      .eq("id", ctx.userId)
-      .maybeSingle();
-
-    if (profileLookupError) {
-      return { data: null, error: profileLookupError.message };
-    }
-
-    if (!existingProfile) {
-      const { data: authUser, error: authUserError } = await supabaseAdmin.auth.admin.getUserById(ctx.userId);
-      if (authUserError) {
-        return { data: null, error: authUserError.message };
-      }
-
-      const fallbackNickname = authUser.user.user_metadata?.full_name
-        || authUser.user.user_metadata?.name
-        || authUser.user.email
-        || `user_${ctx.userId.slice(0, 8)}`;
-
-      const { error: bootstrapError } = await supabaseAdmin
-        .from("profiles")
-        .insert({
-          id: ctx.userId,
-          email: authUser.user.email,
-          handle: `user_${ctx.userId.replace(/-/g, "").slice(0, 12)}`,
-          nickname: fallbackNickname,
-          display_name: fallbackNickname,
-          locale: "en",
-        } as never);
-
-      if (bootstrapError) {
-        return { data: null, error: bootstrapError.message };
-      }
+    try {
+      await ensureProfile(ctx.userId);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "profile_bootstrap_failed";
+      return { data: null, error: msg };
     }
 
     if (age < 18) {
-      // Spec: no retry — delete the auth user.
-      await supabaseAdmin.auth.admin.deleteUser(ctx.userId);
+      // Soft block — keep the auth user so we can refuse re-entry deterministically.
+      const { error: blockError } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          blocked_reason: "underage",
+          blocked_at: new Date().toISOString(),
+          dob_month: data.dob_month,
+          dob_year: data.dob_year,
+        } as never)
+        .eq("id", ctx.userId);
+      if (blockError) return { data: null, error: blockError.message };
+
+      // Revoke all sessions for this user — they can't sneak back in until appeal.
+      try {
+        await supabaseAdmin.auth.admin.signOut(ctx.userId);
+      } catch {
+        // best-effort; the profile flag is the source of truth
+      }
       return { data: null, error: "age_gate_failed" };
     }
 
@@ -79,7 +67,7 @@ export const verifyAge = createServerFn({ method: "POST" })
         age_verified: true,
         dob_month: data.dob_month,
         dob_year: data.dob_year,
-      })
+      } as never)
       .eq("id", ctx.userId);
 
     if (error) return { data: null, error: error.message };
