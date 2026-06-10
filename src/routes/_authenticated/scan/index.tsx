@@ -1,26 +1,20 @@
-// Scan splash + start CTA. Detects an in-progress scan and offers resume.
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+// Scan splash — dramatic Bench opening. Visual reference: shutap_scan_dramatic.html
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { getActiveScan } from "@/lib/scan.functions";
 
 export const Route = createFileRoute("/_authenticated/scan/")({
   component: ScanIntro,
   head: () => ({
     meta: [
-      { title: "Shutap Relationship Scan — How dramatic is your marriage?" },
-      {
-        name: "description",
-        content:
-          "Take the 3-minute Shutap Relationship Scan. Anonymous, surprisingly accurate, slightly chaotic.",
-      },
+      { title: "Assess my situation — Shutap" },
+      { name: "description", content: "The Bench is listening. Your story. No names. The court will decide." },
     ],
   }),
 });
 
 function ScanIntro() {
-  const navigate = useNavigate();
   const fetchActive = useServerFn(getActiveScan);
   const { data: active, isLoading } = useQuery({
     queryKey: ["scan", "active"],
@@ -28,59 +22,72 @@ function ScanIntro() {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="px-4 pt-4">
-        <Link to="/" className="text-sm text-muted-foreground">← Home</Link>
-      </header>
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-7xl mb-6"
-        >
-          👀
-        </motion.div>
-        <div className="text-xs font-medium tracking-wider text-accent uppercase mb-3">
-          Judge My Relationship™
+    <div className="min-h-screen bg-c-surface text-c-text-1 pb-32">
+      <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
+        <div className="mx-auto max-w-xl px-4 py-3 flex items-center gap-3">
+          <Link to="/stream" className="text-c-text-3 text-sm">←</Link>
+          <div className="flex-1 text-center text-sm font-medium">Assess my situation</div>
+          <span className="w-5" />
         </div>
-        <h1 className="text-4xl sm:text-5xl font-medium leading-tight text-balance">
-          90 seconds. mostly tapping.
-        </h1>
-        <p className="mt-4 text-base text-muted-foreground max-w-md text-balance">
-          Like your funniest smartest friend asking questions over wine.
-          We score the chaos at the end.
-        </p>
+      </header>
 
-        <div className="mt-10 w-full space-y-3">
+      <main className="mx-auto max-w-xl">
+        <section className="hero-dark">
+          <div className="hero-dark__orb hero-dark__orb--tr" />
+          <div className="hero-dark__orb hero-dark__orb--bl" />
+          <div className="hero-dark__tag">The Bench is listening</div>
+          <h1 className="hero-dark__q">
+            What happened?
+            <br />Don't soften it.
+          </h1>
+          <p className="hero-dark__sub">Your story. No names needed. The court will decide.</p>
+          <div className="inline-flex items-center gap-1.5 mt-2 text-[10px] text-c-teal">
+            <span className="w-1.5 h-1.5 rounded-full bg-c-teal animate-pulse" />
+            The Bench takes one case at a time
+          </div>
+        </section>
+
+        <div className="px-3 py-4 space-y-3">
+          <div className="flex gap-2 items-end">
+            <div className="brow-av">⚖️</div>
+            <div className="brow-bubble max-w-[260px]">
+              Give it to me straight. <b className="text-c-ink font-medium">What did they do?</b>
+            </div>
+          </div>
+          <p className="bench-line !my-0 mx-0 text-[11px]">
+            No names. No identifying details. You review and approve before anything posts.
+          </p>
+        </div>
+
+        <div className="px-3 pt-3 space-y-2.5">
           {active && !isLoading ? (
             <>
               <Link
                 to="/scan/result/$scanId"
                 params={{ scanId: active.id }}
-                className="block w-full px-6 py-4 rounded-full bg-surface-elevated border border-border font-medium text-base"
+                className="block w-full py-3.5 text-center rounded-2xl bg-c-surface-2 border border-c-surface-3 text-sm font-medium"
               >
-                see your last score →
+                See your last score →
               </Link>
               <Link
                 to="/scan/start"
-                className="block w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
+                className="block w-full py-3.5 text-center rounded-2xl bg-c-pink text-white text-[15px] font-medium"
               >
-                start a new one →
+                Open a new case →
               </Link>
             </>
           ) : (
             <Link
               to="/scan/start"
-              className="block w-full px-6 py-4 rounded-full bg-primary text-primary-foreground font-medium text-lg "
+              className="block w-full py-3.5 text-center rounded-2xl bg-c-pink text-white text-[15px] font-medium"
             >
-              👀 okay let's go →
+              Tell the Bench →
             </Link>
           )}
+          <p className="text-center text-[11px] text-c-text-3 pt-2">
+            Anonymous by default. The court doesn't need your name to see what happened.
+          </p>
         </div>
-
-        <p className="mt-6 text-xs text-muted-foreground">
-          Anonymous. We hide names. Your secrets are safe.
-        </p>
       </main>
     </div>
   );
