@@ -20,12 +20,7 @@ const feedQO = queryOptions({
 const meQO = queryOptions({
   queryKey: ["me", "stream-header"],
   queryFn: async () => {
-    const fn = getMyProfile as unknown as () => Promise<{
-      handle: string | null;
-      nickname: string | null;
-      emoji: string | null;
-      cityLabel?: string | null;
-    } | null>;
+    const fn = getMyProfile as unknown as () => Promise<Record<string, unknown> | null>;
     return fn();
   },
   staleTime: 60_000,
