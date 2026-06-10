@@ -9,6 +9,7 @@ import { AliasPill } from "./AliasPill";
 import { AliasOverlay } from "./AliasOverlay";
 import { ChatbotPill } from "./ChatbotPill";
 import { StreamList } from "./StreamList";
+import { HofLeaderboardOverlay } from "@/components/hof/HofLeaderboardOverlay";
 
 export function StreamShell() {
   const [authed, setAuthed] = useState<boolean | null>(null);
