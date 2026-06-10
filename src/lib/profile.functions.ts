@@ -168,7 +168,7 @@ async function hydrateProfile(
 
   const anonymousMode = ((row.anonymous_mode as boolean | null) ?? true);
 
-  void row.nationality;
+  
   const aliasName = (row.nickname as string | null) ?? null;
   // Anonymous mode (default) → always show the assigned alias for both
   // display name and @handle. Only when the user turns anonymity off do we
