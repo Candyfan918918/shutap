@@ -365,11 +365,11 @@ function WelcomePage() {
               {/* 12-option emoji picker, single row */}
               <div>
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Pick your mark</p>
-                <div className="grid grid-cols-12 gap-1">
+                <div className="grid grid-cols-6 gap-2">
                   {EMOJI_OPTIONS.map((e) => (
                     <button key={e} onClick={() => setEmoji(e)}
                       disabled={phase !== "reveal"}
-                      className={`aspect-square rounded-md text-base flex items-center justify-center transition ${
+                      className={`aspect-square rounded-lg text-2xl flex items-center justify-center transition ${
                         emoji === e
                           ? "bg-primary/20 border border-primary"
                           : "bg-surface-elevated border border-border hover:border-primary/50"
