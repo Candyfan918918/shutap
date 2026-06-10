@@ -33,6 +33,7 @@ export function StoryCard({ payload, index, anonymous }: Props) {
   const navigate = useNavigate();
   const softGate = useSoftGate();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [nomOpen, setNomOpen] = useState(false);
 
   const tone = scoreTone(payload.score);
   const ratios = ["3/4", "4/5", "1/1", "3/4", "4/5", "4/3"];
