@@ -165,6 +165,7 @@ function SpillLanding() {
       const { draftId } = await create({
         data: { rawDump, attachments: [], locale },
       });
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       navigate({ to: "/spill/$draftId/chat", params: { draftId } });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't open the case. Try again.");
