@@ -1,78 +1,72 @@
-## Goal
+# Shutap Step 6: Fill-the-Gaps Plan
 
-Replace the current `/stream` with the spec'd single-surface feed: one full-viewport scroller, typed cards rendered by `item.type`, infinite scroll, pull-to-refresh, plus persistent alias pill and Bench chatbot pill. No header, tabs, sidebar, or bottom nav. the cards in story stream should keep current design in color and fonts, but change horizontal layout to cards like xiaohongshu scrolling. view multiple story cards at the same time. 
+The audit found ~40 distinct gaps across 4 surfaces. Shipping everything in one turn would be unsafe (DB schema changes, route → portal refactor, new components, realtime wiring). I'll split into 4 phases so you can review each. **This turn = Phase 1 only.**
 
-A `/stream` route already exists with a sticky header and `StreamBody` rendering a flat list of `FeedStoryCard`s. It does not match the spec and will be rewritten end-to-end. Existing `VerdictBar`, `CourtCaseCard`, `CountdownChip`, and `AliasPill` building blocks will be reused where they match; otherwise replaced.
+---
 
-## Scope decisions (please confirm)
+## Phase 1 — Story Detail + Voting (no schema changes)
 
-1. **Stream feed source.** Spec mentions `/orchestrator compose`. There is no such endpoint today. I will add one server function `composeStream({ cursor, limit, anonymous })` that mixes types from existing tables (posts → StoryCard, court_cases → CourtCaseCard, hof_scores → HOFCard, bench_voice_strings → BenchMomentCard, plus injected SpillCTA / ScanCTA / ServiceCard slots). A future orchestrator can replace its internals without touching the UI.
-2. **ServiceCard content.** Not defined yet. I will render a placeholder "Service" tile that links to a future services route, gated behind a feature flag so it ships dormant.
-3. **Pull-to-refresh.** Mobile-first gesture only (touch). On desktop a small "New stories" pill appears when fresh items are available.
-4. **Long-press quick actions.** Mobile long-press + desktop right-click both open the same action sheet.
+Highest-value, lowest-risk. All frontend + reuse of existing `castVerdict`.
 
-If any of these are wrong, tell me and I will revise before building.
+1. **VerdictBar upgrade** (`src/components/posts/VerdictBar.tsx`)
+   - Add Supabase Realtime subscription (port pattern from `CompactVerdictBar`)
+   - Render 7 buttons as 3+3+1 grid
+   - Selected state: filled bg + 1px white outline
+   - Labels adapt by `relationship_type` (lookup map)
+   - Replace toast on anon with SoftGate (`useSoftGate`)
+   - Accept `readDepthPercent` prop and pass to `castVerdict`
 
-## Plan
+2. **Scroll-depth tracker** in `post.$postId.tsx`
+   - Track max scroll % via scroll listener, feed to VerdictBar
 
-### 1. Stream store
+3. **New components** (in `src/components/posts/`)
+   - `AliasPill.tsx` — full-size alias + "one-sided / both sides heard" label
+   - `JudgmentButtons.tsx` — 2×2 grid (Not Guilty | Guilty | Mixed | Need More Info), local state for now (no DB persistence yet — flagged for Phase 4)
+   - `RelateButtonStory.tsx` wrapper around existing `RelateButton` for story detail
+   - `SteelmanCard.tsx` — collapsible "The Bench wonders" (gated on `post.has_steelman`, falls back to `null` if field missing)
+   - `DevilsAdvocateToggle.tsx` — local toggle that flips verdict context label
+   - `CaseSummaryToggle.tsx` — collapsible facts/timeline/players (reads existing post fields, empty-graceful)
+   - `SpillScanCTA.tsx` — inline card appearing after vote
+   - `AuthorMenu.tsx` — three-dot dropdown for author: Retract / Post update / Close case (links to existing `/me/posts/$postId/*` routes)
+   - `ServiceCard.tsx` — qualified-category service nudge
 
-- `src/stores/stream.ts` (zustand): `items[]`, `cursor`, `loading`, `chatbot_override_active`, plus actions `prepend`, `append`, `setCursor`, `reset`.
+4. **Wire into `post.$postId.tsx`**
+   - Add AliasPill above title
+   - Render `case_title` + `question_before_court` if present on post (graceful fallback)
+   - Mount all new components in spec order
+   - Show CTA inline after vote (track local `hasVoted` state)
 
-### 2. Server fn: compose stream
+**Out of scope this phase (documented):**
+- `case_title`, `question_before_court`, `has_steelman`, judgment-vote persistence → need migrations (Phase 4)
 
-- `src/lib/stream.functions.ts` → `composeStream({ data: { cursor?, limit?, anonymous } })`.
-- Returns `{ items: StreamItem[], next_cursor: string | null }`.
-- `StreamItem` is a discriminated union on `type`: `story | court_case | spill_cta | scan_cta | hof | bench_moment | service`.
-- Anonymous: only `court_case`, `hof`, `bench_moment`, `scan_cta`, `service`.
-- Authed: full mix, with CTAs sprinkled every ~7 items.
+---
 
-### 3. Card components (`src/components/stream/`)
+## Phase 2 — Spill Portal Refactor
 
-- `StoryCard.tsx` — surface-2 / 0.5px border / `--r-md`. 4:3 vs 3:4 by index parity. Teal left border when `both_sides_heard`. Alias pill (left) + relationship + category badge (right). 3-line snippet. Score badge (gray/purple/coral/amber bands). Compact `VerdictBar` (6px). Relate + comment counts. `CourtRibbon` overlay if nominated. One-sided disclosure line. Long-press / right-click → action sheet. Tap → `/post/$postId`.
-- `CourtCaseCard.tsx` — reuse existing where compatible; otherwise stream variant with `CourtRibbon`.
-- `SpillCTACard.tsx`, `ScanCTACard.tsx` — Bench-voice CTA tiles, route to `/spill` / `/scan`.
-- `HOFCard.tsx` — surfaces a HOF entry.
-- `BenchMomentCard.tsx` — pulls a `bench_voice_strings` line, no actions.
-- `ServiceCard.tsx` — dormant placeholder.
+- Build `src/components/spill/SpillPortal.tsx` (full-screen Dialog + AnimatePresence)
+- Convert existing `/spill/$draftId/{chat,draft,score,scoring}` route content into portal step components
+- Mount portal from `_authenticated/route.tsx` via a `useSpillStore` trigger
+- Keep old routes as thin redirects → open portal
+- Add: top progress bar, slide-down question card, alias/anon toggle, cool-down offer, polishing spinner on `ready_to_edit`, guardian success + crisis card
 
-### 4. Shared widgets
+## Phase 3 — Scan Portal Refactor
 
-- `CourtRibbon.tsx` — pill, amber background, 1s countdown tick. Pulse <60min. Coral + faster pulse <10min.
-- `RelateButton.tsx` — distinct icon, "N felt this", teal fill when active. Calls `relateToPost` or fires `SoftGate`.
-- Rework `VerdictBar` to spec: 7 animated segments, Realtime subscription on `post_verdict_votes` filtered by post_id, user's vote = white 1px outline, compact (6px) / full (32px) variants.
-- `AliasPill` — three states (full / reduced / anonymous), surface-3 + pill radius.
+- Same pattern: `ScanPortal.tsx` + step components
+- Fix score color ranges per spec, equal-width "Save privately / Post to feed" buttons, AI 2–3 sentence summary, service card
 
-### 5. Persistent UI shell
+## Phase 4 — Schema additions
 
-- `src/components/stream/StreamShell.tsx`: full-viewport scroller, fixed `AliasPill` top-right (hidden when anonymous), fixed `ChatbotPill` bottom-center ("Ask The Bench...", text-only).
-- `AliasOverlay` and `ChatbotOverlay` mounted lazily on tap. Existing overlays reused if present, else stub scaffolding with the four sections (profile, bookmarks, journal, settings) for alias, and a placeholder chat surface that calls a future `askBench` server fn.
+Migrations for:
+- `posts.case_title`, `posts.question_before_court`, `posts.has_steelman`, `posts.case_summary` jsonb
+- `post_judgment_votes` table (4-option judgment) with weighting + RLS + GRANTs
+- `tea_drafts` status `'ready_to_edit'`, `case_title`, `question_before_court` columns
+- Privacy phrase flagging in spill chat (server-side PII scrubber wiring)
+- Generalisation pill + cross-story warning
 
-### 6. Stream page
+---
 
-- Rewrite `src/routes/stream.tsx`: no header. Renders `<StreamShell>` with `<StreamList />`.
-- `StreamList` uses `useInfiniteQuery` with `composeStream`, page size 20, primes via loader (`ensureInfiniteQueryData`). `IntersectionObserver` sentinel triggers `fetchNextPage`.
-- Pull-to-refresh: touch gesture handler invokes `queryClient.resetQueries(['stream'])`, then refetch.
+## What I'll ship this turn
 
-### 7. SoftGate
+Phase 1 only. No DB changes. ~10 new components + 2 file edits. Story detail will visibly match the spec for everything that doesn't need new columns; the columns-required pieces render gracefully when fields are absent.
 
-- Reuse existing soft-gate component if available; otherwise a small `<SoftGate trigger=...>` wrapper that opens a sign-in sheet for anonymous taps on vote / relate / comment / bookmark.
-
-## Technical details
-
-- Realtime: enable publication for `post_verdict_votes` if not already (verify in a migration first; skip if it is).
-- `composeStream` is a public server fn using `supabaseAdmin` inside the handler (public reads + safe column projection). Bench-voice copy comes from `bench_voice_strings`.
-- All copy goes through the Bench voice rules — no "Loading…", no exclamation marks.
-- Score color bands implemented as a `scoreTone(score)` helper returning a CSS variable name.
-- Long-press: `pointerdown` 450ms timer; cancelled on `pointermove` / `pointerup`. Right-click `onContextMenu` opens the same sheet.
-- Infinite scroll: cursor encoded as `${published_at}|${id}` for stability.
-- Anonymous detection: `supabase.auth.getSession()` (client) + `anonymous` flag passed to `composeStream` so SSR returns the right mix.
-
-## Out of scope (later steps)
-
-- Real `/orchestrator compose` mixing logic (current server fn is the seam).
-- Bench chatbot reply pipeline (overlay ships with input + scaffold).
-- Journal feature inside the alias overlay (link only).
-- Service catalogue (`ServiceCard` is placeholder).
-
-Confirm the four scope decisions above and I will build straight through.
+Reply **"go"** to start Phase 1, or tell me to re-scope (e.g. "do migrations first" or "skip judgment buttons").

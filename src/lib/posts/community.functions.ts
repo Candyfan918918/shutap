@@ -278,16 +278,27 @@ export const getMyVerdict = createServerFn({ method: "POST" })
 export const castVerdict = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({ postId: z.string().uuid(), kind: z.enum(VERDICT_KINDS) }).parse(i),
+    z
+      .object({
+        postId: z.string().uuid(),
+        kind: z.enum(VERDICT_KINDS),
+        read_depth_percent: z.number().int().min(0).max(100).optional(),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const row = {
+      post_id: data.postId,
+      user_id: userId,
+      kind: data.kind,
+      ...(typeof data.read_depth_percent === "number"
+        ? { read_depth_percent: data.read_depth_percent }
+        : {}),
+    };
     const { error } = await supabase
       .from("post_verdict_votes")
-      .upsert(
-        { post_id: data.postId, user_id: userId, kind: data.kind },
-        { onConflict: "post_id,user_id" },
-      );
+      .upsert(row, { onConflict: "post_id,user_id" });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
