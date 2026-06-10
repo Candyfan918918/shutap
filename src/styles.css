@@ -733,17 +733,19 @@
 .cf-eyebrow-aux { font-weight:400; letter-spacing:0; text-transform:none; color:var(--c-pink-deep); font-size:11px; }
 
 /* HERO */
-.cf-hero { background:var(--c-pink); padding:18px 16px 16px; text-align:center; position:relative; overflow:hidden; }
-.cf-ghost { position:absolute; top:-8px; left:50%; transform:translateX(-50%);
-  font-size:72px; font-weight:500; color:rgba(136,0,64,0.06);
-  white-space:nowrap; pointer-events:none; letter-spacing:-2px; }
-.cf-eyebrow { font-size:10px; font-weight:500; letter-spacing:.10em; text-transform:uppercase;
-  color:var(--c-pink-ink); opacity:.7; margin-bottom:6px; position:relative; }
-.cf-title { font-size:15px; font-weight:500; color:var(--c-pink-ink); line-height:1.45; margin-bottom:6px; position:relative; }
-.cf-q { font-size:12px; font-style:italic; color:var(--c-pink-ink); opacity:.7; line-height:1.5; position:relative; }
-.cf-timer { display:inline-flex; align-items:center; gap:5px; margin-top:10px;
-  background:rgba(255,255,255,.55); border-radius:var(--r-pill); padding:3px 10px;
-  font-size:11px; color:var(--c-pink-ink); font-weight:500; position:relative; }
+.cf-hero { background:var(--c-surface); padding:20px 16px 18px; text-align:center; position:relative; overflow:hidden;
+  border-top:.5px solid var(--c-border); }
+.cf-ghost { position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  font-size:88px; font-weight:500; color:var(--c-pink-soft);
+  white-space:nowrap; pointer-events:none; letter-spacing:-3px; opacity:.55; }
+.cf-eyebrow { font-size:10px; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--c-pink-deep); margin-bottom:8px; position:relative; }
+.cf-title { font-size:16px; font-weight:500; color:var(--c-text-1); line-height:1.45; margin-bottom:6px; position:relative; text-wrap:balance; }
+.cf-q { font-size:12px; font-style:italic; color:var(--c-text-2); line-height:1.5; position:relative; }
+.cf-timer { display:inline-flex; align-items:center; gap:5px; margin-top:12px;
+  background:var(--c-pink-soft); border:.5px solid var(--c-pink-border);
+  border-radius:var(--r-pill); padding:3px 10px;
+  font-size:11px; color:var(--c-pink-deep); font-weight:500; position:relative; }
 
 /* PARTIES */
 .cf-parties { display:grid; grid-template-columns:1fr 28px 1fr; gap:8px; align-items:start; }
