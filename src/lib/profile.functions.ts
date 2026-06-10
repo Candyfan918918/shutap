@@ -169,9 +169,13 @@ async function hydrateProfile(
   const anonymousMode = ((row.anonymous_mode as boolean | null) ?? true);
 
   const hasClaimedAlias = Boolean(row.nationality && row.emotion && row.creature);
-  const resolvedDisplayName = hasClaimedAlias
-    ? ((row.nickname as string | null) ?? (row.display_name as string | null) ?? row.handle as string)
-    : ((row.display_name as string | null) ?? (row.nickname as string | null) ?? row.handle as string);
+  const aliasName = (row.nickname as string | null) ?? null;
+  // Anonymous mode (default) → always show the assigned alias for both
+  // display name and @handle. Only when the user turns anonymity off do we
+  // surface their edited real display_name; the @handle stays as stored.
+  const resolvedDisplayName = anonymousMode
+    ? (aliasName ?? (row.display_name as string | null) ?? row.handle as string)
+    : ((row.display_name as string | null) ?? aliasName ?? row.handle as string);
 
   return {
     id,
@@ -179,6 +183,7 @@ async function hydrateProfile(
     displayName: resolvedDisplayName,
     bio: (row.bio as string | null) ?? null,
     avatarUrl: (row.avatar_url as string | null) ?? null,
+    emoji: (row.emoji as string | null) ?? null,
     cityLabel: anonymousMode ? null : ((row.city_label as string | null) ?? null),
     countryCode: (row.country_code as string | null) ?? null,
     vibe: (row.vibe as string | null) ?? null,
