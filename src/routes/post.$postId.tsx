@@ -202,6 +202,7 @@ function PostPage() {
         <StoryArc postId={post.id} />
         <PredictionsPanel postId={post.id} />
         <OutcomePrompt postId={post.id} authorId={post.author_id} />
+        <WisdomGraphPanel postId={post.id} />
         <OtherPerspectives postId={post.id} plaintiffId={post.author_id} />
         <CommentThread
           ref={commentsRef}
