@@ -24,17 +24,35 @@
   --c-text-2: #7a6e78;
   --c-text-3: #b0a4ae;
 
-  /* Pink — soft only. Mid and deep saturations are banned. */
+  /* Pink — soft only as background. Mid/deep saturations banned as fills. */
   --c-pink:       #ffd0e8;
   --c-pink-soft:  #ffd0e8;
   --c-pink-mid:   #ffd0e8;
   --c-pink-deep:  #ffd0e8;
+  --c-pink-ink:    #880040; /* text on pink-soft only */
+  --c-pink-border: #f4c0d1;
 
-  /* Supporting accents */
-  --c-teal:   #1a9e82;
-  --c-coral:  #d45040;
-  --c-amber:  #d4860a;
-  --c-purple: #6b4fa0;
+  /* Supporting accents + soft/border/deep variants (for category pills, cards) */
+  --c-teal:        #1a9e82;
+  --c-teal-soft:   #e1f5ee;
+  --c-teal-border: #9fe1cb;
+  --c-teal-deep:   #085041;
+
+  --c-coral:        #d45040;
+  --c-coral-soft:   #faece7;
+  --c-coral-border: #f5c4b3;
+  --c-coral-deep:   #712b13;
+
+  --c-amber:        #d4860a;
+  --c-amber-soft:   #faeeda;
+  --c-amber-border: #fac775;
+  --c-amber-deep:   #633806;
+
+  --c-purple:        #6b4fa0;
+  --c-purple-soft:   #eeedfe;
+  --c-purple-border: #cecbf6;
+  --c-purple-deep:   #3c3489;
+
   --c-green:  #4a8c28;
   --c-red:    #d03040;
 
