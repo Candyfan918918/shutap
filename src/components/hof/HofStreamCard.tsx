@@ -22,7 +22,7 @@ export interface HofStreamPayload {
   post_id?: string | null;
 }
 
-export function HofStreamCard({ payload }: { payload: HofStreamPayload }) {
+export function HofStreamCard({ payload }: { payload: HofStreamPayload; index?: number }) {
   const cat = categoryByKey(payload.category);
   const [nomOpen, setNomOpen] = useState(false);
 
