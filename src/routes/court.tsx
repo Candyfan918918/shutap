@@ -188,7 +188,7 @@ function CourtPage() {
 
         {featured && shouldShowWatchParty(featured) && <WatchParty c={featured} />}
 
-        {featured && <CourtroomPanel c={featured} />}
+        {featured && <CaseFlow c={featured} />}
 
         {grouped.inCourt.length > 1 && (
           <Section
