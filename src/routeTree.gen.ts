@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as AuthenticatedStreamRouteImport } from './routes/_authenticated/stream'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
@@ -90,6 +91,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => EnterRoute,
+} as any)
+const AuthenticatedStreamRoute = AuthenticatedStreamRouteImport.update({
+  id: '/stream',
+  path: '/stream',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/_authenticated/stream': typeof AuthenticatedStreamRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/me'
     | '/settings'
+    | '/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/friends'
     | '/me'
+    | '/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/_authenticated/stream'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -615,6 +627,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/enter/verify'
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
+    }
+    '/_authenticated/stream': {
+      id: '/_authenticated/stream'
+      path: '/stream'
+      fullPath: '/stream'
+      preLoaderRoute: typeof AuthenticatedStreamRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -920,6 +939,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
+  AuthenticatedStreamRoute: typeof AuthenticatedStreamRoute
   AuthenticatedProfileScansRoute: typeof AuthenticatedProfileScansRoute
   AuthenticatedScanStartRoute: typeof AuthenticatedScanStartRoute
   AuthenticatedSpillStartRoute: typeof AuthenticatedSpillStartRoute
@@ -939,6 +959,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
+  AuthenticatedStreamRoute: AuthenticatedStreamRoute,
   AuthenticatedProfileScansRoute: AuthenticatedProfileScansRoute,
   AuthenticatedScanStartRoute: AuthenticatedScanStartRoute,
   AuthenticatedSpillStartRoute: AuthenticatedSpillStartRoute,

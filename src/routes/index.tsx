@@ -97,13 +97,17 @@ function AnonymousCourt() {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      setAuthed(!!data.session);
+      const signedIn = !!data.session;
+      setAuthed(signedIn);
+      if (signedIn) navigate({ to: "/stream" });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setAuthed(!!session);
+      const signedIn = !!session;
+      setAuthed(signedIn);
+      if (signedIn) navigate({ to: "/stream" });
     });
     return () => { active = false; sub.subscription.unsubscribe(); };
-  }, []);
+  }, [navigate]);
 
 
   const fetchFeatured = useServerFn(getFeaturedCourtCase);
