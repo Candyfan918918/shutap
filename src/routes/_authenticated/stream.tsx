@@ -84,7 +84,7 @@ function StreamPage() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-[480px] px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-3 flex items-center justify-between">
           <span className="text-lg font-medium tracking-tight">
             shut<span className="text-c-pink-deep">ap</span>
           </span>
@@ -96,7 +96,7 @@ function StreamPage() {
       </header>
 
       {/* Stream hero — cream + pink-deep, matches Court */}
-      <section className="mx-auto max-w-[480px] border-x border-b border-c-border relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2">
+      <section className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-b border-c-border relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2">
         <span
           aria-hidden
           className="absolute left-1/2 -translate-x-1/2 top-[-10px] text-[88px] font-medium text-c-pink-soft/70 whitespace-nowrap pointer-events-none tracking-tighter select-none"
@@ -114,7 +114,7 @@ function StreamPage() {
         </p>
       </section>
 
-      <main className="mx-auto max-w-[480px] border-x border-c-border px-3 pt-4 pb-32 space-y-3">
+      <main className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-c-border px-3 pt-4 pb-32 space-y-3">
 
         {/* Bench inline nudge */}
         <p className="bench-line !my-0 mx-1 text-[12px]">
@@ -161,7 +161,7 @@ function BenchPillMenu() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
-      <div className="mx-auto max-w-[480px] px-3 pb-3">
+      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-3 pb-3">
         {open && (
           <>
             <button
