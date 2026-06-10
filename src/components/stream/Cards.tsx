@@ -100,41 +100,7 @@ export function ServiceCard({
   );
 }
 
-export function HOFCard({ payload, index }: { payload: HofPayload; index: number }) {
-  const isPortrait = index % 2 === 0;
-  const aspect = isPortrait ? "3/4" : "4/3";
-  return (
-    <Link
-      to="/hof"
-      className="flex flex-col overflow-hidden transition active:scale-[0.995] p-4"
-      style={{
-        background: "linear-gradient(165deg, var(--c-amber-soft) 0%, var(--c-surface-2) 100%)",
-        borderRadius: "var(--r-md, 14px)",
-        border: "0.5px solid var(--c-border)",
-        aspectRatio: aspect,
-      }}
-    >
-      <span
-        className="self-start px-2 h-5 inline-flex items-center text-[9.5px] font-semibold uppercase tracking-[0.05em] rounded-full"
-        style={{ background: "rgba(0,0,0,0.07)" }}
-      >
-        Hall of Fame
-      </span>
-      <p
-        className="mt-3 text-[14px] font-medium leading-snug flex-1"
-        style={{ color: "var(--c-text-1)" }}
-      >
-        {payload.title ?? "A case the room won't let go of."}
-      </p>
-      <div
-        className="mt-2 text-[11px] tabular-nums"
-        style={{ color: "var(--c-text-2)" }}
-      >
-        Score {Math.round(payload.score)} · {payload.period}
-      </div>
-    </Link>
-  );
-}
+export { HofStreamCard as HOFCard } from "@/components/hof/HofStreamCard";
 
 export function BenchMomentCard({ line, index }: { line: string; index: number }) {
   const isPortrait = index % 2 === 0;
