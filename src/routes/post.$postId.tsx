@@ -21,6 +21,17 @@ import { OtherPerspectives } from "@/components/perspectives/OtherPerspectives";
 import { PredictionsPanel } from "@/components/court/PredictionsPanel";
 import { OutcomePrompt } from "@/components/court/OutcomePrompt";
 import { WisdomGraphPanel } from "@/components/court/WisdomGraphPanel";
+import { StoryAliasBlock } from "@/components/posts/StoryAliasBlock";
+import { JudgmentButtons } from "@/components/posts/JudgmentButtons";
+import { SteelmanCard } from "@/components/posts/SteelmanCard";
+import { DevilsAdvocateToggle } from "@/components/posts/DevilsAdvocateToggle";
+import { CaseSummaryToggle } from "@/components/posts/CaseSummaryToggle";
+import { SpillScanCTA } from "@/components/posts/SpillScanCTA";
+import { AuthorMenu } from "@/components/posts/AuthorMenu";
+import { ServiceCard } from "@/components/posts/ServiceCard";
+import { RelateButton } from "@/components/stream/RelateButton";
+import { useSoftGate } from "@/components/stream/useSoftGate";
+import { reactToPost } from "@/lib/posts/engagement.functions";
 import type { PostRecord, ReactionKind, SharePlatform } from "@/lib/posts/types";
 
 
