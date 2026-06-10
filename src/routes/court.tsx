@@ -116,39 +116,38 @@ function CourtPage() {
     : "🌐 Country";
 
   return (
-    <div className="min-h-screen bg-background text-foreground bg-grain pb-24">
-      <header className="sticky top-0 z-30  bg-background/75 border-b border-border">
-        <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="text-sm text-muted-foreground">← Shutap</Link>
-          <StreakChip />
+    <div className="min-h-screen bg-c-surface text-c-text-1 pb-24">
+      <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
+        <div className="mx-auto max-w-3xl px-4 py-2.5 flex items-center justify-between">
+          <Link to="/stream" className="text-[17px] font-medium tracking-tight">
+            shut<span className="text-c-pink">ap</span>
+          </Link>
+          <span className="live-pill"><span className="live-pill__dot" />Family Court · Live</span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 pt-6 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <div
-            className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-[1.5px] text-2xl"
-            style={{
-              borderColor: "var(--c-amber)",
-              background: "var(--c-surface-3)",
-            }}
+      <main className="mx-auto max-w-3xl">
+        <section className="relative overflow-hidden text-center px-4 pt-5 pb-4" style={{ background: "var(--c-pink)" }}>
+          <span
+            aria-hidden
+            className="absolute left-1/2 -translate-x-1/2 top-[-8px] text-[72px] font-medium text-white/[0.06] whitespace-nowrap pointer-events-none tracking-tighter"
           >
-            ⚖️
+            COURT
+          </span>
+          <div className="text-[10px] font-medium tracking-[0.10em] uppercase text-white/60 mb-1.5">
+            Relationship Court™ · Where the human decides
           </div>
-          <h1
-            className="text-2xl sm:text-4xl font-semibold tracking-tight text-balance"
-            style={{ color: "var(--c-amber)" }}
-          >
-            Relationship Court™
+          <h1 className="text-[15px] sm:text-base font-medium text-white leading-snug mb-1.5">
+            The cases the algorithm couldn't ignore.
           </h1>
-          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Where the human decides
-          </p>
-        </motion.div>
+          <p className="text-[12px] italic text-white/70 leading-snug">What would you do if you were her?</p>
+          <span className="inline-flex items-center gap-1.5 mt-2.5 bg-white/15 rounded-full px-2.5 py-1 text-[11px] text-white font-medium">
+            ⏱ Live deliberations
+          </span>
+        </section>
+
+        <div className="px-4 pt-6 space-y-6">
+
 
         <CourtTabs
           value={tab}
