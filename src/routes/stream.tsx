@@ -28,7 +28,7 @@ const meQO = queryOptions({
   staleTime: 60_000,
 });
 
-export const Route = createFileRoute("/_authenticated/stream")({
+export const Route = createFileRoute("/stream")({
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(feedQO);
     void context.queryClient.ensureQueryData(meQO);
