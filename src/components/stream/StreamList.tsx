@@ -109,6 +109,9 @@ export function StreamList({ anonymous }: Props) {
         {refreshing ? "The bench reshuffles." : pull > 64 ? "release to refresh" : "pull"}
       </div>
 
+      {/* Bench response pinned above the stream when chatbot overrides it */}
+      {overrideActive && <BenchResponseCard />}
+
       {/* Masonry — Xiaohongshu style. Fluid columns + gaps across all widths. */}
       <div className="stream-wrap pb-32">
         <style>{`
@@ -129,21 +132,21 @@ export function StreamList({ anonymous }: Props) {
         </div>
       </div>
 
-      {/* Sentinel + loading line */}
+      {/* Sentinel + loading line — paused when chatbot override is active */}
       <div ref={sentinelRef} className="h-10" />
-      {query.isFetchingNextPage && (
+      {!overrideActive && query.isFetchingNextPage && (
         <p className="text-center text-[11px] pb-6" style={{ color: "var(--c-text-3)" }}>
           The bench keeps reading.
         </p>
       )}
-      {!query.hasNextPage && items.length > 0 && (
+      {!overrideActive && !query.hasNextPage && items.length > 0 && (
         <p className="text-center text-[11px] pb-10" style={{ color: "var(--c-text-3)" }}>
           That's the docket. Come back tomorrow.
         </p>
       )}
       {items.length === 0 && !query.isLoading && (
         <p className="text-center text-[12px] pt-12 pb-6" style={{ color: "var(--c-text-3)" }}>
-          The room is quiet. The bench waits.
+          {overrideActive ? "The bench found nothing for that. Ask again." : "The room is quiet. The bench waits."}
         </p>
       )}
     </div>
