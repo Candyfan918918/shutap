@@ -70,10 +70,13 @@ function AnonymousCourt() {
     else navigate({ to: "/enter", search: { redirect: to } });
   };
 
-  const fetchGlobal = useServerFn(pingTally);
   const globalQ = useQuery({
     queryKey: ["landing", "global-verdicts"],
-    queryFn: () => fetchGlobal(),
+    queryFn: async () => {
+      const r = await fetch("/api/public/verdict-tally");
+      if (!r.ok) return { total: 0 };
+      return (await r.json()) as { total: number };
+    },
     refetchInterval: 5_000,
     staleTime: 0,
   });
