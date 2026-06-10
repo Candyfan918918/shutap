@@ -186,6 +186,21 @@
   --color-c-green: var(--c-green);
   --color-c-red: var(--c-red);
 
+  --color-c-pink-ink: var(--c-pink-ink);
+  --color-c-pink-border: var(--c-pink-border);
+  --color-c-teal-soft: var(--c-teal-soft);
+  --color-c-teal-border: var(--c-teal-border);
+  --color-c-teal-deep: var(--c-teal-deep);
+  --color-c-coral-soft: var(--c-coral-soft);
+  --color-c-coral-border: var(--c-coral-border);
+  --color-c-coral-deep: var(--c-coral-deep);
+  --color-c-amber-soft: var(--c-amber-soft);
+  --color-c-amber-border: var(--c-amber-border);
+  --color-c-amber-deep: var(--c-amber-deep);
+  --color-c-purple-soft: var(--c-purple-soft);
+  --color-c-purple-border: var(--c-purple-border);
+  --color-c-purple-deep: var(--c-purple-deep);
+
   --color-tag-pink: var(--tag-pink);
   --color-tag-pink-foreground: var(--tag-pink-foreground);
   --color-tag-peach: var(--tag-peach);
