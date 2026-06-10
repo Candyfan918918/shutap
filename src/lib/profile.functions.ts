@@ -39,6 +39,7 @@ export interface PublicProfile {
   displayName: string;
   bio: string | null;
   avatarUrl: string | null;
+  emoji: string | null;
   cityLabel: string | null;
   countryCode: string | null;
   vibe: string | null;
@@ -67,7 +68,7 @@ export interface MyProfile extends PublicProfile {
 const HandleSchema = z.string().regex(HANDLE_RE, "invalid handle").max(24);
 
 const PROFILE_COLS =
-  "id, handle, display_name, nickname, bio, avatar_url, city_label, country_code, vibe, anonymous_mode, locale, email, notif_prefs, privacy, avatar_kind";
+  "id, handle, display_name, nickname, bio, avatar_url, emoji, city_label, country_code, vibe, anonymous_mode, locale, email, notif_prefs, privacy, avatar_kind";
 
 // ---------- public profile by handle ----------
 export const getProfileByHandle = createServerFn({ method: "GET" })
