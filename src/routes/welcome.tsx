@@ -302,10 +302,11 @@ function WelcomePage() {
 
         <AnimatePresence mode="wait">
           {phase === "dob" && (
-            <motion.div
+            <motion.form
               key="dob"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               className="mt-6 space-y-3"
+              onSubmit={(e) => { e.preventDefault(); void onAgeSubmit(); }}
             >
               <p className="text-sm text-muted-foreground text-center">
                 Shutap is for adults 18 and older.
@@ -324,12 +325,13 @@ function WelcomePage() {
                   ))}
                 </select>
               </div>
-              <button onClick={onAgeSubmit} disabled={busy}
+              <button type="submit" disabled={busy}
                 className="w-full py-3.5 rounded-full bg-primary text-primary-foreground font-medium disabled:opacity-50">
                 {busy ? "Checking…" : "Confirm"}
               </button>
-            </motion.div>
+            </motion.form>
           )}
+
 
           {(phase === "reveal" || phase === "saving" || phase === "done") && alias && (
             <motion.div
