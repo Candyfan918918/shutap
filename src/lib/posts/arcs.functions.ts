@@ -36,10 +36,53 @@ export interface ArcStatus {
 }
 
 // ---------- public: list updates for a post ----------
+async function resolveViewerIdForArcs(): Promise<string | null> {
+  try {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const auth = getRequestHeader("authorization") ?? getRequestHeader("Authorization");
+    if (!auth?.startsWith("Bearer ")) return null;
+    const token = auth.slice(7);
+    const { createClient } = await import("@supabase/supabase-js");
+    const c = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { persistSession: false } },
+    );
+    const { data } = await c.auth.getUser(token);
+    return data.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const listPostUpdates = createServerFn({ method: "GET" })
   .inputValidator((d: { postId: string }) =>
     z.object({ postId: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
+    // Visibility gate: don't leak arc bodies on non-public posts.
+    const { data: post } = await supabaseAdmin
+      .from("posts")
+      .select("visibility, author_id, status, deleted_at")
+      .eq("id", data.postId)
+      .maybeSingle();
+    if (!post || (post as { status: string }).status !== "published" || (post as { deleted_at: string | null }).deleted_at) {
+      return { updates: [] as PostUpdate[] };
+    }
+    const visibility = (post as { visibility: string }).visibility;
+    const authorId = (post as { author_id: string }).author_id;
+    if (visibility !== "public") {
+      const viewerId = await resolveViewerIdForArcs();
+      if (!viewerId) return { updates: [] as PostUpdate[] };
+      if (viewerId !== authorId) {
+        if (visibility === "friends") {
+          const { data: friend } = await supabaseAdmin.rpc("is_friend", { _a: viewerId, _b: authorId });
+          if (friend !== true) return { updates: [] as PostUpdate[] };
+        } else {
+          return { updates: [] as PostUpdate[] };
+        }
+      }
+    }
+
     const { data: rows, error } = await supabaseAdmin
       .from("post_updates")
       .select("id, post_id, author_id, kind, title, body, media_url, episode_number, created_at")
