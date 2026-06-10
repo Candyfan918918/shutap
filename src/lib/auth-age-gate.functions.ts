@@ -5,10 +5,11 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { ensureProfile } from "@/lib/profile/bootstrap.server";
 
-const InputSchema = z.object({
-  dob_month: z.number().int().min(1).max(12),
-  dob_year: z.number().int().min(1900).max(new Date().getUTCFullYear()),
-});
+const makeInputSchema = () =>
+  z.object({
+    dob_month: z.number().int().min(1).max(12),
+    dob_year: z.number().int().min(1900).max(new Date().getUTCFullYear()),
+  });
 
 export type AgeGateResult = {
   data: { age_verified: true } | null;
@@ -25,7 +26,7 @@ function ageYearsFrom(month: number, year: number): number {
 
 export const verifyAge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .inputValidator((input: unknown) => makeInputSchema().parse(input))
   .handler(async ({ data, context }): Promise<AgeGateResult> => {
     const ctx = context as { userId: string };
     const age = ageYearsFrom(data.dob_month, data.dob_year);
