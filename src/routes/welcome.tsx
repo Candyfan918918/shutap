@@ -215,7 +215,7 @@ function WelcomePage() {
     setErrorMsg(null);
     setPhase("saving");
     try {
-      await claim({
+      const res = await claim({
         data: {
           nationality: alias.nationality,
           emotion: alias.emotion,
@@ -224,15 +224,37 @@ function WelcomePage() {
           rerollUsed,
         },
       });
-      console.log("[welcome] claimAlias ok");
+      console.log("[welcome] claimAlias result", res);
+      if (!res.ok) {
+        if (res.reason === "taken") {
+          toast.message("Someone else just claimed that. Spinning again.");
+          setAlias(null);
+          setLocks({ n: false, e: false, c: false });
+          setPhase("spin");
+          return;
+        }
+        if (res.reason === "blocked") {
+          setPhase("underage");
+          return;
+        }
+        if (res.reason === "age_not_verified") {
+          setErrorMsg("Age not verified yet.");
+          setPhase("dob");
+          return;
+        }
+        setErrorMsg(`claimAlias: ${res.message ?? "unknown"}`);
+        toast.error(res.message ?? "Couldn't save");
+        setPhase("reveal");
+        return;
+      }
       setPhase("done");
       const dest = redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
         ? redirectTo
-        : "/";
+        : "/court";
       try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
       setTimeout(() => { window.location.replace(dest); }, 600);
     } catch (e) {
-      console.error("[welcome] claimAlias failed", e);
+      console.error("[welcome] claimAlias threw", e);
       const msg = e instanceof Error ? e.message : "Couldn't save";
       setErrorMsg(`claimAlias: ${msg}`);
       toast.error(msg);
