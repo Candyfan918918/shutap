@@ -9,7 +9,7 @@ export type WGNode = {
   node_type: string;
   category: string | null;
   post_id: string | null;
-  payload: Record<string, unknown> | null;
+  payload: any;
   created_at: string;
 };
 export type WGEdge = {
