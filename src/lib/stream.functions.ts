@@ -55,11 +55,20 @@ export interface CourtCasePayload {
 
 
 export interface HofPayload {
-  entity_type: string;
+  entity_type: "story" | "case" | "user";
   entity_id: string;
   period: string;
+  category: string;
+  rank: number;
   score: number;
   title: string | null;
+  alias_label: string | null;
+  alias_emoji: string | null;
+  verdict_pct: number | null;
+  juror_count: number | null;
+  juror_title: string | null;
+  bench_line: string | null;
+  post_id: string | null;
 }
 
 const CursorSchema = z
@@ -182,23 +191,70 @@ export const composeStream = createServerFn({ method: "POST" })
     }
 
 
-    // 5. HOF tile (top entry, current week)
+    // 5. HOF tile — prefer Daily winner of any category; fall back to weekly/all.
     let hof: HofPayload | null = null;
-    const { data: hofRows } = await supabaseAdmin
-      .from("hof_scores")
-      .select("entity_type, entity_id, period, score, metrics")
-      .order("score", { ascending: false })
-      .limit(1);
-    if (hofRows && hofRows.length > 0) {
-      const h: any = hofRows[0];
+    let hofRow: any = null;
+    let hofCategory = "most_dramatic";
+    for (const p of ["daily", "weekly", "all"] as const) {
+      const { data: rows } = await supabaseAdmin
+        .from("hof_scores")
+        .select("entity_type, entity_id, period, category, score, metrics")
+        .eq("period", p)
+        .order("score", { ascending: false })
+        .limit(1);
+      if (rows && rows.length > 0) {
+        hofRow = rows[0];
+        hofCategory = (rows[0] as any).category ?? hofCategory;
+        break;
+      }
+    }
+    if (hofRow) {
+      const { HOF_CATEGORIES } = await import("@/lib/hof-categories");
+      const cat = HOF_CATEGORIES.find((c) => c.key === hofCategory);
+      let title: string | null = (hofRow.metrics?.title as string) ?? null;
+      let alias_label: string | null = null;
+      let alias_emoji: string | null = null;
+      let post_id: string | null = null;
+      try {
+        if (hofRow.entity_type === "story") {
+          const { data: post } = await supabaseAdmin
+            .from("posts").select("id, case_title, title").eq("id", hofRow.entity_id).maybeSingle();
+          title = (post as any)?.case_title ?? (post as any)?.title ?? title;
+          post_id = (post as any)?.id ?? null;
+        } else if (hofRow.entity_type === "case") {
+          const { data: c } = await supabaseAdmin
+            .from("court_cases").select("post_id").eq("id", hofRow.entity_id).maybeSingle();
+          post_id = (c as any)?.post_id ?? null;
+          if (post_id) {
+            const { data: post } = await supabaseAdmin
+              .from("posts").select("case_title, title").eq("id", post_id).maybeSingle();
+            title = (post as any)?.case_title ?? (post as any)?.title ?? title;
+          }
+        } else if (hofRow.entity_type === "user") {
+          const { data: prof } = await supabaseAdmin
+            .from("profiles").select("nickname, handle").eq("id", hofRow.entity_id).maybeSingle();
+          alias_label = (prof as any)?.nickname ?? (prof as any)?.handle ?? null;
+          alias_emoji = "👤";
+        }
+      } catch { /* graceful */ }
       hof = {
-        entity_type: h.entity_type,
-        entity_id: h.entity_id,
-        period: h.period,
-        score: Number(h.score ?? 0),
-        title: (h.metrics?.title as string) ?? null,
+        entity_type: hofRow.entity_type,
+        entity_id: hofRow.entity_id,
+        period: hofRow.period,
+        category: hofCategory,
+        rank: 1,
+        score: Number(hofRow.score ?? 0),
+        title,
+        alias_label,
+        alias_emoji,
+        verdict_pct: null,
+        juror_count: null,
+        juror_title: null,
+        bench_line: cat?.benchLine ?? null,
+        post_id,
       };
     }
+
 
     // 6. Bench moment line
     const { data: benchRows } = await supabaseAdmin
@@ -301,7 +357,7 @@ export const composeStream = createServerFn({ method: "POST" })
           },
         });
       }
-      if (pos === 3 && hof) {
+      if (pos === 5 && hof) {
         items.push({ type: "hof", id: `hof-${idx}`, key: `hof:${hof.entity_id}`, payload: hof });
       }
       if (pos === 2) {

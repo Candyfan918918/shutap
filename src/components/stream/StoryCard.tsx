@@ -12,6 +12,7 @@ import { RelateButton } from "./RelateButton";
 import { ActionSheet } from "./ActionSheet";
 import { useLongPress } from "./useLongPress";
 import { useSoftGate } from "./useSoftGate";
+import { NominateActionSheet } from "@/components/hof/NominateActionSheet";
 
 type PayloadWithMedia = StoryPayload & { media_url?: string | null };
 
@@ -32,6 +33,7 @@ export function StoryCard({ payload, index, anonymous }: Props) {
   const navigate = useNavigate();
   const softGate = useSoftGate();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [nomOpen, setNomOpen] = useState(false);
 
   const tone = scoreTone(payload.score);
   const ratios = ["3/4", "4/5", "1/1", "3/4", "4/5", "4/3"];
@@ -148,11 +150,17 @@ export function StoryCard({ payload, index, anonymous }: Props) {
           { key: "debate", icon: "🗣️", label: "Debate with a friend", onSelect: () => {
               void navigate({ to: "/post/$postId", params: { postId: payload.id } });
             } },
-          { key: "hof", icon: "🏛️", label: "Nominate to HOF", onSelect: () => {
+          { key: "hof", icon: "🏛️", label: "Nominate for Hall of Fame", onSelect: () => {
               if (anonymous) softGate("hof_dramatic", { entityId: payload.id });
-              else toast("Nomination noted.");
+              else setNomOpen(true);
             } },
         ]}
+      />
+      <NominateActionSheet
+        open={nomOpen}
+        onClose={() => setNomOpen(false)}
+        entityType="story"
+        entityId={payload.id}
       />
     </article>
   );

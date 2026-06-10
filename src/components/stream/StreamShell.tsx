@@ -9,10 +9,27 @@ import { AliasPill } from "./AliasPill";
 import { AliasOverlay } from "./AliasOverlay";
 import { ChatbotPill } from "./ChatbotPill";
 import { StreamList } from "./StreamList";
+import { HofLeaderboardOverlay } from "@/components/hof/HofLeaderboardOverlay";
 
 export function StreamShell() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [overlay, setOverlay] = useState(false);
+  const [hofOpen, setHofOpen] = useState(false);
+  const [hofInit, setHofInit] = useState<{ category?: string; entity?: "case" | "story" | "user"; period?: "daily" | "weekly" | "monthly" | "all" }>({});
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail ?? {};
+      setHofInit({
+        category: detail.category,
+        entity: detail.entity,
+        period: detail.period,
+      });
+      setHofOpen(true);
+    };
+    window.addEventListener("open-hof-leaderboard", handler as any);
+    return () => window.removeEventListener("open-hof-leaderboard", handler as any);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -47,6 +64,13 @@ export function StreamShell() {
 
       <ChatbotPill />
       <AliasOverlay open={overlay} onClose={() => setOverlay(false)} authed={!!authed} />
+      <HofLeaderboardOverlay
+        open={hofOpen}
+        onClose={() => setHofOpen(false)}
+        initialCategory={hofInit.category}
+        initialEntity={hofInit.entity}
+        initialPeriod={hofInit.period}
+      />
     </div>
   );
 }

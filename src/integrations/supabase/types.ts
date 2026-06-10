@@ -490,8 +490,83 @@ export type Database = {
         }
         Relationships: []
       }
+      hof_badges: {
+        Row: {
+          awarded_at: string
+          category: string
+          emoji: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          period: string
+          period_key: string
+          rank: number
+          snapshot_id: string | null
+        }
+        Insert: {
+          awarded_at?: string
+          category: string
+          emoji?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          period: string
+          period_key: string
+          rank: number
+          snapshot_id?: string | null
+        }
+        Update: {
+          awarded_at?: string
+          category?: string
+          emoji?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          period?: string
+          period_key?: string
+          rank?: number
+          snapshot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hof_badges_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "hof_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hof_nominations: {
+        Row: {
+          category: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hof_scores: {
         Row: {
+          category: string
           entity_id: string
           entity_type: string
           id: string
@@ -501,6 +576,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string
           entity_id: string
           entity_type: string
           id?: string
@@ -510,6 +586,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string
           entity_id?: string
           entity_type?: string
           id?: string
@@ -522,28 +599,43 @@ export type Database = {
       }
       hof_snapshots: {
         Row: {
+          category: string | null
           created_at: string
+          entity_id: string | null
+          entity_type: string | null
           id: string
           payload: Json
           period: string
           period_end: string
           period_start: string
+          rank: number | null
+          score: number | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           payload: Json
           period: string
           period_end: string
           period_start: string
+          rank?: number | null
+          score?: number | null
         }
         Update: {
+          category?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           payload?: Json
           period?: string
           period_end?: string
           period_start?: string
+          rank?: number | null
+          score?: number | null
         }
         Relationships: []
       }
