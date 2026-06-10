@@ -15,14 +15,14 @@ function SpillLanding() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1 pb-32">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-xl px-4 py-3 flex items-center gap-3">
+        <div className="mx-auto max-w-[480px] px-4 py-3 flex items-center gap-3">
           <Link to="/stream" className="text-c-text-3 text-sm">✕</Link>
           <div className="flex-1 text-center text-sm font-medium">Spill</div>
           <span className="w-5" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl">
+      <main className="mx-auto max-w-[480px]">
         <section className="hero-dark">
           <div className="hero-dark__orb hero-dark__orb--tr" />
           <div className="hero-dark__orb hero-dark__orb--bl" />
@@ -60,7 +60,7 @@ function SpillLanding() {
           <Link
             to="/spill/start"
             search={{ voice: 0 }}
-            className="block w-full py-3.5 text-center rounded-2xl bg-c-pink text-white text-[15px] font-medium"
+            className="block w-full py-3.5 text-center rounded-2xl bg-c-pink-soft text-c-pink-ink border border-c-pink-border text-[15px] font-medium"
           >
             Start talking →
           </Link>

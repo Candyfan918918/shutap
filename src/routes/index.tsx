@@ -1088,7 +1088,7 @@ function FinalCTA({ onGate }: { onGate: (intent: string) => void }) {
       </p>
       <button
         onClick={() => onGate("claim_final")}
-        className="mt-6 px-6 py-3 rounded-md bg-c-pink text-white font-medium text-sm hover:opacity-90 transition"
+        className="mt-6 px-6 py-3 rounded-md bg-c-pink-soft text-c-pink-ink border border-c-pink-border font-medium text-sm hover:bg-c-pink-soft/80 transition"
       >
         Claim my identity →
       </button>
