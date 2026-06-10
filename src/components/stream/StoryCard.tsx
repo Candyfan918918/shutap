@@ -12,6 +12,7 @@ import { RelateButton } from "./RelateButton";
 import { ActionSheet } from "./ActionSheet";
 import { useLongPress } from "./useLongPress";
 import { useSoftGate } from "./useSoftGate";
+import { NominateActionSheet } from "@/components/hof/NominateActionSheet";
 
 type PayloadWithMedia = StoryPayload & { media_url?: string | null };
 
