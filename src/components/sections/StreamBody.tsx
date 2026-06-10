@@ -55,12 +55,12 @@ export function StreamBody() {
 
       <div
         className="px-3 pt-3 pb-4"
-        style={{ columnGap: "10px", columnCount: 2 }}
+        style={{ columnGap: "12px", columnCount: 2 }}
       >
         <style>{`
-          @media (min-width: 640px) { .stream-cols-preview { column-count: 3 !important; } }
-          .stream-cols-preview { column-gap: 10px; column-count: 2; }
-          .stream-cell-preview { break-inside: avoid; margin-bottom: 10px; display: block; }
+          @media (min-width: 1024px) { .stream-cols-preview { column-count: 3 !important; } }
+          .stream-cols-preview { column-gap: 12px; column-count: 2; }
+          .stream-cell-preview { break-inside: avoid; margin-bottom: 12px; display: block; }
         `}</style>
 
         {items.length === 0 ? (

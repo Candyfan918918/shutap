@@ -103,20 +103,17 @@ export function StreamList({ anonymous }: Props) {
         {refreshing ? "The bench reshuffles." : pull > 64 ? "release to refresh" : "pull"}
       </div>
 
-      {/* Masonry — Xiaohongshu style. 2 cols mobile, 3 tablet, 4 desktop. */}
+      {/* Masonry — Xiaohongshu style. 2 cols mobile, 2 tablet, 3 desktop. */}
       <div
         className="px-3 pt-2 pb-32"
-        style={{
-          columnGap: "10px",
-          columnCount: 2,
-        }}
+        style={{ columnGap: "12px", columnCount: 2 }}
       >
         <style>{`
-          @media (min-width: 640px) { .stream-cols { column-count: 3 !important; } }
-          @media (min-width: 1024px) { .stream-cols { column-count: 4 !important; } }
-          .stream-cell { break-inside: avoid; margin-bottom: 10px; display: block; }
+          @media (min-width: 768px) { .stream-cols { column-count: 2 !important; } }
+          @media (min-width: 1024px) { .stream-cols { column-count: 3 !important; } }
+          .stream-cell { break-inside: avoid; margin-bottom: 12px; display: block; }
         `}</style>
-        <div className="stream-cols" style={{ columnGap: "10px", columnCount: 2 }}>
+        <div className="stream-cols" style={{ columnGap: "12px", columnCount: 2 }}>
           {items.map((item, idx) => (
             <div key={item.key} className="stream-cell">
               {renderItem(item, idx, anonymous)}
