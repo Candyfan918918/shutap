@@ -357,7 +357,7 @@ export const composeStream = createServerFn({ method: "POST" })
           },
         });
       }
-      if (pos === 3 && hof) {
+      if (pos === 5 && hof) {
         items.push({ type: "hof", id: `hof-${idx}`, key: `hof:${hof.entity_id}`, payload: hof });
       }
       if (pos === 2) {
