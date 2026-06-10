@@ -222,7 +222,7 @@ function FeedStoryCard({ item, insertHof }: { item: FeedItem; insertHof: boolean
       </article>
 
       {insertHof && (
-        <Link to="/court" className="hof-strip block mx-1">
+        <Link to="/hof" className="hof-strip block mx-1">
           <div className="hof-strip__label">🏆 Hall of Fame · This week</div>
           <div className="hof-strip__title">Most dramatic case of the week is up for grabs.</div>
           <div className="hof-strip__meta">Cast a verdict → climb the ladder</div>
