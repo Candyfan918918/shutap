@@ -114,7 +114,7 @@ function StreamPage() {
         </p>
       </section>
 
-      <main className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-c-border px-3 pt-4 pb-32 space-y-3">
+      <main className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-2xl border-x border-c-border px-3 md:px-4 pt-4 pb-32 space-y-3">
 
         {/* Bench inline nudge */}
         <p className="bench-line !my-0 mx-1 text-[12px]">
@@ -132,7 +132,15 @@ function StreamPage() {
             </Link>
           </div>
         ) : (
-          feedQ.data.map((p, i) => <FeedStoryCard key={p.id} item={p} insertHof={i === 4} />)
+          feedQ.data.map((p, i) => (
+            <FeedStoryCard
+              key={p.id}
+              item={p}
+              insertHof={i === 1}
+              insertScan={i === 2}
+              insertBench={i === 3 ? "You've scrolled past 4 stories without judging. Not sure where you stand? Take the 2-minute assessment. →" : null}
+            />
+          ))
         )}
 
         {/* Chatbot pill — expands into the 5-CTA menu (replaces traditional nav) */}
@@ -161,7 +169,7 @@ function BenchPillMenu() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
-      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-3 pb-3">
+      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-2xl px-3 pb-3">
         {open && (
           <>
             <button
@@ -193,62 +201,200 @@ function BenchPillMenu() {
           onClick={() => setOpen((v) => !v)}
           className="chatbot-pill pointer-events-auto w-full justify-center italic"
         >
-          {open ? "Close" : "Ask Bench anything · or pick a room →"}
+          {open ? "Close" : "Ask The Bench…"}
         </button>
       </div>
     </div>
   );
 }
 
+// Deterministic hash → 0..1 for seeding per-item synthetic data.
+function hash01(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 1000) / 1000;
+}
 
-function FeedStoryCard({ item, insertHof }: { item: FeedItem; insertHof: boolean }) {
-  const cat = categoryFor(item.scoreCategory);
-  const total = Math.max(1, item.verdictCount);
-  // Synthetic distribution to render the bar (until verdict-by-kind is wired).
-  const segs = [
-    { color: "#f09595", pct: 58 },
-    { color: "var(--c-pink-soft)", pct: 21 },
-    { color: "var(--c-teal-soft)", pct: 13 },
-    { color: "var(--c-amber-soft)", pct: 8 },
+type VerdictSeg = { key: string; label: string; pct: number; color: string; dot: string };
+
+function verdictsFor(id: string, cat: { label: string; cls: string }): VerdictSeg[] {
+  const r = hash01(id);
+  // Three or four-segment distributions keyed off category flavor.
+  if (cat.label === "Work") {
+    const a = 65 + Math.round(r * 12);
+    const b = 12 + Math.round(r * 10);
+    return [
+      { key: "rf",  label: "Red flag",  pct: a, color: "#f09595", dot: "#f09595" },
+      { key: "law", label: "Lawyer up", pct: b, color: "var(--c-amber-soft)", dot: "var(--c-amber)" },
+      { key: "other", label: "Other",  pct: 100 - a - b, color: "var(--c-surface-3)", dot: "var(--c-text-3)" },
+    ];
+  }
+  if (cat.label === "Family") {
+    const a = 40 + Math.round(r * 14);
+    const b = 28 + Math.round(r * 10);
+    const c = 14 + Math.round(r * 6);
+    return [
+      { key: "rf",   label: "Red flag",    pct: a, color: "#f09595",                dot: "#f09595" },
+      { key: "th",   label: "Therapy",     pct: b, color: "var(--c-purple-soft)",   dot: "var(--c-purple)" },
+      { key: "talk", label: "Talk it out", pct: c, color: "var(--c-pink-soft)",     dot: "var(--c-pink-deep)" },
+      { key: "other",label: "Other",       pct: Math.max(0, 100 - a - b - c), color: "var(--c-surface-3)", dot: "var(--c-text-3)" },
+    ];
+  }
+  if (cat.label === "Stranger") {
+    const a = 60 + Math.round(r * 10);
+    const b = 20 + Math.round(r * 8);
+    return [
+      { key: "law", label: "Lawyer up", pct: a, color: "var(--c-amber-soft)", dot: "var(--c-amber)" },
+      { key: "rf",  label: "Red flag",  pct: b, color: "#f09595", dot: "#f09595" },
+      { key: "other", label: "Other", pct: 100 - a - b, color: "var(--c-surface-3)", dot: "var(--c-text-3)" },
+    ];
+  }
+  // Romance / Digital / default
+  const a = 45 + Math.round(r * 18);
+  const b = 20 + Math.round(r * 12);
+  const c = 10 + Math.round(r * 8);
+  return [
+    { key: "rf",   label: "Red flag",    pct: a, color: "#f09595",              dot: "#f09595" },
+    { key: "talk", label: "Talk it out", pct: b, color: "var(--c-pink-soft)",   dot: "var(--c-pink-deep)" },
+    { key: "gf",   label: "Green flag",  pct: c, color: "#eaf3de",              dot: "var(--c-green-flag)" },
+    { key: "other",label: "Other",       pct: Math.max(0, 100 - a - b - c), color: "var(--c-surface-3)", dot: "var(--c-text-3)" },
   ];
+}
+
+const CAT_BUBBLE_BG: Record<string, string> = {
+  Romance:  "var(--c-pink-soft)",
+  Family:   "var(--c-teal-soft)",
+  Work:     "var(--c-amber-soft)",
+  Stranger: "var(--c-coral-soft)",
+  Digital:  "var(--c-purple-soft)",
+};
+
+const AUTHOR_EMOJIS = ["🦅", "🌿", "🦋", "🦎", "🐙", "🦊", "🦉", "🐬", "🌺", "🐦"];
+
+// Split body into intro + italic question (last sentence ending in "?").
+function splitBody(text: string): { intro: string; question: string | null } {
+  const trimmed = text.trim();
+  const m = trimmed.match(/(.*?)([^.!?\n]*\?)\s*$/s);
+  if (m && m[2] && m[2].length < trimmed.length) {
+    return { intro: m[1].trim(), question: m[2].trim() };
+  }
+  return { intro: trimmed, question: null };
+}
+
+function FeedStoryCard({
+  item,
+  insertHof,
+  insertScan,
+  insertBench,
+}: {
+  item: FeedItem;
+  insertHof: boolean;
+  insertScan: boolean;
+  insertBench: string | null;
+}) {
+  const cat = categoryFor(item.scoreCategory);
+  const segs = verdictsFor(item.id, cat);
+  const bubbleBg = CAT_BUBBLE_BG[cat.label] ?? "var(--c-pink-soft)";
+  const authorEmoji = AUTHOR_EMOJIS[Math.floor(hash01(item.id) * AUTHOR_EMOJIS.length)];
+  const source = item.isSeed ? "via Scan" : "via Spill";
+  const body = splitBody(item.storyText.slice(0, 360));
+  const verdictTotal = Math.max(0, item.verdictCount);
 
   return (
     <>
       <article className="feed-card">
         <div className="feed-card__header">
-          <div className="author-bubble" style={{ background: "var(--c-pink-soft)" }}>🦅</div>
-          <div className="flex-1 leading-tight">
-            <div className="text-[11px] font-medium text-c-text-1">{item.author?.nickname ?? "Anonymous"}</div>
-            <div className="text-[10px] text-c-text-3">via Spill · {timeAgo(item.publishedAt)}</div>
+          <div className="author-bubble" style={{ background: bubbleBg }}>{authorEmoji}</div>
+          <div className="flex-1 leading-tight min-w-0">
+            <div className="text-[11px] md:text-[12px] font-medium text-c-text-1 truncate">
+              {item.author?.nickname ?? "Anonymous Juror"}
+            </div>
+            <div className="text-[10px] md:text-[11px] text-c-text-3">{source} · {timeAgo(item.publishedAt)}</div>
           </div>
           <span className={`cat-pill ${cat.cls}`}>{cat.label}</span>
         </div>
+
         <Link to="/post/$postId" params={{ postId: item.id }} className="block feed-card__body">
-          {item.storyText.slice(0, 240)}
-          {item.storyText.length > 240 ? "…" : ""}
+          {body.intro.split(/\n{2,}/).map((para, i) => (
+            <p key={i} className={i === 0 ? "" : "mt-3"}>{para}</p>
+          ))}
+          {body.question && (
+            <p className="mt-3"><em>"{body.question}"</em></p>
+          )}
+          {item.storyText.length > 360 && <span className="text-c-text-3"> …</span>}
         </Link>
+
         <div className="feed-card__verdict-row">
           <div className="vbar">
-            {segs.map((s, i) => (
-              <div key={i} className="vs" style={{ width: `${s.pct}%`, background: s.color }} />
+            {segs.map((s) => (
+              <div key={s.key} className="vs" style={{ width: `${s.pct}%`, background: s.color }} />
             ))}
           </div>
-          <div className="text-[10px] text-c-text-3">{item.verdictCount} verdicts · {total} jurors</div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {segs.slice(0, 3).map((s) => (
+              <span key={s.key} className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] text-c-text-3">
+                <span className="inline-block w-[7px] h-[7px] rounded-full" style={{ background: s.dot }} />
+                {s.label} {s.pct}%
+              </span>
+            ))}
+            <span className="ml-auto text-[10px] md:text-[11px] text-c-text-3">
+              {verdictTotal.toLocaleString()} verdicts
+            </span>
+          </div>
         </div>
+
         <div className="feed-card__actions">
-          <button className="act-btn act-btn--vote">⚖️ Vote</button>
-          <button className="act-btn act-btn--relate">💚 Relate</button>
+          <Link
+            to="/post/$postId"
+            params={{ postId: item.id }}
+            className="act-btn act-btn--vote"
+          >
+            ⚖️ Judge this
+          </Link>
+          <button type="button" className="act-btn act-btn--relate">💚 Happened to me</button>
           <span className="flex-1" />
-          <button className="act-btn act-btn--icon" aria-label="Share">↗</button>
+          <button type="button" className="act-btn act-btn--icon" aria-label="Share">↗</button>
         </div>
       </article>
 
       {insertHof && (
         <Link to="/hof" className="hof-strip block mx-1">
-          <div className="hof-strip__label">🏆 Hall of Fame · This week</div>
-          <div className="hof-strip__title">Most dramatic case of the week is up for grabs.</div>
-          <div className="hof-strip__meta">Cast a verdict → climb the ladder</div>
+          <div className="hof-strip__label">🏆 Hall of fame · Most relatable this week</div>
+          <div className="hof-strip__title">
+            I found out my best friend of 12 years had a whole other friend group she never mentioned.
+          </div>
+          <div className="hof-strip__meta">14,201 verdicts · 3,812 relate · Outcome confirmed</div>
         </Link>
+      )}
+
+      {insertScan && (
+        <section className="scan-strip">
+          <div className="px-3.5 pt-2.5 pb-1 text-[10px] font-medium tracking-[0.07em] uppercase text-c-pink-ink">
+            Scan result · Stranger
+          </div>
+          <div className="scan-strip__score">Drama score: 780</div>
+          <div className="scan-strip__summary">
+            A one-sided conflict with a service provider where power dynamics are clearly at play.
+            High likelihood of a justified complaint. Community would likely side with you.
+          </div>
+          <div className="flex gap-2 px-3.5 pt-2 pb-2.5 border-t border-c-pink-border bg-c-surface">
+            <button type="button" className="flex-1 text-center text-[11px] font-medium py-1.5 rounded-[10px] border border-c-surface-3 bg-c-surface-2 text-c-text-2">
+              Save privately
+            </button>
+            <Link
+              to="/spill"
+              className="flex-1 text-center text-[11px] font-medium py-1.5 rounded-[10px] border border-c-pink-border bg-c-pink-soft text-c-pink-ink"
+            >
+              Post to feed →
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {insertBench && (
+        <div className="bench-line !my-0 mx-1 text-[12px]">
+          {insertBench}
+        </div>
       )}
     </>
   );
@@ -265,3 +411,4 @@ function timeAgo(iso: string | null): string {
   const d = Math.floor(h / 24);
   return `${d}d ago`;
 }
+
