@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { StoryPayload } from "@/lib/stream.functions";
-import { generateStoryCoverSVG } from "@/lib/stream/generate-cover";
+import { generateScoreCardCoverSVG } from "@/lib/stream/generate-cover";
 import { AliasPill } from "./AliasPill";
 import { CompactVerdictBar } from "./CompactVerdictBar";
 import { CourtRibbon } from "./CourtRibbon";
