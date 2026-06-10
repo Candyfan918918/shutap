@@ -561,15 +561,6 @@ export const getFeaturedCourtCase = createServerFn({ method: "GET" })
   },
 );
 
-export const getGlobalVerdictCount = createServerFn({ method: "GET" })
-  .handler(
-  async (): Promise<{ total: number }> => {
-    const { count } = await supabaseAdmin
-      .from("post_verdict_votes")
-      .select("*", { count: "exact", head: true });
-    return { total: count ?? 0 };
-  },
-);
 
 // ──────────────────────────────────────────────────────────────
 // Teaser feed (anonymous landing)

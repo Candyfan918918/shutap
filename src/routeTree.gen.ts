@@ -28,6 +28,7 @@ import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicVerdictTallyRouteImport } from './routes/api/public/verdict-tally'
 import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
 import { Route as AuthenticatedSettingsSafetyRouteImport } from './routes/_authenticated/settings/safety'
 import { Route as AuthenticatedSettingsPrivacyRouteImport } from './routes/_authenticated/settings/privacy'
@@ -148,6 +149,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const ApiPublicVerdictTallyRoute = ApiPublicVerdictTallyRouteImport.update({
+  id: '/api/public/verdict-tally',
+  path: '/api/public/verdict-tally',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSpillStartRoute = AuthenticatedSpillStartRouteImport.update({
   id: '/spill/start',
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
+  '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
+  '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/scan': typeof AuthenticatedScanIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -411,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/_authenticated/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
+  '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/settings/safety'
     | '/spill/start'
+    | '/api/public/verdict-tally'
     | '/admin/'
     | '/scan/'
     | '/settings/'
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/settings/safety'
     | '/spill/start'
+    | '/api/public/verdict-tally'
     | '/admin'
     | '/scan'
     | '/settings'
@@ -547,6 +558,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/privacy'
     | '/_authenticated/settings/safety'
     | '/_authenticated/spill/start'
+    | '/api/public/verdict-tally'
     | '/_authenticated/admin/'
     | '/_authenticated/scan/'
     | '/_authenticated/settings/'
@@ -577,6 +589,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
+  ApiPublicVerdictTallyRoute: typeof ApiPublicVerdictTallyRoute
   ApiPublicHooksCourtTickRoute: typeof ApiPublicHooksCourtTickRoute
   ApiPublicHooksOutcomeTrackerRoute: typeof ApiPublicHooksOutcomeTrackerRoute
   ApiPublicSPostIdRoute: typeof ApiPublicSPostIdRoute
@@ -718,6 +731,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/verdict-tally': {
+      id: '/api/public/verdict-tally'
+      path: '/api/public/verdict-tally'
+      fullPath: '/api/public/verdict-tally'
+      preLoaderRoute: typeof ApiPublicVerdictTallyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/spill/start': {
       id: '/_authenticated/spill/start'
@@ -1016,6 +1036,7 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
+  ApiPublicVerdictTallyRoute: ApiPublicVerdictTallyRoute,
   ApiPublicHooksCourtTickRoute: ApiPublicHooksCourtTickRoute,
   ApiPublicHooksOutcomeTrackerRoute: ApiPublicHooksOutcomeTrackerRoute,
   ApiPublicSPostIdRoute: ApiPublicSPostIdRoute,
