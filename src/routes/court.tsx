@@ -118,7 +118,7 @@ function CourtPage() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1 pb-24">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-[480px] px-4 py-2.5 flex items-center justify-between">
+        <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-2.5 flex items-center justify-between">
           <Link to="/stream" className="text-[17px] font-medium tracking-tight">
             shut<span className="text-c-pink-deep">ap</span>
           </Link>
@@ -126,7 +126,7 @@ function CourtPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[480px] border-x border-c-border">
+      <main className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-c-border">
         {/* Hero — soft palette: cream surface, pink-deep ink, ghost wordmark in pink-soft */}
         <section className="relative overflow-hidden text-center px-4 pt-6 pb-5 bg-c-surface-2 border-b border-c-border">
           <span

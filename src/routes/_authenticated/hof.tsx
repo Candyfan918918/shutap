@@ -64,14 +64,14 @@ function HofPage() {
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1 pb-32">
       <header className="sticky top-0 z-30 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-        <div className="mx-auto max-w-[480px] px-4 py-3 flex items-center gap-3">
+        <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-3 flex items-center gap-3">
           <Link to="/stream" className="text-c-text-3 text-sm">←</Link>
           <div className="flex-1 text-center text-sm font-medium">Hall of Fame</div>
           <span className="w-5" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-[480px]">
+      <main className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl">
         {/* HERO */}
         <section className="hero-dark">
           <div className="hero-dark__orb hero-dark__orb--tr" style={{ background: "var(--c-gold)", opacity: 0.10 }} />

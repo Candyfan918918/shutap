@@ -898,3 +898,27 @@
   font-size:12px; font-weight:500; z-index:999; white-space:nowrap; pointer-events:none;
   animation:cf-toast-in .4s cubic-bezier(.175,.885,.32,1.275); }
 @keyframes cf-toast-in { from{transform:translate(-50%,70px);opacity:0} to{transform:translate(-50%,0);opacity:1} }
+
+/* ─── Case Flow desktop scaling ──────────────────────────── */
+@media (min-width: 768px) {
+  .cf-section { padding: 22px 28px; }
+  .cf-hero    { padding: 32px 28px 28px; }
+  .cf-ghost   { font-size: 128px; top: -18px; }
+  .cf-title   { font-size: 20px; line-height: 1.4; }
+  .cf-q       { font-size: 13px; }
+  .cf-eyebrow { font-size: 11px; }
+  .cf-vgrid, .cf-jgrid { gap: 10px; }
+  .cf-vbtn { padding: 16px 10px; font-size: 12px; }
+  .cf-vbtn-em { font-size: 26px; }
+  .cf-cta { padding: 15px; font-size: 15px; }
+}
+@media (min-width: 1024px) {
+  .cf-section { padding: 26px 40px; }
+  .cf-hero    { padding: 44px 40px 36px; }
+  .cf-ghost   { font-size: 168px; top: -28px; }
+  .cf-title   { font-size: 22px; }
+  .cf-parties { grid-template-columns: 1fr 40px 1fr; gap: 14px; }
+  .cf-pav     { width: 44px; height: 44px; font-size: 22px; }
+  .cf-vbar    { height: 14px; }
+  .cf-seat    { width: 32px; height: 32px; font-size: 16px; }
+}
