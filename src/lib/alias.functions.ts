@@ -77,7 +77,15 @@ export interface GeneratedAlias {
   };
 }
 
-export const generateAlias = createServerFn({ method: "GET" })
+export type ClaimAliasResult =
+  | { ok: true }
+  | { ok: false; reason: "taken" | "blocked" | "age_not_verified" | "unknown"; message?: string };
+
+// generateAlias now requires auth + age-verified (and not blocked). The DB
+// unique index on (nationality, emotion, creature) is the real guard;
+// claimAlias handles the race.
+export const generateAlias = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     z.object({
       category: z.string().max(64).optional(),
@@ -85,7 +93,18 @@ export const generateAlias = createServerFn({ method: "GET" })
       countryCode: z.string().length(2).optional(),
     }).parse,
   )
-  .handler(async ({ data }): Promise<GeneratedAlias> => {
+  .handler(async ({ data, context }): Promise<GeneratedAlias> => {
+    const { supabase, userId } = context;
+
+    const { data: profile, error: profileErr } = await supabase
+      .from("profiles")
+      .select("age_verified, blocked_reason")
+      .eq("id", userId)
+      .maybeSingle();
+    if (profileErr) throw new Error(profileErr.message);
+    if (profile?.blocked_reason) throw new Error("account_blocked");
+    if (!profile?.age_verified) throw new Error("age_not_verified");
+
     const country =
       data.countryCode ||
       getRequestHeader("cf-ipcountry") ||
@@ -97,7 +116,7 @@ export const generateAlias = createServerFn({ method: "GET" })
     const emotionPool = pickEmotion(data.category);
     const creaturePool = pickCreature(data.relationshipType);
 
-    // Uniqueness — retry up to 5 times against existing claimed aliases.
+    // Best-effort uniqueness check — the real guard is the unique index in claimAlias.
     let chosen = {
       nationality: pickNationality(country),
       emotion: pick(emotionPool),
@@ -132,8 +151,9 @@ export const generateAlias = createServerFn({ method: "GET" })
     };
   });
 
-// ── Claim the alias (writes to profile)
-// Phone is intentionally NOT collected — Shutap auth is Email OTP + Google + Apple only.
+// ── Claim the alias (writes to profile). Race-safe: catches the unique-index
+// violation (23505) and returns { ok: false, reason: "taken" } so the client
+// can ask the user to spin again.
 
 export const claimAlias = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -146,8 +166,18 @@ export const claimAlias = createServerFn({ method: "POST" })
       rerollUsed: z.boolean(),
     }).parse,
   )
-  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+  .handler(async ({ data, context }): Promise<ClaimAliasResult> => {
     const { supabase, userId } = context;
+
+    const { data: profile, error: profileErr } = await supabase
+      .from("profiles")
+      .select("age_verified, blocked_reason")
+      .eq("id", userId)
+      .maybeSingle();
+    if (profileErr) return { ok: false, reason: "unknown", message: profileErr.message };
+    if (profile?.blocked_reason) return { ok: false, reason: "blocked" };
+    if (!profile?.age_verified) return { ok: false, reason: "age_not_verified" };
+
     const nickname = `${data.emotion} ${data.nationality} ${data.creature}`;
     const update = {
       nationality: data.nationality,
@@ -161,7 +191,15 @@ export const claimAlias = createServerFn({ method: "POST" })
       .from("profiles")
       .update(update as never)
       .eq("id", userId);
-    if (error) throw new Error(error.message);
+
+    if (error) {
+      // Postgres unique_violation — someone else claimed this exact combo
+      // between generateAlias and claimAlias. Tell the client to re-spin.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).code === "23505") {
+        return { ok: false, reason: "taken" };
+      }
+      return { ok: false, reason: "unknown", message: error.message };
+    }
     return { ok: true };
   });
-

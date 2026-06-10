@@ -1638,6 +1638,8 @@ export type Database = {
           avatar_kind: string
           avatar_url: string | null
           bio: string | null
+          blocked_at: string | null
+          blocked_reason: string | null
           city: string | null
           city_label: string | null
           counsel_count: number
@@ -1683,6 +1685,8 @@ export type Database = {
           avatar_kind?: string
           avatar_url?: string | null
           bio?: string | null
+          blocked_at?: string | null
+          blocked_reason?: string | null
           city?: string | null
           city_label?: string | null
           counsel_count?: number
@@ -1728,6 +1732,8 @@ export type Database = {
           avatar_kind?: string
           avatar_url?: string | null
           bio?: string | null
+          blocked_at?: string | null
+          blocked_reason?: string | null
           city?: string | null
           city_label?: string | null
           counsel_count?: number

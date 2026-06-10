@@ -106,21 +106,18 @@ export const finalizeIdentity = createServerFn({ method: "POST" })
       patch.onboarded_at = new Date().toISOString();
     }
 
-    const profileWrite = existing?.id
-      ? supabase
-          .from("profiles")
-          .update(patch as never)
-          .eq("id", userId)
-      : supabase
-          .from("profiles")
-          .insert({
-            id: userId,
-            handle: `user_${userId.replace(/-/g, "").slice(0, 12)}`,
-            nickname: lockedDisplayName ?? displayName,
-            ...patch,
-          } as never);
+    // Always go through the single profile bootstrap path. ensureProfile is
+    // idempotent and uses the admin client so a missing row is created exactly
+    // once even if verifyAge + finalizeIdentity race.
+    if (!existing?.id) {
+      const { ensureProfile } = await import("@/lib/profile/bootstrap.server");
+      await ensureProfile(userId);
+    }
 
-    const { data: row, error: updErr } = await profileWrite
+    const { data: row, error: updErr } = await supabase
+      .from("profiles")
+      .update(patch as never)
+      .eq("id", userId)
       .select("id, display_name, nickname, avatar_url, vibe, descriptor, city_label, country_code, region, city, locale, age_verified, nationality, emotion, creature, onboarded_at")
       .single();
     if (updErr) throw new Error(updErr.message);
