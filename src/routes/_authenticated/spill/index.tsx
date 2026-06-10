@@ -47,6 +47,16 @@ const PLACEHOLDERS = [
   "She said she was working late. She wasn't.",
 ];
 
+const DRAFT_KEY = "shutap.spill.draft.v1";
+
+function formatSavedAt(ts: number): string {
+  const diff = Math.max(0, Date.now() - ts);
+  if (diff < 5_000) return "saved just now";
+  if (diff < 60_000) return `saved ${Math.floor(diff / 1000)}s ago`;
+  if (diff < 3_600_000) return `saved ${Math.floor(diff / 60_000)}m ago`;
+  return `saved ${Math.floor(diff / 3_600_000)}h ago`;
+}
+
 function SpillLanding() {
   const navigate = useNavigate();
   const create = useServerFn(createTeaDraft);
