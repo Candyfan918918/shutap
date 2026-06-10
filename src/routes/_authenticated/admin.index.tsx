@@ -9,6 +9,7 @@ import {
   updateCityCourtCap,
   type CityCourtRow,
 } from "@/lib/admin/cityCourts.functions";
+import { schemaCheck, type SchemaCheckResult } from "@/lib/health/schema-check.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -21,9 +22,11 @@ function CityCourtsPage() {
   const list = useServerFn(listCityCourts);
   const toggle = useServerFn(toggleCityCourt);
   const updateCap = useServerFn(updateCityCourtCap);
+  const runSchemaCheck = useServerFn(schemaCheck);
   const [rows, setRows] = useState<CityCourtRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [health, setHealth] = useState<SchemaCheckResult | null>(null);
 
   const refresh = () =>
     list({ data: {} as never })
@@ -32,16 +35,32 @@ function CityCourtsPage() {
 
   useEffect(() => {
     refresh();
+    runSchemaCheck({ data: {} as never })
+      .then(setHealth)
+      .catch((e) => setHealth({ ok: false, missing: [], checked: [], error: (e as Error).message }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) return <p className="text-sm text-muted-foreground">Pulling roster.</p>;
 
-  if (rows.length === 0)
-    return <p className="text-sm text-muted-foreground">No city courts on file yet.</p>;
-
   return (
     <div className="space-y-3">
+      {health && !health.ok && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          <p className="font-medium">Schema health: failing</p>
+          {health.missing.length > 0 && (
+            <p className="mt-1">Missing columns on profiles: {health.missing.join(", ")}</p>
+          )}
+          {health.error && <p className="mt-1 font-mono break-words">{health.error}</p>}
+        </div>
+      )}
+      {health?.ok && (
+        <p className="text-[11px] text-muted-foreground">Schema health: ok ({health.checked.length} cols on profiles)</p>
+      )}
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No city courts on file yet.</p>
+      ) : (
+        <>
       <p className="text-sm text-muted-foreground">
         Toggle a court off to stop nominating cases there. Cap controls how many cases per cron tick.
       </p>
@@ -114,6 +133,8 @@ function CityCourtsPage() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   );
 }
