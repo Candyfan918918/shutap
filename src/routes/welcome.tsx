@@ -257,6 +257,18 @@ function WelcomePage() {
             : "The court has spoken"}
         </p>
 
+        {errorMsg && (
+          <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            <p className="font-mono break-words">{errorMsg}</p>
+            <button
+              onClick={() => { setErrorMsg(null); if (phase === "saving") setPhase("reveal"); }}
+              className="mt-1 underline text-[11px]"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {/* Slot reels — present from spin onward */}
         {phase !== "dob" && phase !== "loading" && (
           <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-surface-elevated border border-border p-3">
