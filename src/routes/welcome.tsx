@@ -63,6 +63,7 @@ function WelcomePage() {
   const [locks, setLocks] = useState({ n: false, e: false, c: false });
   const [busy, setBusy] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const latestAdultYear = getAdultCutoffYear();
 
   const [dobMonth, setDobMonth] = useState<number>(1);
