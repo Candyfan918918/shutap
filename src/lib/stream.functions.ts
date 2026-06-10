@@ -84,8 +84,9 @@ export const composeStream = createServerFn({ method: "POST" })
     const { cursor, limit, anonymous } = data;
     const cur = decodeCursor(cursor);
 
-    // 1. Pull stories (skip when anonymous — anon only sees court+public mixes)
-    const storyLimit = anonymous ? 0 : Math.ceil(limit * 0.6);
+    // 1. Pull stories. Anonymous viewers (landing) still see the docket —
+    // posts are public; only personal/CTAs are gated below.
+    const storyLimit = anonymous ? Math.ceil(limit * 0.7) : Math.ceil(limit * 0.6);
     let stories: any[] = [];
     if (storyLimit > 0) {
       let q = supabaseAdmin
