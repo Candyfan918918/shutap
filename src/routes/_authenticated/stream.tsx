@@ -134,7 +134,7 @@ function BenchPillMenu() {
     { to: "/court",  emoji: "⚖️", label: "Court",        sub: "cast verdicts",        cls: "bg-c-teal-soft text-c-teal-deep border-c-teal-border" },
     { to: "/scan",   emoji: "🧠", label: "Scan",         sub: "read the room",        cls: "bg-c-purple-soft text-c-purple-deep border-c-purple-border" },
     { to: "/stream", emoji: "🌊", label: "Story Stream", sub: "the feed",             cls: "bg-c-amber-soft text-c-amber-deep border-c-amber-border" },
-    { to: "/court",  emoji: "🏆", label: "Hall of Fame", sub: "the legends",          cls: "bg-c-coral-soft text-c-coral-deep border-c-coral-border" },
+    { to: "/hof",    emoji: "🏆", label: "Hall of Fame", sub: "the legends",          cls: "bg-c-coral-soft text-c-coral-deep border-c-coral-border" },
   ];
 
   return (
