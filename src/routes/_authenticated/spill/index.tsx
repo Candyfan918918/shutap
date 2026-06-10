@@ -334,10 +334,32 @@ function SpillLanding() {
               className="w-full min-h-[80px] resize-none bg-transparent text-[14px] leading-relaxed text-c-ink placeholder:text-c-text-3 placeholder:italic focus:outline-none"
             />
             <div className="flex items-center justify-between mt-2">
-              <div className="text-[11px] text-c-text-3 flex items-center gap-2">
-                <span>{wordCount} words</span>
-                {savedAt && (
+            <div className="text-[11px] flex items-center gap-2">
+                <span className="text-c-text-3">{wordCount} words</span>
+                {saveStatus === "saving" && (
+                  <span className="text-c-text-3 flex items-center gap-1">
+                    <span className="w-[6px] h-[6px] rounded-full bg-c-amber animate-pulse" />
+                    saving
+                  </span>
+                )}
+                {saveStatus === "saved" && savedAt && (
                   <span className="text-c-text-3/80">· {formatSavedAt(savedAt)}</span>
+                )}
+                {saveStatus === "failed" && (
+                  <span className="text-c-red flex items-center gap-1">
+                    <span>⚠</span>
+                    <span>couldn't save</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        retryCountRef.current = 0;
+                        attemptSave();
+                      }}
+                      className="underline underline-offset-2 hover:opacity-70"
+                    >
+                      retry
+                    </button>
+                  </span>
                 )}
                 {(text.trim() || caseType) && (
                   <button
