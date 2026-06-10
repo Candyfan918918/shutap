@@ -31,6 +31,7 @@ export interface StoryPayload {
   author_emotion: string | null;
   author_creature: string | null;
   is_nominated: boolean;
+  media_url: string | null;
   case?: { tier: string | null; lock_at: string | null; region_label: string | null; category: string | null } | null;
 }
 
@@ -92,7 +93,7 @@ export const composeStream = createServerFn({ method: "POST" })
       let q = supabaseAdmin
         .from("posts")
         .select(
-          "id, title, story_text, score, score_category, relate_count, comment_count, both_sides_heard, is_seed, published_at, author_id",
+          "id, title, story_text, score, score_category, relate_count, comment_count, both_sides_heard, is_seed, published_at, author_id, media_url",
         )
         .eq("status", "published")
         .eq("visibility", "public")
@@ -248,6 +249,7 @@ export const composeStream = createServerFn({ method: "POST" })
           author_emotion: a.emotion ?? null,
           author_creature: a.creature ?? null,
           is_nominated: nominatedSet.has(s.id),
+          media_url: s.media_url ?? null,
           case: null,
         },
       });
