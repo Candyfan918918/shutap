@@ -26,7 +26,7 @@ function ageYearsFrom(month: number, year: number): number {
 
 export const verifyAge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .inputValidator((input: unknown) => makeInputSchema().parse(input))
   .handler(async ({ data, context }): Promise<AgeGateResult> => {
     const ctx = context as { userId: string };
     const age = ageYearsFrom(data.dob_month, data.dob_year);
