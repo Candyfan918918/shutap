@@ -8,6 +8,8 @@ import { composeStream, type StreamItem } from "@/lib/stream.functions";
 import { StoryCard } from "./StoryCard";
 import { CourtCaseCard } from "./CourtCaseCard";
 import { SpillCTACard, ScanCTACard, ServiceCard, HOFCard, BenchMomentCard } from "./Cards";
+import { BenchResponseCard } from "./BenchResponseCard";
+import { useStreamStore } from "@/stores/stream";
 
 interface Props {
   anonymous: boolean;
@@ -30,16 +32,20 @@ export function StreamList({ anonymous }: Props) {
     staleTime: 30_000,
   });
 
-  const items: StreamItem[] = useMemo(
+  const overrideActive = useStreamStore((s) => s.chatbot_override_active);
+  const overrideItems = useStreamStore((s) => s.override_items);
+
+  const baseItems: StreamItem[] = useMemo(
     () => (query.data?.pages ?? []).flatMap((p) => p.items),
     [query.data],
   );
+  const items: StreamItem[] = overrideActive ? overrideItems : baseItems;
 
   // Infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || overrideActive) return;
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -52,7 +58,7 @@ export function StreamList({ anonymous }: Props) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [query]);
+  }, [query, overrideActive]);
 
   // Pull-to-refresh (touch only)
   const startY = useRef<number | null>(null);
@@ -103,6 +109,9 @@ export function StreamList({ anonymous }: Props) {
         {refreshing ? "The bench reshuffles." : pull > 64 ? "release to refresh" : "pull"}
       </div>
 
+      {/* Bench response pinned above the stream when chatbot overrides it */}
+      {overrideActive && <BenchResponseCard />}
+
       {/* Masonry — Xiaohongshu style. Fluid columns + gaps across all widths. */}
       <div className="stream-wrap pb-32">
         <style>{`
@@ -123,21 +132,21 @@ export function StreamList({ anonymous }: Props) {
         </div>
       </div>
 
-      {/* Sentinel + loading line */}
+      {/* Sentinel + loading line — paused when chatbot override is active */}
       <div ref={sentinelRef} className="h-10" />
-      {query.isFetchingNextPage && (
+      {!overrideActive && query.isFetchingNextPage && (
         <p className="text-center text-[11px] pb-6" style={{ color: "var(--c-text-3)" }}>
           The bench keeps reading.
         </p>
       )}
-      {!query.hasNextPage && items.length > 0 && (
+      {!overrideActive && !query.hasNextPage && items.length > 0 && (
         <p className="text-center text-[11px] pb-10" style={{ color: "var(--c-text-3)" }}>
           That's the docket. Come back tomorrow.
         </p>
       )}
       {items.length === 0 && !query.isLoading && (
         <p className="text-center text-[12px] pt-12 pb-6" style={{ color: "var(--c-text-3)" }}>
-          The room is quiet. The bench waits.
+          {overrideActive ? "The bench found nothing for that. Ask again." : "The room is quiet. The bench waits."}
         </p>
       )}
     </div>
