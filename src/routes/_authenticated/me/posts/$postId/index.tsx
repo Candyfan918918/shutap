@@ -10,13 +10,24 @@ import { KpiTile } from "@/components/posts/KpiTile";
 import { ViewsSparkline } from "@/components/posts/ViewsSparkline";
 import { SharePlatformBarsPlatform, SharePlatformBarsChannel } from "@/components/posts/SharePlatformBars";
 import { VisibilityBadge } from "@/components/posts/VisibilityBadge";
+import { AuthorActionComposer } from "@/components/posts/AuthorActionComposer";
+
+type ComposerAction = "update" | "sequel" | "close";
+const COMPOSER_ACTIONS: ComposerAction[] = ["update", "sequel", "close"];
 
 export const Route = createFileRoute("/_authenticated/me/posts/$postId/")({
+  validateSearch: (s: Record<string, unknown>): { action?: ComposerAction } => {
+    const a = typeof s.action === "string" ? s.action : undefined;
+    return a && (COMPOSER_ACTIONS as string[]).includes(a)
+      ? { action: a as ComposerAction }
+      : {};
+  },
   component: PostAnalyticsPage,
 });
 
 function PostAnalyticsPage() {
   const { postId } = Route.useParams();
+  const { action } = Route.useSearch();
   const navigate = useNavigate();
   const fetchKpi = useServerFn(getPostAnalytics);
   const setVis = useServerFn(setPostVisibility);
@@ -25,6 +36,9 @@ function PostAnalyticsPage() {
     queryKey: ["post_analytics", postId],
     queryFn: () => fetchKpi({ data: { postId } }),
   });
+
+  const closeComposer = () =>
+    navigate({ to: "/me/posts/$postId", params: { postId }, search: {} });
 
   if (isLoading || !data) {
     return <div className="min-h-screen grid place-items-center text-muted-foreground">loading analytics…</div>;
@@ -116,6 +130,10 @@ function PostAnalyticsPage() {
         <SharePlatformBarsPlatform rows={data.shareBreakdown} />
         <SharePlatformBarsChannel rows={data.forwardBreakdown} />
       </main>
+
+      {action && (
+        <AuthorActionComposer postId={postId} action={action} onClose={closeComposer} />
+      )}
     </div>
   );
 }
