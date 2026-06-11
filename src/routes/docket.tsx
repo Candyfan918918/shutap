@@ -1,6 +1,6 @@
 // /docket — notable current verdicts, public landing. Referenced by llms.txt.
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getHomepageData } from "@/lib/marketing/homepage.functions";
+import { getHomepageData, type LiveCase } from "@/lib/marketing/homepage.functions";
 
 const ORIGIN = "https://shutap.com";
 
@@ -43,7 +43,7 @@ function DocketPage() {
           {cases.length === 0 && (
             <li className="py-6 text-sm text-c-text-3 italic">The docket is empty at this hour.</li>
           )}
-          {cases.map((c) => (
+          {cases.map((c: LiveCase) => (
             <li key={c.caseId} className="py-5">
               <Link
                 to="/case/$caseSlug"
