@@ -98,6 +98,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_triage_results: {
+        Row: {
+          classifier: string
+          confidence: number
+          created_at: string
+          entity_id: string
+          entity_type: string
+          evidence: Json
+          id: string
+          model: string | null
+          notes: string | null
+          policy_ref: string | null
+          priority_score: number
+          recommended_action: string
+          similar_cases: Json
+        }
+        Insert: {
+          classifier: string
+          confidence?: number
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          evidence?: Json
+          id?: string
+          model?: string | null
+          notes?: string | null
+          policy_ref?: string | null
+          priority_score?: number
+          recommended_action: string
+          similar_cases?: Json
+        }
+        Update: {
+          classifier?: string
+          confidence?: number
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          evidence?: Json
+          id?: string
+          model?: string | null
+          notes?: string | null
+          policy_ref?: string | null
+          priority_score?: number
+          recommended_action?: string
+          similar_cases?: Json
+        }
+        Relationships: []
+      }
       alias_pool_creatures: {
         Row: {
           name: string
@@ -841,44 +889,147 @@ export type Database = {
           },
         ]
       }
+      mod_actions: {
+        Row: {
+          accepted_ai_rec: boolean
+          action: string
+          admin_email: string
+          admin_id: string
+          admin_role: string
+          ai_recommendation: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          notes: string | null
+          override_reason: string | null
+          queue_item_id: string | null
+        }
+        Insert: {
+          accepted_ai_rec?: boolean
+          action: string
+          admin_email: string
+          admin_id: string
+          admin_role: string
+          ai_recommendation?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          notes?: string | null
+          override_reason?: string | null
+          queue_item_id?: string | null
+        }
+        Update: {
+          accepted_ai_rec?: boolean
+          action?: string
+          admin_email?: string
+          admin_id?: string
+          admin_role?: string
+          ai_recommendation?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          override_reason?: string | null
+          queue_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mod_actions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mod_actions_queue_item_id_fkey"
+            columns: ["queue_item_id"]
+            isOneToOne: false
+            referencedRelation: "mod_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mod_queue: {
         Row: {
+          ai_confidence: number | null
+          ai_evidence: Json
+          ai_policy_ref: string | null
+          ai_recommendation: string | null
+          ai_similar_cases: Json
+          assigned_admin_id: string | null
           case_id: string | null
+          comment_id: string | null
           created_at: string
+          entity_id: string | null
+          entity_type: string
           id: string
           moderator_id: string | null
           notes: string | null
           post_id: string
+          priority_score: number
           reason: string
           resolved_at: string | null
+          severity: string
           status: string
           updated_at: string
         }
         Insert: {
+          ai_confidence?: number | null
+          ai_evidence?: Json
+          ai_policy_ref?: string | null
+          ai_recommendation?: string | null
+          ai_similar_cases?: Json
+          assigned_admin_id?: string | null
           case_id?: string | null
+          comment_id?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string
           id?: string
           moderator_id?: string | null
           notes?: string | null
           post_id: string
+          priority_score?: number
           reason: string
           resolved_at?: string | null
+          severity?: string
           status?: string
           updated_at?: string
         }
         Update: {
+          ai_confidence?: number | null
+          ai_evidence?: Json
+          ai_policy_ref?: string | null
+          ai_recommendation?: string | null
+          ai_similar_cases?: Json
+          assigned_admin_id?: string | null
           case_id?: string | null
+          comment_id?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string
           id?: string
           moderator_id?: string | null
           notes?: string | null
           post_id?: string
+          priority_score?: number
           reason?: string
           resolved_at?: string | null
+          severity?: string
           status?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mod_queue_assigned_admin_id_fkey"
+            columns: ["assigned_admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mod_queue_case_id_fkey"
             columns: ["case_id"]
