@@ -150,11 +150,11 @@ function HomePage() {
         <div className="mx-auto max-w-4xl px-6 py-16">
           <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">Every Story Gets a Verdict</h2>
           <ol className="mt-10 grid gap-8 sm:grid-cols-3">
-            {[
+            {([
               ["Spill.", "Tell it your way. An interviewer draws the story out of you — it never writes a word for you."],
               ["Judgment.", "Thousands of strangers vote: guilty, not guilty, red flag, run. The verdict locks on a deadline."],
               ["The Outcome.", "Months later, you come back and tell the court what actually happened. That part matters most."],
-            ].map(([head, body], i) => (
+            ] as const).map(([head, body], i) => (
               <li key={head}>
                 <div className="text-xs uppercase tracking-wider text-c-text-3 tabular-nums">{i + 1}</div>
                 <div className="mt-2 font-serif text-xl text-c-text-1">{head}</div>
