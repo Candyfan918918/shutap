@@ -234,7 +234,7 @@ function Divider({ icon, tint, label }: { icon: string; tint: string; label: str
 function EmptyTile() {
   return (
     <div className="mx-3 mb-2.5 rounded-2xl border border-dashed border-c-border bg-c-surface-2 p-6 text-center">
-      <p className="text-xs text-c-text-2">Nothing's risen here yet. Keep judging.</p>
+      <p className="text-xs text-c-text-2">The Hall of Fame is empty. Standards are high here.</p>
     </div>
   );
 }

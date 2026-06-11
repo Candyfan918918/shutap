@@ -7,7 +7,7 @@ export function StoriesGrid({ posts, isMe }: { posts: PublicPostRow[]; isMe: boo
     return (
       <div className="px-8 py-16 text-center text-muted-foreground">
         <div className="text-5xl mb-3">👀</div>
-        <div className="text-base">no chaos posted yet</div>
+        <div className="text-base">No cases filed. The Bench is waiting.</div>
         <div className="text-sm mt-1">either peaceful… or hiding something.</div>
         {isMe && (
           <Link

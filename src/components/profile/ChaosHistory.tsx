@@ -15,7 +15,7 @@ export function ChaosHistory({ rows }: { rows: ChaosHistoryRow[] }) {
     return (
       <div className="px-8 py-16 text-center text-muted-foreground">
         <div className="text-5xl mb-3">📊</div>
-        <div>no scans yet. the suspense is killing us.</div>
+        <div>No scans on the record yet.</div>
       </div>
     );
   }

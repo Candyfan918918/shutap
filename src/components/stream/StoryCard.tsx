@@ -129,9 +129,9 @@ export function StoryCard({ payload, index, anonymous }: Props) {
               try {
                 const { reactToPost } = await import("@/lib/posts/engagement.functions");
                 await reactToPost({ data: { postId: payload.id, kind: "been_there" } } as any);
-                toast("Felt this.");
+                toast("Felt this. The Bench took note.");
               } catch {
-                toast("Couldn't record that.");
+                toast("The court did not record that. Try again.");
               }
             }}
           />
@@ -144,9 +144,9 @@ export function StoryCard({ payload, index, anonymous }: Props) {
         actions={[
           { key: "bookmark", icon: "🔖", label: "Bookmark", onSelect: () => {
               if (anonymous) softGate("bookmark", { entityId: payload.id });
-              else toast("Saved to your bench.");
+              else toast("Saved for later judgment.");
             } },
-          { key: "share", icon: "📤", label: "Share", onSelect: () => navigator.share?.({ url: `/post/${payload.id}` }) ?? toast("Link copied.") },
+          { key: "share", icon: "📤", label: "Share", onSelect: () => navigator.share?.({ url: `/post/${payload.id}` }) ?? toast("Link copied. Carry it as you will.") },
           { key: "debate", icon: "🗣️", label: "Debate with a friend", onSelect: () => {
               void navigate({ to: "/post/$postId", params: { postId: payload.id } });
             } },

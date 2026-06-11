@@ -6,7 +6,7 @@ export function BadgesGrid({ badges }: { badges: Badge[] }) {
     return (
       <div className="px-8 py-16 text-center text-muted-foreground">
         <div className="text-5xl mb-3">🏆</div>
-        <div>no badges yet</div>
+        <div>No badges yet. Earn the Bench's attention.</div>
         <div className="text-sm mt-1">earn them by posting, scanning, getting likes.</div>
       </div>
     );

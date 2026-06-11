@@ -69,7 +69,7 @@ export function OutcomePrompt({
           days_elapsed: days ? Math.max(0, Number(days) || 0) : undefined,
         },
       });
-      if (r.error || !r.data) throw new Error(r.error ?? "Outcome not recorded.");
+      if (r.error || !r.data) throw new Error(r.error ?? "Outcome did not land. Try again.");
       setOutcome({ outcome_type: type, detail: detail.trim() || null });
       if (typeof window !== "undefined") window.dispatchEvent(new Event("wg:refresh"));
       toast(
@@ -78,7 +78,7 @@ export function OutcomePrompt({
           : "Outcome filed. The Bench takes note.",
       );
     } catch (e: any) {
-      toast(e?.message ?? "Outcome not recorded.");
+      toast(e?.message ?? "Outcome did not land. Try again.");
     } finally {
       setBusy(false);
     }

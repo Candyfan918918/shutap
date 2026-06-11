@@ -35,7 +35,7 @@ export function ChatbotOverlay({ open, onClose }: Props) {
     try {
       const r = await (ask as unknown as (a: { data: any }) => Promise<any>)({ data: { message: msg } });
       if (r?.error || !r?.data) {
-        toast("The bench is hoarse. Try again.");
+        toast("The Bench is hoarse. Ask again.");
         return;
       }
       const { response_text, items, clear } = r.data;
@@ -48,7 +48,7 @@ export function ChatbotOverlay({ open, onClose }: Props) {
       setValue("");
       onClose();
     } catch {
-      toast("The bench is hoarse. Try again.");
+      toast("The Bench is hoarse. Ask again.");
     } finally {
       setLoading(false);
     }

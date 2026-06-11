@@ -55,7 +55,7 @@ function MyPostsPage() {
         </div>
 
         {pQuery.isLoading ? (
-          <div className="text-center text-muted-foreground py-12">loading…</div>
+          <div className="text-center text-muted-foreground py-12">The docket is being read.</div>
         ) : (pQuery.data ?? []).length === 0 ? (
           <EmptyState tab={tab} />
         ) : (

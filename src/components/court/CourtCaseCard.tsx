@@ -141,7 +141,7 @@ function CourtCaseCardImpl({
               {c.verdict.total} verdict{c.verdict.total === 1 ? "" : "s"}
             </div>
           ) : (
-            <div className="text-[11px] text-muted-foreground">No verdicts yet.</div>
+            <div className="text-[11px] text-muted-foreground">No verdicts yet. Someone has to go first.</div>
           )}
 
           <div className="text-[11px] text-muted-foreground flex items-center gap-2">

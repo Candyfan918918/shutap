@@ -63,7 +63,7 @@ function ModQueuePage() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Pulling queue.</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing here.</p>
+        <p className="text-sm text-muted-foreground">Queue is empty. The peace holds.</p>
       ) : (
         <ul className="space-y-3">
           {items.map((it) => (

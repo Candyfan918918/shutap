@@ -276,9 +276,9 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
       )}
 
       {loading ? (
-        <p className="text-xs text-muted-foreground">Loading…</p>
+        <p className="text-xs text-muted-foreground">The floor is opening.</p>
       ) : mainList.length === 0 && sameSitList.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic">No comments yet — be the first.</p>
+        <p className="text-xs text-muted-foreground italic">No one has spoken yet. The floor is open.</p>
       ) : (
         <ul className="space-y-1">{mainList.map(renderItem)}</ul>
       )}
