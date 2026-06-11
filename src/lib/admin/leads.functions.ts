@@ -76,12 +76,12 @@ export const updateRevocation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await gate();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: AnyRow = {};
     const now = new Date().toISOString();
+    const patch: Record<string, string> = {};
     if (data.action === "partner_notified") patch.partner_notified_at = now;
     if (data.action === "partner_confirmed_deleted") patch.partner_confirmed_deleted_at = now;
     if (data.action === "resolved") patch.revocation_resolved_at = now;
-    const { error } = await supabaseAdmin.from("leads").update(patch).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("leads").update(patch as any).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
