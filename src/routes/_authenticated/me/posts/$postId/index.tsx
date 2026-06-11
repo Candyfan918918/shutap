@@ -130,6 +130,10 @@ function PostAnalyticsPage() {
         <SharePlatformBarsPlatform rows={data.shareBreakdown} />
         <SharePlatformBarsChannel rows={data.forwardBreakdown} />
       </main>
+
+      {action && (
+        <AuthorActionComposer postId={postId} action={action} onClose={closeComposer} />
+      )}
     </div>
   );
 }
