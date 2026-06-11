@@ -44,16 +44,26 @@ export async function getAdminSessionManager() {
 /** Read + validate session. Returns null if missing or expired. Refreshes lastActiveAt on hit. */
 export async function readAdminSession(): Promise<AdminSessionData | null> {
   const session = await getAdminSessionManager();
-  const data = session.data;
-  if (!data?.adminId) return null;
+  const raw = session.data as Partial<AdminSessionData> | undefined;
+  if (!raw?.adminId || !raw.email || !raw.displayName || !raw.role || !raw.loginAt || !raw.lastActiveAt) {
+    return null;
+  }
+  const data: AdminSessionData = {
+    adminId: raw.adminId,
+    email: raw.email,
+    displayName: raw.displayName,
+    role: raw.role as AdminRole,
+    loginAt: raw.loginAt,
+    lastActiveAt: raw.lastActiveAt,
+  };
   const now = Date.now();
-  if (now - (data.lastActiveAt ?? 0) > INACTIVITY_MS) {
+  if (now - data.lastActiveAt > INACTIVITY_MS) {
     await session.clear();
     return null;
   }
-  // sliding refresh: touch every minute at most
   if (now - data.lastActiveAt > 60_000) {
     await session.update({ ...data, lastActiveAt: now });
+    data.lastActiveAt = now;
   }
   return data;
 }

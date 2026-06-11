@@ -14,12 +14,15 @@ import { Route as StreamRouteImport } from './routes/stream'
 import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
 import { Route as CourtRouteImport } from './routes/court'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
@@ -79,6 +82,11 @@ const CourtRoute = CourtRouteImport.update({
   path: '/court',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -87,6 +95,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const UHandleRoute = UHandleRouteImport.update({
   id: '/u/$handle',
@@ -107,6 +120,11 @@ const AliasAliasIdRoute = AliasAliasIdRouteImport.update({
   id: '/alias/$aliasId',
   path: '/alias/$aliasId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -297,6 +315,7 @@ const AuthenticatedMePostsPostIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
@@ -306,10 +325,12 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/admin/': typeof AdminIndexRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -350,10 +371,12 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/admin': typeof AdminIndexRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -388,6 +411,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
@@ -397,10 +421,12 @@ export interface FileRoutesById {
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/admin/': typeof AdminIndexRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -435,6 +461,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/court'
     | '/enter'
     | '/hof'
@@ -444,10 +471,12 @@ export interface FileRouteTypes {
     | '/friends'
     | '/me'
     | '/settings'
+    | '/admin/login'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/admin/'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -488,10 +517,12 @@ export interface FileRouteTypes {
     | '/compose'
     | '/friends'
     | '/me'
+    | '/admin/login'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/admin'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -525,6 +556,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/court'
     | '/enter'
     | '/hof'
@@ -534,10 +566,12 @@ export interface FileRouteTypes {
     | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/admin/login'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
+    | '/admin/'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/settings/account'
@@ -572,6 +606,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   CourtRoute: typeof CourtRoute
   EnterRoute: typeof EnterRouteWithChildren
   HofRoute: typeof HofRoute
@@ -626,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CourtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -639,6 +681,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/u/$handle': {
       id: '/u/$handle'
@@ -667,6 +716,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/alias/$aliasId'
       preLoaderRoute: typeof AliasAliasIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -986,6 +1042,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface EnterRouteChildren {
   EnterVerifyRoute: typeof EnterVerifyRoute
 }
@@ -999,6 +1067,7 @@ const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   CourtRoute: CourtRoute,
   EnterRoute: EnterRouteWithChildren,
   HofRoute: HofRoute,
