@@ -44,18 +44,17 @@ function DocketPage() {
             <li className="py-6 text-sm text-c-text-3 italic">The docket is empty at this hour.</li>
           )}
           {cases.map((c) => (
-            <li key={c.id} className="py-5">
+            <li key={c.caseId} className="py-5">
               <Link
                 to="/case/$caseSlug"
-                params={{ caseSlug: c.id }}
+                params={{ caseSlug: c.postId }}
                 className="block hover:bg-c-surface-2 -mx-2 px-2 py-1 transition"
               >
                 <div className="font-serif text-lg text-c-text-1">{c.title}</div>
-                {c.dominantVerdict && (
-                  <div className="mt-1 text-xs text-c-text-3 tabular-nums">
-                    {c.dominantPct}% leaning {c.dominantVerdict.replace(/_/g, " ")} · {c.totalVotes.toLocaleString()} verdicts
-                  </div>
-                )}
+                <div className="mt-1 text-xs text-c-text-3 tabular-nums">
+                  {c.courtBadge}
+                  {c.topVerdictKind ? ` · ${c.topVerdictPct}% leaning ${c.topVerdictKind.replace(/_/g, " ")}` : ""}
+                </div>
               </Link>
             </li>
           ))}

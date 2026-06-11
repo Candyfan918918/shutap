@@ -73,7 +73,7 @@ function DataIndexPage() {
             Each Shutap category has its own pattern. Drill in for verdict splits, conflict types, and outcome distribution.
           </p>
           <ul className="mt-6 divide-y divide-c-border border-y border-c-border">
-            {d.categories.map((c) => (
+            {d.categories.map((c: DataIndex["categories"][number]) => (
               <li key={c.slug}>
                 <Link
                   to="/data/$category"

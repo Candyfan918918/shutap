@@ -100,7 +100,7 @@ function CategoryDataPage() {
               The five most common verdicts in {s.label.toLowerCase()} cases on Shutap, with share of total votes.
             </p>
             <ul className="mt-5 divide-y divide-c-border border-y border-c-border">
-              {s.topVerdicts.map((v) => (
+              {s.topVerdicts.map((v: CategoryStats["topVerdicts"][number]) => (
                 <li key={v.kind} className="flex items-center justify-between py-3 text-sm">
                   <span className="text-c-text-1">{pretty(v.kind)}</span>
                   <span className="tabular-nums text-c-text-3">
@@ -119,7 +119,7 @@ function CategoryDataPage() {
               Outcome distribution across resolved {s.label.toLowerCase()} cases. Each row is the share of storytellers who returned with that outcome.
             </p>
             <ul className="mt-5 divide-y divide-c-border border-y border-c-border">
-              {s.outcomeDistribution.map((o) => (
+              {s.outcomeDistribution.map((o: CategoryStats["outcomeDistribution"][number]) => (
                 <li key={o.outcomeType} className="flex items-center justify-between py-3 text-sm">
                   <span className="text-c-text-1">{pretty(o.outcomeType)}</span>
                   <span className="tabular-nums text-c-text-3">
