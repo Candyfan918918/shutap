@@ -234,7 +234,7 @@ export const getLlmsFullCases = createServerFn({ method: "GET" }).handler(
     // Top 100 resolved cases by engagement, with outcome present preferred.
     const { data: posts } = await supabaseAdmin
       .from("posts")
-      .select("id, title, story_question, like_count, comment_count, view_count")
+      .select("id, title, case_title, question_before_court, view_count")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
@@ -242,12 +242,13 @@ export const getLlmsFullCases = createServerFn({ method: "GET" }).handler(
       .limit(200);
 
     const result: LlmsFullCase[] = [];
-    for (const p of posts ?? []) {
-      const post = p as {
-        id: string;
-        title: string | null;
-        story_question: string | null;
-      };
+    for (const p of (posts ?? []) as Array<{
+      id: string;
+      title: string | null;
+      case_title: string | null;
+      question_before_court: string | null;
+    }>) {
+      const post = p;
       const { data: votes } = await supabaseAdmin
         .from("post_verdict_votes")
         .select("kind")
@@ -274,8 +275,8 @@ export const getLlmsFullCases = createServerFn({ method: "GET" }).handler(
 
       result.push({
         id: post.id,
-        title: post.title ?? "Untitled case",
-        question: post.story_question ?? "",
+        title: post.case_title ?? post.title ?? "Untitled case",
+        question: post.question_before_court ?? "",
         dominantVerdict,
         dominantPct,
         totalVotes,
