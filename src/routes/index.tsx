@@ -1,263 +1,286 @@
-// Landing page — embeds the full Court, Story Stream, and Hall of Fame
-// page bodies so visitors browse the live product before signing in.
-// Watching is free. Every engagement action gates on sign-in.
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useGateStore } from "@/stores/gate";
-import { useQuery } from "@tanstack/react-query";
-import { CourtBody } from "@/components/sections/CourtBody";
-import { StreamBody } from "@/components/sections/StreamBody";
-import { HofBody } from "@/components/sections/HofBody";
-import shutapIcon from "@/assets/shutap-favicon-32.png.asset.json";
-import shutapLogo from "@/assets/shutap-logo-light.png.asset.json";
+// Shutap marketing homepage. SSR via loader → server fn. Typography only, no
+// above-the-fold animation. All content rules below are exact per spec.
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { getHomepageData, type LiveCase, type ResolvedCase } from "@/lib/marketing/homepage.functions";
+
+const CANONICAL = "https://shutap.com/";
+const BENCH_LINES = [
+  "The court does not adjourn.",
+  "Someone is being judged as you read this.",
+  "Justice is crowdsourced here.",
+];
+
+function dailyBenchLine(): string {
+  // Deterministic rotation by UTC day so SSR + CSR match.
+  const day = Math.floor(Date.now() / 86_400_000);
+  return BENCH_LINES[day % BENCH_LINES.length];
+}
+
+function formatVerdictKind(k: string | null): string {
+  if (!k) return "no verdict yet";
+  return k.replace(/_/g, " ");
+}
+
+function timeUntil(iso: string | null): string {
+  if (!iso) return "open";
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "locking now";
+  const h = Math.floor(ms / 3_600_000);
+  if (h >= 48) return `${Math.floor(h / 24)}d to verdict`;
+  if (h >= 1) return `${h}h to verdict`;
+  return `${Math.max(1, Math.floor(ms / 60_000))}m to verdict`;
+}
 
 export const Route = createFileRoute("/")({
-  component: AnonymousCourt,
-  head: () => ({
-    meta: [
-      { title: "Shutap — 👑 Relationship Court™" },
-      {
-        name: "description",
-        content:
-          "The internet decides. Read the case, watch the verdict bar move in real time. Zero real names exposed.",
-      },
-      { property: "og:title", content: "Shutap — Relationship Court™" },
-      { property: "og:description", content: "Watch the world decide. Zero real names exposed." },
-      { property: "og:type", content: "website" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-    ],
-  }),
-  errorComponent: ({ error, reset }) => (
-    <div className="mx-auto max-w-md p-8 text-center space-y-4">
-      <p className="text-sm text-muted-foreground">The bench is unavailable.</p>
-      <p className="text-xs text-muted-foreground/70 break-words">{error.message}</p>
-      <button
-        onClick={reset}
-        className="px-4 py-2 rounded-md border border-c-border bg-c-surface-2 text-c-text-1 text-sm font-medium hover:bg-c-surface-3 transition"
-      >
-        Try again
-      </button>
-    </div>
+  loader: () => getHomepageData(),
+  component: HomePage,
+  head: ({ loaderData }) => {
+    const total = loaderData?.totalVerdicts ?? 0;
+    const desc =
+      "Shutap is the anonymous court of public opinion. Share what happened, get a verdict from thousands of real people — then come back and tell the world how it actually ended.";
+    return {
+      meta: [
+        { title: "Shutap — Spill it. The court decides." },
+        { name: "description", content: desc },
+        { property: "og:title", content: "Shutap — Spill it. The court decides." },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: CANONICAL },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: "Shutap — Spill it. The court decides." },
+        { name: "twitter:description", content: desc },
+      ],
+      links: [{ rel: "canonical", href: CANONICAL }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Shutap",
+            url: "https://shutap.com",
+            description:
+              "The anonymous court of public opinion. Real cases, real verdicts, real outcomes.",
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Shutap",
+            url: "https://shutap.com",
+            inLanguage: "en",
+            description: `${total.toLocaleString()} verdicts cast. Zero real names. Ever.`,
+          }),
+        },
+      ],
+    };
+  },
+  errorComponent: ({ error }) => (
+    <main className="min-h-screen bg-c-surface text-c-text-1 grid place-items-center px-6">
+      <p className="text-sm text-c-text-2 max-w-md text-center">The bench is unavailable. {error.message}</p>
+    </main>
   ),
   notFoundComponent: () => (
-    <div className="mx-auto max-w-md p-8 text-center">
-      <p className="text-sm text-muted-foreground">This case doesn't exist. Or it was retracted. The Bench is saying nothing.</p>
-    </div>
+    <main className="min-h-screen bg-c-surface text-c-text-1 grid place-items-center px-6">
+      <p className="text-sm text-c-text-2">This case doesn't exist.</p>
+    </main>
   ),
 });
 
-function AnonymousCourt() {
-  const navigate = useNavigate();
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const gateOpen = useGateStore((s) => s.open);
+const APP = "https://app.shutap.com";
 
-  useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setAuthed(!!data.session);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setAuthed(!!session);
-    });
-    return () => { active = false; sub.subscription.unsubscribe(); };
-  }, []);
-
-  const go = (to: "/spill" | "/scan" | "/court") => {
-    if (authed) navigate({ to });
-    else navigate({ to: "/enter", search: { redirect: to } });
-  };
-
-  const globalQ = useQuery({
-    queryKey: ["landing", "global-verdicts"],
-    queryFn: async () => {
-      const r = await fetch("/api/public/verdict-tally");
-      if (!r.ok) return { total: 0 };
-      return (await r.json()) as { total: number };
-    },
-    refetchInterval: 5_000,
-    staleTime: 0,
-  });
+function HomePage() {
+  const { totalVerdicts, liveCases, resolvedCase } = Route.useLoaderData() as import("@/lib/marketing/homepage.functions").HomepageData;
+  const benchLine = dailyBenchLine();
 
   return (
-    <div className="min-h-screen bg-c-surface text-c-text-1 pb-16">
-      <TopChrome authed={authed} />
-      <TrustSignalBar total={globalQ.data?.total ?? null} />
+    <div className="min-h-screen bg-c-surface text-c-text-1">
+      <SiteHeader />
 
-      <motion.main
-        animate={gateOpen ? { filter: "blur(4px)", y: 40 } : { filter: "blur(0px)", y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl border-x border-c-border bg-c-surface"
-      >
-        {/* Global landing hero */}
-        <section className="hero-dark hub-hero">
-          <div className="hero-dark__orb hero-dark__orb--tr" />
-          <div className="hero-dark__orb hero-dark__orb--bl" />
-          <div className="hub-hero__crown">👑</div>
-          <div className="hub-hero__tag">Relationship Court™</div>
-          <h1 className="hub-hero__title">Where the human decides.</h1>
-          <p className="hub-hero__sub">Real cases. Real verdicts. Zero real names.</p>
-        </section>
-
-        {/* THE COURT — full embed of /court */}
-        <CourtBody />
-        <div className="px-3.5 pt-1 pb-6">
-          <Link
-            to="/court"
-            className="block w-full text-center rounded-2xl border border-c-pink-border bg-c-pink-soft px-4 py-3 text-sm font-medium text-c-pink-deep hover:brightness-95 transition"
-          >
-            ⚖️ Open the full Court →
-          </Link>
+      {/* HERO */}
+      <section className="border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-20 sm:py-28">
+          <h1 className="text-balance font-serif text-4xl sm:text-6xl leading-[1.05] tracking-tight text-c-text-1">
+            Spill it. The court decides.
+          </h1>
+          <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-c-text-2">
+            Shutap is the anonymous court of public opinion. Share what happened, get a verdict from
+            thousands of real people — then come back and tell the world how it actually ended.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <a
+              href={`${APP}/spill`}
+              className="inline-flex items-center justify-center rounded-md bg-c-text-1 px-5 py-3 text-sm font-medium text-c-surface hover:opacity-90 transition"
+            >
+              Open a Case
+            </a>
+            <a
+              href={`${APP}/court`}
+              className="inline-flex items-center justify-center rounded-md border border-c-border px-5 py-3 text-sm font-medium text-c-text-1 hover:bg-c-surface-2 transition"
+            >
+              Enter the Court
+            </a>
+          </div>
+          <p className="mt-8 text-xs text-c-text-3 tabular-nums">
+            <span className="text-c-text-2 font-medium">{totalVerdicts.toLocaleString()}</span>{" "}
+            verdicts cast. Zero real names. Ever.
+          </p>
         </div>
+      </section>
 
-        {/* STORY STREAM — full embed of /stream */}
-        <StreamBody />
-        <div className="px-3.5 pt-1 pb-6">
-          <Link
-            to="/stream"
-            className="block w-full text-center rounded-2xl border border-c-teal-border bg-c-teal-soft px-4 py-3 text-sm font-medium text-c-teal-deep hover:brightness-95 transition"
-          >
-            🌊 Browse the full Story Stream →
-          </Link>
+      {/* SECTION 1 — THE DOCKET */}
+      <section className="border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">In Session Right Now</h2>
+          <p className="mt-2 text-sm italic text-c-text-3">{benchLine}</p>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+            {liveCases.length === 0 ? (
+              <li className="text-sm text-c-text-3 sm:col-span-3">The docket is quiet. Come back in an hour.</li>
+            ) : (
+              liveCases.map((c) => <DocketCard key={c.caseId} c={c} />)
+            )}
+          </ul>
         </div>
+      </section>
 
-        {/* HALL OF FAME — full embed of /hof */}
-        <HofBody />
-        <div className="px-3.5 pt-3 pb-6">
-          <Link
-            to="/hof"
-            className="block w-full text-center rounded-2xl border border-c-purple-border bg-c-purple-soft px-4 py-3 text-sm font-medium text-c-purple-deep hover:brightness-95 transition"
-          >
-            🏆 Browse the full Hall of Fame →
-          </Link>
+      {/* SECTION 2 — HOW IT WORKS */}
+      <section className="border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">Every Story Gets a Verdict</h2>
+          <ol className="mt-10 grid gap-8 sm:grid-cols-3">
+            {([
+              ["Spill.", "Tell it your way. An interviewer draws the story out of you — it never writes a word for you."],
+              ["Judgment.", "Thousands of strangers vote: guilty, not guilty, red flag, run. The verdict locks on a deadline."],
+              ["The Outcome.", "Months later, you come back and tell the court what actually happened. That part matters most."],
+            ] as const).map(([head, body], i) => (
+              <li key={head}>
+                <div className="text-xs uppercase tracking-wider text-c-text-3 tabular-nums">{i + 1}</div>
+                <div className="mt-2 font-serif text-xl text-c-text-1">{head}</div>
+                <p className="mt-2 text-sm leading-relaxed text-c-text-2">{body}</p>
+              </li>
+            ))}
+          </ol>
         </div>
+      </section>
 
-        {/* FINAL CTA */}
-        <div className="px-3.5 pb-8 pt-2">
-          <FinalCTA onGo={go} />
+      {/* SECTION 3 — PROOF */}
+      <section className="border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">What Happened Next</h2>
+          {resolvedCase ? <OutcomeBlock c={resolvedCase} /> : (
+            <p className="mt-6 text-sm text-c-text-3">No resolved cases to show yet.</p>
+          )}
+          <p className="mt-10 max-w-2xl text-sm leading-relaxed text-c-text-2">
+            Most platforms stop at opinions. Shutap follows the story until it ends.
+          </p>
         </div>
-      </motion.main>
+      </section>
 
-      <footer className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-8 text-center text-[11px] text-c-text-3 space-y-1">
-        <p>Real stories. Real opinions. Not legal or therapeutic advice.</p>
-        <p>Made with chaos, worldwide.</p>
-      </footer>
+      {/* SECTION 4 — WHY IT EXISTS */}
+      <section className="border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-20">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">In an AI World, Stay Human</h2>
+          <div className="mt-8 max-w-2xl space-y-4 text-base leading-relaxed text-c-text-2">
+            <p>Artificial intelligence can generate answers.</p>
+            <p>Only humans can generate experience.</p>
+            <p>Every case here was lived by someone.</p>
+            <p>Every verdict was cast by a person.</p>
+            <p>Every outcome really happened.</p>
+            <p className="pt-2 text-c-text-1">Shutap preserves what makes us human:</p>
+            <p className="font-serif text-lg text-c-text-1">
+              mistakes · growth · forgiveness · courage · resilience
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }
 
-function TrustSignalBar({ total }: { total: number | null }) {
-  const [display, setDisplay] = useState<number | null>(total);
-  const last = useRef<number | null>(null);
-  useEffect(() => {
-    if (total == null) return;
-    if (last.current == null) { last.current = total; setDisplay(total); return; }
-    const from = last.current; const to = total;
-    if (from === to) return;
-    const start = performance.now();
-    let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / 800);
-      setDisplay(Math.round(from + (to - from) * t));
-      if (t < 1) raf = requestAnimationFrame(tick);
-      else last.current = to;
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [total]);
-
+function DocketCard({ c }: { c: LiveCase }) {
   return (
-    <div className="w-full bg-c-surface-2 border-b border-c-surface-3">
-      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl px-4 py-1.5 flex items-center justify-between text-[11px] text-c-text-2 font-normal">
-        <span className="flex items-center gap-1.5">
-          <span className="relative inline-block h-1.5 w-1.5">
-            <span className="absolute inset-0 rounded-full bg-c-teal animate-ping opacity-75" />
-            <span className="absolute inset-0 rounded-full bg-c-teal" />
-          </span>
-          <span>
-            <span className="font-medium text-c-text-1 tabular-nums">
-              {display != null ? display.toLocaleString() : "—"}
-            </span>{" "}
-            verdicts cast
-          </span>
-        </span>
-        <span className="text-c-text-3">Zero real names exposed.</span>
-      </div>
-    </div>
+    <li className="rounded-md border border-c-border bg-c-surface-2 p-4">
+      <Link to="/post/$postId" params={{ postId: c.postId }} className="block group">
+        <div className="text-[10px] uppercase tracking-wider text-c-text-3">{c.courtBadge}</div>
+        <div className="mt-2 font-serif text-base leading-snug text-c-text-1 group-hover:underline underline-offset-4">
+          {c.title}
+        </div>
+        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-c-surface-3">
+          <div
+            className="h-full bg-c-text-1"
+            style={{ width: `${Math.max(4, c.topVerdictPct)}%` }}
+            aria-label={`${c.topVerdictPct}% ${formatVerdictKind(c.topVerdictKind)}`}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-[11px] text-c-text-3 tabular-nums">
+          <span>{c.topVerdictPct}% {formatVerdictKind(c.topVerdictKind)}</span>
+          <span>{timeUntil(c.closesAt)}</span>
+        </div>
+      </Link>
+    </li>
   );
 }
 
-function TopChrome({ authed }: { authed: boolean | null }) {
+function OutcomeBlock({ c }: { c: ResolvedCase }) {
   return (
-    <header className="sticky top-0 z-40 bg-c-surface/85 backdrop-blur border-b border-c-surface-3">
-      <div className="mx-auto max-w-[480px] md:max-w-[640px] lg:max-w-3xl flex items-center justify-between px-4 py-3">
-        <div className="flex items-center">
-          <img src={shutapLogo.url} alt="Shutap" className="hidden sm:block h-6 w-auto" />
-          <img src={shutapIcon.url} alt="Shutap" className="sm:hidden h-6 w-auto" />
+    <article className="mt-6 rounded-md border border-c-border bg-c-surface-2 p-6 sm:p-8">
+      <Link to="/post/$postId" params={{ postId: c.postId }} className="block group">
+        <div className="text-[10px] uppercase tracking-wider text-c-text-3">Resolved · {c.daysToOutcome} days to outcome</div>
+        <h3 className="mt-2 font-serif text-xl sm:text-2xl leading-tight text-c-text-1 group-hover:underline underline-offset-4">
+          {c.title}
+        </h3>
+        <div className="mt-4 text-xs text-c-text-3 tabular-nums">
+          Community verdict:{" "}
+          <span className="text-c-text-1 font-medium">{c.verdictPct}% {formatVerdictKind(c.verdictKind)}</span>
         </div>
-        <span className="text-[11px] text-c-text-3 italic hidden sm:inline">
-          {authed ? "The bench remembers you." : "The bench does not check IDs at the door."}
-        </span>
+        {c.outcomeSnippet ? (
+          <p className="mt-4 text-sm leading-relaxed text-c-text-2">{c.outcomeSnippet}</p>
+        ) : null}
+      </Link>
+    </article>
+  );
+}
+
+function SiteHeader() {
+  return (
+    <header className="border-b border-c-border">
+      <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
+        <a href="/" className="font-serif text-base tracking-tight text-c-text-1">Shutap</a>
+        <nav className="flex items-center gap-5 text-xs text-c-text-2">
+          <a href={`${APP}/court`} className="hover:text-c-text-1">Enter the Court</a>
+          <a href={`${APP}/spill`} className="hover:text-c-text-1">Open a Case</a>
+        </nav>
       </div>
     </header>
   );
 }
 
-function FinalCTA({ onGo }: { onGo: (to: "/spill" | "/scan" | "/court") => void }) {
-  const purple = "oklch(0.68 0.18 295)";
+function SiteFooter() {
   return (
-    <section
-      className="rounded-3xl bg-surface-elevated p-8 text-center space-y-6"
-      style={{ borderColor: purple, borderWidth: 0.5, borderStyle: "solid" }}
-    >
-      <div className="space-y-3">
-        <p className="text-2xl sm:text-3xl font-medium text-balance">
-          The bench is waiting on you.
-        </p>
-        <p className="text-sm text-muted-foreground text-balance">
-          No name. No photo. An alias and a verdict. That is the price of entry.
-        </p>
+    <footer className="bg-c-surface">
+      <div className="mx-auto max-w-4xl px-6 py-12 grid gap-8 sm:grid-cols-3 text-xs text-c-text-2">
+        <div>Shutap — The world's memory of human experience.</div>
+        <nav className="flex flex-wrap gap-x-4 gap-y-2 sm:justify-center">
+          <a href={`${APP}/court`} className="hover:text-c-text-1">Enter the Court</a>
+          <a href={`${APP}/spill`} className="hover:text-c-text-1">Open a Case</a>
+          <a href="/#docket" className="hover:text-c-text-1">The Docket</a>
+          <a href="/data" className="hover:text-c-text-1">Data</a>
+          <a href="/about" className="hover:text-c-text-1">About</a>
+          <a href="/privacy" className="hover:text-c-text-1">Privacy</a>
+          <a href="/community-standards" className="hover:text-c-text-1">Community Standards</a>
+          <a href="/transparency" className="hover:text-c-text-1">Transparency Report</a>
+        </nav>
+        <div className="sm:text-right">18+ · Anonymous · Real verdicts · Real outcomes</div>
       </div>
-
-      <div className="grid sm:grid-cols-2 gap-3 text-left">
-        <button
-          onClick={() => onGo("/spill")}
-          className="group rounded-2xl border border-c-pink-border bg-c-pink-soft p-4 hover:brightness-95 transition"
-        >
-          <div className="text-[10px] uppercase tracking-wider font-medium text-c-pink-ink/80">
-            Bring a case
-          </div>
-          <div className="mt-1 text-base font-medium text-c-pink-ink">
-            Spill yours →
-          </div>
-          <p className="mt-2 text-xs text-c-pink-ink/80 leading-snug">
-            Type it out. Voice it out. The bench shapes it. The room rules.
-          </p>
-        </button>
-        <button
-          onClick={() => onGo("/scan")}
-          className="group rounded-2xl border border-c-coral-border bg-c-coral-soft p-4 hover:brightness-95 transition"
-        >
-          <div className="text-[10px] uppercase tracking-wider font-medium text-c-coral-deep/80">
-            Read the dynamic
-          </div>
-          <div className="mt-1 text-base font-medium text-c-coral-deep">
-            Run the scan →
-          </div>
-          <p className="mt-2 text-xs text-c-coral-deep/80 leading-snug">
-            Answer a few. Get a read. The bench does not flatter.
-          </p>
-        </button>
+      <div className="border-t border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-4 text-xs italic text-c-text-3">
+          In an AI world, stay human.
+        </div>
       </div>
-
-      <button
-        onClick={() => onGo("/court")}
-        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4 transition"
-      >
-        Or just step in and watch the court.
-      </button>
-    </section>
+    </footer>
   );
 }
