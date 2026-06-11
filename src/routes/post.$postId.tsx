@@ -247,6 +247,29 @@ function PostPage() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+        {(post as any).case_closed_at && (
+          <div className="rounded-2xl border border-amber-400/50 bg-amber-400/10 px-4 py-2 text-xs font-medium text-amber-500">
+            ⚖️ Case closed — the author marked this resolved.
+          </div>
+        )}
+        {(post as any).sequel_of && (
+          <Link
+            to="/post/$postId"
+            params={{ postId: (post as any).sequel_of }}
+            className="block rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs text-muted-foreground hover:border-primary/40"
+          >
+            ← Read the original case
+          </Link>
+        )}
+        {(post as any).case_closed_of && (
+          <Link
+            to="/post/$postId"
+            params={{ postId: (post as any).case_closed_of }}
+            className="block rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs text-muted-foreground hover:border-primary/40"
+          >
+            ← Open original case
+          </Link>
+        )}
         {justPublished && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
