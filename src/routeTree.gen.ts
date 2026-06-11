@@ -28,6 +28,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminConfigRouteImport } from './routes/admin.config'
 import { Route as AdminBriefingRouteImport } from './routes/admin.briefing'
+import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -155,6 +156,11 @@ const AdminConfigRoute = AdminConfigRouteImport.update({
 const AdminBriefingRoute = AdminBriefingRouteImport.update({
   id: '/briefing',
   path: '/briefing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/briefing': typeof AdminBriefingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/briefing': typeof AdminBriefingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/briefing': typeof AdminBriefingRoute
   '/admin/config': typeof AdminConfigRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/settings'
     | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/briefing'
     | '/admin/config'
     | '/admin/leads'
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/me'
     | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/briefing'
     | '/admin/config'
     | '/admin/leads'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/settings'
     | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/briefing'
     | '/admin/config'
     | '/admin/leads'
@@ -829,6 +841,13 @@ declare module '@tanstack/react-router' {
       path: '/briefing'
       fullPath: '/admin/briefing'
       preLoaderRoute: typeof AdminBriefingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-log': {
+      id: '/admin/audit-log'
+      path: '/audit-log'
+      fullPath: '/admin/audit-log'
+      preLoaderRoute: typeof AdminAuditLogRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -1158,6 +1177,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBriefingRoute: typeof AdminBriefingRoute
   AdminConfigRoute: typeof AdminConfigRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
@@ -1169,6 +1189,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBriefingRoute: AdminBriefingRoute,
   AdminConfigRoute: AdminConfigRoute,
   AdminLeadsRoute: AdminLeadsRoute,
