@@ -22,7 +22,13 @@ import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminModQueueRouteImport } from './routes/admin.mod-queue'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminConfigRouteImport } from './routes/admin.config'
+import { Route as AdminBriefingRouteImport } from './routes/admin.briefing'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
@@ -121,9 +127,39 @@ const AliasAliasIdRoute = AliasAliasIdRouteImport.update({
   path: '/alias/$aliasId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminModQueueRoute = AdminModQueueRouteImport.update({
+  id: '/mod-queue',
+  path: '/mod-queue',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfigRoute = AdminConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBriefingRoute = AdminBriefingRouteImport.update({
+  id: '/briefing',
+  path: '/briefing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -325,7 +361,13 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -371,7 +413,13 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -421,7 +469,13 @@ export interface FileRoutesById {
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
@@ -471,7 +525,13 @@ export interface FileRouteTypes {
     | '/friends'
     | '/me'
     | '/settings'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
     | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
@@ -517,7 +577,13 @@ export interface FileRouteTypes {
     | '/compose'
     | '/friends'
     | '/me'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
     | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
@@ -566,7 +632,13 @@ export interface FileRouteTypes {
     | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
     | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
@@ -717,11 +789,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AliasAliasIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/mod-queue': {
+      id: '/admin/mod-queue'
+      path: '/mod-queue'
+      fullPath: '/admin/mod-queue'
+      preLoaderRoute: typeof AdminModQueueRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/config': {
+      id: '/admin/config'
+      path: '/config'
+      fullPath: '/admin/config'
+      preLoaderRoute: typeof AdminConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/briefing': {
+      id: '/admin/briefing'
+      path: '/briefing'
+      fullPath: '/admin/briefing'
+      preLoaderRoute: typeof AdminBriefingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_authenticated/settings': {
@@ -1043,12 +1157,24 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminBriefingRoute: typeof AdminBriefingRoute
+  AdminConfigRoute: typeof AdminConfigRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminModQueueRoute: typeof AdminModQueueRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminBriefingRoute: AdminBriefingRoute,
+  AdminConfigRoute: AdminConfigRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminModQueueRoute: AdminModQueueRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -1087,3 +1213,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
