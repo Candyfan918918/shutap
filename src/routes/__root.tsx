@@ -105,6 +105,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Shutap",
+          alternateName: "The Shutap Court",
+          url: "https://shutap.com",
+          logo: "https://shutap.com/icon-512.png",
+          description: "The anonymous court of public opinion. Real people share real conflicts; thousands vote a verdict; the author returns with what actually happened.",
+          sameAs: [
+            "https://x.com/Shutap",
+            "https://www.instagram.com/shutap",
+            "https://www.tiktok.com/@shutap",
+            "https://www.linkedin.com/company/shutap",
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Shutap",
+          url: "https://shutap.com",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
