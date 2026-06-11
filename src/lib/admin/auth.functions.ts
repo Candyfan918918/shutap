@@ -83,10 +83,14 @@ export const adminTotpStep = createServerFn({ method: "POST" })
       err.statusCode = 401;
       throw err;
     }
-    const { authenticator } = await import("otplib");
-    authenticator.options = { window: 1 };
-    const valid = authenticator.check(data.code, (row as any).totp_secret);
-    if (!valid) {
+    const otplib = await import("otplib");
+    const result = otplib.verifySync({
+      strategy: "totp",
+      secret: (row as any).totp_secret,
+      token: data.code,
+      window: 1,
+    } as any);
+    if (!result?.valid) {
       const err: any = new Error("invalid_code");
       err.statusCode = 401;
       throw err;
