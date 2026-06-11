@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
   ),
   notFoundComponent: () => (
     <div className="mx-auto max-w-md p-8 text-center">
-      <p className="text-sm text-muted-foreground">Nothing on the docket.</p>
+      <p className="text-sm text-muted-foreground">This case doesn't exist. Or it was retracted. The Bench is saying nothing.</p>
     </div>
   ),
 });
