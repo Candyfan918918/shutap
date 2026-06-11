@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_authenticated/me/posts/$postId/")({
 
 function PostAnalyticsPage() {
   const { postId } = Route.useParams();
+  const { action } = Route.useSearch();
   const navigate = useNavigate();
   const fetchKpi = useServerFn(getPostAnalytics);
   const setVis = useServerFn(setPostVisibility);
@@ -35,6 +36,9 @@ function PostAnalyticsPage() {
     queryKey: ["post_analytics", postId],
     queryFn: () => fetchKpi({ data: { postId } }),
   });
+
+  const closeComposer = () =>
+    navigate({ to: "/me/posts/$postId", params: { postId }, search: {} });
 
   if (isLoading || !data) {
     return <div className="min-h-screen grid place-items-center text-muted-foreground">loading analytics…</div>;
