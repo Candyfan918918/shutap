@@ -36,7 +36,7 @@ function FriendsPage() {
         </div>
       </header>
       <main className="mx-auto max-w-2xl px-4 pt-6 pb-24 space-y-8">
-        {isLoading && <div className="text-muted-foreground">loading…</div>}
+        {isLoading && <div className="text-muted-foreground">The docket is being read.</div>}
 
         {incoming.length > 0 && (
           <Section title={`Requests (${incoming.length})`}>
@@ -71,7 +71,7 @@ function FriendsPage() {
 
         <Section title={`Friends (${accepted.length})`}>
           {accepted.length === 0 ? (
-            <div className="px-4 py-6 text-sm text-muted-foreground">No friends yet. Send a request from someone's profile.</div>
+            <div className="px-4 py-6 text-sm text-muted-foreground">No allies yet. The bench is solitary by default.</div>
           ) : accepted.map((r) => (
             <Row key={r.userId} r={r}>
               <button

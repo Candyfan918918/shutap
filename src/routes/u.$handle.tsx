@@ -86,7 +86,7 @@ function ProfilePage() {
   });
 
   if (profileQuery.isLoading) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">loading…</div>;
+    return <div className="min-h-screen grid place-items-center text-muted-foreground">The record is being pulled.</div>;
   }
   if (!profile) throw notFound();
 

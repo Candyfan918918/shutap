@@ -41,7 +41,7 @@ function PostAnalyticsPage() {
     navigate({ to: "/me/posts/$postId", params: { postId }, search: {} });
 
   if (isLoading || !data) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">loading analytics…</div>;
+    return <div className="min-h-screen grid place-items-center text-muted-foreground">The numbers are being tallied.</div>;
   }
 
   const changeVis = async (v: "public" | "private" | "friends") => {

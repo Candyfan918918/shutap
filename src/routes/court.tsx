@@ -30,7 +30,7 @@ export const Route = createFileRoute("/court")({
   ),
   notFoundComponent: () => (
     <div className="mx-auto max-w-md p-8 text-center">
-      <p className="text-sm text-muted-foreground">No case file under that docket.</p>
+      <p className="text-sm text-muted-foreground">No cases before the court today. That won't last.</p>
     </div>
   ),
 });

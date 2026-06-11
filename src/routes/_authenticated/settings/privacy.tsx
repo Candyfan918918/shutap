@@ -46,7 +46,7 @@ function PrivacyPage() {
     finally { setSaving(false); }
   };
 
-  if (!data) return <div className="text-muted-foreground">loading…</div>;
+  if (!data) return <div className="text-muted-foreground">The record is being pulled.</div>;
 
   return (
     <div className="space-y-6">

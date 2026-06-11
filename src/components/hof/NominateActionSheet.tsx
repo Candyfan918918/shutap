@@ -24,9 +24,9 @@ export function NominateActionSheet({ open, onClose, entityType, entityId }: Pro
     try {
       const r = await nominate({ data: { entity_type: entityType, entity_id: entityId, category } });
       if (r.ok) toast(r.line);
-      else toast("The Bench couldn't record that.");
+      else toast("The court did not record that. Try again.");
     } catch {
-      toast("The Bench couldn't record that.");
+      toast("The court did not record that. Try again.");
     } finally {
       setPending(null);
       onClose();

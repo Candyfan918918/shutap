@@ -60,7 +60,7 @@ export function PredictionsPanel({ postId }: { postId: string }) {
       setSummary(fresh.data);
     } catch (e: any) {
       setPick(prev);
-      toast(e?.message ?? "Prediction not recorded.");
+      toast(e?.message ?? "Prediction did not land. Try again.");
     } finally {
       setBusy(false);
     }

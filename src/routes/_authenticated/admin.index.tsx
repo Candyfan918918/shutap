@@ -58,7 +58,7 @@ function CityCourtsPage() {
         <p className="text-[11px] text-muted-foreground">Schema health: ok ({health.checked.length} cols on profiles)</p>
       )}
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No city courts on file yet.</p>
+        <p className="text-sm text-muted-foreground">No city courts on the record yet.</p>
       ) : (
         <>
       <p className="text-sm text-muted-foreground">

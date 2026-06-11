@@ -26,9 +26,9 @@ function SafetyPage() {
         <p className="text-sm text-muted-foreground">Manage blocked accounts and report users from their profile.</p>
       </div>
       <div className="rounded-2xl border border-border bg-card divide-y divide-border">
-        {isLoading && <div className="px-4 py-6 text-sm text-muted-foreground">loading…</div>}
+        {isLoading && <div className="px-4 py-6 text-sm text-muted-foreground">The docket is being read.</div>}
         {!isLoading && (!data || data.length === 0) && (
-          <div className="px-4 py-6 text-sm text-muted-foreground">No one blocked. peaceful era ✨</div>
+          <div className="px-4 py-6 text-sm text-muted-foreground">No one blocked. The peace holds.</div>
         )}
         {(data ?? []).map((u) => (
           <div key={u.userId} className="px-4 py-3 flex items-center gap-3">

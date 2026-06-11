@@ -27,7 +27,7 @@ export function SharePlatformBars({ rows, title }: { rows: Array<{ k: string; co
     return (
       <div className="rounded-2xl bg-surface-elevated border border-border p-4">
         <div className="text-xs text-muted-foreground mb-2">{title}</div>
-        <div className="text-sm text-muted-foreground">no data yet 👀</div>
+        <div className="text-sm text-muted-foreground">No reach recorded yet. Patience.</div>
       </div>
     );
   }

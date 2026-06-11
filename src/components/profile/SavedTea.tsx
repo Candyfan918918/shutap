@@ -10,7 +10,7 @@ export function SavedTea({ rows, isMe }: { rows: SavedPostRow[]; isMe: boolean }
     return (
       <div className="px-8 py-16 text-center text-muted-foreground">
         <div className="text-5xl mb-3">🔖</div>
-        <div>nothing saved yet</div>
+        <div>Nothing saved. Nothing worth returning to yet.</div>
         <div className="text-sm mt-1">bookmark posts that hit different.</div>
       </div>
     );

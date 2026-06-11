@@ -29,7 +29,7 @@ function ScansHistoryPage() {
 
       <main className="mx-auto max-w-2xl px-4 py-6 space-y-3">
         {isLoading ? (
-          <p className="text-center text-muted-foreground py-12">Loading…</p>
+          <p className="text-center text-muted-foreground py-12">The record is being pulled.</p>
         ) : !scans || scans.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">🎬</div>
