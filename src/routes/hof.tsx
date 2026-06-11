@@ -20,7 +20,7 @@ export const Route = createFileRoute("/hof")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="mx-auto max-w-md p-8 text-center text-c-text-2 text-sm">Nothing on the docket.</div>
+    <div className="mx-auto max-w-md p-8 text-center text-c-text-2 text-sm">The Hall of Fame is empty. Standards are high here.</div>
   ),
 });
 
