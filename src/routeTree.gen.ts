@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
@@ -104,6 +105,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => EnterRoute,
+} as any)
+const AliasAliasIdRoute = AliasAliasIdRouteImport.update({
+  id: '/alias/$aliasId',
+  path: '/alias/$aliasId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -320,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -365,6 +372,7 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -414,6 +422,7 @@ export interface FileRoutesById {
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -463,6 +472,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/me'
     | '/settings'
+    | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/compose'
     | '/friends'
     | '/me'
+    | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -600,6 +612,7 @@ export interface RootRouteChildren {
   HofRoute: typeof HofRoute
   StreamRoute: typeof StreamRoute
   WelcomeRoute: typeof WelcomeRoute
+  AliasAliasIdRoute: typeof AliasAliasIdRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
   ApiPublicVerdictTallyRoute: typeof ApiPublicVerdictTallyRoute
@@ -682,6 +695,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/enter/verify'
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
+    }
+    '/alias/$aliasId': {
+      id: '/alias/$aliasId'
+      path: '/alias/$aliasId'
+      fullPath: '/alias/$aliasId'
+      preLoaderRoute: typeof AliasAliasIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -1055,6 +1075,7 @@ const rootRouteChildren: RootRouteChildren = {
   HofRoute: HofRoute,
   StreamRoute: StreamRoute,
   WelcomeRoute: WelcomeRoute,
+  AliasAliasIdRoute: AliasAliasIdRoute,
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
   ApiPublicVerdictTallyRoute: ApiPublicVerdictTallyRoute,
@@ -1068,13 +1089,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

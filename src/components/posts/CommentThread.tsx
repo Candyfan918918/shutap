@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useMemo, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useGateStore } from "@/stores/gate";
@@ -7,6 +7,9 @@ import {
   listComments,
   deleteComment,
   toggleCommentReaction,
+  toggleChangedMind,
+  toggleSameSituation,
+  markCounselPick,
   COMMENT_SORTS,
   type CommentRow,
   type CommentSort,
@@ -14,11 +17,11 @@ import {
 } from "@/lib/posts/community.functions";
 import { supabase } from "@/integrations/supabase/client";
 
-const PROMPTS: Array<{ label: string; text: string; tone: "funny" | "supportive" | "real" }> = [
-  { label: "😭 funny", tone: "funny", text: "Girl 😭 absolutely not." },
-  { label: "💛 supportive", tone: "supportive", text: "Honestly this healed me. Sending love." },
-  { label: "🫣 real", tone: "real", text: "Respectfully this is suspicious." },
-  { label: "👀 update?", tone: "real", text: "Need part 2 immediately." },
+const PROMPTS: Array<{ label: string; text: string }> = [
+  { label: "😭 funny", text: "Girl 😭 absolutely not." },
+  { label: "💛 supportive", text: "Honestly this healed me. Sending love." },
+  { label: "🫣 real", text: "Respectfully this is suspicious." },
+  { label: "👀 update?", text: "Need part 2 immediately." },
 ];
 
 function timeAgo(iso: string): string {
@@ -39,19 +42,22 @@ export interface CommentThreadHandle {
 
 interface Props {
   postId: string;
+  postAuthorId?: string | null;
   onCommentPosted?: () => void;
 }
 
 export const CommentThread = forwardRef<CommentThreadHandle, Props>(function CommentThread(
-  { postId, onCommentPosted },
+  { postId, postAuthorId, onCommentPosted },
   ref,
 ) {
   const fetchComments = useServerFn(listComments);
   const post = useServerFn(addComment);
   const del = useServerFn(deleteComment);
   const reactFn = useServerFn(toggleCommentReaction);
+  const changedMindFn = useServerFn(toggleChangedMind);
+  const sameSitFn = useServerFn(toggleSameSituation);
+  const counselPickFn = useServerFn(markCounselPick);
   const enqueue = useGateStore((s) => s.enqueue);
-
 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +65,8 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
   const [submitting, setSubmitting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [sort, setSort] = useState<CommentSort>("top");
+  const [sameSitOpen, setSameSitOpen] = useState(false);
+  const [actionFor, setActionFor] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -78,11 +86,7 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
     finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    void refresh(sort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postId, sort]);
-
+  useEffect(() => { void refresh(sort); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [postId, sort]);
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
@@ -90,10 +94,14 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
     })();
   }, []);
 
+  const isAuthor = !!userId && !!postAuthorId && userId === postAuthorId;
+  const sameSitList = useMemo(() => comments.filter((c) => c.isSameSituation), [comments]);
+  const mainList = useMemo(() => comments.filter((c) => !c.isSameSituation), [comments]);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!body.trim()) return;
-    if (!userId) { toast.message("Sign in to comment"); return; }
+    if (!userId) { enqueue({ type: "comment", entityId: postId }); return; }
     setSubmitting(true);
     try {
       await post({ data: { postId, body: body.trim() } });
@@ -102,40 +110,105 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
       onCommentPosted?.();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't post comment");
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   const onDelete = async (commentId: string) => {
     try {
       await del({ data: { commentId } });
       setComments((cs) => cs.filter((c) => c.id !== commentId));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed");
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Delete failed"); }
   };
 
   const onReact = async (c: CommentRow, kind: CommentReactionKind) => {
-    if (!userId) { toast.message("Sign in to react"); return; }
-    const has = c.myReactions.includes(kind);
-    // optimistic
-    setComments((cs) => cs.map((x) => {
-      if (x.id !== c.id) return x;
-      const nextR = has ? x.myReactions.filter((k) => k !== kind) : [...x.myReactions, kind];
-      return {
-        ...x,
-        myReactions: nextR,
-        likeCount: kind === "like" ? Math.max(0, x.likeCount + (has ? -1 : 1)) : x.likeCount,
-        funnyCount: kind === "funny" ? Math.max(0, x.funnyCount + (has ? -1 : 1)) : x.funnyCount,
-      };
-    }));
+    if (!userId) { enqueue({ type: "comment", entityId: postId }); return; }
     try {
-      await reactFn({ data: { commentId: c.id, kind } });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Reaction failed");
+      if (kind === "changed_mind") await changedMindFn({ data: { commentId: c.id } });
+      else await reactFn({ data: { commentId: c.id, kind } });
       void refresh();
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Reaction failed"); }
+  };
+
+  const onSameSit = async (c: CommentRow) => {
+    if (!userId) { enqueue({ type: "comment", entityId: postId }); return; }
+    if (c.userId !== userId) { toast.message("Only the comment author can tag this."); return; }
+    try {
+      await sameSitFn({ data: { commentId: c.id } });
+      void refresh();
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Couldn't tag"); }
+    setActionFor(null);
+  };
+
+  const onCounselPick = async (c: CommentRow) => {
+    if (!isAuthor) return;
+    try {
+      await counselPickFn({ data: { postId, commentId: c.id } });
+      toast.success("Marked as most helpful ✦");
+      void refresh();
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Couldn't mark"); }
+    setActionFor(null);
+  };
+
+  const renderItem = (c: CommentRow) => {
+    const likedByMe = c.myReactions.includes("like");
+    const laughedByMe = c.myReactions.includes("funny");
+    const mindChangedByMe = c.myReactions.includes("changed_mind");
+    return (
+      <li
+        key={c.id}
+        className={`flex gap-3 p-3 rounded-xl transition ${
+          c.isCounselPick ? "border border-amber-400/60 bg-amber-400/5" : ""
+        }`}
+        onContextMenu={(e) => { e.preventDefault(); setActionFor(c.id); }}
+      >
+        <div className="h-7 w-7 rounded-full bg-primary shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-xs font-medium truncate">
+              {c.author?.nickname ?? c.author?.handle ?? "anon"}
+            </span>
+            <span className="text-[10px] text-muted-foreground">{timeAgo(c.createdAt)}</span>
+            {c.isCounselPick && (
+              <span className="text-[10px] font-medium text-amber-500">Most helpful ✦</span>
+            )}
+            {userId === c.userId && (
+              <button onClick={() => onDelete(c.id)} className="ml-auto text-[10px] text-muted-foreground hover:text-destructive">
+                delete
+              </button>
+            )}
+          </div>
+          <p className="text-sm mt-0.5 whitespace-pre-wrap break-words">{c.body}</p>
+          <div className="mt-1.5 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+            <button onClick={() => onReact(c, "like")} className={`flex items-center gap-1 ${likedByMe ? "text-rose-500 font-medium" : "hover:text-foreground"}`}>
+              <span>{likedByMe ? "❤️" : "🤍"}</span><span>{c.likeCount}</span>
+            </button>
+            <button onClick={() => onReact(c, "funny")} className={`flex items-center gap-1 ${laughedByMe ? "text-amber-500 font-medium" : "hover:text-foreground"}`}>
+              <span>😂</span><span>{c.funnyCount}</span>
+            </button>
+            <button onClick={() => onReact(c, "changed_mind")} className={`flex items-center gap-1 ${mindChangedByMe ? "text-primary font-medium" : "hover:text-foreground"}`}>
+              <span>💡</span><span>changed my mind {c.changedMindsCount ? `· ${c.changedMindsCount}` : ""}</span>
+            </button>
+            <button onClick={() => setActionFor(c.id)} className="ml-auto hover:text-foreground">⋯</button>
+          </div>
+
+          {actionFor === c.id && (
+            <div className="mt-2 flex flex-wrap gap-2 rounded-lg border border-border bg-surface-elevated p-2">
+              {userId === c.userId && (
+                <button onClick={() => onSameSit(c)} className="text-[11px] px-2 py-1 rounded-full bg-background border border-border hover:border-primary/50">
+                  {c.isSameSituation ? "remove same-situation tag" : "🫂 same situation"}
+                </button>
+              )}
+              {isAuthor && userId !== c.userId && !c.isCounselPick && (
+                <button onClick={() => onCounselPick(c)} className="text-[11px] px-2 py-1 rounded-full bg-amber-400/15 border border-amber-400/40 text-amber-500 hover:bg-amber-400/25">
+                  ✦ mark as most helpful
+                </button>
+              )}
+              <button onClick={() => setActionFor(null)} className="ml-auto text-[10px] text-muted-foreground hover:text-foreground">close</button>
+            </div>
+          )}
+        </div>
+      </li>
+    );
   };
 
   return (
@@ -145,18 +218,11 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
         <span className="text-xs text-muted-foreground">{comments.length}</span>
       </div>
 
-      {/* Sort tabs */}
       <div className="mb-4 flex gap-1 p-1 rounded-full bg-surface-elevated border border-border w-fit">
         {COMMENT_SORTS.map((s) => (
-          <button
-            key={s}
-            onClick={() => setSort(s)}
-            className={`px-3 py-1 text-[11px] rounded-full transition font-medium ${
-              sort === s
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
+          <button key={s} onClick={() => setSort(s)} className={`px-3 py-1 text-[11px] rounded-full transition font-medium ${
+            sort === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}>
             {s === "top" ? "🔥 top" : s === "newest" ? "🆕 newest" : "😂 funniest"}
           </button>
         ))}
@@ -168,100 +234,53 @@ export const CommentThread = forwardRef<CommentThreadHandle, Props>(function Com
             ref={inputRef}
             value={body}
             onChange={(e) => setBody(e.target.value.slice(0, 1000))}
-            placeholder="say something kind. or honest. or both."
+            placeholder="What would you do?"
             rows={3}
             className="w-full px-3 py-2 rounded-xl bg-background border border-border focus:border-primary/60 outline-none text-sm resize-none"
             maxLength={1000}
           />
           <div className="flex flex-wrap gap-1.5">
             {PROMPTS.map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                onClick={() => { setBody(p.text); inputRef.current?.focus(); }}
-                className="px-2.5 py-1 rounded-full text-[10px] bg-surface-elevated border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground transition"
-              >
+              <button key={p.label} type="button" onClick={() => { setBody(p.text); inputRef.current?.focus(); }} className="px-2.5 py-1 rounded-full text-[10px] bg-surface-elevated border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground transition">
                 {p.label}
               </button>
             ))}
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground">{body.length}/1000 · be kind, stay anon</span>
-            <button
-              type="submit"
-              disabled={submitting || !body.trim()}
-              className="px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50"
-            >
+            <button type="submit" disabled={submitting || !body.trim()} className="px-4 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50">
               {submitting ? "posting…" : "post"}
             </button>
           </div>
         </form>
       ) : (
         <div className="mb-4 rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
-          <button
-            type="button"
-            onClick={() => enqueue({ type: "comment", entityId: postId })}
-            className="text-primary underline"
-          >
+          <button type="button" onClick={() => enqueue({ type: "comment", entityId: postId })} className="text-primary underline">
             Sign in
-          </button>{" "}
-          to drop a comment.
+          </button>{" "}to drop a comment.
+        </div>
+      )}
+
+      {sameSitList.length > 0 && (
+        <div className="mb-4 rounded-xl border border-border bg-surface-elevated/40 overflow-hidden">
+          <button onClick={() => setSameSitOpen((o) => !o)} className="w-full px-3 py-2 flex items-center justify-between text-xs font-medium hover:bg-surface-elevated">
+            <span>🫂 From people who've been there · {sameSitList.length}</span>
+            <span className="text-muted-foreground">{sameSitOpen ? "−" : "+"}</span>
+          </button>
+          {sameSitOpen && (
+            <ul className="p-2 space-y-2 border-t border-border">
+              {sameSitList.map(renderItem)}
+            </ul>
+          )}
         </div>
       )}
 
       {loading ? (
         <p className="text-xs text-muted-foreground">Loading…</p>
-      ) : comments.length === 0 ? (
+      ) : mainList.length === 0 && sameSitList.length === 0 ? (
         <p className="text-xs text-muted-foreground italic">No comments yet — be the first.</p>
       ) : (
-        <ul className="space-y-3">
-          {comments.map((c) => {
-            const likedByMe = c.myReactions.includes("like");
-            const laughedByMe = c.myReactions.includes("funny");
-            return (
-              <li key={c.id} className="flex gap-3">
-                <div className="h-7 w-7 rounded-full bg-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-medium truncate">
-                      {c.author?.nickname ?? c.author?.handle ?? "anon"}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(c.createdAt)}</span>
-                    {userId === c.userId && (
-                      <button
-                        onClick={() => onDelete(c.id)}
-                        className="ml-auto text-[10px] text-muted-foreground hover:text-destructive"
-                      >
-                        delete
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-sm mt-0.5 whitespace-pre-wrap break-words">{c.body}</p>
-                  <div className="mt-1.5 flex gap-3 text-[11px]">
-                    <button
-                      onClick={() => onReact(c, "like")}
-                      className={`flex items-center gap-1 transition ${
-                        likedByMe ? "text-rose-500 font-medium" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <span>{likedByMe ? "❤️" : "🤍"}</span>
-                      <span>{c.likeCount}</span>
-                    </button>
-                    <button
-                      onClick={() => onReact(c, "funny")}
-                      className={`flex items-center gap-1 transition ${
-                        laughedByMe ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <span>😂</span>
-                      <span>{c.funnyCount}</span>
-                    </button>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <ul className="space-y-1">{mainList.map(renderItem)}</ul>
       )}
     </section>
   );
