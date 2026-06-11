@@ -24,11 +24,9 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authenticated/spill/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ApiPublicVerdictTallyRouteImport } from './routes/api/public/verdict-tally'
 import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
 import { Route as AuthenticatedSettingsSafetyRouteImport } from './routes/_authenticated/settings/safety'
@@ -40,7 +38,6 @@ import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
-import { Route as AuthenticatedAdminModQueueRouteImport } from './routes/_authenticated/admin.mod-queue'
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
@@ -131,11 +128,6 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedSpillIndexRoute = AuthenticatedSpillIndexRouteImport.update({
   id: '/spill/',
   path: '/spill/',
@@ -151,11 +143,6 @@ const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   id: '/scan/',
   path: '/scan/',
   getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const ApiPublicVerdictTallyRoute = ApiPublicVerdictTallyRouteImport.update({
   id: '/api/public/verdict-tally',
@@ -219,12 +206,6 @@ const AuthenticatedProfileScansRoute =
     id: '/profile/scans',
     path: '/profile/scans',
     getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedAdminModQueueRoute =
-  AuthenticatedAdminModQueueRouteImport.update({
-    id: '/mod-queue',
-    path: '/mod-queue',
-    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedMePostsIndexRoute =
   AuthenticatedMePostsIndexRouteImport.update({
@@ -321,7 +302,6 @@ export interface FileRoutesByFullPath {
   '/hof': typeof HofRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
@@ -330,7 +310,6 @@ export interface FileRoutesByFullPath {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -342,7 +321,6 @@ export interface FileRoutesByFullPath {
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/spill/': typeof AuthenticatedSpillIndexRoute
@@ -376,7 +354,6 @@ export interface FileRoutesByTo {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -388,7 +365,6 @@ export interface FileRoutesByTo {
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
   '/scan': typeof AuthenticatedScanIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/spill': typeof AuthenticatedSpillIndexRoute
@@ -417,7 +393,6 @@ export interface FileRoutesById {
   '/hof': typeof HofRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
@@ -426,7 +401,6 @@ export interface FileRoutesById {
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/_authenticated/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -438,7 +412,6 @@ export interface FileRoutesById {
   '/_authenticated/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/spill/': typeof AuthenticatedSpillIndexRoute
@@ -467,7 +440,6 @@ export interface FileRouteTypes {
     | '/hof'
     | '/stream'
     | '/welcome'
-    | '/admin'
     | '/compose'
     | '/friends'
     | '/me'
@@ -476,7 +448,6 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/admin/mod-queue'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -488,7 +459,6 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/spill/start'
     | '/api/public/verdict-tally'
-    | '/admin/'
     | '/scan/'
     | '/settings/'
     | '/spill/'
@@ -522,7 +492,6 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/admin/mod-queue'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -534,7 +503,6 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/spill/start'
     | '/api/public/verdict-tally'
-    | '/admin'
     | '/scan'
     | '/settings'
     | '/spill'
@@ -562,7 +530,6 @@ export interface FileRouteTypes {
     | '/hof'
     | '/stream'
     | '/welcome'
-    | '/_authenticated/admin'
     | '/_authenticated/compose'
     | '/_authenticated/friends'
     | '/_authenticated/me'
@@ -571,7 +538,6 @@ export interface FileRouteTypes {
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/_authenticated/admin/mod-queue'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/settings/account'
@@ -583,7 +549,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/safety'
     | '/_authenticated/spill/start'
     | '/api/public/verdict-tally'
-    | '/_authenticated/admin/'
     | '/_authenticated/scan/'
     | '/_authenticated/settings/'
     | '/_authenticated/spill/'
@@ -731,13 +696,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/spill/': {
       id: '/_authenticated/spill/'
       path: '/spill'
@@ -758,13 +716,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/scan/'
       preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/admin/': {
-      id: '/_authenticated/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/api/public/verdict-tally': {
       id: '/api/public/verdict-tally'
@@ -842,13 +793,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/scans'
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/admin/mod-queue': {
-      id: '/_authenticated/admin/mod-queue'
-      path: '/mod-queue'
-      fullPath: '/admin/mod-queue'
-      preLoaderRoute: typeof AuthenticatedAdminModQueueRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/me/posts/': {
       id: '/_authenticated/me/posts/'
@@ -958,19 +902,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminModQueueRoute: typeof AuthenticatedAdminModQueueRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
-}
-
-const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminModQueueRoute: AuthenticatedAdminModQueueRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-}
-
-const AuthenticatedAdminRouteWithChildren =
-  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
-
 interface AuthenticatedMeRouteChildren {
   AuthenticatedMePostsIndexRoute: typeof AuthenticatedMePostsIndexRoute
   AuthenticatedMePostsPostIdEditRoute: typeof AuthenticatedMePostsPostIdEditRoute
@@ -1016,7 +947,6 @@ const AuthenticatedSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
@@ -1035,7 +965,6 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
@@ -1089,3 +1018,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

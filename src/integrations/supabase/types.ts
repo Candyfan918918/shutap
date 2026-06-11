@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          last_active_at: string | null
+          last_login_at: string | null
+          password_hash: string
+          role: Database["public"]["Enums"]["admin_role"]
+          totp_secret: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_name: string
+          email: string
+          id?: string
+          last_active_at?: string | null
+          last_login_at?: string | null
+          password_hash: string
+          role: Database["public"]["Enums"]["admin_role"]
+          totp_secret: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+          last_active_at?: string | null
+          last_login_at?: string | null
+          password_hash?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+          totp_secret?: string
+        }
+        Relationships: []
+      }
       ai_call_log: {
         Row: {
           agent: string
@@ -2777,6 +2816,7 @@ export type Database = {
       suggest_handles: { Args: { _base: string }; Returns: string[] }
     }
     Enums: {
+      admin_role: "super_admin" | "moderator" | "analyst" | "partner_manager"
       app_role: "admin" | "moderator" | "user"
       intent_kind:
         | "reactions"
@@ -2943,6 +2983,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["super_admin", "moderator", "analyst", "partner_manager"],
       app_role: ["admin", "moderator", "user"],
       intent_kind: [
         "reactions",
