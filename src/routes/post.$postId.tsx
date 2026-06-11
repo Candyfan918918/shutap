@@ -355,6 +355,7 @@ function PostPage() {
         <CommentThread
           ref={commentsRef}
           postId={post.id}
+          postAuthorId={post.author_id}
           onCommentPosted={() => setShowRelated(true)}
         />
         <RelatedPosts postId={post.id} autoLoad={showRelated} />
