@@ -92,7 +92,7 @@ export const Route = createFileRoute("/")({
 const APP = "https://app.shutap.com";
 
 function HomePage() {
-  const { totalVerdicts, liveCases, resolvedCase } = Route.useLoaderData();
+  const { totalVerdicts, liveCases, resolvedCase } = Route.useLoaderData() as import("@/lib/marketing/homepage.functions").HomepageData;
   const benchLine = dailyBenchLine();
 
   return (
