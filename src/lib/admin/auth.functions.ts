@@ -148,8 +148,8 @@ export const adminBootstrap = createServerFn({ method: "POST" })
       err.statusCode = 403;
       throw err;
     }
-    const { authenticator } = await import("otplib");
-    const secret = authenticator.generateSecret();
+    const otplib = await import("otplib");
+    const secret = otplib.generateSecret();
     const { hashPassword } = await import("./password.server");
     const email = data.email.trim().toLowerCase();
     const { error } = await supabaseAdmin.from("admin_users").insert({
@@ -161,7 +161,7 @@ export const adminBootstrap = createServerFn({ method: "POST" })
       active: true,
     });
     if (error) throw new Error(error.message);
-    const otpauth = authenticator.keyuri(email, "Shutap Bench", secret);
+    const otpauth = otplib.generateURI({ strategy: "totp", issuer: "Shutap Bench", label: email, secret });
     return { otpauth, secret };
   });
 

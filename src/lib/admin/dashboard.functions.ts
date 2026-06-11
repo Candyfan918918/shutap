@@ -22,7 +22,7 @@ export const getDashboardMetrics = createServerFn({ method: "GET" })
     const yesterdayStart = new Date(new Date(todayStart).getTime() - 24 * 60 * 60 * 1000).toISOString();
 
     async function countWhere(table: string, build: (q: any) => any): Promise<number> {
-      const q = supabaseAdmin.from(table).select("*", { count: "exact", head: true });
+      const q = (supabaseAdmin as any).from(table).select("*", { count: "exact", head: true });
       const { count } = await build(q);
       return count ?? 0;
     }
