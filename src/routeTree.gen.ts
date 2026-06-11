@@ -25,6 +25,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as CaseCaseSlugRouteImport } from './routes/case.$caseSlug'
 import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminModQueueRouteImport } from './routes/admin.mod-queue'
@@ -146,6 +147,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => EnterRoute,
+} as any)
+const CaseCaseSlugRoute = CaseCaseSlugRouteImport.update({
+  id: '/case/$caseSlug',
+  path: '/case/$caseSlug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AliasAliasIdRoute = AliasAliasIdRouteImport.update({
   id: '/alias/$aliasId',
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/admin/mod-queue': typeof AdminModQueueRoute
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
+  '/case/$caseSlug': typeof CaseCaseSlugRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -461,6 +468,7 @@ export interface FileRoutesByTo {
   '/admin/mod-queue': typeof AdminModQueueRoute
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
+  '/case/$caseSlug': typeof CaseCaseSlugRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -522,6 +530,7 @@ export interface FileRoutesById {
   '/admin/mod-queue': typeof AdminModQueueRoute
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
+  '/case/$caseSlug': typeof CaseCaseSlugRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -583,6 +592,7 @@ export interface FileRouteTypes {
     | '/admin/mod-queue'
     | '/admin/users'
     | '/alias/$aliasId'
+    | '/case/$caseSlug'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -640,6 +650,7 @@ export interface FileRouteTypes {
     | '/admin/mod-queue'
     | '/admin/users'
     | '/alias/$aliasId'
+    | '/case/$caseSlug'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -700,6 +711,7 @@ export interface FileRouteTypes {
     | '/admin/mod-queue'
     | '/admin/users'
     | '/alias/$aliasId'
+    | '/case/$caseSlug'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -749,6 +761,7 @@ export interface RootRouteChildren {
   StreamRoute: typeof StreamRoute
   WelcomeRoute: typeof WelcomeRoute
   AliasAliasIdRoute: typeof AliasAliasIdRoute
+  CaseCaseSlugRoute: typeof CaseCaseSlugRoute
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
   ApiPublicVerdictTallyRoute: typeof ApiPublicVerdictTallyRoute
@@ -873,6 +886,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/enter/verify'
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
+    }
+    '/case/$caseSlug': {
+      id: '/case/$caseSlug'
+      path: '/case/$caseSlug'
+      fullPath: '/case/$caseSlug'
+      preLoaderRoute: typeof CaseCaseSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/alias/$aliasId': {
       id: '/alias/$aliasId'
@@ -1305,6 +1325,7 @@ const rootRouteChildren: RootRouteChildren = {
   StreamRoute: StreamRoute,
   WelcomeRoute: WelcomeRoute,
   AliasAliasIdRoute: AliasAliasIdRoute,
+  CaseCaseSlugRoute: CaseCaseSlugRoute,
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
   ApiPublicVerdictTallyRoute: ApiPublicVerdictTallyRoute,

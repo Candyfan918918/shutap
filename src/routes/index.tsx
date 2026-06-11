@@ -204,7 +204,7 @@ function HomePage() {
 function DocketCard({ c }: { c: LiveCase }) {
   return (
     <li className="rounded-md border border-c-border bg-c-surface-2 p-4">
-      <Link to="/post/$postId" params={{ postId: c.postId }} className="block group">
+      <Link to="/case/$caseSlug" params={{ caseSlug: c.postId }} className="block group">
         <div className="text-[10px] uppercase tracking-wider text-c-text-3">{c.courtBadge}</div>
         <div className="mt-2 font-serif text-base leading-snug text-c-text-1 group-hover:underline underline-offset-4">
           {c.title}
@@ -228,7 +228,7 @@ function DocketCard({ c }: { c: LiveCase }) {
 function OutcomeBlock({ c }: { c: ResolvedCase }) {
   return (
     <article className="mt-6 rounded-md border border-c-border bg-c-surface-2 p-6 sm:p-8">
-      <Link to="/post/$postId" params={{ postId: c.postId }} className="block group">
+      <Link to="/case/$caseSlug" params={{ caseSlug: c.postId }} className="block group">
         <div className="text-[10px] uppercase tracking-wider text-c-text-3">Resolved · {c.daysToOutcome} days to outcome</div>
         <h3 className="mt-2 font-serif text-xl sm:text-2xl leading-tight text-c-text-1 group-hover:underline underline-offset-4">
           {c.title}
