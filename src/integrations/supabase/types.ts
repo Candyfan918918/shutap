@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_briefings: {
+        Row: {
+          briefing_date: string
+          category: string
+          created_at: string
+          detail: string
+          id: string
+          metric: Json
+          priority: string
+          read_by: Json
+          recommendation: string | null
+          title: string
+        }
+        Insert: {
+          briefing_date: string
+          category: string
+          created_at?: string
+          detail: string
+          id?: string
+          metric?: Json
+          priority: string
+          read_by?: Json
+          recommendation?: string | null
+          title: string
+        }
+        Update: {
+          briefing_date?: string
+          category?: string
+          created_at?: string
+          detail?: string
+          id?: string
+          metric?: Json
+          priority?: string
+          read_by?: Json
+          recommendation?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           active: boolean
@@ -828,47 +867,95 @@ export type Database = {
       }
       leads: {
         Row: {
+          booked_at: string | null
           case_type: string | null
           city: string | null
           consent_id: string | null
+          consent_verified_at: string | null
           contact: Json
+          converted_at: string | null
           country: string | null
           created_at: string
           emotional_intensity: number | null
+          first_contacted_at: string | null
           id: string
+          lead_quality: string | null
           notes: string | null
+          partner_confirmed_deleted_at: string | null
+          partner_id: string | null
+          partner_name: string | null
+          partner_notified_at: string | null
+          pipeline_stage: string
+          revocation_resolved_at: string | null
+          revoked_at: string | null
+          sent_to_partner_at: string | null
+          service_category: string | null
+          situation_summary: string | null
           status: Database["public"]["Enums"]["lead_status"]
           story_id: string | null
+          updated_at: string
           urgency: number | null
           user_id: string | null
         }
         Insert: {
+          booked_at?: string | null
           case_type?: string | null
           city?: string | null
           consent_id?: string | null
+          consent_verified_at?: string | null
           contact?: Json
+          converted_at?: string | null
           country?: string | null
           created_at?: string
           emotional_intensity?: number | null
+          first_contacted_at?: string | null
           id?: string
+          lead_quality?: string | null
           notes?: string | null
+          partner_confirmed_deleted_at?: string | null
+          partner_id?: string | null
+          partner_name?: string | null
+          partner_notified_at?: string | null
+          pipeline_stage?: string
+          revocation_resolved_at?: string | null
+          revoked_at?: string | null
+          sent_to_partner_at?: string | null
+          service_category?: string | null
+          situation_summary?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           story_id?: string | null
+          updated_at?: string
           urgency?: number | null
           user_id?: string | null
         }
         Update: {
+          booked_at?: string | null
           case_type?: string | null
           city?: string | null
           consent_id?: string | null
+          consent_verified_at?: string | null
           contact?: Json
+          converted_at?: string | null
           country?: string | null
           created_at?: string
           emotional_intensity?: number | null
+          first_contacted_at?: string | null
           id?: string
+          lead_quality?: string | null
           notes?: string | null
+          partner_confirmed_deleted_at?: string | null
+          partner_id?: string | null
+          partner_name?: string | null
+          partner_notified_at?: string | null
+          pipeline_stage?: string
+          revocation_resolved_at?: string | null
+          revoked_at?: string | null
+          sent_to_partner_at?: string | null
+          service_category?: string | null
+          situation_summary?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           story_id?: string | null
+          updated_at?: string
           urgency?: number | null
           user_id?: string | null
         }
