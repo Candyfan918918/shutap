@@ -422,16 +422,16 @@ export const toggleChangedMind = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) {
       await supabase.from("post_comment_reactions").delete().eq("id", existing.id);
-      await supabaseAdmin.rpc("_bump_comment_counter", { _comment_id: data.commentId, _col: "changed_minds_count", _delta: -1 } as never).then(() => {}, () => {});
-      // fallback if RPC absent
-      await supabaseAdmin.from("post_comments").update({ changed_minds_count: 0 } as never).eq("id", data.commentId).gte("changed_minds_count", 0).select("id").maybeSingle().then(() => {}, () => {});
+      const { data: cur } = await supabaseAdmin
+        .from("post_comments").select("changed_minds_count").eq("id", data.commentId).maybeSingle();
+      const next = Math.max(0, ((cur as { changed_minds_count: number } | null)?.changed_minds_count ?? 0) - 1);
+      await supabaseAdmin.from("post_comments").update({ changed_minds_count: next }).eq("id", data.commentId);
       return { active: false };
     }
     const { error } = await supabase
       .from("post_comment_reactions")
       .insert({ comment_id: data.commentId, user_id: userId, kind: "changed_mind" });
     if (error) throw new Error(error.message);
-    // bump counter via raw update
     const { data: cur } = await supabaseAdmin
       .from("post_comments").select("changed_minds_count").eq("id", data.commentId).maybeSingle();
     const next = ((cur as { changed_minds_count: number } | null)?.changed_minds_count ?? 0) + 1;
