@@ -14,21 +14,28 @@ import { Route as StreamRouteImport } from './routes/stream'
 import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
 import { Route as CourtRouteImport } from './routes/court'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
 import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminModQueueRouteImport } from './routes/admin.mod-queue'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
+import { Route as AdminConfigRouteImport } from './routes/admin.config'
+import { Route as AdminBriefingRouteImport } from './routes/admin.briefing'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedComposeRouteImport } from './routes/_authenticated/compose'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSpillIndexRouteImport } from './routes/_authenticated/spill/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedScanIndexRouteImport } from './routes/_authenticated/scan/index'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ApiPublicVerdictTallyRouteImport } from './routes/api/public/verdict-tally'
 import { Route as AuthenticatedSpillStartRouteImport } from './routes/_authenticated/spill/start'
 import { Route as AuthenticatedSettingsSafetyRouteImport } from './routes/_authenticated/settings/safety'
@@ -40,7 +47,6 @@ import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
-import { Route as AuthenticatedAdminModQueueRouteImport } from './routes/_authenticated/admin.mod-queue'
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
@@ -82,6 +88,11 @@ const CourtRoute = CourtRouteImport.update({
   path: '/court',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -90,6 +101,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const UHandleRoute = UHandleRouteImport.update({
   id: '/u/$handle',
@@ -111,6 +127,41 @@ const AliasAliasIdRoute = AliasAliasIdRouteImport.update({
   path: '/alias/$aliasId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminModQueueRoute = AdminModQueueRouteImport.update({
+  id: '/mod-queue',
+  path: '/mod-queue',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfigRoute = AdminConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBriefingRoute = AdminBriefingRouteImport.update({
+  id: '/briefing',
+  path: '/briefing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -131,11 +182,6 @@ const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   path: '/compose',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedSpillIndexRoute = AuthenticatedSpillIndexRouteImport.update({
   id: '/spill/',
   path: '/spill/',
@@ -151,11 +197,6 @@ const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   id: '/scan/',
   path: '/scan/',
   getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const ApiPublicVerdictTallyRoute = ApiPublicVerdictTallyRouteImport.update({
   id: '/api/public/verdict-tally',
@@ -219,12 +260,6 @@ const AuthenticatedProfileScansRoute =
     id: '/profile/scans',
     path: '/profile/scans',
     getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedAdminModQueueRoute =
-  AuthenticatedAdminModQueueRouteImport.update({
-    id: '/mod-queue',
-    path: '/mod-queue',
-    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedMePostsIndexRoute =
   AuthenticatedMePostsIndexRouteImport.update({
@@ -316,21 +351,28 @@ const AuthenticatedMePostsPostIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
+  '/admin/': typeof AdminIndexRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -342,7 +384,6 @@ export interface FileRoutesByFullPath {
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/scan/': typeof AuthenticatedScanIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/spill/': typeof AuthenticatedSpillIndexRoute
@@ -372,11 +413,18 @@ export interface FileRoutesByTo {
   '/compose': typeof AuthenticatedComposeRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
+  '/admin': typeof AdminIndexRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -388,7 +436,6 @@ export interface FileRoutesByTo {
   '/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/admin': typeof AuthenticatedAdminIndexRoute
   '/scan': typeof AuthenticatedScanIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/spill': typeof AuthenticatedSpillIndexRoute
@@ -412,21 +459,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/briefing': typeof AdminBriefingRoute
+  '/admin/config': typeof AdminConfigRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/mod-queue': typeof AdminModQueueRoute
+  '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
-  '/_authenticated/admin/mod-queue': typeof AuthenticatedAdminModQueueRoute
+  '/admin/': typeof AdminIndexRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -438,7 +492,6 @@ export interface FileRoutesById {
   '/_authenticated/settings/safety': typeof AuthenticatedSettingsSafetyRoute
   '/_authenticated/spill/start': typeof AuthenticatedSpillStartRoute
   '/api/public/verdict-tally': typeof ApiPublicVerdictTallyRoute
-  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/scan/': typeof AuthenticatedScanIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/spill/': typeof AuthenticatedSpillIndexRoute
@@ -462,21 +515,28 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/court'
     | '/enter'
     | '/hof'
     | '/stream'
     | '/welcome'
-    | '/admin'
     | '/compose'
     | '/friends'
     | '/me'
     | '/settings'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
+    | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/admin/mod-queue'
+    | '/admin/'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -488,7 +548,6 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/spill/start'
     | '/api/public/verdict-tally'
-    | '/admin/'
     | '/scan/'
     | '/settings/'
     | '/spill/'
@@ -518,11 +577,18 @@ export interface FileRouteTypes {
     | '/compose'
     | '/friends'
     | '/me'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
+    | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/admin/mod-queue'
+    | '/admin'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -534,7 +600,6 @@ export interface FileRouteTypes {
     | '/settings/safety'
     | '/spill/start'
     | '/api/public/verdict-tally'
-    | '/admin'
     | '/scan'
     | '/settings'
     | '/spill'
@@ -557,21 +622,28 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/court'
     | '/enter'
     | '/hof'
     | '/stream'
     | '/welcome'
-    | '/_authenticated/admin'
     | '/_authenticated/compose'
     | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/admin/analytics'
+    | '/admin/briefing'
+    | '/admin/config'
+    | '/admin/leads'
+    | '/admin/login'
+    | '/admin/mod-queue'
+    | '/admin/users'
     | '/alias/$aliasId'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
-    | '/_authenticated/admin/mod-queue'
+    | '/admin/'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/settings/account'
@@ -583,7 +655,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/safety'
     | '/_authenticated/spill/start'
     | '/api/public/verdict-tally'
-    | '/_authenticated/admin/'
     | '/_authenticated/scan/'
     | '/_authenticated/settings/'
     | '/_authenticated/spill/'
@@ -607,6 +678,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   CourtRoute: typeof CourtRoute
   EnterRoute: typeof EnterRouteWithChildren
   HofRoute: typeof HofRoute
@@ -661,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CourtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -674,6 +753,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/u/$handle': {
       id: '/u/$handle'
@@ -703,6 +789,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AliasAliasIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/mod-queue': {
+      id: '/admin/mod-queue'
+      path: '/mod-queue'
+      fullPath: '/admin/mod-queue'
+      preLoaderRoute: typeof AdminModQueueRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/config': {
+      id: '/admin/config'
+      path: '/config'
+      fullPath: '/admin/config'
+      preLoaderRoute: typeof AdminConfigRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/briefing': {
+      id: '/admin/briefing'
+      path: '/briefing'
+      fullPath: '/admin/briefing'
+      preLoaderRoute: typeof AdminBriefingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -731,13 +866,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/spill/': {
       id: '/_authenticated/spill/'
       path: '/spill'
@@ -758,13 +886,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/scan/'
       preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/admin/': {
-      id: '/_authenticated/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/api/public/verdict-tally': {
       id: '/api/public/verdict-tally'
@@ -842,13 +963,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/scans'
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/admin/mod-queue': {
-      id: '/_authenticated/admin/mod-queue'
-      path: '/mod-queue'
-      fullPath: '/admin/mod-queue'
-      preLoaderRoute: typeof AuthenticatedAdminModQueueRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/me/posts/': {
       id: '/_authenticated/me/posts/'
@@ -958,19 +1072,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminModQueueRoute: typeof AuthenticatedAdminModQueueRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
-}
-
-const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminModQueueRoute: AuthenticatedAdminModQueueRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-}
-
-const AuthenticatedAdminRouteWithChildren =
-  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
-
 interface AuthenticatedMeRouteChildren {
   AuthenticatedMePostsIndexRoute: typeof AuthenticatedMePostsIndexRoute
   AuthenticatedMePostsPostIdEditRoute: typeof AuthenticatedMePostsPostIdEditRoute
@@ -1016,7 +1117,6 @@ const AuthenticatedSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
@@ -1035,7 +1135,6 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
@@ -1057,6 +1156,30 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminBriefingRoute: typeof AdminBriefingRoute
+  AdminConfigRoute: typeof AdminConfigRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminModQueueRoute: typeof AdminModQueueRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminBriefingRoute: AdminBriefingRoute,
+  AdminConfigRoute: AdminConfigRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminModQueueRoute: AdminModQueueRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface EnterRouteChildren {
   EnterVerifyRoute: typeof EnterVerifyRoute
 }
@@ -1070,6 +1193,7 @@ const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   CourtRoute: CourtRoute,
   EnterRoute: EnterRouteWithChildren,
   HofRoute: HofRoute,
