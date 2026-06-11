@@ -16,7 +16,7 @@ export const VERDICT_KINDS = [
 ] as const;
 export type VerdictKind = (typeof VERDICT_KINDS)[number];
 
-export const COMMENT_REACTION_KINDS = ["like", "funny"] as const;
+export const COMMENT_REACTION_KINDS = ["like", "funny", "changed_mind", "same_situation"] as const;
 export type CommentReactionKind = (typeof COMMENT_REACTION_KINDS)[number];
 
 export const COMMENT_SORTS = ["top", "newest", "funniest"] as const;
@@ -31,6 +31,9 @@ export interface CommentRow {
   createdAt: string;
   likeCount: number;
   funnyCount: number;
+  changedMindsCount: number;
+  isSameSituation: boolean;
+  isCounselPick: boolean;
   myReactions: CommentReactionKind[];
   author: { handle: string | null; nickname: string | null; avatarUrl: string | null } | null;
 }
@@ -95,7 +98,7 @@ export const listComments = createServerFn({ method: "GET" })
 
     let q = supabaseAdmin
       .from("post_comments")
-      .select("id, post_id, user_id, parent_id, body, created_at, like_count, funny_count")
+      .select("id, post_id, user_id, parent_id, body, created_at, like_count, funny_count, changed_minds_count, is_same_situation, is_counsel_pick")
       .eq("post_id", data.postId)
       .eq("status", "published")
       .is("deleted_at", null)
@@ -105,13 +108,18 @@ export const listComments = createServerFn({ method: "GET" })
     } else if (data.sort === "funniest") {
       q = q.order("funny_count", { ascending: false }).order("created_at", { ascending: false });
     } else {
-      q = q.order("like_count", { ascending: false }).order("created_at", { ascending: false });
+      q = q
+        .order("is_counsel_pick", { ascending: false })
+        .order("changed_minds_count", { ascending: false })
+        .order("like_count", { ascending: false })
+        .order("created_at", { ascending: false });
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     const list = (rows ?? []) as Array<{
       id: string; post_id: string; user_id: string; parent_id: string | null;
       body: string; created_at: string; like_count: number; funny_count: number;
+      changed_minds_count: number | null; is_same_situation: boolean | null; is_counsel_pick: boolean | null;
     }>;
     if (list.length === 0) return [];
 
@@ -154,6 +162,9 @@ export const listComments = createServerFn({ method: "GET" })
         createdAt: c.created_at,
         likeCount: c.like_count ?? 0,
         funnyCount: c.funny_count ?? 0,
+        changedMindsCount: c.changed_minds_count ?? 0,
+        isSameSituation: !!c.is_same_situation,
+        isCounselPick: !!c.is_counsel_pick,
         myReactions: mine.get(c.id) ?? [],
         author: p ? { handle: p.handle, nickname: p.nickname, avatarUrl: p.avatar_url } : null,
       };
