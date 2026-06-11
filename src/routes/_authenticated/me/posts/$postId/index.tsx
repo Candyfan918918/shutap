@@ -11,9 +11,10 @@ import { ViewsSparkline } from "@/components/posts/ViewsSparkline";
 import { SharePlatformBarsPlatform, SharePlatformBarsChannel } from "@/components/posts/SharePlatformBars";
 import { VisibilityBadge } from "@/components/posts/VisibilityBadge";
 import { AuthorActionComposer } from "@/components/posts/AuthorActionComposer";
+import { RetractStorySheet } from "@/components/posts/RetractStorySheet";
 
-type ComposerAction = "update" | "sequel" | "close";
-const COMPOSER_ACTIONS: ComposerAction[] = ["update", "sequel", "close"];
+type ComposerAction = "update" | "sequel" | "close" | "retract";
+const COMPOSER_ACTIONS: ComposerAction[] = ["update", "sequel", "close", "retract"];
 
 export const Route = createFileRoute("/_authenticated/me/posts/$postId/")({
   validateSearch: (s: Record<string, unknown>): { action?: ComposerAction } => {
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/me/posts/$postId/")({
   },
   component: PostAnalyticsPage,
 });
+
 
 function PostAnalyticsPage() {
   const { postId } = Route.useParams();
@@ -131,9 +133,13 @@ function PostAnalyticsPage() {
         <SharePlatformBarsChannel rows={data.forwardBreakdown} />
       </main>
 
-      {action && (
+      {action === "retract" && (
+        <RetractStorySheet postId={postId} onClose={closeComposer} />
+      )}
+      {action && action !== "retract" && (
         <AuthorActionComposer postId={postId} action={action} onClose={closeComposer} />
       )}
+
     </div>
   );
 }
