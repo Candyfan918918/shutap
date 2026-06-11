@@ -15,8 +15,11 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
 import { Route as SitemapCourtsDotxmlRouteImport } from './routes/sitemap-courts[.]xml'
 import { Route as SitemapCasesDotxmlRouteImport } from './routes/sitemap-cases[.]xml'
+import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
+import { Route as DocketRouteImport } from './routes/docket'
+import { Route as DataRouteImport } from './routes/data'
 import { Route as CourtRouteImport } from './routes/court'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -25,6 +28,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as EnterVerifyRouteImport } from './routes/enter.verify'
+import { Route as DataCategoryRouteImport } from './routes/data.$category'
 import { Route as CaseCaseSlugRouteImport } from './routes/case.$caseSlug'
 import { Route as AliasAliasIdRouteImport } from './routes/alias.$aliasId'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -99,6 +103,11 @@ const SitemapCasesDotxmlRoute = SitemapCasesDotxmlRouteImport.update({
   path: '/sitemap-cases.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
+  id: '/llms-full.txt',
+  path: '/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HofRoute = HofRouteImport.update({
   id: '/hof',
   path: '/hof',
@@ -107,6 +116,16 @@ const HofRoute = HofRouteImport.update({
 const EnterRoute = EnterRouteImport.update({
   id: '/enter',
   path: '/enter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocketRoute = DocketRouteImport.update({
+  id: '/docket',
+  path: '/docket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataRoute = DataRouteImport.update({
+  id: '/data',
+  path: '/data',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CourtRoute = CourtRouteImport.update({
@@ -147,6 +166,11 @@ const EnterVerifyRoute = EnterVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => EnterRoute,
+} as any)
+const DataCategoryRoute = DataCategoryRouteImport.update({
+  id: '/$category',
+  path: '/$category',
+  getParentRoute: () => DataRoute,
 } as any)
 const CaseCaseSlugRoute = CaseCaseSlugRouteImport.update({
   id: '/case/$caseSlug',
@@ -389,8 +413,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
+  '/data': typeof DataRouteWithChildren
+  '/docket': typeof DocketRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -411,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/case/$caseSlug': typeof CaseCaseSlugRoute
+  '/data/$category': typeof DataCategoryRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -448,8 +476,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/court': typeof CourtRoute
+  '/data': typeof DataRouteWithChildren
+  '/docket': typeof DocketRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -469,6 +500,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/case/$caseSlug': typeof CaseCaseSlugRoute
+  '/data/$category': typeof DataCategoryRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -509,8 +541,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/court': typeof CourtRoute
+  '/data': typeof DataRouteWithChildren
+  '/docket': typeof DocketRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -531,6 +566,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/alias/$aliasId': typeof AliasAliasIdRoute
   '/case/$caseSlug': typeof CaseCaseSlugRoute
+  '/data/$category': typeof DataCategoryRoute
   '/enter/verify': typeof EnterVerifyRoute
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
@@ -571,8 +607,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/court'
+    | '/data'
+    | '/docket'
     | '/enter'
     | '/hof'
+    | '/llms-full.txt'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -593,6 +632,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/alias/$aliasId'
     | '/case/$caseSlug'
+    | '/data/$category'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -630,8 +670,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/court'
+    | '/data'
+    | '/docket'
     | '/enter'
     | '/hof'
+    | '/llms-full.txt'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -651,6 +694,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/alias/$aliasId'
     | '/case/$caseSlug'
+    | '/data/$category'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -690,8 +734,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/admin'
     | '/court'
+    | '/data'
+    | '/docket'
     | '/enter'
     | '/hof'
+    | '/llms-full.txt'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -712,6 +759,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/alias/$aliasId'
     | '/case/$caseSlug'
+    | '/data/$category'
     | '/enter/verify'
     | '/post/$postId'
     | '/u/$handle'
@@ -752,8 +800,11 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   CourtRoute: typeof CourtRoute
+  DataRoute: typeof DataRouteWithChildren
+  DocketRoute: typeof DocketRoute
   EnterRoute: typeof EnterRouteWithChildren
   HofRoute: typeof HofRoute
+  LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   SitemapCasesDotxmlRoute: typeof SitemapCasesDotxmlRoute
   SitemapCourtsDotxmlRoute: typeof SitemapCourtsDotxmlRoute
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
@@ -817,6 +868,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapCasesDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms-full.txt': {
+      id: '/llms-full.txt'
+      path: '/llms-full.txt'
+      fullPath: '/llms-full.txt'
+      preLoaderRoute: typeof LlmsFullDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hof': {
       id: '/hof'
       path: '/hof'
@@ -829,6 +887,20 @@ declare module '@tanstack/react-router' {
       path: '/enter'
       fullPath: '/enter'
       preLoaderRoute: typeof EnterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docket': {
+      id: '/docket'
+      path: '/docket'
+      fullPath: '/docket'
+      preLoaderRoute: typeof DocketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data': {
+      id: '/data'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/court': {
@@ -886,6 +958,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/enter/verify'
       preLoaderRoute: typeof EnterVerifyRouteImport
       parentRoute: typeof EnterRoute
+    }
+    '/data/$category': {
+      id: '/data/$category'
+      path: '/$category'
+      fullPath: '/data/$category'
+      preLoaderRoute: typeof DataCategoryRouteImport
+      parentRoute: typeof DataRoute
     }
     '/case/$caseSlug': {
       id: '/case/$caseSlug'
@@ -1301,6 +1380,16 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface DataRouteChildren {
+  DataCategoryRoute: typeof DataCategoryRoute
+}
+
+const DataRouteChildren: DataRouteChildren = {
+  DataCategoryRoute: DataCategoryRoute,
+}
+
+const DataRouteWithChildren = DataRoute._addFileChildren(DataRouteChildren)
+
 interface EnterRouteChildren {
   EnterVerifyRoute: typeof EnterVerifyRoute
 }
@@ -1316,8 +1405,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   CourtRoute: CourtRoute,
+  DataRoute: DataRouteWithChildren,
+  DocketRoute: DocketRoute,
   EnterRoute: EnterRouteWithChildren,
   HofRoute: HofRoute,
+  LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   SitemapCasesDotxmlRoute: SitemapCasesDotxmlRoute,
   SitemapCourtsDotxmlRoute: SitemapCourtsDotxmlRoute,
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
