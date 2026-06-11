@@ -173,6 +173,44 @@ export type Database = {
         }
         Relationships: []
       }
+      comment_ai_summaries: {
+        Row: {
+          comment_count_at_gen: number
+          expires_at: string
+          generated_at: string
+          majority_theme: string | null
+          majority_verdict: string | null
+          minority_theme: string | null
+          post_id: string
+        }
+        Insert: {
+          comment_count_at_gen?: number
+          expires_at?: string
+          generated_at?: string
+          majority_theme?: string | null
+          majority_verdict?: string | null
+          minority_theme?: string | null
+          post_id: string
+        }
+        Update: {
+          comment_count_at_gen?: number
+          expires_at?: string
+          generated_at?: string
+          majority_theme?: string | null
+          majority_verdict?: string | null
+          minority_theme?: string | null
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_ai_summaries_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           body: string
@@ -981,10 +1019,13 @@ export type Database = {
       post_comments: {
         Row: {
           body: string
+          changed_minds_count: number
           created_at: string
           deleted_at: string | null
           funny_count: number
           id: string
+          is_counsel_pick: boolean
+          is_same_situation: boolean
           like_count: number
           parent_id: string | null
           post_id: string
@@ -994,10 +1035,13 @@ export type Database = {
         }
         Insert: {
           body: string
+          changed_minds_count?: number
           created_at?: string
           deleted_at?: string | null
           funny_count?: number
           id?: string
+          is_counsel_pick?: boolean
+          is_same_situation?: boolean
           like_count?: number
           parent_id?: string | null
           post_id: string
@@ -1007,10 +1051,13 @@ export type Database = {
         }
         Update: {
           body?: string
+          changed_minds_count?: number
           created_at?: string
           deleted_at?: string | null
           funny_count?: number
           id?: string
+          is_counsel_pick?: boolean
+          is_same_situation?: boolean
           like_count?: number
           parent_id?: string | null
           post_id?: string
@@ -1458,6 +1505,9 @@ export type Database = {
           badges: string[]
           both_sides_heard: boolean
           candidacy_paused: boolean
+          case_closed_at: string | null
+          case_closed_of: string | null
+          case_closed_summary: string | null
           case_title: string | null
           comment_count: number
           controversy_score: number
@@ -1484,6 +1534,7 @@ export type Database = {
           save_count: number
           score: number | null
           score_category: string | null
+          sequel_of: string | null
           share_card_square: string | null
           share_card_vertical: string | null
           share_card_xhs: string | null
@@ -1506,6 +1557,9 @@ export type Database = {
           badges?: string[]
           both_sides_heard?: boolean
           candidacy_paused?: boolean
+          case_closed_at?: string | null
+          case_closed_of?: string | null
+          case_closed_summary?: string | null
           case_title?: string | null
           comment_count?: number
           controversy_score?: number
@@ -1532,6 +1586,7 @@ export type Database = {
           save_count?: number
           score?: number | null
           score_category?: string | null
+          sequel_of?: string | null
           share_card_square?: string | null
           share_card_vertical?: string | null
           share_card_xhs?: string | null
@@ -1554,6 +1609,9 @@ export type Database = {
           badges?: string[]
           both_sides_heard?: boolean
           candidacy_paused?: boolean
+          case_closed_at?: string | null
+          case_closed_of?: string | null
+          case_closed_summary?: string | null
           case_title?: string | null
           comment_count?: number
           controversy_score?: number
@@ -1580,6 +1638,7 @@ export type Database = {
           save_count?: number
           score?: number | null
           score_category?: string | null
+          sequel_of?: string | null
           share_card_square?: string | null
           share_card_vertical?: string | null
           share_card_xhs?: string | null
@@ -1597,6 +1656,20 @@ export type Database = {
           weighted_vote_sum?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_case_closed_of_fkey"
+            columns: ["case_closed_of"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_sequel_of_fkey"
+            columns: ["sequel_of"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "posts_story_id_fkey"
             columns: ["story_id"]
