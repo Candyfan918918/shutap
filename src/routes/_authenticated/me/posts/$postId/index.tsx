@@ -10,8 +10,18 @@ import { KpiTile } from "@/components/posts/KpiTile";
 import { ViewsSparkline } from "@/components/posts/ViewsSparkline";
 import { SharePlatformBarsPlatform, SharePlatformBarsChannel } from "@/components/posts/SharePlatformBars";
 import { VisibilityBadge } from "@/components/posts/VisibilityBadge";
+import { AuthorActionComposer } from "@/components/posts/AuthorActionComposer";
+
+type ComposerAction = "update" | "sequel" | "close";
+const COMPOSER_ACTIONS: ComposerAction[] = ["update", "sequel", "close"];
 
 export const Route = createFileRoute("/_authenticated/me/posts/$postId/")({
+  validateSearch: (s: Record<string, unknown>): { action?: ComposerAction } => {
+    const a = typeof s.action === "string" ? s.action : undefined;
+    return a && (COMPOSER_ACTIONS as string[]).includes(a)
+      ? { action: a as ComposerAction }
+      : {};
+  },
   component: PostAnalyticsPage,
 });
 

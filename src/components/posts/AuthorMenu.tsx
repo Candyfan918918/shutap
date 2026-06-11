@@ -53,6 +53,15 @@ export function AuthorMenu({ postId }: Props) {
           <Link
             to="/me/posts/$postId"
             params={{ postId }}
+            search={{ action: "sequel" } as any}
+            className="block px-3 py-2 text-xs hover:bg-surface-elevated"
+            onClick={() => setOpen(false)}
+          >
+            Post sequel
+          </Link>
+          <Link
+            to="/me/posts/$postId"
+            params={{ postId }}
             search={{ action: "close" } as any}
             className="block px-3 py-2 text-xs hover:bg-surface-elevated"
             onClick={() => setOpen(false)}
