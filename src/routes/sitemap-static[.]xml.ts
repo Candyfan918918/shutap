@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
 const BASE = "https://shutap.com";
-const STATIC = ["/", "/court", "/stream", "/hof"];
+const STATIC = ["/", "/court", "/stream", "/hof", "/docket", "/outcomes", "/data", "/data/romance", "/data/family", "/data/work", "/data/friendship", "/data/digital", "/data/stranger", "/data/service"];
 
 export const Route = createFileRoute("/sitemap-static.xml")({
   server: {
