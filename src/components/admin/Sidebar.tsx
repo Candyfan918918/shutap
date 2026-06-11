@@ -8,6 +8,7 @@ type Role = "super_admin" | "moderator" | "analyst" | "partner_manager";
 const NAV: ReadonlyArray<{ to: string; label: string; roles: ReadonlyArray<Role> }> = [
   { to: "/admin", label: "Dashboard", roles: ["super_admin", "moderator", "analyst", "partner_manager"] },
   { to: "/admin/mod-queue", label: "Moderation Queue", roles: ["super_admin", "moderator"] },
+  { to: "/admin/audit-log", label: "Audit Log", roles: ["super_admin", "moderator", "analyst"] },
   { to: "/admin/analytics", label: "Analytics", roles: ["super_admin", "analyst"] },
   { to: "/admin/briefing", label: "AI Briefing", roles: ["super_admin", "moderator", "analyst", "partner_manager"] },
   { to: "/admin/leads", label: "Lead Management", roles: ["super_admin", "partner_manager"] },
