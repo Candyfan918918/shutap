@@ -406,3 +406,108 @@ export const getRelatedPosts = createServerFn({ method: "GET" })
       commentCount: p.comment_count ?? 0,
     }));
   });
+
+// ---------- toggleChangedMind (auth) — bumps changed_minds_count ----------
+export const toggleChangedMind = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ commentId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }): Promise<{ active: boolean }> => {
+    const { supabase, userId } = context;
+    const { data: existing } = await supabase
+      .from("post_comment_reactions")
+      .select("id")
+      .eq("comment_id", data.commentId)
+      .eq("user_id", userId)
+      .eq("kind", "changed_mind")
+      .maybeSingle();
+    if (existing) {
+      await supabase.from("post_comment_reactions").delete().eq("id", existing.id);
+      await supabaseAdmin.rpc("_bump_comment_counter", { _comment_id: data.commentId, _col: "changed_minds_count", _delta: -1 } as never).then(() => {}, () => {});
+      // fallback if RPC absent
+      await supabaseAdmin.from("post_comments").update({ changed_minds_count: 0 } as never).eq("id", data.commentId).gte("changed_minds_count", 0).select("id").maybeSingle().then(() => {}, () => {});
+      return { active: false };
+    }
+    const { error } = await supabase
+      .from("post_comment_reactions")
+      .insert({ comment_id: data.commentId, user_id: userId, kind: "changed_mind" });
+    if (error) throw new Error(error.message);
+    // bump counter via raw update
+    const { data: cur } = await supabaseAdmin
+      .from("post_comments").select("changed_minds_count").eq("id", data.commentId).maybeSingle();
+    const next = ((cur as { changed_minds_count: number } | null)?.changed_minds_count ?? 0) + 1;
+    await supabaseAdmin.from("post_comments").update({ changed_minds_count: next }).eq("id", data.commentId);
+    return { active: true };
+  });
+
+// ---------- toggleSameSituation (auth) — flips is_same_situation on comment ----------
+// Only the comment author may flag their own comment as "same situation".
+export const toggleSameSituation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ commentId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }): Promise<{ active: boolean }> => {
+    const { supabase, userId } = context;
+    const { data: c } = await supabase
+      .from("post_comments")
+      .select("id, user_id, is_same_situation")
+      .eq("id", data.commentId)
+      .maybeSingle();
+    if (!c) throw new Error("Comment not found.");
+    if ((c as { user_id: string }).user_id !== userId) {
+      throw new Error("Only the comment author can flag this.");
+    }
+    const next = !(c as { is_same_situation: boolean }).is_same_situation;
+    const { error } = await supabase
+      .from("post_comments")
+      .update({ is_same_situation: next })
+      .eq("id", data.commentId);
+    if (error) throw new Error(error.message);
+    return { active: next };
+  });
+
+// ---------- markCounselPick (auth, post author only) ----------
+// One pick per post: any prior pick is unset before setting the new one.
+export const markCounselPick = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ postId: z.string().uuid(), commentId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { data: post } = await supabaseAdmin
+      .from("posts").select("author_id").eq("id", data.postId).maybeSingle();
+    if (!post || (post as { author_id: string }).author_id !== userId) {
+      throw new Error("Only the story author can mark a counsel pick.");
+    }
+    await supabaseAdmin.from("post_comments")
+      .update({ is_counsel_pick: false }).eq("post_id", data.postId).eq("is_counsel_pick", true);
+    const { error } = await supabaseAdmin.from("post_comments")
+      .update({ is_counsel_pick: true }).eq("id", data.commentId).eq("post_id", data.postId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- getCachedCommentSummary (public; 1h cache) ----------
+export interface CommentSummary {
+  majorityTheme: string | null;
+  minorityTheme: string | null;
+  majorityVerdict: string | null;
+  commentCountAtGen: number;
+  generatedAt: string;
+}
+export const getCachedCommentSummary = createServerFn({ method: "GET" })
+  .inputValidator((i: unknown) => z.object({ postId: z.string().uuid() }).parse(i))
+  .handler(async ({ data }): Promise<CommentSummary | null> => {
+    const { data: row } = await supabaseAdmin
+      .from("comment_ai_summaries")
+      .select("majority_theme, minority_theme, majority_verdict, comment_count_at_gen, generated_at, expires_at")
+      .eq("post_id", data.postId)
+      .maybeSingle();
+    if (!row) return null;
+    const r = row as { majority_theme: string | null; minority_theme: string | null; majority_verdict: string | null; comment_count_at_gen: number; generated_at: string; expires_at: string };
+    if (new Date(r.expires_at).getTime() < Date.now()) return null;
+    return {
+      majorityTheme: r.majority_theme,
+      minorityTheme: r.minority_theme,
+      majorityVerdict: r.majority_verdict,
+      commentCountAtGen: r.comment_count_at_gen,
+      generatedAt: r.generated_at,
+    };
+  });
