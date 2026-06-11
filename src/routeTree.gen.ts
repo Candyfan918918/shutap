@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as StreamRouteImport } from './routes/stream'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
+import { Route as SitemapCourtsDotxmlRouteImport } from './routes/sitemap-courts[.]xml'
+import { Route as SitemapCasesDotxmlRouteImport } from './routes/sitemap-cases[.]xml'
 import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
 import { Route as CourtRouteImport } from './routes/court'
@@ -72,6 +76,26 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const StreamRoute = StreamRouteImport.update({
   id: '/stream',
   path: '/stream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
+  id: '/sitemap-static.xml',
+  path: '/sitemap-static.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCourtsDotxmlRoute = SitemapCourtsDotxmlRouteImport.update({
+  id: '/sitemap-courts.xml',
+  path: '/sitemap-courts.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCasesDotxmlRoute = SitemapCasesDotxmlRouteImport.update({
+  id: '/sitemap-cases.xml',
+  path: '/sitemap-cases.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HofRoute = HofRouteImport.update({
@@ -361,6 +385,10 @@ export interface FileRoutesByFullPath {
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
+  '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -415,6 +443,10 @@ export interface FileRoutesByTo {
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
+  '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/compose': typeof AuthenticatedComposeRoute
@@ -471,6 +503,10 @@ export interface FileRoutesById {
   '/court': typeof CourtRoute
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
+  '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
+  '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stream': typeof StreamRoute
   '/welcome': typeof WelcomeRoute
   '/_authenticated/compose': typeof AuthenticatedComposeRoute
@@ -528,6 +564,10 @@ export interface FileRouteTypes {
     | '/court'
     | '/enter'
     | '/hof'
+    | '/sitemap-cases.xml'
+    | '/sitemap-courts.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/stream'
     | '/welcome'
     | '/compose'
@@ -582,6 +622,10 @@ export interface FileRouteTypes {
     | '/court'
     | '/enter'
     | '/hof'
+    | '/sitemap-cases.xml'
+    | '/sitemap-courts.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/stream'
     | '/welcome'
     | '/compose'
@@ -637,6 +681,10 @@ export interface FileRouteTypes {
     | '/court'
     | '/enter'
     | '/hof'
+    | '/sitemap-cases.xml'
+    | '/sitemap-courts.xml'
+    | '/sitemap-static.xml'
+    | '/sitemap.xml'
     | '/stream'
     | '/welcome'
     | '/_authenticated/compose'
@@ -694,6 +742,10 @@ export interface RootRouteChildren {
   CourtRoute: typeof CourtRoute
   EnterRoute: typeof EnterRouteWithChildren
   HofRoute: typeof HofRoute
+  SitemapCasesDotxmlRoute: typeof SitemapCasesDotxmlRoute
+  SitemapCourtsDotxmlRoute: typeof SitemapCourtsDotxmlRoute
+  SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StreamRoute: typeof StreamRoute
   WelcomeRoute: typeof WelcomeRoute
   AliasAliasIdRoute: typeof AliasAliasIdRoute
@@ -722,6 +774,34 @@ declare module '@tanstack/react-router' {
       path: '/stream'
       fullPath: '/stream'
       preLoaderRoute: typeof StreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-static.xml': {
+      id: '/sitemap-static.xml'
+      path: '/sitemap-static.xml'
+      fullPath: '/sitemap-static.xml'
+      preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-courts.xml': {
+      id: '/sitemap-courts.xml'
+      path: '/sitemap-courts.xml'
+      fullPath: '/sitemap-courts.xml'
+      preLoaderRoute: typeof SitemapCourtsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-cases.xml': {
+      id: '/sitemap-cases.xml'
+      path: '/sitemap-cases.xml'
+      fullPath: '/sitemap-cases.xml'
+      preLoaderRoute: typeof SitemapCasesDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hof': {
@@ -1218,6 +1298,10 @@ const rootRouteChildren: RootRouteChildren = {
   CourtRoute: CourtRoute,
   EnterRoute: EnterRouteWithChildren,
   HofRoute: HofRoute,
+  SitemapCasesDotxmlRoute: SitemapCasesDotxmlRoute,
+  SitemapCourtsDotxmlRoute: SitemapCourtsDotxmlRoute,
+  SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StreamRoute: StreamRoute,
   WelcomeRoute: WelcomeRoute,
   AliasAliasIdRoute: AliasAliasIdRoute,
