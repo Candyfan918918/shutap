@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
 import { Route as SitemapCourtsDotxmlRouteImport } from './routes/sitemap-courts[.]xml'
 import { Route as SitemapCasesDotxmlRouteImport } from './routes/sitemap-cases[.]xml'
+import { Route as OutcomesRouteImport } from './routes/outcomes'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as HofRouteImport } from './routes/hof'
 import { Route as EnterRouteImport } from './routes/enter'
@@ -101,6 +102,11 @@ const SitemapCourtsDotxmlRoute = SitemapCourtsDotxmlRouteImport.update({
 const SitemapCasesDotxmlRoute = SitemapCasesDotxmlRouteImport.update({
   id: '/sitemap-cases.xml',
   path: '/sitemap-cases.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutcomesRoute = OutcomesRouteImport.update({
+  id: '/outcomes',
+  path: '/outcomes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
@@ -418,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/outcomes': typeof OutcomesRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/outcomes': typeof OutcomesRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -546,6 +554,7 @@ export interface FileRoutesById {
   '/enter': typeof EnterRouteWithChildren
   '/hof': typeof HofRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
+  '/outcomes': typeof OutcomesRoute
   '/sitemap-cases.xml': typeof SitemapCasesDotxmlRoute
   '/sitemap-courts.xml': typeof SitemapCourtsDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
@@ -612,6 +621,7 @@ export interface FileRouteTypes {
     | '/enter'
     | '/hof'
     | '/llms-full.txt'
+    | '/outcomes'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -675,6 +685,7 @@ export interface FileRouteTypes {
     | '/enter'
     | '/hof'
     | '/llms-full.txt'
+    | '/outcomes'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -739,6 +750,7 @@ export interface FileRouteTypes {
     | '/enter'
     | '/hof'
     | '/llms-full.txt'
+    | '/outcomes'
     | '/sitemap-cases.xml'
     | '/sitemap-courts.xml'
     | '/sitemap-static.xml'
@@ -805,6 +817,7 @@ export interface RootRouteChildren {
   EnterRoute: typeof EnterRouteWithChildren
   HofRoute: typeof HofRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
+  OutcomesRoute: typeof OutcomesRoute
   SitemapCasesDotxmlRoute: typeof SitemapCasesDotxmlRoute
   SitemapCourtsDotxmlRoute: typeof SitemapCourtsDotxmlRoute
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
@@ -866,6 +879,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap-cases.xml'
       fullPath: '/sitemap-cases.xml'
       preLoaderRoute: typeof SitemapCasesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outcomes': {
+      id: '/outcomes'
+      path: '/outcomes'
+      fullPath: '/outcomes'
+      preLoaderRoute: typeof OutcomesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms-full.txt': {
@@ -1410,6 +1430,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnterRoute: EnterRouteWithChildren,
   HofRoute: HofRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
+  OutcomesRoute: OutcomesRoute,
   SitemapCasesDotxmlRoute: SitemapCasesDotxmlRoute,
   SitemapCourtsDotxmlRoute: SitemapCourtsDotxmlRoute,
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
