@@ -70,17 +70,16 @@ export const castVerdict = createServerFn({ method: "POST" })
       null;
     const ip_hash = await hashIp(rawIp);
 
-    // Velocity check: 10+ same-IP votes in last 5 min.
+    // Velocity check: 10+ votes by this user in last 5 min.
+    // Uses user_id (not ip_hash) so signed-in abusers are caught even across IPs.
     let quarantined = false;
-    if (ip_hash) {
-      const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
-      const { count } = await supabaseAdmin
-        .from("post_verdict_votes")
-        .select("post_id", { count: "exact", head: true })
-        .eq("ip_hash", ip_hash)
-        .gte("created_at", fiveMinAgo);
-      if ((count ?? 0) >= 10) quarantined = true;
-    }
+    const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+    const { count } = await supabaseAdmin
+      .from("post_verdict_votes")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", ctx.userId)
+      .gte("created_at", fiveMinAgo);
+    if ((count ?? 0) >= 10) quarantined = true;
 
     const { error } = await supabaseAdmin
       .from("post_verdict_votes")
