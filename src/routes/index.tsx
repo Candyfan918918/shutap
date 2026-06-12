@@ -335,6 +335,60 @@ function HomePage() {
         </div>
       </section>
 
+      {/* SECTION 2b — THE COURT */}
+      <section className="section-reveal in-view border-b border-c-border">
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">The Court</h2>
+          <p className="mt-2 text-sm italic text-c-text-3">
+            Not a tribunal. A room full of strangers with opinions.
+          </p>
+
+          <div className="mt-8 grid gap-8 sm:grid-cols-2">
+            <div>
+              <h3 className="font-serif text-lg text-c-text-1">How a case moves</h3>
+              <ol className="mt-4 space-y-3 text-sm leading-relaxed text-c-text-2">
+                <li>
+                  <span className="text-c-text-3 tabular-nums mr-2">01</span>
+                  Someone opens a case. <span className="text-c-text-1">"My sister wore white to my wedding."</span>
+                </li>
+                <li>
+                  <span className="text-c-text-3 tabular-nums mr-2">02</span>
+                  The court reads it. Votes land — guilty, not guilty, red flag, run.
+                </li>
+                <li>
+                  <span className="text-c-text-3 tabular-nums mr-2">03</span>
+                  A deadline hits. The verdict locks.
+                </li>
+                <li>
+                  <span className="text-c-text-3 tabular-nums mr-2">04</span>
+                  Weeks later, the author returns with what actually happened.
+                </li>
+              </ol>
+            </div>
+
+            <div className="rounded-md border border-c-border bg-c-surface-2 p-5">
+              <div className="text-[10px] uppercase tracking-wider text-c-text-3">A note from the bench</div>
+              <p className="mt-3 text-sm leading-relaxed text-c-text-2">
+                Verdicts here are opinions, not rulings. No one is named. Nothing is enforceable.
+                The court is a mirror, not a gavel — use it to think, not to punish.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-c-text-3">
+                If you're in danger, the court is the wrong room. Call someone who can actually help.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <a
+              href={`${APP}/court`}
+              className="cta-ghost inline-flex items-center justify-center rounded-md border border-c-border px-4 py-2 text-sm text-c-text-1 hover:bg-c-surface-2"
+            >
+              Enter the Court →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 3b — HALL OF FAME */}
       <section
         ref={hofRef}
