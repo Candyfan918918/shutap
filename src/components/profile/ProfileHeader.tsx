@@ -1,4 +1,4 @@
-// Public profile header.
+// Public profile header — Shutap vocabulary only. No followers/likes/posts copy.
 import { Link } from "@tanstack/react-router";
 import type { PublicProfile } from "@/lib/profile.functions";
 import { FollowButton } from "./FollowButton";
@@ -8,6 +8,15 @@ function stat(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
   return n.toString();
+}
+
+function StatItem({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col">
+      <span className="font-medium tabular-nums text-foreground">{stat(value)}</span>
+      <span className="text-xs text-muted-foreground leading-tight">{label}</span>
+    </div>
+  );
 }
 
 export function ProfileHeader({ p, onChanged }: { p: PublicProfile; onChanged: () => void }) {
@@ -45,26 +54,20 @@ export function ProfileHeader({ p, onChanged }: { p: PublicProfile; onChanged: (
             <div className="mt-2 text-xs text-muted-foreground">📍 {p.cityLabel}</div>
           )}
 
-          <div className="mt-3 flex items-center gap-4 text-sm">
-            <div><span className="font-medium tabular-nums">{stat(p.postCount)}</span> <span className="text-muted-foreground">posts</span></div>
-            <div><span className="font-medium tabular-nums">{stat(p.followerCount)}</span> <span className="text-muted-foreground">followers</span></div>
-            <div><span className="font-medium tabular-nums">{stat(p.followingCount)}</span> <span className="text-muted-foreground">following</span></div>
+          {/* Alias profile stats row — Shutap vocabulary. */}
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatItem value={p.postCount} label="cases brought" />
+            <StatItem value={p.counselCount} label="counsel given" />
+            <StatItem value={p.courtAppearances} label="Court appearances" />
+            <StatItem value={p.outcomesTracked} label="outcomes tracked" />
           </div>
 
-          {(p.avgScore > 0 || p.maxScore > 0) && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {p.avgScore > 0 && (
-                <span className="text-xs px-2 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary">
-                  🚨 avg chaos {p.avgScore}
-                </span>
-              )}
-              {p.maxScore >= 700 && (
-                <span className="text-xs px-2 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent">
-                  👑 peak {p.maxScore}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Community trust — tier, never a number. */}
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent">
+              ⚖️ {p.trustTier}
+            </span>
+          </div>
         </div>
       </div>
     </div>
