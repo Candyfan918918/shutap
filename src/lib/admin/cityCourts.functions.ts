@@ -1,9 +1,6 @@
 // Admin tooling for city court toggles, caps and pause reasons.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-type Ctx = { userId: string };
 
 export interface CityCourtRow {
   code: string;
@@ -15,12 +12,17 @@ export interface CityCourtRow {
   updatedAt: string;
 }
 
+async function gateAdmin() {
+  const { requireAdminSession } = await import("./session.server");
+  const { assertAdmin } = await import("./role.server");
+  const session = await requireAdminSession();
+  await assertAdmin(session.adminId);
+  return session;
+}
+
 export const listCityCourts = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const ctx = context as Ctx;
-    const { assertAdmin } = await import("./role.server");
-    await assertAdmin(ctx.userId);
+  .handler(async () => {
+    await gateAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("city_courts")
@@ -41,7 +43,6 @@ export const listCityCourts = createServerFn({ method: "GET" })
   });
 
 export const toggleCityCourt = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z.object({
       code: z.string().min(1).max(16),
@@ -49,17 +50,15 @@ export const toggleCityCourt = createServerFn({ method: "POST" })
       pausedReason: z.string().max(280).optional(),
     }).parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const ctx = context as Ctx;
-    const { assertAdmin } = await import("./role.server");
-    await assertAdmin(ctx.userId);
+  .handler(async ({ data }) => {
+    const session = await gateAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("city_courts")
       .update({
         active: data.active,
         paused_reason: data.active ? null : (data.pausedReason ?? "Paused by Bench"),
-        updated_by: ctx.userId,
+        updated_by: session.adminId,
         updated_at: new Date().toISOString(),
       })
       .eq("code", data.code);
@@ -68,23 +67,20 @@ export const toggleCityCourt = createServerFn({ method: "POST" })
   });
 
 export const updateCityCourtCap = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z.object({
       code: z.string().min(1).max(16),
       nominationCap: z.number().int().min(0).max(50),
     }).parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const ctx = context as Ctx;
-    const { assertAdmin } = await import("./role.server");
-    await assertAdmin(ctx.userId);
+  .handler(async ({ data }) => {
+    const session = await gateAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("city_courts")
       .update({
         nomination_cap: data.nominationCap,
-        updated_by: ctx.userId,
+        updated_by: session.adminId,
         updated_at: new Date().toISOString(),
       })
       .eq("code", data.code);
