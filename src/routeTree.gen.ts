@@ -22,6 +22,7 @@ import { Route as EnterRouteImport } from './routes/enter'
 import { Route as DocketRouteImport } from './routes/docket'
 import { Route as DataRouteImport } from './routes/data'
 import { Route as CourtRouteImport } from './routes/court'
+import { Route as AmIWrongRouteImport } from './routes/am-i-wrong'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -138,6 +139,11 @@ const DataRoute = DataRouteImport.update({
 const CourtRoute = CourtRouteImport.update({
   id: '/court',
   path: '/court',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AmIWrongRoute = AmIWrongRouteImport.update({
+  id: '/am-i-wrong',
+  path: '/am-i-wrong',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -425,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/am-i-wrong': typeof AmIWrongRoute
   '/court': typeof CourtRoute
   '/data': typeof DataRouteWithChildren
   '/docket': typeof DocketRoute
@@ -490,6 +497,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/am-i-wrong': typeof AmIWrongRoute
   '/court': typeof CourtRoute
   '/data': typeof DataRouteWithChildren
   '/docket': typeof DocketRoute
@@ -557,6 +565,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/am-i-wrong': typeof AmIWrongRoute
   '/court': typeof CourtRoute
   '/data': typeof DataRouteWithChildren
   '/docket': typeof DocketRoute
@@ -625,6 +634,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/am-i-wrong'
     | '/court'
     | '/data'
     | '/docket'
@@ -690,6 +700,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/am-i-wrong'
     | '/court'
     | '/data'
     | '/docket'
@@ -756,6 +767,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/admin'
+    | '/am-i-wrong'
     | '/court'
     | '/data'
     | '/docket'
@@ -824,6 +836,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AmIWrongRoute: typeof AmIWrongRoute
   CourtRoute: typeof CourtRoute
   DataRoute: typeof DataRouteWithChildren
   DocketRoute: typeof DocketRoute
@@ -941,6 +954,13 @@ declare module '@tanstack/react-router' {
       path: '/court'
       fullPath: '/court'
       preLoaderRoute: typeof CourtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/am-i-wrong': {
+      id: '/am-i-wrong'
+      path: '/am-i-wrong'
+      fullPath: '/am-i-wrong'
+      preLoaderRoute: typeof AmIWrongRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1445,6 +1465,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AmIWrongRoute: AmIWrongRoute,
   CourtRoute: CourtRoute,
   DataRoute: DataRouteWithChildren,
   DocketRoute: DocketRoute,
