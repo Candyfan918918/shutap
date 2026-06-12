@@ -15,7 +15,7 @@ export async function isAdmin(adminId: string | null | undefined): Promise<boole
     .from("admin_users")
     .select("role, active")
     .eq("id", adminId)
-    .in("role", ADMIN_ROLES as unknown as string[])
+    .in("role", [...ADMIN_ROLES])
     .eq("active", true)
     .maybeSingle();
   return !!data;
@@ -26,7 +26,7 @@ export async function assertAdmin(adminId: string): Promise<void> {
     .from("admin_users")
     .select("role, active")
     .eq("id", adminId)
-    .in("role", ADMIN_ROLES as unknown as string[])
+    .in("role", [...ADMIN_ROLES])
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
