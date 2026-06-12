@@ -2,6 +2,7 @@
 // above-the-fold animation. All content rules below are exact per spec.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getHomepageData, type LiveCase, type ResolvedCase } from "@/lib/marketing/homepage.functions";
+import { headHome } from "@/lib/seo/meta";
 
 const CANONICAL = "https://shutap.com/";
 const BENCH_LINES = [
