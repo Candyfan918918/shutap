@@ -1,24 +1,34 @@
 // Admin role assertion — call from inside server-fn handlers only.
+// Queries the admin_users table (admin_role enum), NOT public.user_roles.
+// The `adminId` argument is the admin_users.id from the admin cookie session,
+// not the Supabase auth.users id (admin_users has no link to auth.users).
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export async function assertAdmin(userId: string): Promise<void> {
+// Roles considered "admin" for gating admin tooling.
+// Matches the admin_role enum values that should pass assertAdmin().
+export const ADMIN_ROLES = ["super_admin", "moderator"] as const;
+export type AdminGateRole = (typeof ADMIN_ROLES)[number];
+
+export async function isAdmin(adminId: string | null | undefined): Promise<boolean> {
+  if (!adminId) return false;
+  const { data } = await supabaseAdmin
+    .from("admin_users")
+    .select("role, active")
+    .eq("id", adminId)
+    .in("role", ADMIN_ROLES as unknown as string[])
+    .eq("active", true)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function assertAdmin(adminId: string): Promise<void> {
   const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
+    .from("admin_users")
+    .select("role, active")
+    .eq("id", adminId)
+    .in("role", ADMIN_ROLES as unknown as string[])
+    .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("forbidden");
-}
-
-export async function isAdmin(userId: string | null | undefined): Promise<boolean> {
-  if (!userId) return false;
-  const { data } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  return !!data;
 }
