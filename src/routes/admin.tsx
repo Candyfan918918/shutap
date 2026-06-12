@@ -7,6 +7,12 @@ import { AdminSidebar } from "@/components/admin/Sidebar";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { name: "robots", content: "noindex,nofollow" },
+      { title: "Admin — Shutap" },
+    ],
+  }),
   beforeLoad: async ({ location }) => {
     if (location.pathname === "/admin/login") return;
     const me = await getAdminMe({});
