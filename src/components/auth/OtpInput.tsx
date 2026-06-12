@@ -77,6 +77,7 @@ export function OtpInput({
           maxLength={length}
           value={v}
           disabled={disabled}
+          aria-label={`Digit ${i + 1} of ${length}`}
           onChange={(e) => onChange(i, e.target.value)}
           onKeyDown={(e) => onKeyDown(i, e)}
           className="w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-medium rounded-xl bg-surface-elevated border border-border focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 tabular-nums"

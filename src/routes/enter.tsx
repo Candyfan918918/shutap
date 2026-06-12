@@ -116,6 +116,7 @@ function EnterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("enter.emailPlaceholder")}
+              aria-label="Email address"
               className="w-full px-4 py-3.5 rounded-full bg-surface-elevated border border-border focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 text-base"
             />
             <motion.button
