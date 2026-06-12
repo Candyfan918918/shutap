@@ -33,6 +33,21 @@ async function resolveViewerId(): Promise<string | null> {
   }
 }
 
+export type TrustTier =
+  | "Building trust"
+  | "Established juror"
+  | "Respected voice"
+  | "Court elder"
+  | "Legend";
+
+export function trustTierFor(score: number): TrustTier {
+  if (score >= 800) return "Legend";
+  if (score >= 500) return "Court elder";
+  if (score >= 300) return "Respected voice";
+  if (score >= 100) return "Established juror";
+  return "Building trust";
+}
+
 export interface PublicProfile {
   id: string;
   handle: string;
@@ -44,10 +59,15 @@ export interface PublicProfile {
   countryCode: string | null;
   vibe: string | null;
   anonymousMode: boolean;
-  // counts
+  // counts (Shutap vocabulary)
   followerCount: number;
   followingCount: number;
-  postCount: number;
+  postCount: number; // cases brought
+  counselCount: number; // counsel given
+  courtAppearances: number; // distinct cases voted on
+  outcomesTracked: number; // outcomes the user has reported
+  trustScore: number;
+  trustTier: TrustTier;
   avgScore: number;
   maxScore: number;
   badges: Badge[];
