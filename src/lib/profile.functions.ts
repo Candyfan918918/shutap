@@ -139,7 +139,7 @@ async function hydrateProfile(
   const id = row.id as string;
 
   // Parallel aggregates
-  const [followers, following, posts, scans, friendship] = await Promise.all([
+  const [followers, following, posts, scans, friendship, counsel, votes, outcomes, repRow] = await Promise.all([
     supabaseAdmin.from("follows").select("follower_id", { count: "exact", head: true }).eq("followee_id", id),
     supabaseAdmin.from("follows").select("followee_id", { count: "exact", head: true }).eq("follower_id", id),
     supabaseAdmin
@@ -156,6 +156,25 @@ async function hydrateProfile(
           .or(`and(requester_id.eq.${viewerId},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${viewerId})`)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
+    supabaseAdmin
+      .from("post_comments")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", id)
+      .eq("status", "published")
+      .is("deleted_at", null),
+    supabaseAdmin
+      .from("post_verdict_votes")
+      .select("post_id")
+      .eq("user_id", id),
+    supabaseAdmin
+      .from("story_outcomes")
+      .select("post_id", { count: "exact", head: true })
+      .eq("author_id", id),
+    supabaseAdmin
+      .from("profiles")
+      .select("justice_score, wisdom_score, empathy_score, prediction_score")
+      .eq("id", id)
+      .maybeSingle(),
   ]);
 
   const isFollowing = viewerId && viewerId !== id
