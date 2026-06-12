@@ -37,10 +37,16 @@ export const Route = createFileRoute("/case/$caseSlug")({
   },
   component: CasePage,
   head: ({ params, loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Case — Shutap" }] };
+    if (!loaderData) {
+      return buildHead({
+        title: "Case — Shutap",
+        description: "A case before the Shutap court.",
+        canonical: `${SHUTAP_ORIGIN}/case/${params.caseSlug}`,
+        ogType: "article",
+      });
+    }
     const d = loaderData;
-    const url = `${ORIGIN}/case/${params.caseSlug}`;
-    const desc = caseBrief(d);
+    const url = `${SHUTAP_ORIGIN}/case/${params.caseSlug}`;
     const story200 = d.storyText.length > 200 ? d.storyText.slice(0, 200) + "…" : d.storyText;
 
     const qaPage = {
@@ -88,13 +94,10 @@ export const Route = createFileRoute("/case/$caseSlug")({
       })),
     };
 
-    const scripts: Array<{ type: string; children: string }> = [
-      { type: "application/ld+json", children: JSON.stringify(qaPage) },
-      { type: "application/ld+json", children: JSON.stringify(forumPosting) },
-    ];
+    const jsonLd: unknown[] = [qaPage, forumPosting];
 
     if (d.outcomeType) {
-      const faq = {
+      jsonLd.push({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         mainEntity: [
@@ -115,26 +118,28 @@ export const Route = createFileRoute("/case/$caseSlug")({
             },
           },
         ],
-      };
-      scripts.push({ type: "application/ld+json", children: JSON.stringify(faq) });
+      });
     }
 
+    const head = headCase({
+      caseId: params.caseSlug,
+      caseTitle: d.caseTitle,
+      questionBeforeCourt: d.questionBeforeCourt,
+      dominantVerdict: d.dominantVerdict ?? "no_verdict",
+      dominantVerdictPct: d.dominantVerdictPct,
+      totalVotes: d.totalVotes,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt,
+      hasOutcome: Boolean(d.outcomeType),
+      outcomeDays: d.daysToOutcome,
+    });
+
     return {
-      meta: [
-        { title: `${d.caseTitle} — Shutap` },
-        { name: "description", content: desc },
-        { property: "og:title", content: d.caseTitle },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "article" },
-        { property: "og:url", content: url },
-        { property: "article:published_time", content: d.createdAt },
-        { property: "article:modified_time", content: d.updatedAt },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: d.caseTitle },
-        { name: "twitter:description", content: desc },
+      ...head,
+      scripts: [
+        ...head.scripts,
+        ...jsonLd.map((obj) => ({ type: "application/ld+json", children: JSON.stringify(obj) })),
       ],
-      links: [{ rel: "canonical", href: url }],
-      scripts,
     };
   },
   errorComponent: ({ error }) => (
