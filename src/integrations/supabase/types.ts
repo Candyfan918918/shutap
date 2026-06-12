@@ -2457,6 +2457,7 @@ export type Database = {
           like_count: number
           locale: string
           media: Json
+          moderation_status: string
           outcome_recorded_at: string | null
           published_at: string | null
           region: string | null
@@ -2483,6 +2484,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media?: Json
+          moderation_status?: string
           outcome_recorded_at?: string | null
           published_at?: string | null
           region?: string | null
@@ -2509,6 +2511,7 @@ export type Database = {
           like_count?: number
           locale?: string
           media?: Json
+          moderation_status?: string
           outcome_recorded_at?: string | null
           published_at?: string | null
           region?: string | null
