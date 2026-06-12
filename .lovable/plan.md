@@ -1,72 +1,65 @@
-# Shutap Step 6: Fill-the-Gaps Plan
+# Homepage Motion Pass — `src/routes/index.tsx`
 
-The audit found ~40 distinct gaps across 4 surfaces. Shipping everything in one turn would be unsafe (DB schema changes, route → portal refactor, new components, realtime wiring). I'll split into 4 phases so you can review each. **This turn = Phase 1 only.**
+Scope is strictly `src/routes/index.tsx` (plus a tiny co-located hook). No new deps, no `framer-motion`/`GSAP`, no edits to `styles.css`.
 
----
+## What we'll build
 
-## Phase 1 — Story Detail + Voting (no schema changes)
+1. **Reusable in-view hook** (defined inside `index.tsx`, not a new file): `useInView(ref, options)` — single-fire IntersectionObserver, disconnects after first hit.
+2. **Reusable count-up hook**: `useCountUp(target, { duration, start })` driven by `requestAnimationFrame` with `ease-out cubic`. Starts when a passed `enabled` flag flips true (wired to `useInView`).
+3. **Single `<style>` block** at the top of `HomePage` containing all keyframes (`fadeUp`, `ghostDrift`, `livePulse`, `cardIn`, `goldGlow`) + the `prefers-reduced-motion` reset as the last rule.
 
-Highest-value, lowest-risk. All frontend + reuse of existing `castVerdict`.
+## Section-by-section changes
 
-1. **VerdictBar upgrade** (`src/components/posts/VerdictBar.tsx`)
-   - Add Supabase Realtime subscription (port pattern from `CompactVerdictBar`)
-   - Render 7 buttons as 3+3+1 grid
-   - Selected state: filled bg + 1px white outline
-   - Labels adapt by `relationship_type` (lookup map)
-   - Replace toast on anon with SoftGate (`useSoftGate`)
-   - Accept `readDepthPercent` prop and pass to `castVerdict`
+**Hero**
+- Add a ghost watermark div behind the headline using `ghostDrift 14s ease-in-out infinite` (positioned absolute, low opacity, `pointer-events:none`). Note: hero currently has no watermark element; we'll add a decorative `<span aria-hidden>` for this.
+- `h1` → `fadeUp 0.6s` on mount.
+- Subheading `p` → `fadeUp` with `animation-delay: 0.15s`, initial `opacity:0`.
+- CTA wrapper → `fadeUp` delay `0.3s`.
+- Verdict counter line → swap `totalVerdicts.toLocaleString()` for `useCountUp(totalVerdicts, { duration: 1800 })` rendered with `.toLocaleString()` each frame.
+- **SEO pills**: the current file has no SEO pills section. We will NOT invent one; the staggered-pill animation in the brief is skipped unless the user wants pills added (flagged below).
 
-2. **Scroll-depth tracker** in `post.$postId.tsx`
-   - Track max scroll % via scroll listener, feed to VerdictBar
+**Live dot for "In Session Right Now"**
+- Current heading has no red dot. Add a small `<span>` dot before the H2 with `livePulse 1.8s ease-in-out infinite` using existing brand red token (we'll use the literal `rgba(212,80,64,…)` per spec).
 
-3. **New components** (in `src/components/posts/`)
-   - `AliasPill.tsx` — full-size alias + "one-sided / both sides heard" label
-   - `JudgmentButtons.tsx` — 2×2 grid (Not Guilty | Guilty | Mixed | Need More Info), local state for now (no DB persistence yet — flagged for Phase 4)
-   - `RelateButtonStory.tsx` wrapper around existing `RelateButton` for story detail
-   - `SteelmanCard.tsx` — collapsible "The Bench wonders" (gated on `post.has_steelman`, falls back to `null` if field missing)
-   - `DevilsAdvocateToggle.tsx` — local toggle that flips verdict context label
-   - `CaseSummaryToggle.tsx` — collapsible facts/timeline/players (reads existing post fields, empty-graceful)
-   - `SpillScanCTA.tsx` — inline card appearing after vote
-   - `AuthorMenu.tsx` — three-dot dropdown for author: Retract / Post update / Close case (links to existing `/me/posts/$postId/*` routes)
-   - `ServiceCard.tsx` — qualified-category service nudge
+**Docket cards (live cases)**
+- Wrap the `<ul>` with a ref + `useInView` (threshold 0.15).
+- Each `<DocketCard>` gets `animation: cardIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards` with `animation-delay: ${i * 0.1}s` once the section is in view (apply via inline style on the `<li>`; initial state `opacity:0; transform:translateY(22px)`).
+- Verdict bar: replace the static `width:${pct}%` with a CSS var `--bar-width`. When in view, set `style={{ width: 'var(--bar-width)', transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)', transitionDelay: `${i*0.1 + 0.2}s` }}`; before in-view, width is `0%`.
+- Hover: card gets `translateY(-2px)` + soft shadow on hover via Tailwind utilities (no JS).
 
-4. **Wire into `post.$postId.tsx`**
-   - Add AliasPill above title
-   - Render `case_title` + `question_before_court` if present on post (graceful fallback)
-   - Mount all new components in spec order
-   - Show CTA inline after vote (track local `hasVoted` state)
+**HOF band**
+- The current file has **no HOF band / stat counters / trophy icon**. We will NOT fabricate one. The HOF-band motion (counters, gold glow, card stagger) is skipped unless the user wants the band added (flagged below).
 
-**Out of scope this phase (documented):**
-- `case_title`, `question_before_court`, `has_steelman`, judgment-vote persistence → need migrations (Phase 4)
+**Story stream**
+- The current file has **no embedded story stream** on `/`. The masonry stagger entrance is skipped unless the user wants a stream block added (flagged below).
+- "Read more stories →" button likewise n/a.
 
----
+**Section reveals**
+- Each existing `<section>` (Hero, Docket, How-it-works, Proof, Why-it-exists) gets a ref + `useInView` (threshold 0.1) and toggles a class `in-view` that transitions `opacity 0 → 1` over `0.5s`. Hero is treated as immediately in view to avoid first-paint flash.
 
-## Phase 2 — Spill Portal Refactor
+**Hover states (Tailwind utility additions only)**
+- `DocketCard` `<li>`: `transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]`.
+- Primary CTA: `transition-transform duration-150 hover:scale-[1.03]`.
+- Ghost CTA: existing `hover:bg-c-surface-2` kept; add `transition-colors duration-150`.
 
-- Build `src/components/spill/SpillPortal.tsx` (full-screen Dialog + AnimatePresence)
-- Convert existing `/spill/$draftId/{chat,draft,score,scoring}` route content into portal step components
-- Mount portal from `_authenticated/route.tsx` via a `useSpillStore` trigger
-- Keep old routes as thin redirects → open portal
-- Add: top progress bar, slide-down question card, alias/anon toggle, cool-down offer, polishing spinner on `ready_to_edit`, guardian success + crisis card
+**Outcome block / How-it-works / Why-it-exists**
+- Inherit section-level fade-in only; no per-item stagger (out of spec).
 
-## Phase 3 — Scan Portal Refactor
+## Reduced motion
+The `<style>` block ends with:
+```css
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+```
+The count-up hook also short-circuits to the final value when `matchMedia('(prefers-reduced-motion: reduce)').matches`.
 
-- Same pattern: `ScanPortal.tsx` + step components
-- Fix score color ranges per spec, equal-width "Save privately / Post to feed" buttons, AI 2–3 sentence summary, service card
+## Open questions (please confirm before I build)
 
-## Phase 4 — Schema additions
+The brief references three blocks that don't exist on `/` today: **SEO pills in hero**, the **HOF stat band + cards**, and the **embedded story stream**. Three options:
 
-Migrations for:
-- `posts.case_title`, `posts.question_before_court`, `posts.has_steelman`, `posts.case_summary` jsonb
-- `post_judgment_votes` table (4-option judgment) with weighting + RLS + GRANTs
-- `tea_drafts` status `'ready_to_edit'`, `case_title`, `question_before_court` columns
-- Privacy phrase flagging in spill chat (server-side PII scrubber wiring)
-- Generalisation pill + cross-story warning
+- **A. Motion-only on what exists** (recommended): apply hero, live-dot, docket cards/bars, hover states, and section reveals. Skip pills/HOF/stream until those sections are actually added.
+- **B. I add stub sections** for HOF band and story stream on `/` so the brief's animations have something to attach to (this expands scope beyond pure motion).
+- **C. You point me at where those blocks already live** (maybe they were intended for a different route) and I'll apply motion there in a follow-up.
 
----
-
-## What I'll ship this turn
-
-Phase 1 only. No DB changes. ~10 new components + 2 file edits. Story detail will visibly match the spec for everything that doesn't need new columns; the columns-required pieces render gracefully when fields are absent.
-
-Reply **"go"** to start Phase 1, or tell me to re-scope (e.g. "do migrations first" or "skip judgment buttons").
+Which would you like?
