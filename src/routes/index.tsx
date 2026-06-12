@@ -1,7 +1,14 @@
 // Shutap marketing homepage. SSR via loader → server fn.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { getHomepageData, type LiveCase, type ResolvedCase } from "@/lib/marketing/homepage.functions";
+import {
+  getHomepageData,
+  type LiveCase,
+  type ResolvedCase,
+  type HofEntry,
+  type HofStats,
+  type StreamStory,
+} from "@/lib/marketing/homepage.functions";
 import { headHome } from "@/lib/seo/meta";
 
 const BENCH_LINES = [
@@ -100,7 +107,7 @@ function useCountUp(target: number, duration = 1800, enabled = true) {
 }
 
 function HomePage() {
-  const { totalVerdicts, liveCases, resolvedCase } =
+  const { totalVerdicts, liveCases, resolvedCase, hofStats, hofEntries, streamStories } =
     Route.useLoaderData() as import("@/lib/marketing/homepage.functions").HomepageData;
   const benchLine = dailyBenchLine();
 
@@ -110,10 +117,17 @@ function HomePage() {
   const [docketRef, docketIn] = useInView<HTMLElement>({ threshold: 0.1 });
   const [howRef, howIn] = useInView<HTMLElement>({ threshold: 0.1 });
   const [proofRef, proofIn] = useInView<HTMLElement>({ threshold: 0.1 });
+  const [hofRef, hofIn] = useInView<HTMLElement>({ threshold: 0.2 });
+  const [streamRef, streamIn] = useInView<HTMLElement>({ threshold: 0.05 });
   const [whyRef, whyIn] = useInView<HTMLElement>({ threshold: 0.1 });
 
   // Docket cards trigger (slightly tighter threshold for the cards themselves)
   const [docketListRef, docketListIn] = useInView<HTMLUListElement>({ threshold: 0.15 });
+
+  // HOF count-ups gated on band in-view
+  const verdictsWeek = useCountUp(hofStats.verdictsThisWeek, 1400, hofIn);
+  const casesDecided = useCountUp(hofStats.casesDecided, 1400, hofIn);
+  const unanimousPct = useCountUp(hofStats.unanimousPct, 1400, hofIn);
 
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1">
@@ -192,6 +206,32 @@ function HomePage() {
         .cta-primary { transition: transform 0.18s ease; }
         .cta-primary:hover { transform: scale(1.03); }
         .cta-ghost { transition: background-color 0.18s ease; }
+
+        @keyframes goldGlow {
+          0%, 100% { color: #c8960a; }
+          50%       { color: #e8b420; }
+        }
+        .gold-glow { animation: goldGlow 3s ease-in-out infinite; }
+
+        .hof-card {
+          opacity: 0;
+          transform: translateY(22px);
+          transition: border-color 0.2s ease;
+        }
+        .hof-list.in-view .hof-card {
+          animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        .hof-card:hover { border-color: rgba(200,150,10,0.5); }
+
+        .stream-entry { opacity: 0; transform: translateY(28px); }
+        .stream-container.in-view .stream-entry {
+          animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        .stream-more { opacity: 0; }
+        .stream-container.in-view .stream-more {
+          animation: fadeUp 0.5s ease forwards;
+          animation-delay: 0.6s;
+        }
 
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -295,6 +335,82 @@ function HomePage() {
         </div>
       </section>
 
+      {/* SECTION 3b — HALL OF FAME */}
+      <section
+        ref={hofRef}
+        className={`section-reveal border-b border-c-border ${hofIn ? "in-view" : ""}`}
+      >
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight flex items-center gap-3">
+            <span className="gold-glow" aria-hidden>⚖︎</span>
+            Hall of Fame
+          </h2>
+          <p className="mt-2 text-sm italic text-c-text-3">The court remembers.</p>
+
+          <dl className="mt-8 grid gap-6 sm:grid-cols-3">
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Verdicts this week</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{verdictsWeek.toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Cases decided</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{casesDecided.toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Unanimous rulings</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{unanimousPct}%</dd>
+            </div>
+          </dl>
+
+          {hofEntries.length > 0 ? (
+            <ul className={`hof-list mt-10 grid gap-4 sm:grid-cols-3 ${hofIn ? "in-view" : ""}`}>
+              {hofEntries.map((h, i) => <HofCard key={`${h.entityType}:${h.entityId}`} h={h} index={i} />)}
+            </ul>
+          ) : (
+            <p className="mt-8 text-sm text-c-text-3">The hall is still being built.</p>
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 3c — STORY STREAM */}
+      <section
+        ref={streamRef}
+        className={`section-reveal border-b border-c-border ${streamIn ? "in-view" : ""}`}
+      >
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">The Stream</h2>
+          <p className="mt-2 text-sm italic text-c-text-3">Stories the court is still chewing on.</p>
+
+          {streamStories.length === 0 ? (
+            <p className="mt-8 text-sm text-c-text-3">No stories yet. Be the first.</p>
+          ) : (
+            <div className={`stream-container mt-8 ${streamIn ? "in-view" : ""}`}>
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {streamStories.map((s, i) => (
+                  <li
+                    key={s.postId}
+                    className="stream-entry"
+                    style={{ animationDelay: `${i * 0.07}s` }}
+                  >
+                    <StreamCard s={s} />
+                  </li>
+                ))}
+              </ul>
+              <div className="stream-more mt-8">
+                <a
+                  href={`${APP}/stream`}
+                  className="cta-ghost inline-flex items-center justify-center rounded-md border border-c-border px-4 py-2 text-sm text-c-text-1 hover:bg-c-surface-2"
+                >
+                  Read more stories →
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+
+
       {/* SECTION 4 — WHY IT EXISTS */}
       <section
         ref={whyRef}
@@ -371,6 +487,58 @@ function OutcomeBlock({ c }: { c: ResolvedCase }) {
         ) : null}
       </Link>
     </article>
+  );
+}
+
+function HofCard({ h, index }: { h: HofEntry; index: number }) {
+  const inner = (
+    <>
+      <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+        {h.category.replace(/_/g, " ")}
+      </div>
+      <div className="mt-2 font-serif text-base leading-snug text-c-text-1">
+        {h.title}
+      </div>
+      <div className="mt-3 text-[11px] text-c-text-3 tabular-nums">
+        {h.score.toLocaleString()} pts
+      </div>
+    </>
+  );
+  return (
+    <li
+      className="hof-card rounded-md border border-c-border bg-c-surface-2 p-4"
+      style={{ animationDelay: `${0.05 + index * 0.1}s` }}
+    >
+      {h.postId ? (
+        <Link to="/case/$caseSlug" params={{ caseSlug: h.postId }} className="block group">
+          {inner}
+        </Link>
+      ) : (
+        inner
+      )}
+    </li>
+  );
+}
+
+function StreamCard({ s }: { s: StreamStory }) {
+  return (
+    <Link
+      to="/case/$caseSlug"
+      params={{ caseSlug: s.postId }}
+      className="block group rounded-md border border-c-border bg-c-surface-2 p-4 transition-colors hover:bg-c-surface-3"
+    >
+      {s.category ? (
+        <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+          {s.category.replace(/_/g, " ")}
+        </div>
+      ) : null}
+      <div className="mt-2 font-serif text-base leading-snug text-c-text-1 group-hover:underline underline-offset-4">
+        {s.title}
+      </div>
+      {s.snippet ? (
+        <p className="mt-2 text-sm leading-relaxed text-c-text-2 line-clamp-3">{s.snippet}</p>
+      ) : null}
+    </Link>
   );
 }
 
