@@ -1,8 +1,7 @@
 // /outcomes — resolved cases with their real-world outcomes. Public landing.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-
-const ORIGIN = "https://shutap.com";
+import { headOutcomes } from "@/lib/seo/meta";
 
 type ResolvedCase = {
   postId: string;
