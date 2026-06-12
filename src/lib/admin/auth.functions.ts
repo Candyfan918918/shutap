@@ -3,13 +3,13 @@
 // reach this module's top-level via the client graph).
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const PENDING_HEADER = "x-shutap-admin-pending";
 const PENDING_MAX_MS = 5 * 60 * 1000;
 
 function signPending(adminId: string): string {
   // tiny HMAC over adminId|expiry using session seed
-  const { createHmac } = require("node:crypto") as typeof import("node:crypto");
   const exp = Date.now() + PENDING_MAX_MS;
   const payload = `${adminId}.${exp}`;
   const sig = createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
@@ -17,7 +17,6 @@ function signPending(adminId: string): string {
   return `${payload}.${sig}`;
 }
 function verifyPending(token: string): string | null {
-  const { createHmac, timingSafeEqual } = require("node:crypto") as typeof import("node:crypto");
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [adminId, expStr, sig] = parts;
