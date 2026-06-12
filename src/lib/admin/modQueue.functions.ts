@@ -73,7 +73,6 @@ export const listModQueue = createServerFn({ method: "GET" })
   });
 
 export const resolveQueueItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z.object({
       id: z.string().uuid(),
@@ -81,10 +80,8 @@ export const resolveQueueItem = createServerFn({ method: "POST" })
       notes: z.string().max(500).optional(),
     }).parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const ctx = context as Ctx;
-    const { assertAdmin } = await import("./role.server");
-    await assertAdmin(ctx.userId);
+  .handler(async ({ data }) => {
+    const session = await gateAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: item, error: lerr } = await supabaseAdmin
@@ -100,7 +97,7 @@ export const resolveQueueItem = createServerFn({ method: "POST" })
       .from("mod_queue")
       .update({
         status: data.decision,
-        moderator_id: ctx.userId,
+        moderator_id: session.adminId,
         notes: data.notes ?? null,
         resolved_at: new Date().toISOString(),
       })
