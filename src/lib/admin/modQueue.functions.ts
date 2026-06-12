@@ -1,9 +1,14 @@
 // Mod queue — admin-only review of paused candidacy.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Ctx = { userId: string };
+async function gateAdmin() {
+  const { requireAdminSession } = await import("./session.server");
+  const { assertAdmin } = await import("./role.server");
+  const session = await requireAdminSession();
+  await assertAdmin(session.adminId);
+  return session;
+}
 
 export type ModReason = "pii_suspected" | "mass_flag" | "legal_risk" | "manual_hold" | "rate_limited";
 export type ModStatus = "pending" | "approved" | "rejected";
@@ -21,14 +26,11 @@ export interface ModQueueItem {
 }
 
 export const listModQueue = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z.object({ status: z.enum(["pending", "approved", "rejected", "all"]).default("pending") }).parse(i ?? {}),
   )
-  .handler(async ({ data, context }) => {
-    const ctx = context as Ctx;
-    const { assertAdmin } = await import("./role.server");
-    await assertAdmin(ctx.userId);
+  .handler(async ({ data }) => {
+    await gateAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("mod_queue")
