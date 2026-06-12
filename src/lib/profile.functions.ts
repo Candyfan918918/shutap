@@ -169,7 +169,7 @@ async function hydrateProfile(
     supabaseAdmin
       .from("story_outcomes")
       .select("post_id", { count: "exact", head: true })
-      .eq("author_id", id),
+      .eq("submitted_by", id),
     supabaseAdmin
       .from("profiles")
       .select("justice_score, wisdom_score, empathy_score, prediction_score")
