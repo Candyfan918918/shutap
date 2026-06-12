@@ -60,6 +60,7 @@ import { Route as AuthenticatedSettingsDataRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedScanStartRouteImport } from './routes/_authenticated/scan/start'
 import { Route as AuthenticatedProfileScansRouteImport } from './routes/_authenticated/profile/scans'
+import { Route as AuthenticatedMeModerationRouteImport } from './routes/_authenticated/me.moderation'
 import { Route as AuthenticatedMePostsIndexRouteImport } from './routes/_authenticated/me/posts/index'
 import { Route as ApiPublicShareCardPostIdRouteImport } from './routes/api/public/share-card.$postId'
 import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$postId'
@@ -339,6 +340,12 @@ const AuthenticatedProfileScansRoute =
     path: '/profile/scans',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMeModerationRoute =
+  AuthenticatedMeModerationRouteImport.update({
+    id: '/moderation',
+    path: '/moderation',
+    getParentRoute: () => AuthenticatedMeRoute,
+  } as any)
 const AuthenticatedMePostsIndexRoute =
   AuthenticatedMePostsIndexRouteImport.update({
     id: '/posts/',
@@ -464,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/admin/': typeof AdminIndexRoute
+  '/me/moderation': typeof AuthenticatedMeModerationRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -529,6 +537,7 @@ export interface FileRoutesByTo {
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/admin': typeof AdminIndexRoute
+  '/me/moderation': typeof AuthenticatedMeModerationRoute
   '/profile/scans': typeof AuthenticatedProfileScansRoute
   '/scan/start': typeof AuthenticatedScanStartRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -598,6 +607,7 @@ export interface FileRoutesById {
   '/post/$postId': typeof PostPostIdRoute
   '/u/$handle': typeof UHandleRoute
   '/admin/': typeof AdminIndexRoute
+  '/_authenticated/me/moderation': typeof AuthenticatedMeModerationRoute
   '/_authenticated/profile/scans': typeof AuthenticatedProfileScansRoute
   '/_authenticated/scan/start': typeof AuthenticatedScanStartRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -667,6 +677,7 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/u/$handle'
     | '/admin/'
+    | '/me/moderation'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/u/$handle'
     | '/admin'
+    | '/me/moderation'
     | '/profile/scans'
     | '/scan/start'
     | '/settings/account'
@@ -800,6 +812,7 @@ export interface FileRouteTypes {
     | '/post/$postId'
     | '/u/$handle'
     | '/admin/'
+    | '/_authenticated/me/moderation'
     | '/_authenticated/profile/scans'
     | '/_authenticated/scan/start'
     | '/_authenticated/settings/account'
@@ -1222,6 +1235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/me/moderation': {
+      id: '/_authenticated/me/moderation'
+      path: '/moderation'
+      fullPath: '/me/moderation'
+      preLoaderRoute: typeof AuthenticatedMeModerationRouteImport
+      parentRoute: typeof AuthenticatedMeRoute
+    }
     '/_authenticated/me/posts/': {
       id: '/_authenticated/me/posts/'
       path: '/posts'
@@ -1331,12 +1351,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedMeRouteChildren {
+  AuthenticatedMeModerationRoute: typeof AuthenticatedMeModerationRoute
   AuthenticatedMePostsIndexRoute: typeof AuthenticatedMePostsIndexRoute
   AuthenticatedMePostsPostIdEditRoute: typeof AuthenticatedMePostsPostIdEditRoute
   AuthenticatedMePostsPostIdIndexRoute: typeof AuthenticatedMePostsPostIdIndexRoute
 }
 
 const AuthenticatedMeRouteChildren: AuthenticatedMeRouteChildren = {
+  AuthenticatedMeModerationRoute: AuthenticatedMeModerationRoute,
   AuthenticatedMePostsIndexRoute: AuthenticatedMePostsIndexRoute,
   AuthenticatedMePostsPostIdEditRoute: AuthenticatedMePostsPostIdEditRoute,
   AuthenticatedMePostsPostIdIndexRoute: AuthenticatedMePostsPostIdIndexRoute,
