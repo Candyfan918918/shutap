@@ -1,7 +1,14 @@
 // Shutap marketing homepage. SSR via loader → server fn.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { getHomepageData, type LiveCase, type ResolvedCase } from "@/lib/marketing/homepage.functions";
+import {
+  getHomepageData,
+  type LiveCase,
+  type ResolvedCase,
+  type HofEntry,
+  type HofStats,
+  type StreamStory,
+} from "@/lib/marketing/homepage.functions";
 import { headHome } from "@/lib/seo/meta";
 
 const BENCH_LINES = [
