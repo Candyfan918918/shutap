@@ -2,6 +2,7 @@
 // Order of sections IS the optimization — answer-first, then story, then schema.
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { getCasePage, type CasePageData } from "@/lib/marketing/case-page.functions";
+import { headCase, buildHead, ORIGIN as SHUTAP_ORIGIN } from "@/lib/seo/meta";
 
 const ORIGIN = "https://shutap.com";
 const APP = "https://app.shutap.com";
