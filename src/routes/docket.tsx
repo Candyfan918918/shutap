@@ -1,23 +1,12 @@
 // /docket — notable current verdicts, public landing. Referenced by llms.txt.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getHomepageData, type LiveCase } from "@/lib/marketing/homepage.functions";
-
-const ORIGIN = "https://shutap.com";
+import { headDocket } from "@/lib/seo/meta";
 
 export const Route = createFileRoute("/docket")({
   loader: async () => await getHomepageData(),
   component: DocketPage,
-  head: () => ({
-    meta: [
-      { title: "The Docket — Shutap" },
-      { name: "description", content: "Notable cases currently before the Shutap court. Updated weekly with the verdicts the public is actively debating." },
-      { property: "og:title", content: "The Docket — Shutap" },
-      { property: "og:description", content: "Notable cases currently before the Shutap court." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: `${ORIGIN}/docket` },
-    ],
-    links: [{ rel: "canonical", href: `${ORIGIN}/docket` }],
-  }),
+  head: () => headDocket(),
 });
 
 function DocketPage() {

@@ -77,25 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Shutap — what actually happened?" },
-      { name: "description", content: "Shutap — the world's most entertaining anonymous relationship storytelling community. Real stories, Chaos Scores, worldwide rankings." },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#0b0b0c" },
       { name: "author", content: "Shutap" },
-      { property: "og:title", content: "Shutap — what actually happened?" },
-      { property: "og:description", content: "Anonymous. Authentic. Worldwide. Real relationship stories — no fake perfection." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Shutap" },
-      { name: "twitter:title", content: "Shutap — what actually happened?" },
-      { name: "twitter:description", content: "Anonymous. Authentic. Worldwide. Real relationship stories — no fake perfection." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/72f91b30-c67d-4416-9501-b882c88b4379/id-preview-64de9d85--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app-1779225769431.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/72f91b30-c67d-4416-9501-b882c88b4379/id-preview-64de9d85--29d52b59-0fed-4a8a-a2b3-eab0b9ac8c47.lovable.app-1779225769431.png" },
+      { property: "og:site_name", content: "Shutap" },
+      { property: "og:locale", content: "en_US" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: shutapIconAsset.url },
       { rel: "apple-touch-icon", href: shutapAppIconAsset.url },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://iapabdqiqzzothrltwsp.supabase.co", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600&display=swap",
@@ -103,35 +98,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
-      },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Shutap",
-          alternateName: "The Shutap Court",
-          url: "https://shutap.com",
-          logo: "https://shutap.com/icon-512.png",
-          description: "The anonymous court of public opinion. Real people share real conflicts; thousands vote a verdict; the author returns with what actually happened.",
-          sameAs: [
-            "https://x.com/Shutap",
-            "https://www.instagram.com/shutap",
-            "https://www.tiktok.com/@shutap",
-            "https://www.linkedin.com/company/shutap",
-          ],
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "Shutap",
-          url: "https://shutap.com",
-        }),
       },
     ],
   }),

@@ -6,8 +6,7 @@ import {
   type CategorySlug,
   type CategoryStats,
 } from "@/lib/marketing/geo.functions";
-
-const ORIGIN = "https://shutap.com";
+import { buildHead, ORIGIN } from "@/lib/seo/meta";
 
 function pretty(k: string): string {
   return k.replace(/_/g, " ");
@@ -27,39 +26,31 @@ export const Route = createFileRoute("/data/$category")({
   component: CategoryDataPage,
   head: ({ params, loaderData }) => {
     const s = loaderData as CategoryStats | undefined;
+    const label = s?.label ?? params.category;
     const desc = s
-      ? `In ${s.totalCases.toLocaleString()} ${s.label.toLowerCase()}-conflict cases on Shutap, ${s.guiltyPct}% of community verdicts ruled against the accused; ${s.notGuiltyPct}% ruled in their favor.`
+      ? `In ${s.totalCases.toLocaleString()} ${label.toLowerCase()}-conflict cases on Shutap, ${s.guiltyPct}% of community verdicts ruled against the accused; ${s.notGuiltyPct}% ruled in their favor.`
       : `Verdict statistics for ${params.category} cases on Shutap.`;
-    const title = `${s?.label ?? params.category} Verdict Data — Shutap`;
     const url = `${ORIGIN}/data/${params.category}`;
-    return {
-      meta: [
-        { title },
-        { name: "description", content: desc },
-        { property: "og:title", content: title },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: url },
-      ],
-      links: [{ rel: "canonical", href: url }],
-      scripts: s
+    const head = buildHead({
+      title: `${label} Verdict Data | Shutap`,
+      description: desc,
+      canonical: url,
+      jsonLd: s
         ? [
             {
-              type: "application/ld+json",
-              children: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Dataset",
-                name: `Shutap ${s.label} Verdict Data`,
-                description: desc,
-                url,
-                creator: { "@type": "Organization", name: "Shutap" },
-                dateModified: s.generatedAt,
-                keywords: [s.label, "verdict statistics", "public opinion"],
-              }),
+              "@context": "https://schema.org",
+              "@type": "Dataset",
+              name: `Shutap ${s.label} Verdict Data`,
+              description: desc,
+              url,
+              creator: { "@type": "Organization", name: "Shutap" },
+              dateModified: s.generatedAt,
+              keywords: [s.label, "verdict statistics", "public opinion"],
             },
           ]
         : [],
-    };
+    });
+    return head;
   },
   notFoundComponent: () => (
     <main className="min-h-screen bg-c-surface text-c-text-1 grid place-items-center px-6">
