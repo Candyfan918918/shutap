@@ -338,56 +338,114 @@ function HomePage() {
       {/* SECTION 2b — THE COURT */}
       <section className="section-reveal in-view border-b border-c-border">
         <div className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">The Court</h2>
+          {/* Ribbon header */}
+          <div className="text-[10px] uppercase tracking-[0.14em] text-c-text-3">
+            The Court · Where the human decides
+          </div>
+          <h2 className="mt-2 font-serif text-2xl sm:text-3xl tracking-tight">
+            The cases the algorithm couldn't ignore.
+          </h2>
           <p className="mt-2 text-sm italic text-c-text-3">
-            Not a tribunal. A room full of strangers with opinions.
+            "What would you do if you were her?"
           </p>
-
-          <div className="mt-8 grid gap-8 sm:grid-cols-2">
-            <div>
-              <h3 className="font-serif text-lg text-c-text-1">How a case moves</h3>
-              <ol className="mt-4 space-y-3 text-sm leading-relaxed text-c-text-2">
-                <li>
-                  <span className="text-c-text-3 tabular-nums mr-2">01</span>
-                  Someone opens a case. <span className="text-c-text-1">"My sister wore white to my wedding."</span>
-                </li>
-                <li>
-                  <span className="text-c-text-3 tabular-nums mr-2">02</span>
-                  The court reads it. Votes land — guilty, not guilty, red flag, run.
-                </li>
-                <li>
-                  <span className="text-c-text-3 tabular-nums mr-2">03</span>
-                  A deadline hits. The verdict locks.
-                </li>
-                <li>
-                  <span className="text-c-text-3 tabular-nums mr-2">04</span>
-                  Weeks later, the author returns with what actually happened.
-                </li>
-              </ol>
-            </div>
-
-            <div className="rounded-md border border-c-border bg-c-surface-2 p-5">
-              <div className="text-[10px] uppercase tracking-wider text-c-text-3">A note from the bench</div>
-              <p className="mt-3 text-sm leading-relaxed text-c-text-2">
-                Verdicts here are opinions, not rulings. No one is named. Nothing is enforceable.
-                The court is a mirror, not a gavel — use it to think, not to punish.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-c-text-3">
-                If you're in danger, the court is the wrong room. Call someone who can actually help.
-              </p>
-            </div>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-c-border bg-c-surface-2 px-3 py-1 text-[11px] text-c-text-2">
+            <span className="live-dot" aria-hidden />
+            3 cases in session · jurors active now
           </div>
 
-          <div className="mt-8">
+          {/* Example case flow card */}
+          <article className="mt-10 rounded-lg border border-c-border bg-c-surface-2 p-5 sm:p-6">
+            <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+              Case · Family Court · Example
+            </div>
+            <h3 className="mt-2 font-serif text-lg sm:text-xl leading-snug text-c-text-1">
+              "I refused to attend my brother's wedding after he made my abuser the best man without telling me."
+            </h3>
+            <p className="mt-2 text-sm italic text-c-text-2">
+              Does loyalty to family end where your own safety begins?
+            </p>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-c-border bg-c-surface px-2.5 py-1 text-[11px] text-c-text-3 tabular-nums">
+              <span className="text-c-text-1">1h 44m</span> until verdict locks
+            </div>
+
+            {/* Parties */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
+              <div className="rounded-md border border-c-border bg-c-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-c-text-3">Plaintiff</div>
+                <div className="mt-1 text-sm font-medium text-c-text-1">The Absent Sister</div>
+                <div className="mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] text-c-text-2 bg-c-surface-2 border border-c-border">
+                  Testimony filed
+                </div>
+                <p className="mt-3 text-xs italic leading-relaxed text-c-text-2">
+                  "He knew what he was doing. I had no warning."
+                </p>
+              </div>
+              <div className="hidden sm:flex items-center justify-center">
+                <span className="font-serif text-xs text-c-text-3 border border-c-border rounded-full w-8 h-8 grid place-items-center bg-c-surface">
+                  vs
+                </span>
+              </div>
+              <div className="rounded-md border border-c-border bg-c-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-c-text-3">Defendant</div>
+                <div className="mt-1 text-sm font-medium text-c-text-1">The Brother</div>
+                <div className="mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] text-c-text-3 bg-c-surface-2 border border-c-border">
+                  No response yet
+                </div>
+                <p className="mt-3 text-xs italic leading-relaxed text-c-text-3">
+                  The other chair is empty. The court proceeds regardless.
+                </p>
+              </div>
+            </div>
+
+            {/* Verdict bar */}
+            <div className="mt-6">
+              <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+                Live verdict — 8,214 votes
+              </div>
+              <div className="mt-2 flex h-2 w-full overflow-hidden rounded-full bg-c-surface-3">
+                <div className="h-full" style={{ width: "61%", background: "var(--c-text-1)" }} />
+                <div className="h-full" style={{ width: "18%", background: "var(--c-text-2)", opacity: 0.55 }} />
+                <div className="h-full" style={{ width: "12%", background: "var(--c-text-3)", opacity: 0.55 }} />
+                <div className="h-full" style={{ width: "9%", background: "var(--c-text-3)", opacity: 0.3 }} />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-c-text-2 tabular-nums">
+                <span><span className="text-c-text-1">61%</span> not guilty</span>
+                <span>18% everyone sucks</span>
+                <span>12% need more info</span>
+                <span>9% guilty</span>
+              </div>
+            </div>
+          </article>
+
+          {/* Disclaimer */}
+          <div className="mt-8 rounded-md border border-c-border bg-c-surface-2 p-5">
+            <div className="text-[10px] uppercase tracking-wider text-c-text-3">A note from the bench</div>
+            <p className="mt-3 text-sm leading-relaxed text-c-text-2">
+              Verdicts here are opinions, not rulings. No one is named. Nothing is enforceable.
+              The court is a mirror, not a gavel — use it to think, not to punish.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-c-text-3">
+              If you're in danger, the court is the wrong room. Call someone who can actually help.
+            </p>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
             <a
               href={`${APP}/court`}
-              className="cta-ghost inline-flex items-center justify-center rounded-md border border-c-border px-4 py-2 text-sm text-c-text-1 hover:bg-c-surface-2"
+              className="cta-primary inline-flex items-center justify-center rounded-md bg-c-text-1 px-5 py-2.5 text-sm font-medium text-c-surface hover:opacity-90"
             >
               Enter the Court →
+            </a>
+            <a
+              href={`${APP}/spill`}
+              className="cta-ghost inline-flex items-center justify-center rounded-md border border-c-border px-4 py-2.5 text-sm text-c-text-1 hover:bg-c-surface-2"
+            >
+              Open a Case
             </a>
           </div>
         </div>
       </section>
+
 
       {/* SECTION 3b — HALL OF FAME */}
       <section
