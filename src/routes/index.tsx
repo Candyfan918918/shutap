@@ -107,7 +107,7 @@ function useCountUp(target: number, duration = 1800, enabled = true) {
 }
 
 function HomePage() {
-  const { totalVerdicts, liveCases, resolvedCase } =
+  const { totalVerdicts, liveCases, resolvedCase, hofStats, hofEntries, streamStories } =
     Route.useLoaderData() as import("@/lib/marketing/homepage.functions").HomepageData;
   const benchLine = dailyBenchLine();
 
@@ -117,10 +117,17 @@ function HomePage() {
   const [docketRef, docketIn] = useInView<HTMLElement>({ threshold: 0.1 });
   const [howRef, howIn] = useInView<HTMLElement>({ threshold: 0.1 });
   const [proofRef, proofIn] = useInView<HTMLElement>({ threshold: 0.1 });
+  const [hofRef, hofIn] = useInView<HTMLElement>({ threshold: 0.2 });
+  const [streamRef, streamIn] = useInView<HTMLElement>({ threshold: 0.05 });
   const [whyRef, whyIn] = useInView<HTMLElement>({ threshold: 0.1 });
 
   // Docket cards trigger (slightly tighter threshold for the cards themselves)
   const [docketListRef, docketListIn] = useInView<HTMLUListElement>({ threshold: 0.15 });
+
+  // HOF count-ups gated on band in-view
+  const verdictsWeek = useCountUp(hofStats.verdictsThisWeek, 1400, hofIn);
+  const casesDecided = useCountUp(hofStats.casesDecided, 1400, hofIn);
+  const unanimousPct = useCountUp(hofStats.unanimousPct, 1400, hofIn);
 
   return (
     <div className="min-h-screen bg-c-surface text-c-text-1">
