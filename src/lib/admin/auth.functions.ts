@@ -3,6 +3,7 @@
 // reach this module's top-level via the client graph).
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const PENDING_HEADER = "x-shutap-admin-pending";
 const PENDING_MAX_MS = 5 * 60 * 1000;
