@@ -41,8 +41,31 @@ export const Route = createFileRoute("/u/$handle")({
   ),
   head: ({ params }) => ({
     meta: [
-      { title: `@${params.handle} · Tea Spilling` },
-      { name: "description", content: `@${params.handle}'s relationship chaos profile.` },
+      { title: `@${params.handle} · Shutap profile` },
+      {
+        name: "description",
+        content: `Read @${params.handle}'s stories, chaos history, and verdicts on Shutap — the court where strangers judge your relationship drama.`,
+      },
+      { property: "og:title", content: `@${params.handle} on Shutap` },
+      {
+        property: "og:description",
+        content: `Stories, chaos scores, and badges earned by @${params.handle} in the Shutap court.`,
+      },
+      { property: "og:type", content: "profile" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          mainEntity: {
+            "@type": "Person",
+            alternateName: `@${params.handle}`,
+            url: `https://shutap.lovable.app/u/${params.handle}`,
+          },
+        }),
+      },
     ],
   }),
 });
