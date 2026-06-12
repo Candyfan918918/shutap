@@ -33,6 +33,21 @@ async function resolveViewerId(): Promise<string | null> {
   }
 }
 
+export type TrustTier =
+  | "Building trust"
+  | "Established juror"
+  | "Respected voice"
+  | "Court elder"
+  | "Legend";
+
+export function trustTierFor(score: number): TrustTier {
+  if (score >= 800) return "Legend";
+  if (score >= 500) return "Court elder";
+  if (score >= 300) return "Respected voice";
+  if (score >= 100) return "Established juror";
+  return "Building trust";
+}
+
 export interface PublicProfile {
   id: string;
   handle: string;
@@ -44,10 +59,15 @@ export interface PublicProfile {
   countryCode: string | null;
   vibe: string | null;
   anonymousMode: boolean;
-  // counts
+  // counts (Shutap vocabulary)
   followerCount: number;
   followingCount: number;
-  postCount: number;
+  postCount: number; // cases brought
+  counselCount: number; // counsel given
+  courtAppearances: number; // distinct cases voted on
+  outcomesTracked: number; // outcomes the user has reported
+  trustScore: number;
+  trustTier: TrustTier;
   avgScore: number;
   maxScore: number;
   badges: Badge[];
@@ -119,7 +139,7 @@ async function hydrateProfile(
   const id = row.id as string;
 
   // Parallel aggregates
-  const [followers, following, posts, scans, friendship] = await Promise.all([
+  const [followers, following, posts, scans, friendship, counsel, votes, outcomes, repRow] = await Promise.all([
     supabaseAdmin.from("follows").select("follower_id", { count: "exact", head: true }).eq("followee_id", id),
     supabaseAdmin.from("follows").select("followee_id", { count: "exact", head: true }).eq("follower_id", id),
     supabaseAdmin
@@ -136,6 +156,25 @@ async function hydrateProfile(
           .or(`and(requester_id.eq.${viewerId},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${viewerId})`)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
+    supabaseAdmin
+      .from("post_comments")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", id)
+      .eq("status", "published")
+      .is("deleted_at", null),
+    supabaseAdmin
+      .from("post_verdict_votes")
+      .select("post_id")
+      .eq("user_id", id),
+    supabaseAdmin
+      .from("story_outcomes")
+      .select("post_id", { count: "exact", head: true })
+      .eq("submitted_by", id),
+    supabaseAdmin
+      .from("profiles")
+      .select("justice_score, wisdom_score, empathy_score, prediction_score")
+      .eq("id", id)
+      .maybeSingle(),
   ]);
 
   const isFollowing = viewerId && viewerId !== id
@@ -168,7 +207,24 @@ async function hydrateProfile(
 
   const anonymousMode = ((row.anonymous_mode as boolean | null) ?? true);
 
-  
+  const counselCount = counsel.count ?? 0;
+  const voteRows = (votes.data as Array<{ post_id: string }> | null) ?? [];
+  const courtAppearances = new Set(voteRows.map((v) => v.post_id)).size;
+  const outcomesTracked = outcomes.count ?? 0;
+
+  const rep = (repRow.data ?? null) as null | {
+    justice_score: number | null;
+    wisdom_score: number | null;
+    empathy_score: number | null;
+    prediction_score: number | null;
+  };
+  const trustScore =
+    (rep?.justice_score ?? 0) +
+    (rep?.wisdom_score ?? 0) +
+    (rep?.empathy_score ?? 0) +
+    (rep?.prediction_score ?? 0);
+  const trustTier = trustTierFor(trustScore);
+
   const aliasName = (row.nickname as string | null) ?? null;
   // Anonymous mode (default) → always show the assigned alias for both
   // display name and @handle. Only when the user turns anonymity off do we
@@ -191,6 +247,11 @@ async function hydrateProfile(
     followerCount: followers.count ?? 0,
     followingCount: following.count ?? 0,
     postCount,
+    counselCount,
+    courtAppearances,
+    outcomesTracked,
+    trustScore,
+    trustTier,
     avgScore: anonymousMode && viewerId !== id ? 0 : avgScore,
     maxScore,
     badges,

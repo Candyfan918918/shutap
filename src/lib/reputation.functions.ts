@@ -24,12 +24,20 @@ function clamp(n: number, lo = 0, hi = 100): number {
 }
 
 function titleFor(s: ReputationScores, judgments: number): string {
-  if (s.justice_score >= 70 && s.wisdom_score >= 70 && s.empathy_score >= 70 && judgments >= 500)
-    return "Legend of the Court";
-  if (s.justice_score > 75 && s.wisdom_score > 40) return "Unrobed Judge";
-  if (s.justice_score > 60 && judgments >= 100) return "Justice Messenger";
-  if (s.wisdom_score > 20 || judgments >= 50) return "Story Sleuth";
-  return "Popcorn Witness";
+  // Order matters: check highest tier first.
+  if (
+    s.justice_score > 70 &&
+    s.wisdom_score > 70 &&
+    s.empathy_score > 70 &&
+    s.prediction_score > 70 &&
+    judgments >= 500
+  )
+    return "👑 Legend of the Court";
+  if (s.justice_score > 75 && s.wisdom_score > 40) return "🦉 Unrobed Judge";
+  if (s.wisdom_score > 60) return "🗣 Voice of Reason";
+  if (s.justice_score > 60 && judgments >= 100) return "⚖️ Justice Messenger";
+  if (s.wisdom_score > 20 || judgments >= 50) return "🕵️ Story Sleuth";
+  return "🍿 Popcorn Witness";
 }
 
 export async function recordReputationEvent(args: {
