@@ -207,7 +207,24 @@ async function hydrateProfile(
 
   const anonymousMode = ((row.anonymous_mode as boolean | null) ?? true);
 
-  
+  const counselCount = counsel.count ?? 0;
+  const voteRows = (votes.data as Array<{ post_id: string }> | null) ?? [];
+  const courtAppearances = new Set(voteRows.map((v) => v.post_id)).size;
+  const outcomesTracked = outcomes.count ?? 0;
+
+  const rep = (repRow.data ?? null) as null | {
+    justice_score: number | null;
+    wisdom_score: number | null;
+    empathy_score: number | null;
+    prediction_score: number | null;
+  };
+  const trustScore =
+    (rep?.justice_score ?? 0) +
+    (rep?.wisdom_score ?? 0) +
+    (rep?.empathy_score ?? 0) +
+    (rep?.prediction_score ?? 0);
+  const trustTier = trustTierFor(trustScore);
+
   const aliasName = (row.nickname as string | null) ?? null;
   // Anonymous mode (default) → always show the assigned alias for both
   // display name and @handle. Only when the user turns anonymity off do we
@@ -230,6 +247,11 @@ async function hydrateProfile(
     followerCount: followers.count ?? 0,
     followingCount: following.count ?? 0,
     postCount,
+    counselCount,
+    courtAppearances,
+    outcomesTracked,
+    trustScore,
+    trustTier,
     avgScore: anonymousMode && viewerId !== id ? 0 : avgScore,
     maxScore,
     badges,
