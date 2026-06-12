@@ -2989,6 +2989,20 @@ export type Database = {
           tier: string
         }[]
       }
+      _seed_create_users: { Args: { _users: Json }; Returns: number }
+      _seed_insert_comments: { Args: { _comments: Json }; Returns: number }
+      _seed_insert_court: {
+        Args: { _badges: Json; _cases: Json; _tiers: Json }
+        Returns: number
+      }
+      _seed_insert_hof: {
+        Args: { _badges: Json; _scores: Json }
+        Returns: number
+      }
+      _seed_insert_posts: { Args: { _posts: Json }; Returns: number }
+      _seed_insert_votes: { Args: { _votes: Json }; Returns: number }
+      _seed_reconcile: { Args: never; Returns: undefined }
+      _seed_teardown: { Args: never; Returns: undefined }
       _slugify_handle: { Args: { _text: string }; Returns: string }
       _tier_duration: { Args: { _tier: string }; Returns: string }
       bump_streak: {
