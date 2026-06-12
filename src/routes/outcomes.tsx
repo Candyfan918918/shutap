@@ -58,17 +58,7 @@ const getRecentOutcomes = createServerFn({ method: "GET" }).handler(
 export const Route = createFileRoute("/outcomes")({
   loader: async () => await getRecentOutcomes(),
   component: OutcomesPage,
-  head: () => ({
-    meta: [
-      { title: "Outcomes — Shutap" },
-      { name: "description", content: "Resolved Shutap cases — what the community voted versus what actually happened. Every outcome reported by the original storyteller." },
-      { property: "og:title", content: "Outcomes — Shutap" },
-      { property: "og:description", content: "Resolved cases: verdict vs. what actually happened." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: `${ORIGIN}/outcomes` },
-    ],
-    links: [{ rel: "canonical", href: `${ORIGIN}/outcomes` }],
-  }),
+  head: () => headOutcomes(),
 });
 
 function OutcomesPage() {
