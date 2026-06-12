@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // Roles considered "admin" for gating admin tooling.
 // Matches the admin_role enum values that should pass assertAdmin().
-export const ADMIN_ROLES = ["super_admin", "moderator"] as const;
+export const ADMIN_ROLES = ["super_admin", "moderator"] as const satisfies readonly ("super_admin" | "moderator" | "analyst" | "partner_manager")[];
 export type AdminGateRole = (typeof ADMIN_ROLES)[number];
 
 export async function isAdmin(adminId: string | null | undefined): Promise<boolean> {
