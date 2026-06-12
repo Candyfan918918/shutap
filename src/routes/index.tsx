@@ -490,6 +490,58 @@ function OutcomeBlock({ c }: { c: ResolvedCase }) {
   );
 }
 
+function HofCard({ h, index }: { h: HofEntry; index: number }) {
+  const inner = (
+    <>
+      <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+        {h.category.replace(/_/g, " ")}
+      </div>
+      <div className="mt-2 font-serif text-base leading-snug text-c-text-1">
+        {h.title}
+      </div>
+      <div className="mt-3 text-[11px] text-c-text-3 tabular-nums">
+        {h.score.toLocaleString()} pts
+      </div>
+    </>
+  );
+  return (
+    <li
+      className="hof-card rounded-md border border-c-border bg-c-surface-2 p-4"
+      style={{ animationDelay: `${0.05 + index * 0.1}s` }}
+    >
+      {h.postId ? (
+        <Link to="/case/$caseSlug" params={{ caseSlug: h.postId }} className="block group">
+          {inner}
+        </Link>
+      ) : (
+        inner
+      )}
+    </li>
+  );
+}
+
+function StreamCard({ s }: { s: StreamStory }) {
+  return (
+    <Link
+      to="/case/$caseSlug"
+      params={{ caseSlug: s.postId }}
+      className="block group rounded-md border border-c-border bg-c-surface-2 p-4 transition-colors hover:bg-c-surface-3"
+    >
+      {s.category ? (
+        <div className="text-[10px] uppercase tracking-wider text-c-text-3">
+          {s.category.replace(/_/g, " ")}
+        </div>
+      ) : null}
+      <div className="mt-2 font-serif text-base leading-snug text-c-text-1 group-hover:underline underline-offset-4">
+        {s.title}
+      </div>
+      {s.snippet ? (
+        <p className="mt-2 text-sm leading-relaxed text-c-text-2 line-clamp-3">{s.snippet}</p>
+      ) : null}
+    </Link>
+  );
+}
+
 function SiteHeader() {
   return (
     <header className="border-b border-c-border">
