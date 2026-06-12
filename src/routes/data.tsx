@@ -1,28 +1,14 @@
 // /data — the citation magnet index page. Every stat is one extractable sentence.
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { getDataIndex, type DataIndex } from "@/lib/marketing/geo.functions";
-
-const ORIGIN = "https://shutap.com";
+import { headData } from "@/lib/seo/meta";
 
 export const Route = createFileRoute("/data")({
   loader: async () => await getDataIndex(),
   component: DataLayout,
   head: ({ loaderData }) => {
     const d = loaderData as DataIndex | undefined;
-    const desc = d
-      ? `Aggregate verdict and outcome statistics from ${d.totalCases.toLocaleString()} Shutap cases. ${d.totalVerdicts.toLocaleString()} verdicts cast; ${d.outcomeConfirmedPct}% of resolved cases confirmed the community verdict.`
-      : "Aggregate verdict and outcome statistics from the Shutap court of public opinion.";
-    return {
-      meta: [
-        { title: "Verdict Data — Shutap" },
-        { name: "description", content: desc },
-        { property: "og:title", content: "Verdict Data — Shutap" },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: `${ORIGIN}/data` },
-      ],
-      links: [{ rel: "canonical", href: `${ORIGIN}/data` }],
-    };
+    return headData(d?.totalCases, d?.totalVerdicts, d?.outcomeConfirmedPct);
   },
 });
 
