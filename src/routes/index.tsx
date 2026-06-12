@@ -335,6 +335,82 @@ function HomePage() {
         </div>
       </section>
 
+      {/* SECTION 3b — HALL OF FAME */}
+      <section
+        ref={hofRef}
+        className={`section-reveal border-b border-c-border ${hofIn ? "in-view" : ""}`}
+      >
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight flex items-center gap-3">
+            <span className="gold-glow" aria-hidden>⚖︎</span>
+            Hall of Fame
+          </h2>
+          <p className="mt-2 text-sm italic text-c-text-3">The court remembers.</p>
+
+          <dl className="mt-8 grid gap-6 sm:grid-cols-3">
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Verdicts this week</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{verdictsWeek.toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Cases decided</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{casesDecided.toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-c-text-3">Unanimous rulings</dt>
+              <dd className="mt-1 font-serif text-3xl text-c-text-1 tabular-nums">{unanimousPct}%</dd>
+            </div>
+          </dl>
+
+          {hofEntries.length > 0 ? (
+            <ul className={`hof-list mt-10 grid gap-4 sm:grid-cols-3 ${hofIn ? "in-view" : ""}`}>
+              {hofEntries.map((h, i) => <HofCard key={`${h.entityType}:${h.entityId}`} h={h} index={i} />)}
+            </ul>
+          ) : (
+            <p className="mt-8 text-sm text-c-text-3">The hall is still being built.</p>
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 3c — STORY STREAM */}
+      <section
+        ref={streamRef}
+        className={`section-reveal border-b border-c-border ${streamIn ? "in-view" : ""}`}
+      >
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="font-serif text-2xl sm:text-3xl tracking-tight">The Stream</h2>
+          <p className="mt-2 text-sm italic text-c-text-3">Stories the court is still chewing on.</p>
+
+          {streamStories.length === 0 ? (
+            <p className="mt-8 text-sm text-c-text-3">No stories yet. Be the first.</p>
+          ) : (
+            <div className={`stream-container mt-8 ${streamIn ? "in-view" : ""}`}>
+              <ul className="grid gap-4 sm:grid-cols-2">
+                {streamStories.map((s, i) => (
+                  <li
+                    key={s.postId}
+                    className="stream-entry"
+                    style={{ animationDelay: `${i * 0.07}s` }}
+                  >
+                    <StreamCard s={s} />
+                  </li>
+                ))}
+              </ul>
+              <div className="stream-more mt-8">
+                <a
+                  href={`${APP}/stream`}
+                  className="cta-ghost inline-flex items-center justify-center rounded-md border border-c-border px-4 py-2 text-sm text-c-text-1 hover:bg-c-surface-2"
+                >
+                  Read more stories →
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+
+
       {/* SECTION 4 — WHY IT EXISTS */}
       <section
         ref={whyRef}
