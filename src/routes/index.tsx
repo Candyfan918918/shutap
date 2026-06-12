@@ -34,49 +34,7 @@ function timeUntil(iso: string | null): string {
 export const Route = createFileRoute("/")({
   loader: () => getHomepageData(),
   component: HomePage,
-  head: ({ loaderData }) => {
-    const total = loaderData?.totalVerdicts ?? 0;
-    const desc =
-      "Shutap is the anonymous court of public opinion. Share what happened, get a verdict from thousands of real people — then come back and tell the world how it actually ended.";
-    return {
-      meta: [
-        { title: "Shutap — Spill it. The court decides." },
-        { name: "description", content: desc },
-        { property: "og:title", content: "Shutap — Spill it. The court decides." },
-        { property: "og:description", content: desc },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: CANONICAL },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: "Shutap — Spill it. The court decides." },
-        { name: "twitter:description", content: desc },
-      ],
-      links: [{ rel: "canonical", href: CANONICAL }],
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "Shutap",
-            url: "https://shutap.com",
-            description:
-              "The anonymous court of public opinion. Real cases, real verdicts, real outcomes.",
-          }),
-        },
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "Shutap",
-            url: "https://shutap.com",
-            inLanguage: "en",
-            description: `${total.toLocaleString()} verdicts cast. Zero real names. Ever.`,
-          }),
-        },
-      ],
-    };
-  },
+  head: ({ loaderData }) => headHome(loaderData?.totalVerdicts),
   errorComponent: ({ error }) => (
     <main className="min-h-screen bg-c-surface text-c-text-1 grid place-items-center px-6">
       <p className="text-sm text-c-text-2 max-w-md text-center">The bench is unavailable. {error.message}</p>
