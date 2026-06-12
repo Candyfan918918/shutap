@@ -1,5 +1,17 @@
 // Server-only helper for calling Lovable AI Gateway.
 // Do NOT import this from client code.
+//
+// Requires LOVABLE_API_KEY — a project-scoped key that authenticates to
+// Lovable AI Gateway (chat completions, embeddings, image generation).
+// This key is auto-provisioned by Lovable; if missing, rotate it via
+// Project Settings or contact support.
+
+if (!process.env.LOVABLE_API_KEY) {
+  throw new Error(
+    "Missing required environment variable: LOVABLE_API_KEY. " +
+      "Add it to your .env file or project secrets."
+  );
+}
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -14,8 +26,7 @@ export type GatewayJsonOptions = {
 };
 
 export async function callGatewayJSON<T>(opts: GatewayJsonOptions): Promise<T> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+  const apiKey = process.env.LOVABLE_API_KEY!;
 
   const controller = new AbortController();
   const timeoutMs = opts.timeoutMs ?? 20_000;
