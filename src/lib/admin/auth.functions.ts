@@ -17,7 +17,6 @@ function signPending(adminId: string): string {
   return `${payload}.${sig}`;
 }
 function verifyPending(token: string): string | null {
-  const { createHmac, timingSafeEqual } = require("node:crypto") as typeof import("node:crypto");
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [adminId, expStr, sig] = parts;
