@@ -207,6 +207,32 @@ function HomePage() {
         .cta-primary:hover { transform: scale(1.03); }
         .cta-ghost { transition: background-color 0.18s ease; }
 
+        @keyframes goldGlow {
+          0%, 100% { color: #c8960a; }
+          50%       { color: #e8b420; }
+        }
+        .gold-glow { animation: goldGlow 3s ease-in-out infinite; }
+
+        .hof-card {
+          opacity: 0;
+          transform: translateY(22px);
+          transition: border-color 0.2s ease;
+        }
+        .hof-list.in-view .hof-card {
+          animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        .hof-card:hover { border-color: rgba(200,150,10,0.5); }
+
+        .stream-entry { opacity: 0; transform: translateY(28px); }
+        .stream-container.in-view .stream-entry {
+          animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        .stream-more { opacity: 0; }
+        .stream-container.in-view .stream-more {
+          animation: fadeUp 0.5s ease forwards;
+          animation-delay: 0.6s;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after { animation: none !important; transition: none !important; }
         }
