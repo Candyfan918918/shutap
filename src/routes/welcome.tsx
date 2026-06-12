@@ -26,7 +26,14 @@ function getAdultCutoffYear() {
 }
 
 export const Route = createFileRoute("/welcome")({
-  head: () => ({ meta: [{ title: "Welcome — Shutap" }] }),
+  head: () => ({
+    meta: [
+      { title: "Welcome — Shutap" },
+      { name: "description", content: "You've made it past the door. Verify your age, spin your alias, and step into the Shutap court." },
+      { property: "og:title", content: "Welcome to Shutap" },
+      { property: "og:description", content: "Verify your age, claim your permanent alias, and enter the court where strangers judge your story." },
+    ],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
