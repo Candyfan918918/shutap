@@ -38,11 +38,13 @@ export const moderate = createServerFn({ method: "POST" })
 
     if (evErr) return { data: null, error: evErr.message };
 
-    // 2. Side effects per action (stories.status enum: draft|pending|published|removed|sensitive).
+    // 2. Side effects per action.
+    // stories.status enum: draft|pending|published|removed|sensitive.
+    // stories.moderation_status: pending|sensitive|removed|disputed|under_appeal.
     if (data.action === "retract") {
       await supabaseAdmin
         .from("stories")
-        .update({ status: "removed" })
+        .update({ status: "removed", moderation_status: "removed" })
         .eq("id", data.story_id);
     } else if (data.action === "resolve_claim" && data.claimer_id) {
       await supabaseAdmin
@@ -61,8 +63,36 @@ export const moderate = createServerFn({ method: "POST" })
     } else if (data.action === "flag") {
       await supabaseAdmin
         .from("stories")
-        .update({ status: "sensitive" })
+        .update({ status: "sensitive", moderation_status: "sensitive" })
         .eq("id", data.story_id);
+    } else if (data.action === "dispute") {
+      await supabaseAdmin
+        .from("stories")
+        .update({ moderation_status: "disputed" })
+        .eq("id", data.story_id);
+      await supabaseAdmin.from("mod_queue").insert({
+        entity_type: "story",
+        entity_id: data.story_id,
+        post_id: data.story_id,
+        reason: data.reason ?? "dispute",
+        status: "open",
+        severity: "normal",
+        priority_score: 50,
+      });
+    } else if (data.action === "appeal") {
+      await supabaseAdmin
+        .from("stories")
+        .update({ moderation_status: "under_appeal" })
+        .eq("id", data.story_id);
+      await supabaseAdmin.from("mod_queue").insert({
+        entity_type: "story",
+        entity_id: data.story_id,
+        post_id: data.story_id,
+        reason: data.reason ?? "appeal",
+        status: "open",
+        severity: "high",
+        priority_score: 90,
+      });
     }
 
     return { data: { event_id: ev.id }, error: null };
