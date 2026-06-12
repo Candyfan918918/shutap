@@ -264,6 +264,7 @@ function PostPage() {
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pt-6 space-y-6">
+        <h1 className="sr-only">{post.title}</h1>
         {(post as any).case_closed_at && (
           <div className="rounded-2xl border border-amber-400/50 bg-amber-400/10 px-4 py-2 text-xs font-medium text-amber-500">
             ⚖️ Case closed — the author marked this resolved.
