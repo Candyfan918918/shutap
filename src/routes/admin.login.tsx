@@ -2,6 +2,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   adminBootstrap,
   adminBootstrapAvailable,
@@ -182,12 +183,25 @@ function AdminLoginPage() {
           <div className="space-y-3 rounded border border-zinc-800 bg-[oklch(0.18_0.01_270)] p-4">
             <div className="text-sm text-zinc-100">Admin created.</div>
             <div className="text-xs text-zinc-400">
-              Scan this otpauth URL into your authenticator app, then sign in.
+              Scan this QR with your authenticator app, then sign in. Shown once.
             </div>
-            <code className="block break-all rounded bg-[oklch(0.14_0.01_270)] border border-zinc-800 px-2 py-2 text-[11px] text-zinc-300">
+            <div className="flex justify-center rounded bg-white p-3">
+              <QRCodeSVG value={bootstrapResult.otpauth} size={192} level="M" />
+            </div>
+            <div className="text-[11px] text-zinc-500">
+              Manual entry secret:{" "}
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(bootstrapResult.secret)}
+                className="text-zinc-300 underline decoration-dotted hover:text-zinc-100"
+                title="Copy"
+              >
+                {bootstrapResult.secret}
+              </button>
+            </div>
+            <code className="block break-all rounded bg-[oklch(0.14_0.01_270)] border border-zinc-800 px-2 py-2 text-[10px] text-zinc-400">
               {bootstrapResult.otpauth}
             </code>
-            <div className="text-[11px] text-zinc-500">Backup secret: <span className="text-zinc-300">{bootstrapResult.secret}</span></div>
             <button
               type="button"
               onClick={() => { setPhase("password"); setPassword(""); setBootstrapResult(null); setBootstrapAvailable(false); }}
