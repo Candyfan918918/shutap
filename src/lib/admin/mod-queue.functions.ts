@@ -162,7 +162,7 @@ export const getModQueueItem = createServerFn({ method: "POST" })
     };
   });
 
-/** Submit a moderator decision. Writes to mod_actions (append-only) and resolves the queue item. */
+/** Submit a moderator decision. Resolves the queue item atomically, then writes the audit record. */
 export const submitModAction = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z.object({
@@ -206,6 +206,28 @@ export const submitModAction = createServerFn({ method: "POST" })
       throw e;
     }
 
+    // Atomic conditional update — only succeeds while status is still pending.
+    // This eliminates the race where two moderators both resolve the same item
+    // and create duplicate mod_actions records.
+    const nextStatus = data.action === "escalate" ? "escalated" : "resolved";
+    const { data: updatedRows, error: updErr } = await supabaseAdmin
+      .from("mod_queue")
+      .update({
+        status: nextStatus,
+        moderator_id: null, // auth.users-scoped column; admin lives in mod_actions instead
+        resolved_at: new Date().toISOString(),
+        notes: data.notes?.trim() || item.notes,
+      })
+      .eq("id", item.id)
+      .eq("status", "pending")
+      .select();
+    if (updErr) throw new Error(updErr.message);
+    if (!updatedRows || updatedRows.length === 0) {
+      const e: any = new Error("already_resolved");
+      e.statusCode = 409;
+      throw e;
+    }
+
     const { error: insErr } = await supabaseAdmin.from("mod_actions").insert({
       admin_id: session.adminId,
       admin_email: session.email,
@@ -220,18 +242,6 @@ export const submitModAction = createServerFn({ method: "POST" })
       notes: data.notes?.trim() || null,
     });
     if (insErr) throw new Error(insErr.message);
-
-    const nextStatus = data.action === "escalate" ? "escalated" : "resolved";
-    const { error: updErr } = await supabaseAdmin
-      .from("mod_queue")
-      .update({
-        status: nextStatus,
-        moderator_id: null, // auth.users-scoped column; admin lives in mod_actions instead
-        resolved_at: new Date().toISOString(),
-        notes: data.notes?.trim() || item.notes,
-      })
-      .eq("id", item.id);
-    if (updErr) throw new Error(updErr.message);
 
     return { ok: true };
   });
