@@ -10,15 +10,24 @@ export const Route = createFileRoute("/_authenticated")({
     meta: [{ name: "robots", content: "noindex,nofollow" }],
   }),
   beforeLoad: async ({ location }) => {
-    // Use getSession() (local, no network) instead of getUser() to avoid
-    // network-blip false negatives that would bounce signed-in users to /enter.
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
+    // Intentionally getUser() not getSession(): getUser() round-trips to the
+    // Supabase Auth server and validates the JWT, so forged or expired tokens
+    // sitting in localStorage cannot bypass this guard. getSession() only
+    // reads local storage and would trust whatever's there.
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
       throw redirect({
         to: "/enter",
         search: { redirect: location.href },
       });
     }
   },
+  // While beforeLoad's getUser() call is in flight, TanStack Router holds the
+  // previous route — no protected content renders until verification resolves.
+  pendingComponent: () => (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-300" />
+    </div>
+  ),
   component: () => <Outlet />,
 });
