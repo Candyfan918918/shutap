@@ -10,7 +10,6 @@ const PENDING_MAX_MS = 5 * 60 * 1000;
 
 function signPending(adminId: string): string {
   // tiny HMAC over adminId|expiry using session seed
-  const { createHmac } = require("node:crypto") as typeof import("node:crypto");
   const exp = Date.now() + PENDING_MAX_MS;
   const payload = `${adminId}.${exp}`;
   const sig = createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
