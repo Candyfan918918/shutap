@@ -1,4 +1,5 @@
-// Marketing homepage data: total verdicts, 3 live cases, 1 resolved case w/ outcome.
+// Marketing homepage data: total verdicts, 3 live cases, 1 resolved case w/ outcome,
+// HOF band stats + top entries, and a recent story stream.
 // Server-only via service role; returns plain DTOs for SSR.
 import { createServerFn } from "@tanstack/react-start";
 
@@ -22,10 +23,36 @@ export type ResolvedCase = {
   daysToOutcome: number;
 };
 
+export type HofEntry = {
+  entityType: "story" | "case" | "user" | string;
+  entityId: string;
+  postId: string | null;
+  title: string;
+  category: string;
+  score: number;
+};
+
+export type HofStats = {
+  verdictsThisWeek: number;
+  casesDecided: number;
+  unanimousPct: number;
+};
+
+export type StreamStory = {
+  postId: string;
+  title: string;
+  category: string | null;
+  snippet: string;
+  createdAt: string;
+};
+
 export type HomepageData = {
   totalVerdicts: number;
   liveCases: LiveCase[];
   resolvedCase: ResolvedCase | null;
+  hofStats: HofStats;
+  hofEntries: HofEntry[];
+  streamStories: StreamStory[];
 };
 
 function topVerdict(rows: Array<{ kind: string | null; quarantined: boolean | null }>): { kind: string | null; pct: number } {
@@ -43,7 +70,17 @@ function topVerdict(rows: Array<{ kind: string | null; quarantined: boolean | nu
 export const getHomepageData = createServerFn({ method: "GET" }).handler(async (): Promise<HomepageData> => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ count: totalVerdicts }, { data: liveRaw }, { data: outcomes }] = await Promise.all([
+  const weekAgoIso = new Date(Date.now() - 7 * 86_400_000).toISOString();
+
+  const [
+    { count: totalVerdicts },
+    { data: liveRaw },
+    { data: outcomes },
+    { count: verdictsThisWeek },
+    { data: decidedCases },
+    { data: hofRaw },
+    { data: streamRaw },
+  ] = await Promise.all([
     supabaseAdmin.from("post_verdict_votes").select("post_id", { count: "exact", head: true }),
     supabaseAdmin
       .from("court_cases")
@@ -59,8 +96,32 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .select("post_id, outcome_type, detail, created_at, days_elapsed")
       .order("created_at", { ascending: false })
       .limit(8),
+    supabaseAdmin
+      .from("post_verdict_votes")
+      .select("post_id", { count: "exact", head: true })
+      .gte("created_at", weekAgoIso),
+    supabaseAdmin
+      .from("court_cases")
+      .select("id, post_id")
+      .eq("status", "decided")
+      .limit(500),
+    supabaseAdmin
+      .from("hof_scores")
+      .select("entity_type, entity_id, category, score, metrics")
+      .eq("period", "weekly")
+      .order("score", { ascending: false })
+      .limit(8),
+    supabaseAdmin
+      .from("posts")
+      .select("id, title, case_title, story_text, score_category, created_at, status, visibility, deleted_at")
+      .eq("status", "published")
+      .eq("visibility", "public")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(6),
   ]);
 
+  // Live cases
   const cases = (liveRaw ?? []) as any[];
   const liveCases: LiveCase[] = [];
   for (const c of cases) {
@@ -85,6 +146,7 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
     });
   }
 
+  // Resolved case
   let resolvedCase: ResolvedCase | null = null;
   for (const o of (outcomes ?? []) as any[]) {
     const { data: post } = await supabaseAdmin
@@ -112,9 +174,82 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
     break;
   }
 
+  // HOF band: stats + top 3 entries (resolve titles)
+  const decided = (decidedCases ?? []) as any[];
+  let unanimousCount = 0;
+  // Sample-based unanimous detection: a case is "unanimous" if its winning verdict pct >= 80.
+  const sample = decided.slice(0, 40);
+  for (const c of sample) {
+    const { data: v } = await supabaseAdmin
+      .from("post_verdict_votes").select("kind, quarantined").eq("post_id", c.post_id).limit(500);
+    const tv = topVerdict((v ?? []) as any[]);
+    if (tv.pct >= 80) unanimousCount++;
+  }
+  const unanimousPct = sample.length === 0 ? 0 : Math.round((unanimousCount / sample.length) * 100);
+
+  const hofEntries: HofEntry[] = [];
+  for (const row of (hofRaw ?? []) as any[]) {
+    if (hofEntries.length >= 3) break;
+    let title: string = (row.metrics?.title as string) ?? "Untitled";
+    let postId: string | null = null;
+    try {
+      if (row.entity_type === "story") {
+        const { data: post } = await supabaseAdmin
+          .from("posts").select("id, case_title, title, status, visibility, deleted_at")
+          .eq("id", row.entity_id).maybeSingle();
+        if (!post || (post as any).status !== "published" || (post as any).visibility !== "public" || (post as any).deleted_at) continue;
+        title = (post as any).case_title ?? (post as any).title ?? title;
+        postId = (post as any).id;
+      } else if (row.entity_type === "case") {
+        const { data: c } = await supabaseAdmin
+          .from("court_cases").select("post_id").eq("id", row.entity_id).maybeSingle();
+        postId = (c as any)?.post_id ?? null;
+        if (postId) {
+          const { data: post } = await supabaseAdmin
+            .from("posts").select("case_title, title, status, visibility, deleted_at")
+            .eq("id", postId).maybeSingle();
+          if (!post || (post as any).status !== "published" || (post as any).visibility !== "public" || (post as any).deleted_at) continue;
+          title = (post as any).case_title ?? (post as any).title ?? title;
+        }
+      } else if (row.entity_type === "user") {
+        const { data: prof } = await supabaseAdmin
+          .from("profiles").select("nickname, handle").eq("id", row.entity_id).maybeSingle();
+        title = (prof as any)?.nickname ?? (prof as any)?.handle ?? "Anonymous";
+      }
+    } catch { /* skip */ }
+    hofEntries.push({
+      entityType: row.entity_type,
+      entityId: row.entity_id,
+      postId,
+      title,
+      category: row.category ?? "honored",
+      score: Math.round(Number(row.score ?? 0)),
+    });
+  }
+
+  // Story stream
+  const streamStories: StreamStory[] = ((streamRaw ?? []) as any[]).map((p) => {
+    const raw = (p.story_text as string | null) ?? "";
+    const snippet = raw.length > 180 ? raw.slice(0, 180).trimEnd() + "…" : raw;
+    return {
+      postId: p.id,
+      title: p.case_title ?? p.title ?? "Untitled story",
+      category: (p.score_category as string | null) ?? null,
+      snippet,
+      createdAt: p.created_at,
+    };
+  });
+
   return {
     totalVerdicts: totalVerdicts ?? 0,
     liveCases,
     resolvedCase,
+    hofStats: {
+      verdictsThisWeek: verdictsThisWeek ?? 0,
+      casesDecided: decided.length,
+      unanimousPct,
+    },
+    hofEntries,
+    streamStories,
   };
 });
