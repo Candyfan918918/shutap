@@ -40,12 +40,12 @@ export const Route = createFileRoute("/case/$caseSlug")({
       return buildHead({
         title: "Case — Shutap",
         description: "A case before the Shutap court.",
-        canonical: `${SHUTAP_ORIGIN}/case/${params.caseSlug}`,
+        canonical: `${ORIGIN}/case/${params.caseSlug}`,
         ogType: "article",
       });
     }
     const d = loaderData;
-    const url = `${SHUTAP_ORIGIN}/case/${params.caseSlug}`;
+    const url = `${ORIGIN}/case/${params.caseSlug}`;
     const story200 = d.storyText.length > 200 ? d.storyText.slice(0, 200) + "…" : d.storyText;
 
     const qaPage = {
