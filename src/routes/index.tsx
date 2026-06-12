@@ -2,7 +2,7 @@
 // Visual reference: the uploaded shutap-landing.html, ported to project tokens.
 // All interactive controls route to /enter (sign-in).
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getHomepageData,
   type LiveCase,
