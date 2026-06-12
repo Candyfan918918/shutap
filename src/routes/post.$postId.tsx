@@ -76,6 +76,23 @@ export const Route = createFileRoute("/post/$postId")({
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: ogImage },
       ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: p.title,
+            articleBody: p.story_text,
+            image: ogImage,
+            url: `https://shutap.lovable.app/post/${params.postId}`,
+            author: {
+              "@type": "Person",
+              identifier: (p as { author_id?: string }).author_id ?? undefined,
+            },
+          }),
+        },
+      ],
     };
   },
   notFoundComponent: () => (
