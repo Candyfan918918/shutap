@@ -124,6 +124,7 @@ function ProfilePage() {
       </header>
 
       <main className="mx-auto max-w-2xl">
+        <h1 className="sr-only">{profile.displayName ?? `@${profile.handle}`} on Shutap</h1>
         <ProfileHeader p={profile} onChanged={() => profileQuery.refetch()} />
 
         <TabBar
