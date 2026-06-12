@@ -277,6 +277,7 @@ function WelcomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-grain flex flex-col items-center justify-center px-6 py-12 overflow-hidden">
+      <h1 className="sr-only">Welcome to Shutap</h1>
       <div className="w-full max-w-sm">
         <p className="text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           {phase === "loading" ? "One moment."
