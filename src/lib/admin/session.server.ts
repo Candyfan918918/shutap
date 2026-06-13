@@ -30,9 +30,12 @@ export function sessionConfig() {
     cookie: {
       httpOnly: true,
       secure: true,
-      sameSite: "lax" as const,
+      // "none" + partitioned so the cookie survives inside the preview iframe
+      // (cross-site embed). Lax cookies are silently dropped there.
+      sameSite: "none" as const,
+      partitioned: true,
       path: "/",
-    },
+    } as any,
   };
 }
 
