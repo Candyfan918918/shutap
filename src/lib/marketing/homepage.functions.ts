@@ -237,6 +237,7 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
   const streamStories: StreamStory[] = ((streamRaw ?? []) as any[]).map((p) => {
     const raw = (p.story_text as string | null) ?? "";
     const snippet = raw.length > 180 ? raw.slice(0, 180).trimEnd() + "…" : raw;
+    const prof = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
     return {
       postId: p.id,
       title: p.case_title ?? p.title ?? "Untitled story",
@@ -245,6 +246,8 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       createdAt: p.created_at,
       commentCount: Number(p.comment_count ?? 0),
       viewCount: Number(p.view_count ?? 0),
+      authorAlias: (prof?.nickname as string | null) ?? "Anonymous",
+      authorCreature: (prof?.creature as string | null) ?? null,
     };
   });
 
