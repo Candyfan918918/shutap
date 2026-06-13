@@ -118,13 +118,28 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .limit(8),
     supabaseAdmin
       .from("posts")
-      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at, author_id, profiles!posts_author_id_fkey(nickname, creature)")
+      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at, author_id")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(24),
   ]);
+
+  // Resolve author profiles for the stream separately (no FK hint to profiles).
+  const streamAuthorIds = Array.from(
+    new Set(((streamRaw ?? []) as any[]).map((p) => p.author_id).filter(Boolean)),
+  ) as string[];
+  const profilesById = new Map<string, { nickname: string | null; creature: string | null }>();
+  if (streamAuthorIds.length) {
+    const { data: profRows } = await supabaseAdmin
+      .from("profiles")
+      .select("id, nickname, creature")
+      .in("id", streamAuthorIds);
+    for (const row of (profRows ?? []) as any[]) {
+      profilesById.set(row.id as string, { nickname: row.nickname ?? null, creature: row.creature ?? null });
+    }
+  }
 
 
   // Live cases
