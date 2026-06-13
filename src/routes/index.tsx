@@ -750,8 +750,10 @@ type StreamCardData = {
   alias: string;
   aliasEmoji: string;
   hearts: string;
+  comments?: number;
   bars: Array<{ color: string; w: number }>;
 };
+
 
 function fmtCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
