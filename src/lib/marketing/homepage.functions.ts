@@ -46,6 +46,8 @@ export type StreamStory = {
   createdAt: string;
   commentCount: number;
   viewCount: number;
+  authorAlias: string;
+  authorCreature: string | null;
 };
 
 
