@@ -118,13 +118,28 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .limit(8),
     supabaseAdmin
       .from("posts")
-      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at, author_id, profiles!posts_author_id_fkey(nickname, creature)")
+      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at, author_id")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(24),
   ]);
+
+  // Resolve author profiles for the stream separately (no FK hint to profiles).
+  const streamAuthorIds = Array.from(
+    new Set(((streamRaw ?? []) as any[]).map((p) => p.author_id).filter(Boolean)),
+  ) as string[];
+  const profilesById = new Map<string, { nickname: string | null; creature: string | null }>();
+  if (streamAuthorIds.length) {
+    const { data: profRows } = await supabaseAdmin
+      .from("profiles")
+      .select("id, nickname, creature")
+      .in("id", streamAuthorIds);
+    for (const row of (profRows ?? []) as any[]) {
+      profilesById.set(row.id as string, { nickname: row.nickname ?? null, creature: row.creature ?? null });
+    }
+  }
 
 
   // Live cases
@@ -237,7 +252,7 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
   const streamStories: StreamStory[] = ((streamRaw ?? []) as any[]).map((p) => {
     const raw = (p.story_text as string | null) ?? "";
     const snippet = raw.length > 180 ? raw.slice(0, 180).trimEnd() + "…" : raw;
-    const prof = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
+    const prof = p.author_id ? profilesById.get(p.author_id) : null;
     return {
       postId: p.id,
       title: p.case_title ?? p.title ?? "Untitled story",
@@ -246,8 +261,8 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       createdAt: p.created_at,
       commentCount: Number(p.comment_count ?? 0),
       viewCount: Number(p.view_count ?? 0),
-      authorAlias: (prof?.nickname as string | null) ?? "Anonymous",
-      authorCreature: (prof?.creature as string | null) ?? null,
+      authorAlias: prof?.nickname ?? "Anonymous",
+      authorCreature: prof?.creature ?? null,
     };
   });
 
