@@ -761,8 +761,20 @@ function fmtCount(n: number): string {
   return String(n);
 }
 
+const CREATURE_EMOJI: Record<string, string> = {
+  fox: "🦊", owl: "🦉", otter: "🦦", lynx: "🐱", raven: "🐦‍⬛", wolf: "🐺",
+  bear: "🐻", lion: "🦁", tiger: "🐯", panda: "🐼", eagle: "🦅", hawk: "🦅",
+  butterfly: "🦋", bee: "🐝", whale: "🐳", dolphin: "🐬", turtle: "🐢",
+  rabbit: "🐰", deer: "🦌", horse: "🐴", crane: "🦩", swan: "🦢", duck: "🦆",
+  cat: "🐈", dog: "🐕", elephant: "🐘", giraffe: "🦒", koala: "🐨",
+  monkey: "🐒", penguin: "🐧", shark: "🦈", snake: "🐍", squirrel: "🐿️",
+  hedgehog: "🦔", lizard: "🦎", coyote: "🐺", crow: "🐦‍⬛", axolotl: "🦎",
+  narwhal: "🐋", anemone: "🪸", iris: "🌸", fern: "🌿", hibiscus: "🌺",
+};
+
 function streamToCard(s: StreamStory, i: number): StreamCardData {
   const palette = FALLBACK_STREAM[i % FALLBACK_STREAM.length];
+  const creatureKey = (s.authorCreature ?? "").toLowerCase();
   return {
     ...palette,
     title: s.title,
@@ -770,6 +782,8 @@ function streamToCard(s: StreamStory, i: number): StreamCardData {
     cat: s.category ?? palette.cat,
     hearts: s.viewCount > 0 ? fmtCount(s.viewCount) : palette.hearts,
     comments: s.commentCount,
+    alias: s.authorAlias || palette.alias,
+    aliasEmoji: CREATURE_EMOJI[creatureKey] ?? palette.aliasEmoji,
   };
 }
 
