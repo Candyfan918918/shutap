@@ -750,8 +750,16 @@ type StreamCardData = {
   alias: string;
   aliasEmoji: string;
   hearts: string;
+  comments?: number;
   bars: Array<{ color: string; w: number }>;
 };
+
+
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
 
 function streamToCard(s: StreamStory, i: number): StreamCardData {
   const palette = FALLBACK_STREAM[i % FALLBACK_STREAM.length];
@@ -760,8 +768,11 @@ function streamToCard(s: StreamStory, i: number): StreamCardData {
     title: s.title,
     snippet: s.snippet || palette.snippet,
     cat: s.category ?? palette.cat,
+    hearts: s.viewCount > 0 ? fmtCount(s.viewCount) : palette.hearts,
+    comments: s.commentCount,
   };
 }
+
 
 function StreamCard({ s, index, onClick }: { s: StreamCardData; index: number; onClick: () => void }) {
   return (
@@ -792,7 +803,11 @@ function StreamCard({ s, index, onClick }: { s: StreamCardData; index: number; o
             <span className="flex items-center justify-center rounded-full" style={{ width: 20, height: 20, background: "var(--c-surface-3)", border: "0.5px solid var(--c-border)", fontSize: 12 }}>{s.aliasEmoji}</span>
             <span className="text-c-text-2" style={{ fontSize: 10 }}>{s.alias}</span>
           </div>
-          <span className="text-c-text-3" style={{ fontSize: 10 }}>♡ {s.hearts}</span>
+          <div className="flex items-center gap-2 text-c-text-3" style={{ fontSize: 10 }}>
+            {typeof s.comments === "number" && s.comments > 0 && <span>💬 {fmtCount(s.comments)}</span>}
+            <span>👁 {s.hearts}</span>
+          </div>
+
         </div>
       </div>
     </button>

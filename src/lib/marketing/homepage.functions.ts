@@ -44,7 +44,10 @@ export type StreamStory = {
   category: string | null;
   snippet: string;
   createdAt: string;
+  commentCount: number;
+  viewCount: number;
 };
+
 
 export type HomepageData = {
   totalVerdicts: number;
@@ -113,13 +116,14 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .limit(8),
     supabaseAdmin
       .from("posts")
-      .select("id, title, case_title, story_text, score_category, created_at, status, visibility, deleted_at")
+      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
-      .limit(6),
+      .limit(24),
   ]);
+
 
   // Live cases
   const cases = (liveRaw ?? []) as any[];
@@ -237,8 +241,11 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       category: (p.score_category as string | null) ?? null,
       snippet,
       createdAt: p.created_at,
+      commentCount: Number(p.comment_count ?? 0),
+      viewCount: Number(p.view_count ?? 0),
     };
   });
+
 
   return {
     totalVerdicts: totalVerdicts ?? 0,
