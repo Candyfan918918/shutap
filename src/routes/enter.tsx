@@ -57,11 +57,14 @@ function EnterPage() {
     if (busy !== "idle" || !email.includes("@")) return;
     setBusy("email");
     try {
+      const welcomeUrl = redirectTo
+        ? `${window.location.origin}/welcome?redirect=${encodeURIComponent(redirectTo)}`
+        : `${window.location.origin}/welcome`;
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}/welcome`,
+          emailRedirectTo: welcomeUrl,
         },
       });
       if (error) throw error;
@@ -79,8 +82,11 @@ function EnterPage() {
     if (busy !== "idle") return;
     setBusy(provider);
     try {
+      const welcomeUrl = redirectTo
+        ? `${window.location.origin}/welcome?redirect=${encodeURIComponent(redirectTo)}`
+        : `${window.location.origin}/welcome`;
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/welcome`,
+        redirect_uri: welcomeUrl,
       });
       if (result.error) {
         toast.error(t("enter.failed"));
