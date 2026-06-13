@@ -31,7 +31,7 @@ export function sessionConfig() {
       httpOnly: true,
       secure: true,
       sameSite: "lax" as const,
-      path: "/admin",
+      path: "/",
     },
   };
 }
