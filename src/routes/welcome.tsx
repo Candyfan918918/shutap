@@ -103,8 +103,10 @@ function WelcomePage() {
         if (ident.locale) localStorage.setItem("md.locale", ident.locale);
         const aliasAlreadyClaimed = Boolean(ident.nationality && ident.emotion && ident.creature);
         if (ident.ageVerified && aliasAlreadyClaimed) {
-          const dest = redirectSearch && redirectSearch.startsWith("/") && !redirectSearch.startsWith("//")
-            ? redirectSearch
+          const stored = (() => { try { return sessionStorage.getItem("md.postAuthRedirect"); } catch { return null; } })();
+          const candidate = redirectSearch || stored || "";
+          const dest = candidate && candidate.startsWith("/") && !candidate.startsWith("//")
+            ? candidate
             : "/court";
           try { sessionStorage.removeItem("md.postAuthRedirect"); } catch {/* noop */}
           window.location.replace(dest);
