@@ -803,7 +803,11 @@ function StreamCard({ s, index, onClick }: { s: StreamCardData; index: number; o
             <span className="flex items-center justify-center rounded-full" style={{ width: 20, height: 20, background: "var(--c-surface-3)", border: "0.5px solid var(--c-border)", fontSize: 12 }}>{s.aliasEmoji}</span>
             <span className="text-c-text-2" style={{ fontSize: 10 }}>{s.alias}</span>
           </div>
-          <span className="text-c-text-3" style={{ fontSize: 10 }}>♡ {s.hearts}</span>
+          <div className="flex items-center gap-2 text-c-text-3" style={{ fontSize: 10 }}>
+            {typeof s.comments === "number" && s.comments > 0 && <span>💬 {fmtCount(s.comments)}</span>}
+            <span>👁 {s.hearts}</span>
+          </div>
+
         </div>
       </div>
     </button>
