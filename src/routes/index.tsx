@@ -753,6 +753,12 @@ type StreamCardData = {
   bars: Array<{ color: string; w: number }>;
 };
 
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
 function streamToCard(s: StreamStory, i: number): StreamCardData {
   const palette = FALLBACK_STREAM[i % FALLBACK_STREAM.length];
   return {
@@ -760,8 +766,11 @@ function streamToCard(s: StreamStory, i: number): StreamCardData {
     title: s.title,
     snippet: s.snippet || palette.snippet,
     cat: s.category ?? palette.cat,
+    hearts: s.viewCount > 0 ? fmtCount(s.viewCount) : palette.hearts,
+    comments: s.commentCount,
   };
 }
+
 
 function StreamCard({ s, index, onClick }: { s: StreamCardData; index: number; onClick: () => void }) {
   return (
