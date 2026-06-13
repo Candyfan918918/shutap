@@ -241,8 +241,11 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       category: (p.score_category as string | null) ?? null,
       snippet,
       createdAt: p.created_at,
+      commentCount: Number(p.comment_count ?? 0),
+      viewCount: Number(p.view_count ?? 0),
     };
   });
+
 
   return {
     totalVerdicts: totalVerdicts ?? 0,
