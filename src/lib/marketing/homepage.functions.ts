@@ -118,7 +118,7 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .limit(8),
     supabaseAdmin
       .from("posts")
-      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at")
+      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at, author_id, profiles!posts_author_id_fkey(nickname, creature)")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
