@@ -44,7 +44,10 @@ export type StreamStory = {
   category: string | null;
   snippet: string;
   createdAt: string;
+  commentCount: number;
+  viewCount: number;
 };
+
 
 export type HomepageData = {
   totalVerdicts: number;
