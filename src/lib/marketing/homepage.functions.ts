@@ -116,13 +116,14 @@ export const getHomepageData = createServerFn({ method: "GET" }).handler(async (
       .limit(8),
     supabaseAdmin
       .from("posts")
-      .select("id, title, case_title, story_text, score_category, created_at, status, visibility, deleted_at")
+      .select("id, title, case_title, story_text, score_category, created_at, comment_count, view_count, status, visibility, deleted_at")
       .eq("status", "published")
       .eq("visibility", "public")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
-      .limit(6),
+      .limit(24),
   ]);
+
 
   // Live cases
   const cases = (liveRaw ?? []) as any[];
