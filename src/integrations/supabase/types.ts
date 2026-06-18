@@ -221,6 +221,44 @@ export type Database = {
         }
         Relationships: []
       }
+      bench_followups: {
+        Row: {
+          comment: string
+          created_at: string
+          cta_label: string
+          dismissed_at: string | null
+          id: string
+          post_id: string
+          shown_at: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          cta_label: string
+          dismissed_at?: string | null
+          id?: string
+          post_id: string
+          shown_at?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          cta_label?: string
+          dismissed_at?: string | null
+          id?: string
+          post_id?: string
+          shown_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_followups_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: true
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bench_voice_strings: {
         Row: {
           key: string
@@ -446,6 +484,8 @@ export type Database = {
       court_cases: {
         Row: {
           ai_summary: string | null
+          bench_promotion_at: string | null
+          bench_promotion_line: string | null
           bench_verdict_line: string | null
           candidacy_paused: boolean
           closes_at: string | null
@@ -476,6 +516,8 @@ export type Database = {
         }
         Insert: {
           ai_summary?: string | null
+          bench_promotion_at?: string | null
+          bench_promotion_line?: string | null
           bench_verdict_line?: string | null
           candidacy_paused?: boolean
           closes_at?: string | null
@@ -506,6 +548,8 @@ export type Database = {
         }
         Update: {
           ai_summary?: string | null
+          bench_promotion_at?: string | null
+          bench_promotion_line?: string | null
           bench_verdict_line?: string | null
           candidacy_paused?: boolean
           closes_at?: string | null
@@ -1780,6 +1824,15 @@ export type Database = {
           additional_perspectives: boolean
           author_id: string
           badges: string[]
+          bench_objection_response: Json | null
+          bench_objection_used: boolean
+          bench_overturned_at: string | null
+          bench_overturned_comment: string | null
+          bench_overturned_outcome: string | null
+          bench_seed_at: string | null
+          bench_seed_comment: string | null
+          bench_seed_lean: string | null
+          bench_seed_verdict_tag: string | null
           both_sides_heard: boolean
           candidacy_paused: boolean
           case_closed_at: string | null
@@ -1808,6 +1861,9 @@ export type Database = {
           published_at: string | null
           question_before_court: string | null
           relate_count: number
+          safety_blocked: boolean
+          safety_response_comment: string | null
+          safety_risk_type: string | null
           save_count: number
           score: number | null
           score_category: string | null
@@ -1832,6 +1888,15 @@ export type Database = {
           additional_perspectives?: boolean
           author_id: string
           badges?: string[]
+          bench_objection_response?: Json | null
+          bench_objection_used?: boolean
+          bench_overturned_at?: string | null
+          bench_overturned_comment?: string | null
+          bench_overturned_outcome?: string | null
+          bench_seed_at?: string | null
+          bench_seed_comment?: string | null
+          bench_seed_lean?: string | null
+          bench_seed_verdict_tag?: string | null
           both_sides_heard?: boolean
           candidacy_paused?: boolean
           case_closed_at?: string | null
@@ -1860,6 +1925,9 @@ export type Database = {
           published_at?: string | null
           question_before_court?: string | null
           relate_count?: number
+          safety_blocked?: boolean
+          safety_response_comment?: string | null
+          safety_risk_type?: string | null
           save_count?: number
           score?: number | null
           score_category?: string | null
@@ -1884,6 +1952,15 @@ export type Database = {
           additional_perspectives?: boolean
           author_id?: string
           badges?: string[]
+          bench_objection_response?: Json | null
+          bench_objection_used?: boolean
+          bench_overturned_at?: string | null
+          bench_overturned_comment?: string | null
+          bench_overturned_outcome?: string | null
+          bench_seed_at?: string | null
+          bench_seed_comment?: string | null
+          bench_seed_lean?: string | null
+          bench_seed_verdict_tag?: string | null
           both_sides_heard?: boolean
           candidacy_paused?: boolean
           case_closed_at?: string | null
@@ -1912,6 +1989,9 @@ export type Database = {
           published_at?: string | null
           question_before_court?: string | null
           relate_count?: number
+          safety_blocked?: boolean
+          safety_response_comment?: string | null
+          safety_risk_type?: string | null
           save_count?: number
           score?: number | null
           score_category?: string | null
@@ -2346,6 +2426,10 @@ export type Database = {
         Row: {
           answers: Json
           badges: string[]
+          bench_label: string | null
+          bench_lean: string | null
+          bench_read: string | null
+          bench_share_line: string | null
           category: string | null
           completed_at: string | null
           created_at: string
@@ -2365,6 +2449,10 @@ export type Database = {
         Insert: {
           answers?: Json
           badges?: string[]
+          bench_label?: string | null
+          bench_lean?: string | null
+          bench_read?: string | null
+          bench_share_line?: string | null
           category?: string | null
           completed_at?: string | null
           created_at?: string
@@ -2384,6 +2472,10 @@ export type Database = {
         Update: {
           answers?: Json
           badges?: string[]
+          bench_label?: string | null
+          bench_lean?: string | null
+          bench_read?: string | null
+          bench_share_line?: string | null
           category?: string | null
           completed_at?: string | null
           created_at?: string

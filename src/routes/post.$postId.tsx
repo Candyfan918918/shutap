@@ -30,6 +30,7 @@ import { SpillScanCTA } from "@/components/posts/SpillScanCTA";
 import { AuthorMenu } from "@/components/posts/AuthorMenu";
 import { ServiceCard } from "@/components/posts/ServiceCard";
 import { FinalVerdictScreen } from "@/components/posts/FinalVerdictScreen";
+import { BenchSeedCard } from "@/components/posts/BenchSeedCard";
 
 import { RelateButton } from "@/components/stream/RelateButton";
 import { useSoftGate } from "@/components/stream/useSoftGate";
@@ -349,6 +350,8 @@ function PostPage() {
             commentsRef.current?.focus("Honestly… here's what I'd do: ");
           }}
         />
+
+        <BenchSeedCard postId={post.id} viewerIsAuthor={viewerId === post.author_id} />
 
         <JudgmentButtons onCast={() => setHasVoted(true)} />
 

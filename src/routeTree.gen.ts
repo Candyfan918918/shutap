@@ -67,6 +67,7 @@ import { Route as ApiPublicSPostIdRouteImport } from './routes/api/public/s.$pos
 import { Route as ApiPublicHooksOutcomeTrackerRouteImport } from './routes/api/public/hooks/outcome-tracker'
 import { Route as ApiPublicHooksHofSnapshotRouteImport } from './routes/api/public/hooks/hof-snapshot'
 import { Route as ApiPublicHooksCourtTickRouteImport } from './routes/api/public/hooks/court-tick'
+import { Route as ApiPublicHooksBenchFollowupsRouteImport } from './routes/api/public/hooks/bench-followups'
 import { Route as AuthenticatedSpillDraftIdScoringRouteImport } from './routes/_authenticated/spill/$draftId/scoring'
 import { Route as AuthenticatedSpillDraftIdScoreRouteImport } from './routes/_authenticated/spill/$draftId/score'
 import { Route as AuthenticatedSpillDraftIdDraftRouteImport } from './routes/_authenticated/spill/$draftId/draft'
@@ -380,6 +381,12 @@ const ApiPublicHooksCourtTickRoute = ApiPublicHooksCourtTickRouteImport.update({
   path: '/api/public/hooks/court-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksBenchFollowupsRoute =
+  ApiPublicHooksBenchFollowupsRouteImport.update({
+    id: '/api/public/hooks/bench-followups',
+    path: '/api/public/hooks/bench-followups',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedSpillDraftIdScoringRoute =
   AuthenticatedSpillDraftIdScoringRouteImport.update({
     id: '/spill/$draftId/scoring',
@@ -492,6 +499,7 @@ export interface FileRoutesByFullPath {
   '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/bench-followups': typeof ApiPublicHooksBenchFollowupsRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/hooks/hof-snapshot': typeof ApiPublicHooksHofSnapshotRoute
   '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
@@ -558,6 +566,7 @@ export interface FileRoutesByTo {
   '/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/bench-followups': typeof ApiPublicHooksBenchFollowupsRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/hooks/hof-snapshot': typeof ApiPublicHooksHofSnapshotRoute
   '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
@@ -628,6 +637,7 @@ export interface FileRoutesById {
   '/_authenticated/spill/$draftId/draft': typeof AuthenticatedSpillDraftIdDraftRoute
   '/_authenticated/spill/$draftId/score': typeof AuthenticatedSpillDraftIdScoreRoute
   '/_authenticated/spill/$draftId/scoring': typeof AuthenticatedSpillDraftIdScoringRoute
+  '/api/public/hooks/bench-followups': typeof ApiPublicHooksBenchFollowupsRoute
   '/api/public/hooks/court-tick': typeof ApiPublicHooksCourtTickRoute
   '/api/public/hooks/hof-snapshot': typeof ApiPublicHooksHofSnapshotRoute
   '/api/public/hooks/outcome-tracker': typeof ApiPublicHooksOutcomeTrackerRoute
@@ -698,6 +708,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/draft'
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
+    | '/api/public/hooks/bench-followups'
     | '/api/public/hooks/court-tick'
     | '/api/public/hooks/hof-snapshot'
     | '/api/public/hooks/outcome-tracker'
@@ -764,6 +775,7 @@ export interface FileRouteTypes {
     | '/spill/$draftId/draft'
     | '/spill/$draftId/score'
     | '/spill/$draftId/scoring'
+    | '/api/public/hooks/bench-followups'
     | '/api/public/hooks/court-tick'
     | '/api/public/hooks/hof-snapshot'
     | '/api/public/hooks/outcome-tracker'
@@ -833,6 +845,7 @@ export interface FileRouteTypes {
     | '/_authenticated/spill/$draftId/draft'
     | '/_authenticated/spill/$draftId/score'
     | '/_authenticated/spill/$draftId/scoring'
+    | '/api/public/hooks/bench-followups'
     | '/api/public/hooks/court-tick'
     | '/api/public/hooks/hof-snapshot'
     | '/api/public/hooks/outcome-tracker'
@@ -868,6 +881,7 @@ export interface RootRouteChildren {
   PostPostIdRoute: typeof PostPostIdRoute
   UHandleRoute: typeof UHandleRoute
   ApiPublicVerdictTallyRoute: typeof ApiPublicVerdictTallyRoute
+  ApiPublicHooksBenchFollowupsRoute: typeof ApiPublicHooksBenchFollowupsRoute
   ApiPublicHooksCourtTickRoute: typeof ApiPublicHooksCourtTickRoute
   ApiPublicHooksHofSnapshotRoute: typeof ApiPublicHooksHofSnapshotRoute
   ApiPublicHooksOutcomeTrackerRoute: typeof ApiPublicHooksOutcomeTrackerRoute
@@ -1284,6 +1298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksCourtTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/bench-followups': {
+      id: '/api/public/hooks/bench-followups'
+      path: '/api/public/hooks/bench-followups'
+      fullPath: '/api/public/hooks/bench-followups'
+      preLoaderRoute: typeof ApiPublicHooksBenchFollowupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/spill/$draftId/scoring': {
       id: '/_authenticated/spill/$draftId/scoring'
       path: '/spill/$draftId/scoring'
@@ -1506,6 +1527,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostPostIdRoute: PostPostIdRoute,
   UHandleRoute: UHandleRoute,
   ApiPublicVerdictTallyRoute: ApiPublicVerdictTallyRoute,
+  ApiPublicHooksBenchFollowupsRoute: ApiPublicHooksBenchFollowupsRoute,
   ApiPublicHooksCourtTickRoute: ApiPublicHooksCourtTickRoute,
   ApiPublicHooksHofSnapshotRoute: ApiPublicHooksHofSnapshotRoute,
   ApiPublicHooksOutcomeTrackerRoute: ApiPublicHooksOutcomeTrackerRoute,
@@ -1516,13 +1538,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

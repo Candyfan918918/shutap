@@ -289,8 +289,16 @@ export const completeScan = createServerFn({ method: "POST" })
       .single();
     if (updErr) throw new Error(updErr.message);
 
+    // ---------- Prompt 2: Scan card (fire-and-forget). ----------
+    import("@/lib/bench/bench.functions")
+      .then(({ runScanCardFor }) => runScanCardFor(data.scanId))
+      .catch(() => {
+        /* non-fatal */
+      });
+
     return rowToScan(updated as Record<string, unknown>);
   });
+
 
 // ---------- linkScanToPost ----------
 // Called from /compose after publish so the scan record knows which post
