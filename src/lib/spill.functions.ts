@@ -536,7 +536,7 @@ export const publishTea = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ draftId: z.string().uuid() }).parse(input),
   )
-  .handler(async ({ data, context }): Promise<{ postId: string }> => {
+  .handler(async ({ data, context }): Promise<{ postId: string; safety?: { blocked: true; comment: string; risk_type: string } }> => {
     const { supabase, userId } = context;
     const { data: row, error: loadErr } = await supabase
       .from("tea_drafts")
@@ -550,6 +550,21 @@ export const publishTea = createServerFn({ method: "POST" })
     if (!draft.selected_title || !draft.selected_story || !draft.selected_tone) {
       throw new Error("Pick a draft variant before publishing.");
     }
+
+    // ---------- Prompt 7: Safety router. Runs first, always. ----------
+    const { runSafetyRouter, seedBenchReactionFor } = await import("@/lib/bench/bench.functions");
+    const safetyText = `${draft.selected_title}\n\n${draft.selected_story}`;
+    const safety = await runSafetyRouter(safetyText);
+    if (safety.block_normal_processing) {
+      // Mark draft and DO NOT publish. Skip prompts 1-6 entirely.
+      await supabase
+        .from("tea_drafts")
+        .update({ status: "blocked_safety" } as never)
+        .eq("id", data.draftId)
+        .eq("user_id", userId);
+      throw new Error(`__SAFETY_BLOCKED__:${safety.risk_type}:${safety.response_comment}`);
+    }
+
     const variant = (draft.draft_variants ?? []).find((v) => v.tone === draft.selected_tone);
     const hashtags = variant?.hashtags ?? [];
     const badges = variant?.badges ?? [];
@@ -584,5 +599,11 @@ export const publishTea = createServerFn({ method: "POST" })
       .eq("id", data.draftId)
       .eq("user_id", userId);
 
+    // ---------- Prompt 1: Seed bench reaction. Fire-and-forget. ----------
+    seedBenchReactionFor(post.id).catch(() => {
+      /* non-fatal; cron can backfill */
+    });
+
     return { postId: post.id };
   });
+

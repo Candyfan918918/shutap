@@ -156,12 +156,49 @@ export const Route = createFileRoute("/api/public/hooks/court-tick")({
           }
         }
 
+        // ---------- Prompt 4: Bench court promotion notes ----------
+        // For any case in_court without a bench_promotion_line yet (capped).
+        let promotion_notes = 0;
+        const { data: needPromo } = await supabaseAdmin
+          .from("court_cases")
+          .select("id")
+          .eq("status", "in_court")
+          .is("bench_promotion_line", null)
+          .order("nominated_at", { ascending: false })
+          .limit(10);
+        if (needPromo && needPromo.length > 0) {
+          const { runCourtPromotionFor } = await import("@/lib/bench/bench.functions");
+          for (const c of needPromo as any[]) {
+            if (await runCourtPromotionFor(c.id)) promotion_notes += 1;
+          }
+        }
+
+        // ---------- Prompt 5: Overturned recap ----------
+        // For cases decided in the last 24h, where the post has a seed lean
+        // and no overturned recap yet.
+        let overturned_recaps = 0;
+        const since24 = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
+        const { data: needRecap } = await supabaseAdmin
+          .from("court_cases")
+          .select("id")
+          .eq("status", "decided")
+          .gte("decided_at", since24)
+          .limit(20);
+        if (needRecap && needRecap.length > 0) {
+          const { runOverturnedRecapFor } = await import("@/lib/bench/bench.functions");
+          for (const c of needRecap as any[]) {
+            if (await runOverturnedRecapFor(c.id)) overturned_recaps += 1;
+          }
+        }
+
         return Response.json({
           ok: true,
           nominated,
           promoted: promoted ?? 0,
           finalized: finalized ?? 0,
           bench_lines,
+          promotion_notes,
+          overturned_recaps,
           at: new Date().toISOString(),
         });
 
