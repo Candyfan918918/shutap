@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,18,400;1,18,400;1,18,500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#fcf1f5;color:#1b0f16;font-family:'Inter',system-ui,sans-serif;font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  @keyframes eblink{0%,92%,98%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+  @keyframes pop2{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="eyeG" cx="40%" cy="18%" r="75%"><stop offset="0%" stop-color="#fff"/><stop offset="18%" stop-color="#ffd0e8"/><stop offset="48%" stop-color="#f060a0"/><stop offset="78%" stop-color="#c0206a"/><stop offset="100%" stop-color="#880040"/></radialGradient>
+  <radialGradient id="pupG" cx="50%" cy="55%" r="58%"><stop offset="0%" stop-color="#3a1020"/><stop offset="100%" stop-color="#060106"/></radialGradient>
+</defs></svg>
+
+<header style="position:sticky;top:0;z-index:40;background:rgba(252,241,245,.82);backdrop-filter:blur(16px);border-bottom:.5px solid rgba(26,12,20,.10)">
+  <div style="max-width:760px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <a href="Landing.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit" aria-label="Shutap home">
+      <span style="width:32px;height:23px;display:block;animation:eblink 6.4s infinite;transform-origin:center"><svg viewBox="0 0 140 96" fill="none" style="display:block;width:100%;height:100%"><rect x="16" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><rect x="84" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><ellipse cx="44" cy="62" rx="19" ry="24" fill="url(#pupG)"/><ellipse cx="112" cy="62" rx="19" ry="24" fill="url(#pupG)"/><path d="M32 28 C32 22 36.5 18.5 41 22 C45.5 18.5 50 22 50 28 C50 34 41 42 41 42 C41 42 32 34 32 28Z" fill="#fff" opacity=".96"/><path d="M100 28 C100 22 104.5 18.5 109 22 C113.5 18.5 118 22 118 28 C118 34 109 42 109 42 C109 42 100 34 100 28Z" fill="#fff" opacity=".96"/></svg></span>
+      <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.04em"><b>shut</b><i style="color:#cf3b7c;font-style:normal">ap</i></span>
+    </a>
+    <div ref="{{ profileWrap }}" style="position:relative">
+      <button onClick="{{ toggleMenu }}" style="display:flex;align-items:center;gap:8px;background:#fff;border:.5px solid rgba(26,12,20,.18);border-radius:999px;padding:4px 11px 4px 4px;cursor:pointer;font-family:inherit">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f060a0,#a01a55);display:grid;place-items:center;font-size:14px">🦉</span>
+        <span style="font-size:12.5px;font-weight:600;color:#1b0f16">Quiet Indonesian Owl</span><span style="color:#9c8b93;font-size:9px">▾</span>
+      </button>
+      <div ref="{{ menuEl }}" role="menu" style="position:absolute;top:calc(100% + 9px);right:0;width:236px;background:#fff;border:.5px solid rgba(26,12,20,.18);border-radius:14px;box-shadow:0 26px 54px -26px rgba(80,10,45,.45);padding:8px;display:none;z-index:70;animation:pop2 .16s ease">
+        <a href="Profile.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#cf3b7c;text-decoration:none;font-weight:600">View full profile</a>
+        <a href="Landing.dc.html#spill" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Spill a new case</a>
+        <a href="Landing.dc.html#scan" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Quick scan · 60s</a>
+        <a href="Stream.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">The Story Stream</a>
+        <a href="Court.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">The Court</a>
+        <a href="HallOfFame.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Hall of Fame</a>
+        <a href="Welcome.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Claim a new name</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:760px;margin:0 auto;padding:30px 18px 50px">
+
+  <div style="background:linear-gradient(180deg,#181320,#100c14);border-radius:22px;padding:30px 26px;color:#f4eff3;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:-50% 30% auto auto;width:300px;height:300px;background:radial-gradient(circle,rgba(240,96,160,.22),transparent 65%);pointer-events:none"></div>
+    <div style="display:flex;align-items:center;gap:18px;position:relative">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#f060a0,#a01a55);display:grid;place-items:center;font-size:36px;flex:none">🦉</div>
+      <div style="min-width:0">
+        <div style="font-family:'Sora',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.02em">Quiet Indonesian Owl</div>
+        <div style="font-size:13px;color:#a99fa8;margin-top:4px">Your standing alias · joined this spring</div>
+        <div style="display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#EF9F27;background:rgba(239,159,39,.12);border:.5px solid rgba(239,159,39,.3);border-radius:999px;padding:5px 11px">⚖ Popcorn Witness · Tier 2</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px;position:relative">
+      <div><b style="font-family:'Sora',sans-serif;font-weight:800;font-size:22px;display:block;font-variant-numeric:tabular-nums">214</b><span style="font-size:11.5px;color:#a99fa8">felt</span></div>
+      <div><b style="font-family:'Sora',sans-serif;font-weight:800;font-size:22px;display:block;font-variant-numeric:tabular-nums">87</b><span style="font-size:11.5px;color:#a99fa8">verdicts cast</span></div>
+      <div><b style="font-family:'Sora',sans-serif;font-weight:800;font-size:22px;display:block;font-variant-numeric:tabular-nums">3</b><span style="font-size:11.5px;color:#a99fa8">cases filed</span></div>
+      <div><b style="font-family:'Sora',sans-serif;font-weight:800;font-size:22px;display:block;font-variant-numeric:tabular-nums">12</b><span style="font-size:11.5px;color:#a99fa8">objections</span></div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Sora',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em;margin:30px 0 14px">Cases you filed</h3>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <a href="Stream.dc.html#story-7" style="display:flex;align-items:center;gap:14px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:15px;padding:14px 16px;text-decoration:none;color:inherit" style-hover="border-color:#e0508a">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(160deg,#241c3a,#6b46a8);display:grid;place-items:center;font-size:24px;flex:none">🦉</div>
+      <div style="flex:1;min-width:0"><h4 style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;line-height:1.3;margin:0 0 6px">Unfollowed my best friend on Instagram. She noticed immediately.</h4><div style="font-size:11.5px;color:#9c8b93"><span style="color:#888780;font-weight:600">Need update</span> · 1.9k felt · in the stream</div></div>
+      <span style="color:#9c8b93;font-size:18px;flex:none">›</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:14px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:15px;padding:14px 16px">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(160deg,#3a2410,#c9711f);display:grid;place-items:center;font-size:24px;flex:none">🦉</div>
+      <div style="flex:1;min-width:0"><h4 style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px;line-height:1.3;margin:0 0 6px">Skipped my own birthday to avoid hosting people who never host me.</h4><div style="font-size:11.5px;color:#9c8b93"><span style="color:#1D9E75;font-weight:600">Green flag</span> · verdict locked · 4.4k jurors</div></div>
+      <span style="color:#9c8b93;font-size:18px;flex:none">›</span>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Sora',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em;margin:30px 0 14px">Recent verdicts you cast</h3>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:13px;padding:13px 15px"><span style="font-size:13.5px;color:#1b0f16;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Refused overtime. My boss said I'm not a team player…</span><span style="flex:none;font-size:11.5px;font-weight:700;color:#1D9E75;background:rgba(29,158,117,.1);border-radius:999px;padding:4px 10px">Green flag</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:13px;padding:13px 15px"><span style="font-size:13.5px;color:#1b0f16;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cancelled my partner's birthday dinner because…</span><span style="flex:none;font-size:11.5px;font-weight:700;color:#D85A30;background:rgba(216,90,48,.1);border-radius:999px;padding:4px 10px">Run</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:13px;padding:13px 15px"><span style="font-size:13.5px;color:#1b0f16;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Went through my boyfriend's phone while he slept…</span><span style="flex:none;font-size:11.5px;font-weight:700;color:#E24B4A;background:rgba(226,75,74,.1);border-radius:999px;padding:4px 10px">Red flag</span></div>
+  </div>
+
+  <div style="margin-top:30px;background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:16px;padding:20px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+    <div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:14px">Want a fresh start?</div><div style="font-size:12.5px;color:#6e5f67;margin-top:3px">Trade in your alias for a new seat in the gallery. Your record stays pseudonymous.</div></div>
+    <a href="Welcome.dc.html" style="flex:none;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:#100c14;background:#e0508a;border-radius:999px;padding:11px 18px;text-decoration:none">Claim a new name →</a>
+  </div>
+
+  <footer style="padding:34px 0 8px;color:#9c8b93;font-size:12.5px;text-align:center">
+    <div style="margin-top:13px;font-family:'Sora',sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase">In an AI world, stay human</div>
+  </footer>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals(){
+    return {
+      profileWrap: el=>this.$pwrap=el, menuEl: el=>this.$menu=el,
+      toggleMenu:(e)=>{e.stopPropagation(); if(this.$menu) this.$menu.style.display=this.$menu.style.display==='block'?'none':'block';}
+    };
+  }
+  componentDidMount(){ document.addEventListener('click',(e)=>{ if(this.$pwrap&&!this.$pwrap.contains(e.target)&&this.$menu) this.$menu.style.display='none'; }); }
+}
+</script>
+</body>
+</html>
