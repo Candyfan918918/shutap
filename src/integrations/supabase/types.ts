@@ -1748,11 +1748,31 @@ export type Database = {
         }
         Relationships: []
       }
+      post_verdict_vote_ips: {
+        Row: {
+          created_at: string
+          ip_hash: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ip_hash: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ip_hash?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_verdict_votes: {
         Row: {
           created_at: string
           flip_round: number
-          ip_hash: string | null
           kind: string
           post_id: string
           quarantined: boolean
@@ -1763,7 +1783,6 @@ export type Database = {
         Insert: {
           created_at?: string
           flip_round?: number
-          ip_hash?: string | null
           kind: string
           post_id: string
           quarantined?: boolean
@@ -1774,7 +1793,6 @@ export type Database = {
         Update: {
           created_at?: string
           flip_round?: number
-          ip_hash?: string | null
           kind?: string
           post_id?: string
           quarantined?: boolean
