@@ -45,14 +45,14 @@ export function IdentityBadge() {
         if (!cancelled) { setIdentity(null); setHasSession(false); }
         return;
       }
-      if (!cancelled) setHasSession(true);
       try {
         const ident = await fetchIdentity();
-        if (!cancelled) setIdentity(ident);
+        if (!cancelled) { setIdentity(ident); setHasSession(true); }
       } catch { /* ignore */ }
     };
     void supabase.auth.getSession().then(({ data }) => load(!!data.session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       void load(!!session);
     });
     return () => { cancelled = true; subscription.unsubscribe(); };

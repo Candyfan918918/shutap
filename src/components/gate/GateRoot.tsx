@@ -25,9 +25,10 @@ export function GateRoot() {
         console.warn("[gate] could not parse resume key", e);
       }
 
-      // Avoid the /welcome page itself triggering its own redirect loop.
-      const onWelcome = typeof window !== "undefined" && window.location.pathname === "/welcome";
-      if (onWelcome) return;
+      // Public entry surfaces own their flow. Do not bounce / ↔ /welcome on
+      // initial session restore; that is the flicker the Bench is here to end.
+      const path = typeof window !== "undefined" ? window.location.pathname : "";
+      if (path === "/welcome" || path === "/" || path.startsWith("/enter")) return;
 
       // Check whether onboarding is complete; if not, send them to /welcome.
       try {
