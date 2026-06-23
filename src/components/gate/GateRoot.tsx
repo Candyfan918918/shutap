@@ -25,29 +25,27 @@ export function GateRoot() {
         console.warn("[gate] could not parse resume key", e);
       }
 
-      // Avoid the /welcome page itself triggering its own redirect loop.
-      const onWelcome = typeof window !== "undefined" && window.location.pathname === "/welcome";
-      if (onWelcome) return;
+      // Public entry surfaces own their flow. Do not bounce / ↔ /welcome on
+      // initial session restore; that is the flicker the Bench is here to end.
+      const path = typeof window !== "undefined" ? window.location.pathname : "";
+      if (path === "/welcome" || path === "/" || path.startsWith("/enter")) return;
 
       // Check whether onboarding is complete; if not, send them to /welcome.
       try {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) return;
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from("profiles")
-          .select("age_verified, nationality, emotion, creature, blocked_reason")
+          .select("age_verified, nationality, emotion, creature")
           .eq("id", user.user.id)
           .maybeSingle();
+        if (error) {
+          console.warn("[gate] onboarding check deferred", error.message);
+          return;
+        }
 
         const aliasClaimed = Boolean(profile?.nationality && profile?.emotion && profile?.creature);
         const ageVerified = Boolean(profile?.age_verified);
-        const blocked = Boolean(profile?.blocked_reason);
-
-        if (blocked) {
-          console.warn("[gate] account is blocked, signing out");
-          await supabase.auth.signOut();
-          return;
-        }
 
         if (!ageVerified || !aliasClaimed) {
           const here = `${window.location.pathname}${window.location.search}`;
