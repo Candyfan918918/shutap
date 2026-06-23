@@ -98,11 +98,10 @@ export const generateAlias = createServerFn({ method: "POST" })
 
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
-      .select("age_verified, blocked_reason")
+      .select("age_verified")
       .eq("id", userId)
       .maybeSingle();
     if (profileErr) throw new Error(profileErr.message);
-    if (profile?.blocked_reason) throw new Error("account_blocked");
     if (!profile?.age_verified) throw new Error("age_not_verified");
 
     const country =
@@ -112,6 +111,12 @@ export const generateAlias = createServerFn({ method: "POST" })
       getRequestHeader("x-country") ||
       null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: block } = await supabaseAdmin
+      .from("profiles")
+      .select("blocked_reason")
+      .eq("id", userId)
+      .maybeSingle();
+    if (block?.blocked_reason) throw new Error("account_blocked");
 
     const emotionPool = pickEmotion(data.category);
     const creaturePool = pickCreature(data.relationshipType);
@@ -171,12 +176,19 @@ export const claimAlias = createServerFn({ method: "POST" })
 
     const { data: profile, error: profileErr } = await supabase
       .from("profiles")
-      .select("age_verified, blocked_reason")
+      .select("age_verified")
       .eq("id", userId)
       .maybeSingle();
     if (profileErr) return { ok: false, reason: "unknown", message: profileErr.message };
-    if (profile?.blocked_reason) return { ok: false, reason: "blocked" };
     if (!profile?.age_verified) return { ok: false, reason: "age_not_verified" };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: block } = await supabaseAdmin
+      .from("profiles")
+      .select("blocked_reason")
+      .eq("id", userId)
+      .maybeSingle();
+    if (block?.blocked_reason) return { ok: false, reason: "blocked" };
 
     const nickname = `${data.emotion} ${data.nationality} ${data.creature}`;
     // Derive a handle from the alias so @handle stays consistent with the
