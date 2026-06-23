@@ -357,15 +357,15 @@
       </button>
       <div class="profile-menu" id="profileMenu" role="menu">
         <div class="phead"><div class="pn">🦉 Quiet Indonesian Owl</div><div class="pm">Your anonymous identity · Popcorn Witness</div></div>
-        <a role="menuitem" href="profile.html">View full profile</a>
+        <a role="menuitem" href="/me">View full profile</a>
         <a role="menuitem" data-spill>Spill a new case</a>
         <a role="menuitem" data-scan>Quick scan</a>
         <a role="menuitem">Felt <b id="feltCountMenu">0</b></a>
-        <a role="menuitem" href="stream.html">The Story Stream</a>
-        <a role="menuitem" href="court.html">The Court</a>
-        <a role="menuitem" href="hall-of-fame.html">Hall of Fame</a>
-        <a role="menuitem" href="welcome.html">Claim a new name</a>
-        <a role="menuitem" href="profile.html">Settings</a>
+        <a role="menuitem" href="/stream">The Story Stream</a>
+        <a role="menuitem" href="/court">The Court</a>
+        <a role="menuitem" href="/hof">Hall of Fame</a>
+        <a role="menuitem" href="/enter">Claim a new name</a>
+        <a role="menuitem" href="/me">Settings</a>
       </div>
     </div>
   </div>
@@ -385,7 +385,7 @@
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow"><span class="dot"></span>The story stream</span>
-        <span class="sec-note"><a href="stream.html" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Browse the full stream →</a></span>
+        <span class="sec-note"><a href="/stream" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Browse the full stream →</a></span>
       </div>
       <div class="waterfall" id="waterfall" data-cards></div>
     </div>
@@ -396,7 +396,7 @@
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow"><span class="dot"></span>The Court</span>
-        <span class="sec-note"><a href="court.html" style="color:inherit;text-decoration:underline;text-underline-offset:3px">See every case in session →</a></span>
+        <span class="sec-note"><a href="/court" style="color:inherit;text-decoration:underline;text-underline-offset:3px">See every case in session →</a></span>
       </div>
       <p class="invite scan" data-scan style="margin:0 0 14px">Wondering if your version would survive a room like this? <span class="go">Scan it →</span></p>
       <div class="case reveal ink">
@@ -439,7 +439,7 @@
 
       <div class="docket-head">
         <span class="dt">Also in session</span>
-        <a class="da" href="court.html">Open the full docket →</a>
+        <a class="da" href="/court">Open the full docket →</a>
       </div>
       <div class="docket" id="docket"></div>
     </div>
@@ -450,7 +450,7 @@
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow"><span class="dot"></span>Hall of Fame</span>
-        <span class="sec-note"><a href="hall-of-fame.html" style="color:inherit;text-decoration:underline;text-underline-offset:3px">See the full leaderboard →</a></span>
+        <span class="sec-note"><a href="/hof" style="color:inherit;text-decoration:underline;text-underline-offset:3px">See the full leaderboard →</a></span>
       </div>
       <div class="hof-stats reveal">
         <div class="st"><b>1,842</b><span>verdicts this week</span></div>
@@ -717,7 +717,7 @@
       '<div class="seedlabel"><span>The Bench\u2019s first read \u2014 no jurors yet</span><span><b>1</b> vote</span></div>'+
       '<div class="seedbar" aria-hidden="true"><span style="width:100%;background:var('+vt.css+')"></span></div>'+
       '<p class="forming-note" style="margin-top:14px">Claim a name to be the first juror on this one \u2014 or push back on the Bench yourself.</p>'+
-      '<a href="welcome.html" class="objline" style="color:var(--pink-2);text-decoration:none"><span>Claim your name</span><span class="go">\u2192</span></a><br>'+
+      '<a href="/enter" class="objline" style="color:var(--pink-2);text-decoration:none"><span>Claim your name</span><span class="go">\u2192</span></a><br>'+
       '<span class="objline" id="objLine"><span>Disagree with the Bench?</span><span class="go">Object \u2192</span></span>'+
       '<div class="objbox" id="objBox">'+
         '<div class="spillfield"><input id="objInput" type="text" placeholder="Tell the Bench why\u2026" aria-label="Object to the Bench" /><span class="go" id="objGo" role="button" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'+
@@ -798,7 +798,7 @@
   }
   (function(){
     var inp=document.getElementById('spillInput'),go=document.getElementById('spillGo'),rep=document.getElementById('spillReply');
-    function submit(){var v=inp.value.trim();if(!v)return;inp.value='';rep.classList.add('show');rep.innerHTML='…';setTimeout(function(){typeInto(rep,'Good — that\'s where it starts. I\'ll take it from here, one question at a time. To file the case and let the crowd decide, the court gives you a name first.',function(){rep.insertAdjacentHTML('afterend','<a href="welcome.html" class="objline" style="color:var(--pink-2);text-decoration:none;display:inline-flex"><span>Claim your name</span><span class="go">→</span></a>');});},300);}
+    function submit(){var v=inp.value.trim();if(!v)return;inp.value='';rep.classList.add('show');rep.innerHTML='…';setTimeout(function(){typeInto(rep,'Good — that\'s where it starts. I\'ll take it from here, one question at a time. To file the case and let the crowd decide, the court gives you a name first.',function(){rep.insertAdjacentHTML('afterend','<a href="/enter" class="objline" style="color:var(--pink-2);text-decoration:none;display:inline-flex"><span>Claim your name</span><span class="go">→</span></a>');});},300);}
     inp.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});go.addEventListener('click',submit);
   })();
 
@@ -820,7 +820,7 @@
         var opts=step.querySelector('.opts');
         cur.a.forEach(function(txt){var o=document.createElement('span');o.className='opt';o.textContent=txt;o.onclick=function(){i++;render();};opts.appendChild(o);});
       } else {
-        step.innerHTML='<div class="scanres"><div class="rl">The Bench\'s read</div><div class="rv">Likely a <span style="color:var(--v-redflag)">red flag</span> — but the crowd decides.</div><div class="vmeter" data-fill2 aria-hidden="true"><span class="v-redflag" style="flex-basis:46%"></span><span class="v-run" style="flex-basis:20%"></span><span class="v-therapy" style="flex-basis:18%"></span><span class="v-greenflag" style="flex-basis:16%"></span></div><div class="vkey" style="margin-top:10px"><span><i style="background:var(--v-redflag)"></i>Red flag</span><span><i style="background:var(--v-run)"></i>Run</span><span><i style="background:var(--v-therapy)"></i>Therapy</span><span><i style="background:var(--v-greenflag)"></i>Green flag</span></div><div class="post">Post it to be heard — <a href="welcome.html" style="color:var(--pink-2);font-weight:600">claim a name</a> and real people will deliver the real verdict.</div></div>';
+        step.innerHTML='<div class="scanres"><div class="rl">The Bench\'s read</div><div class="rv">Likely a <span style="color:var(--v-redflag)">red flag</span> — but the crowd decides.</div><div class="vmeter" data-fill2 aria-hidden="true"><span class="v-redflag" style="flex-basis:46%"></span><span class="v-run" style="flex-basis:20%"></span><span class="v-therapy" style="flex-basis:18%"></span><span class="v-greenflag" style="flex-basis:16%"></span></div><div class="vkey" style="margin-top:10px"><span><i style="background:var(--v-redflag)"></i>Red flag</span><span><i style="background:var(--v-run)"></i>Run</span><span><i style="background:var(--v-therapy)"></i>Therapy</span><span><i style="background:var(--v-greenflag)"></i>Green flag</span></div><div class="post">Post it to be heard — <a href="/enter" style="color:var(--pink-2);font-weight:600">claim a name</a> and real people will deliver the real verdict.</div></div>';
       }
     }
     render();
