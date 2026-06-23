@@ -28,7 +28,7 @@
 
 <header style="position:sticky;top:0;z-index:40;background:rgba(252,241,245,.82);backdrop-filter:blur(16px);border-bottom:.5px solid rgba(26,12,20,.10)">
   <div style="max-width:880px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-    <a href="Landing.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit" aria-label="Shutap home">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit" aria-label="Shutap home">
       <span style="width:32px;height:23px;display:block;animation:eblink 6.4s infinite;transform-origin:center"><svg viewBox="0 0 140 96" fill="none" style="display:block;width:100%;height:100%"><rect x="16" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><rect x="84" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><ellipse cx="44" cy="62" rx="19" ry="24" fill="url(#pupG)"/><ellipse cx="112" cy="62" rx="19" ry="24" fill="url(#pupG)"/><path d="M32 28 C32 22 36.5 18.5 41 22 C45.5 18.5 50 22 50 28 C50 34 41 42 41 42 C41 42 32 34 32 28Z" fill="#fff" opacity=".96"/><path d="M100 28 C100 22 104.5 18.5 109 22 C113.5 18.5 118 22 118 28 C118 34 109 42 109 42 C109 42 100 34 100 28Z" fill="#fff" opacity=".96"/></svg></span>
       <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.04em"><b>shut</b><i style="color:#cf3b7c;font-style:normal">ap</i></span>
     </a>
@@ -38,13 +38,13 @@
         <span style="font-size:12.5px;font-weight:600;color:#1b0f16">Quiet Indonesian Owl</span><span style="color:#9c8b93;font-size:9px">▾</span>
       </button>
       <div ref="{{ menuEl }}" role="menu" style="position:absolute;top:calc(100% + 9px);right:0;width:236px;background:#fff;border:.5px solid rgba(26,12,20,.18);border-radius:14px;box-shadow:0 26px 54px -26px rgba(80,10,45,.45);padding:8px;display:none;z-index:70;animation:pop2 .16s ease">
-        <a href="Profile.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">View full profile</a>
-        <a href="Landing.dc.html#spill" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Spill a new case</a>
-        <a href="Landing.dc.html#scan" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Quick scan · 60s</a>
-        <a href="Stream.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#cf3b7c;text-decoration:none;font-weight:600">The Story Stream</a>
-        <a href="Court.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">The Court</a>
-        <a href="HallOfFame.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Hall of Fame</a>
-        <a href="Welcome.dc.html" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Claim a new name</a>
+        <a href="/me" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">View full profile</a>
+        <a href="/#spill" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Spill a new case</a>
+        <a href="/#scan" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Quick scan · 60s</a>
+        <a href="/stream" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#cf3b7c;text-decoration:none;font-weight:600">The Story Stream</a>
+        <a href="/court" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">The Court</a>
+        <a href="/hof" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Hall of Fame</a>
+        <a href="/welcome" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Claim a new name</a>
       </div>
     </div>
   </div>
@@ -133,7 +133,7 @@ class Component extends DCLogic {
     el.onmouseenter=()=>{el.style.transform='translateY(-2px)';el.style.borderColor='#7F77DD';};
     el.onmouseleave=()=>{el.style.transform='';el.style.borderColor='rgba(127,119,221,.42)';};
     el.innerHTML=this.eyeSVG(30,22)+'<span style="font-family:Newsreader,serif;font-style:italic;font-size:15.5px;line-height:1.42;color:#1b0f16">Not sure you\u2019d come out clean? A sixty-second read, just tap.</span><span style="font-family:Sora,sans-serif;font-weight:700;font-size:12.5px;color:#7F77DD">Scan it →</span>';
-    el.onclick=()=>{ window.location.href='Landing.dc.html#scan'; };
+    el.onclick=()=>{ window.location.href='/#scan'; };
     return el;
 
   card(s){
@@ -156,7 +156,7 @@ class Component extends DCLogic {
     el.onmouseenter=()=>{el.style.transform='translateY(-2px)';el.style.borderColor='#e0508a';};
     el.onmouseleave=()=>{el.style.transform='';el.style.borderColor='rgba(26,12,20,.18)';};
     el.innerHTML=this.eyeSVG(30,22)+'<span style="font-family:Newsreader,serif;font-style:italic;font-size:15.5px;line-height:1.42;color:#1b0f16">Seeing yourself in these? The court hears anyone. Say it out loud.</span><span style="font-family:Sora,sans-serif;font-weight:700;font-size:12.5px;color:#cf3b7c">Spill it →</span>';
-    el.onclick=()=>{ window.location.href='Landing.dc.html#spill'; };
+    el.onclick=()=>{ window.location.href='/#spill'; };
     return el;
   }
 
@@ -175,13 +175,13 @@ class Component extends DCLogic {
       '<div style="display:flex;justify-content:space-between;font-size:11.5px;color:#9c8b93;margin:11px 0 7px"><span>The Bench\u2019s first read \u2014 no jurors yet</span><span><b style="color:#1b0f16">1</b> vote</span></div>'+
       '<div style="height:16px;border-radius:8px;overflow:hidden;display:flex;background:#efe4ea"><span style="width:100%;height:100%;display:block;background:'+V.color+'"></span></div>'+
       '<p style="font-family:Newsreader,serif;font-style:italic;color:#6e5f67;font-size:15px;margin-top:16px">Claim a name to be the first juror on this one \u2014 or push back on the Bench yourself.</p>'+
-      '<a href="Welcome.dc.html" style="display:inline-flex;align-items:baseline;gap:7px;color:#cf3b7c;text-decoration:none;font-family:Newsreader,serif;font-style:italic;font-size:14px;margin-top:6px"><span>Claim your name</span><span style="font-family:Sora;font-weight:700;font-size:11.5px">→</span></a><br>'+
+      '<a href="/welcome" style="display:inline-flex;align-items:baseline;gap:7px;color:#cf3b7c;text-decoration:none;font-family:Newsreader,serif;font-style:italic;font-size:14px;margin-top:6px"><span>Claim your name</span><span style="font-family:Sora;font-weight:700;font-size:11.5px">→</span></a><br>'+
       '<span id="objLine" style="font-family:Newsreader,serif;font-style:italic;color:#6e5f67;font-size:14px;cursor:pointer;margin-top:14px;display:inline-flex;align-items:baseline;gap:7px"><span>Disagree with the Bench?</span><span style="font-family:Sora;font-weight:700;font-size:11.5px;color:#7F77DD">Object \u2192</span></span>'+
       '<div id="objBox" style="margin-top:14px;display:none">'+
         '<div style="display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#241d30,#15101c);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:13px 15px"><input id="objInput" type="text" placeholder="Tell the Bench why\u2026" style="flex:1;background:none;border:none;outline:none;color:#f4eff3;font-family:Inter,sans-serif;font-size:15.5px" /><span id="objGo" role="button" style="width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;background:#e0508a;cursor:pointer"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#16000c;fill:none;stroke-width:2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'+
         '<div id="objReply" style="margin-top:14px;font-family:Newsreader,serif;font-style:italic;font-size:14.5px;color:#a01a55;line-height:1.5"></div>'+
       '</div>'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap;border-top:.5px solid rgba(26,12,20,.10);padding-top:16px"><span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#6e5f67">♥ <b style="color:#1b0f16">'+d.likes+'</b> felt this</span><a href="Landing.dc.html#spill" style="font-size:13px;color:#6e5f67;text-decoration:none">It happened to me too \u2014 spill mine <span style="color:#e0508a">\u2192</span></a></div>';
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap;border-top:.5px solid rgba(26,12,20,.10);padding-top:16px"><span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#6e5f67">♥ <b style="color:#1b0f16">'+d.likes+'</b> felt this</span><a href="/#spill" style="font-size:13px;color:#6e5f67;text-decoration:none">It happened to me too \u2014 spill mine <span style="color:#e0508a">\u2192</span></a></div>';
     this.$page.style.display='block'; this.$page.scrollTop=0;
     this.$pbody.querySelector('#crumb').onclick=()=>{ location.hash=''; };
     this.wireObjection(d);
