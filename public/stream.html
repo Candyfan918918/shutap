@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,18,400;1,18,400;1,18,500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#fcf1f5;color:#1b0f16;font-family:'Inter',system-ui,sans-serif;font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  @keyframes eblink{0%,92%,98%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+  @keyframes blinkdot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  @keyframes pop2{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="eyeG" cx="40%" cy="18%" r="75%"><stop offset="0%" stop-color="#fff"/><stop offset="18%" stop-color="#ffd0e8"/><stop offset="48%" stop-color="#f060a0"/><stop offset="78%" stop-color="#c0206a"/><stop offset="100%" stop-color="#880040"/></radialGradient>
+  <radialGradient id="pupG" cx="50%" cy="55%" r="58%"><stop offset="0%" stop-color="#3a1020"/><stop offset="100%" stop-color="#060106"/></radialGradient>
+</defs></svg>
+
+<header style="position:sticky;top:0;z-index:40;background:rgba(252,241,245,.82);backdrop-filter:blur(16px);border-bottom:.5px solid rgba(26,12,20,.10)">
+  <div style="max-width:880px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit" aria-label="Shutap home">
+      <span style="width:32px;height:23px;display:block;animation:eblink 6.4s infinite;transform-origin:center"><svg viewBox="0 0 140 96" fill="none" style="display:block;width:100%;height:100%"><rect x="16" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><rect x="84" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><ellipse cx="44" cy="62" rx="19" ry="24" fill="url(#pupG)"/><ellipse cx="112" cy="62" rx="19" ry="24" fill="url(#pupG)"/><path d="M32 28 C32 22 36.5 18.5 41 22 C45.5 18.5 50 22 50 28 C50 34 41 42 41 42 C41 42 32 34 32 28Z" fill="#fff" opacity=".96"/><path d="M100 28 C100 22 104.5 18.5 109 22 C113.5 18.5 118 22 118 28 C118 34 109 42 109 42 C109 42 100 34 100 28Z" fill="#fff" opacity=".96"/></svg></span>
+      <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.04em"><b>shut</b><i style="color:#cf3b7c;font-style:normal">ap</i></span>
+    </a>
+    <div ref="{{ profileWrap }}" style="position:relative">
+      <button onClick="{{ toggleMenu }}" style="display:flex;align-items:center;gap:8px;background:#fff;border:.5px solid rgba(26,12,20,.18);border-radius:999px;padding:4px 11px 4px 4px;cursor:pointer;font-family:inherit">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f060a0,#a01a55);display:grid;place-items:center;font-size:14px">🦉</span>
+        <span style="font-size:12.5px;font-weight:600;color:#1b0f16">Quiet Indonesian Owl</span><span style="color:#9c8b93;font-size:9px">▾</span>
+      </button>
+      <div ref="{{ menuEl }}" role="menu" style="position:absolute;top:calc(100% + 9px);right:0;width:236px;background:#fff;border:.5px solid rgba(26,12,20,.18);border-radius:14px;box-shadow:0 26px 54px -26px rgba(80,10,45,.45);padding:8px;display:none;z-index:70;animation:pop2 .16s ease">
+        <a href="/me" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">View full profile</a>
+        <a href="/#spill" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Spill a new case</a>
+        <a href="/#scan" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Quick scan · 60s</a>
+        <a href="/stream" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#cf3b7c;text-decoration:none;font-weight:600">The Story Stream</a>
+        <a href="/court" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">The Court</a>
+        <a href="/hof" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Hall of Fame</a>
+        <a href="/welcome" style="display:block;padding:9px 10px;border-radius:9px;font-size:13.5px;color:#6e5f67;text-decoration:none" style-hover="background:#f8eef2;color:#1b0f16">Claim a new name</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section style="padding:30px 0">
+    <div style="max-width:880px;margin:0 auto;padding:0 18px">
+      <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Sora',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:#cf3b7c"><span style="width:6px;height:6px;border-radius:50%;background:#e0508a;box-shadow:0 0 0 4px rgba(240,96,160,.14)"></span>The Story Stream</span>
+      <h1 style="font-family:'Sora',sans-serif;font-weight:800;letter-spacing:-.03em;line-height:1.04;font-size:clamp(32px,7vw,46px);margin:12px 0 0">Every story currently open to the crowd.</h1>
+      <p style="color:#6e5f67;font-size:16.5px;max-width:58ch;margin:12px 0 0">Each one already has the Bench's first read. Open a card to see the full case, push back on the Bench in real time, or feel it yourself.</p>
+      <div ref="{{ filters }}" style="display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 22px"></div>
+      <div ref="{{ waterfall }}" style="display:flex;gap:13px;align-items:flex-start"></div>
+    </div>
+  </section>
+  <footer style="padding:30px 0 24px;color:#9c8b93;font-size:12.5px;text-align:center">
+    <div>Shutap — the world's memory of human experience.</div>
+    <div style="margin-top:13px;font-family:'Sora',sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase">In an AI world, stay human</div>
+  </footer>
+</main>
+
+<div id="storyPage" ref="{{ pageEl }}" style="position:fixed;inset:58px 0 0 0;z-index:50;background:#fcf1f5;overflow-y:auto;display:none;padding:24px 0 50px">
+  <div id="storyBody" style="max-width:880px;margin:0 auto;padding:0 18px" ref="{{ pageBody }}"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  get VTAGS(){return {red_flag:{color:'#E24B4A',label:'red flag'},run:{color:'#D85A30',label:'run'},therapy:{color:'#5DCAA5',label:'therapy'},need_update:{color:'#888780',label:'need update'},lawyer_up:{color:'#EF9F27',label:'lawyer up'},talk_it_out:{color:'#7F77DD',label:'talk it out'},green_flag:{color:'#1D9E75',label:'green flag'}};}
+  get STORIES(){return [
+    {id:'0',cov:'linear-gradient(160deg,#3a1226,#a01e5a)',cr:'🦊',mood:'🔥 Hot · Romance',cat:'Romance',h:"I went through my boyfriend's phone while he slept — and now he knows.",av:'🦊',name:'Restless Filipino Fox',likes:'4.2k',ar:'3/4',bt:'red_flag',bc:"Going through someone's phone breaks trust first. The Bench leans against this one."},
+    {id:'1',cov:'linear-gradient(160deg,#2a1f3e,#5b46a8)',cr:'🐻',mood:'💜 Warm · Family',cat:'Family',h:'My parents showed up to my wedding after I explicitly un-invited them.',av:'🐻',name:'Defiant Ghanaian Bear',likes:'8.8k',ar:'1/1',bt:'talk_it_out',bc:'Showing up uninvited is its own kind of answer. Worth one more conversation before judgment.'},
+    {id:'2',cov:'linear-gradient(160deg,#3a2410,#c9711f)',cr:'🦁',mood:'⚡ On fire · Work',cat:'Work',h:"Refused overtime. My boss said I'm not a team player. I said: correct.",av:'🦁',name:'Bitter Kenyan Lioness',likes:'12.1k',ar:'4/5',bt:'green_flag',bc:"A contract is a contract. The Bench doesn't see a villain here."},
+    {id:'3',cov:'linear-gradient(160deg,#10302a,#1f8f6b)',cr:'🐺',mood:'😤 Warm · Stranger',cat:'Stranger',h:"Told the screaming toddler's parents to please go outside.",av:'🐺',name:'Tender Moroccan Wolf',likes:'3.5k',ar:'1/1',bt:'need_update',bc:'Reasonable, if it was said kindly. Tone is doing a lot of work in this one.'},
+    {id:'4',cov:'linear-gradient(160deg,#3a1020,#c0206a)',cr:'🦋',mood:'🌹 Hot · Romance',cat:'Romance',h:"Cancelled my partner's birthday dinner because they were 3 hrs late last time.",av:'🦋',name:'Wistful Pakistani Butterfly',likes:'6.7k',ar:'4/3',bt:'run',bc:'Punishing lateness with cancellation reads as control, not boundaries.'},
+    {id:'5',cov:'linear-gradient(160deg,#13301c,#2f8a3f)',cr:'🦢',mood:'💜 Warm · Friends',cat:'Friends',h:"Cut off a 10-year friend after she skipped my dad's funeral without a word.",av:'🦢',name:'Forlorn Ethiopian Swan',likes:'9.3k',ar:'4/5',bt:'therapy',bc:"Ten years of history doesn't end over one absence without a conversation first."},
+    {id:'6',cov:'linear-gradient(160deg,#3a1c10,#c0531f)',cr:'🦔',mood:'🔥 Hot · Housing',cat:'Housing',h:'Reported my neighbour to the council for parking on my drive while I was away.',av:'🦔',name:'Furious Filipino Hedgehog',likes:'5.1k',ar:'1/1',bt:'lawyer_up',bc:'Repeated boundary violations are exactly what the council is for.'},
+    {id:'7',cov:'linear-gradient(160deg,#241c3a,#6b46a8)',cr:'🦉',mood:'🌙 Quiet · Friends',cat:'Friends',h:'Unfollowed my best friend on Instagram. She noticed immediately.',av:'🦉',name:'Quiet Indonesian Owl',likes:'1.9k',ar:'3/4',bt:'need_update',bc:'A quiet signal sent loudly. The Bench wants to know what happened before the unfollow.'},
+    {id:'8',cov:'linear-gradient(160deg,#1c2a3a,#2f6a8a)',cr:'🦦',mood:'⚡ On fire · Work',cat:'Work',h:'Reported my manager for taking credit for my project in front of the whole team.',av:'🦦',name:'Sharp Brazilian Otter',likes:'7.4k',ar:'1/1',bt:'lawyer_up',bc:'Credit theft in front of witnesses is exactly what a paper trail is for.'}
+  ];}
+  eyeSVG(w,h){return '<span style="width:'+w+'px;height:'+h+'px;flex:none;display:block"><svg viewBox="0 0 140 96" fill="none" style="display:block;width:100%;height:100%"><rect x="16" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><rect x="84" y="6" width="56" height="84" rx="28" fill="url(#eyeG)"/><ellipse cx="44" cy="62" rx="19" ry="24" fill="url(#pupG)"/><ellipse cx="112" cy="62" rx="19" ry="24" fill="url(#pupG)"/></svg></span>';}
+
+  renderVals(){
+    return {
+      profileWrap: el=>this.$pwrap=el, menuEl: el=>this.$menu=el,
+      toggleMenu: (e)=>{e.stopPropagation(); if(this.$menu) this.$menu.style.display=this.$menu.style.display==='block'?'none':'block';},
+      filters: el=>this.$filters=el, waterfall: el=>this.$wf=el,
+      pageEl: el=>this.$page=el, pageBody: el=>this.$pbody=el
+    };
+  }
+
+  componentDidMount(){
+    document.addEventListener('click',(e)=>{ if(this.$pwrap&&!this.$pwrap.contains(e.target)&&this.$menu) this.$menu.style.display='none'; });
+    this.buildFilters(); this.buildFeed('all');
+    window.addEventListener('hashchange',()=>this.routeHash());
+    this.routeHash();
+  }
+  routeHash(){ const h=location.hash; if(h.indexOf('#story-')===0){ this.openStory(h.replace('#story-','')); } else { this.closeStory(); } }
+
+  buildFilters(){
+    const cats=['all','Romance','Family','Work','Friends','Housing','Stranger'];
+    this.$filters.innerHTML='';
+    cats.forEach(c=>{
+      const b=document.createElement('button');
+      const active=(c===(this.activeCat||'all'));
+      b.style.cssText='font-size:13px;font-weight:600;font-family:Inter,sans-serif;white-space:nowrap;border-radius:999px;padding:8px 15px;cursor:pointer;transition:.15s;border:.5px solid '+(active?'#1b0f16':'rgba(26,12,20,.18)')+';background:'+(active?'#1b0f16':'#fff')+';color:'+(active?'#fcf1f5':'#6e5f67');
+      b.textContent=(c==='all'?'All':c);
+      b.onclick=()=>{ this.activeCat=c; this.buildFilters(); this.buildFeed(c); };
+      this.$filters.appendChild(b);
+    });
+  }
+
+  buildFeed(cat){
+    this.$wf.innerHTML='';
+    const c1=document.createElement('div'); c1.style.cssText='flex:1;display:flex;flex-direction:column;gap:13px;min-width:0';
+    const c2=document.createElement('div'); c2.style.cssText='flex:1;display:flex;flex-direction:column;gap:13px;min-width:0';
+    this.$wf.appendChild(c1); this.$wf.appendChild(c2);
+    const list=this.STORIES.filter(s=>cat==='all'||s.cat===cat);
+    list.forEach((s,i)=>{ (i%2===0?c1:c2).appendChild(this.card(s)); });
+    if(list.length%2===0){ c2.appendChild(this.spillNote()); c1.appendChild(this.scanNote()); }
+    else { c1.appendChild(this.spillNote()); c2.appendChild(this.scanNote()); }
+  }
+
+  scanNote(){
+    const el=document.createElement('div');
+    el.style.cssText='display:flex;flex-direction:column;gap:9px;background:#fff;border:1px dashed rgba(127,119,221,.42);border-radius:16px;padding:16px 15px;cursor:pointer;transition:transform .16s,border-color .18s';
+    el.onmouseenter=()=>{el.style.transform='translateY(-2px)';el.style.borderColor='#7F77DD';};
+    el.onmouseleave=()=>{el.style.transform='';el.style.borderColor='rgba(127,119,221,.42)';};
+    el.innerHTML=this.eyeSVG(30,22)+'<span style="font-family:Newsreader,serif;font-style:italic;font-size:15.5px;line-height:1.42;color:#1b0f16">Not sure you\u2019d come out clean? A sixty-second read, just tap.</span><span style="font-family:Sora,sans-serif;font-weight:700;font-size:12.5px;color:#7F77DD">Scan it →</span>';
+    el.onclick=()=>{ window.location.href='/#scan'; };
+    return el;
+
+  card(s){
+    const V=this.VTAGS[s.bt];
+    const el=document.createElement('div');
+    el.style.cssText='background:#fff;border:.5px solid rgba(26,12,20,.10);border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 12px 30px -24px rgba(80,10,45,.4);transition:transform .16s,border-color .18s';
+    el.onmouseenter=()=>{el.style.transform='translateY(-3px)';el.style.borderColor='#e0508a';};
+    el.onmouseleave=()=>{el.style.transform='';el.style.borderColor='rgba(26,12,20,.10)';};
+    el.innerHTML='<div style="position:relative;display:grid;place-items:center;overflow:hidden;aspect-ratio:'+s.ar+';background:'+s.cov+'"><span style="position:absolute;top:9px;left:9px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.32);backdrop-filter:blur(4px);border-radius:999px;padding:4px 9px">'+s.mood+'</span><span style="font-size:52px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.35))">'+s.cr+'</span><span style="position:absolute;bottom:9px;right:9px;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.34);backdrop-filter:blur(4px);border-radius:999px;padding:4px 10px 4px 7px"><i style="width:7px;height:7px;border-radius:50%;background:'+V.color+';display:block"></i>'+V.label+'</span></div>'+
+      '<div style="padding:12px 13px 13px"><h4 style="font-family:Sora,sans-serif;font-weight:700;font-size:14.5px;line-height:1.28;margin:0 0 10px;color:#1b0f16">'+s.h+'</h4>'+
+      '<div style="display:flex;align-items:flex-start;gap:7px;font-family:Newsreader,serif;font-style:italic;font-size:12.5px;color:#6e5f67;line-height:1.4;margin:0 0 11px">'+this.eyeSVG(18,13)+'<span><b style="color:#cf3b7c;font-style:normal;font-family:Inter;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em">Bench</b> '+s.bc+'</span></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6e5f67;min-width:0"><span style="width:20px;height:20px;border-radius:50%;background:#efe4ea;display:grid;place-items:center;font-size:12px;flex:none">'+s.av+'</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.name+'</span></span><span style="font-size:12px;color:#9c8b93;flex:none">♥ '+s.likes+'</span></div></div>';
+    el.onclick=()=>{ location.hash='#story-'+s.id; };
+    return el;
+  }
+
+  spillNote(){
+    const el=document.createElement('div');
+    el.style.cssText='display:flex;flex-direction:column;gap:9px;background:#fff;border:1px dashed rgba(26,12,20,.18);border-radius:16px;padding:16px 15px;cursor:pointer;transition:transform .16s,border-color .18s';
+    el.onmouseenter=()=>{el.style.transform='translateY(-2px)';el.style.borderColor='#e0508a';};
+    el.onmouseleave=()=>{el.style.transform='';el.style.borderColor='rgba(26,12,20,.18)';};
+    el.innerHTML=this.eyeSVG(30,22)+'<span style="font-family:Newsreader,serif;font-style:italic;font-size:15.5px;line-height:1.42;color:#1b0f16">Seeing yourself in these? The court hears anyone. Say it out loud.</span><span style="font-family:Sora,sans-serif;font-weight:700;font-size:12.5px;color:#cf3b7c">Spill it →</span>';
+    el.onclick=()=>{ window.location.href='/#spill'; };
+    return el;
+  }
+
+  _refs(){ this.$page=this.$page||document.getElementById('storyPage'); this.$pbody=this.$pbody||document.getElementById('storyBody'); }
+  closeStory(){ this._refs(); if(this.$page) this.$page.style.display='none'; }
+  openStory(id){
+    this._refs();
+    const d=this.STORIES.find(s=>s.id===String(id)); if(!d || !this.$pbody){ this.closeStory(); return; }
+    const V=this.VTAGS[d.bt];
+    this.$pbody.innerHTML=
+      '<div id="crumb" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:#6e5f67;cursor:pointer;margin-bottom:16px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2"><path d="M15 18l-6-6 6-6"/></svg> Back to the stream</div>'+
+      '<div style="border-radius:18px;overflow:hidden;position:relative;display:grid;place-items:center;min-height:200px;margin-bottom:18px;background:'+d.cov+'"><span style="position:absolute;top:12px;left:12px;font-size:11.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.32);backdrop-filter:blur(4px);border-radius:999px;padding:5px 11px">'+d.mood+'</span><span style="font-size:74px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))">'+d.cr+'</span></div>'+
+      '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:18px"><span style="display:inline-flex;align-items:center;gap:7px;background:#efe4ea;border:.5px solid rgba(26,12,20,.10);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500">'+d.av+' '+d.name+'</span><span style="font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e5f67;border:.5px solid rgba(26,12,20,.10);border-radius:999px;padding:4px 9px">'+V.label+'</span></div>'+
+      '<h2 style="font-family:Sora,sans-serif;font-weight:800;font-size:clamp(22px,4.6vw,30px);line-height:1.18;margin:0 0 12px">'+d.h+'</h2>'+
+      '<div style="display:flex;align-items:flex-start;gap:8px;font-family:Newsreader,serif;font-style:italic;font-size:15px;color:#6e5f67;line-height:1.45;margin-bottom:14px">'+this.eyeSVG(20,15)+'<span><b style="color:#cf3b7c;font-style:normal;font-family:Inter;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em">The Bench</b> '+d.bc+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:11.5px;color:#9c8b93;margin:11px 0 7px"><span>The Bench\u2019s first read \u2014 no jurors yet</span><span><b style="color:#1b0f16">1</b> vote</span></div>'+
+      '<div style="height:16px;border-radius:8px;overflow:hidden;display:flex;background:#efe4ea"><span style="width:100%;height:100%;display:block;background:'+V.color+'"></span></div>'+
+      '<p style="font-family:Newsreader,serif;font-style:italic;color:#6e5f67;font-size:15px;margin-top:16px">Claim a name to be the first juror on this one \u2014 or push back on the Bench yourself.</p>'+
+      '<a href="/welcome" style="display:inline-flex;align-items:baseline;gap:7px;color:#cf3b7c;text-decoration:none;font-family:Newsreader,serif;font-style:italic;font-size:14px;margin-top:6px"><span>Claim your name</span><span style="font-family:Sora;font-weight:700;font-size:11.5px">→</span></a><br>'+
+      '<span id="objLine" style="font-family:Newsreader,serif;font-style:italic;color:#6e5f67;font-size:14px;cursor:pointer;margin-top:14px;display:inline-flex;align-items:baseline;gap:7px"><span>Disagree with the Bench?</span><span style="font-family:Sora;font-weight:700;font-size:11.5px;color:#7F77DD">Object \u2192</span></span>'+
+      '<div id="objBox" style="margin-top:14px;display:none">'+
+        '<div style="display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#241d30,#15101c);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:13px 15px"><input id="objInput" type="text" placeholder="Tell the Bench why\u2026" style="flex:1;background:none;border:none;outline:none;color:#f4eff3;font-family:Inter,sans-serif;font-size:15.5px" /><span id="objGo" role="button" style="width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;background:#e0508a;cursor:pointer"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#16000c;fill:none;stroke-width:2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>'+
+        '<div id="objReply" style="margin-top:14px;font-family:Newsreader,serif;font-style:italic;font-size:14.5px;color:#a01a55;line-height:1.5"></div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap;border-top:.5px solid rgba(26,12,20,.10);padding-top:16px"><span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:#6e5f67">♥ <b style="color:#1b0f16">'+d.likes+'</b> felt this</span><a href="/#spill" style="font-size:13px;color:#6e5f67;text-decoration:none">It happened to me too \u2014 spill mine <span style="color:#e0508a">\u2192</span></a></div>';
+    this.$page.style.display='block'; this.$page.scrollTop=0;
+    this.$pbody.querySelector('#crumb').onclick=()=>{ location.hash=''; };
+    this.wireObjection(d);
+  }
+
+  wireObjection(d){
+    const line=this.$pbody.querySelector('#objLine'), box=this.$pbody.querySelector('#objBox'),
+      input=this.$pbody.querySelector('#objInput'), go=this.$pbody.querySelector('#objGo'), reply=this.$pbody.querySelector('#objReply');
+    let used=false;
+    line.onclick=()=>{ box.style.display='block'; line.style.display='none'; setTimeout(()=>input.focus(),120); };
+    const submit=async()=>{
+      if(used) return; const v=input.value.trim(); if(!v) return; used=true;
+      input.disabled=true; go.style.pointerEvents='none'; go.style.opacity=.4;
+      reply.innerHTML='<span style="display:inline-flex;gap:4px"><i style="width:6px;height:6px;border-radius:50%;background:#cf3b7c;display:block;animation:blinkdot 1.2s infinite"></i><i style="width:6px;height:6px;border-radius:50%;background:#cf3b7c;display:block;animation:blinkdot 1.2s .2s infinite"></i><i style="width:6px;height:6px;border-radius:50%;background:#cf3b7c;display:block;animation:blinkdot 1.2s .4s infinite"></i></span>';
+      const ruling=await this.reconsider(d, v);
+      reply.textContent=''; this.typeInto(reply, ruling, ()=>{
+        const closed=document.createElement('div'); closed.style.cssText='margin-top:10px;font-size:11.5px;color:#9c8b93;font-style:italic;font-family:Newsreader,serif'; closed.textContent='Objection heard. The matter now goes to the jury.'; box.appendChild(closed);
+      });
+    };
+    input.onkeydown=(e)=>{ if(e.key==='Enter') submit(); };
+    go.onclick=submit;
+  }
+
+  async reconsider(d, objection){
+    const prompt=`You are "the Bench" on Shutap, a sharp fair judge of everyday situations. Your first read on this case was: "${d.bc}" (leaning: ${this.VTAGS[d.bt].label}). The story: "${d.h}". A juror now OBJECTS: "${objection}". Respond in 1-2 sentences, in the Bench's voice — acknowledge the objection and say whether your read moves or holds. Plain text only, no JSON, no quotes.`;
+    try{ const r=await window.claude.complete({messages:[{role:'user',content:prompt}]}); return (r||'').trim().replace(/^["']|["']$/g,''); }
+    catch(e){ return "Fair point — that context wasn't in front of me. It doesn't flip the read, but the jury should weigh your side too."; }
+  }
+
+  typeInto(el,text,cb){ let i=0; const step=()=>{ if(i<=text.length){ el.textContent=text.slice(0,i++); setTimeout(step,14);} else cb&&cb(); }; step(); }
+}
+</script>
+</body>
+</html>
