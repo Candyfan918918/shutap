@@ -128,9 +128,12 @@ function RootComponent() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
+    } = supabase.auth.onAuthStateChange((event) => {
+      // Ignore TOKEN_REFRESHED and INITIAL_SESSION — they fire on every mount
+      // and ~hourly on focus, thrashing router/cache and causing UI flashing.
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
-      queryClient.invalidateQueries();
+      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
     return () => subscription.unsubscribe();
   }, [router, queryClient]);
