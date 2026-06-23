@@ -826,5 +826,37 @@
     render();
   }
 </script>
+<script>
+  // Hydrate header from real Supabase session (no fake personas).
+  (function(){
+    try {
+      var PROJECT_ID = 'iapabdqiqzzothrltwsp';
+      var SUPABASE_URL = 'https://' + PROJECT_ID + '.supabase.co';
+      var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhcGFiZHFpcXp6b3Rocmx0d3NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNjg4MDIsImV4cCI6MjA5NDY0NDgwMn0.bzEJ3UWKTN-jm-ZT3G3CrOz7z571JcLO_pMpZf9kkE8';
+      var raw = localStorage.getItem('sb-' + PROJECT_ID + '-auth-token');
+      var wrap = document.getElementById('profileWrap');
+      var enter = document.getElementById('enterCta');
+      if (!raw) { if (enter) enter.style.display = ''; return; }
+      var sess = JSON.parse(raw);
+      var token = sess && sess.access_token;
+      var userId = sess && sess.user && sess.user.id;
+      if (!token || !userId) { if (enter) enter.style.display = ''; return; }
+      fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId + '&select=handle,display_name,nickname,avatar_url,emoji,creature', {
+        headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + token }
+      }).then(function(r){ return r.ok ? r.json() : []; }).then(function(rows){
+        var p = (rows && rows[0]) || {};
+        var name = p.display_name || p.handle || p.nickname || (sess.user.email || 'You');
+        var av = p.avatar_url || p.emoji || p.creature || '•';
+        var nameEl = document.getElementById('pavName');
+        var avEl = document.getElementById('pavAvatar');
+        var fullEl = document.getElementById('pavNameFull');
+        if (nameEl) nameEl.textContent = name;
+        if (avEl) avEl.textContent = (av && av.length <= 4) ? av : '•';
+        if (fullEl) fullEl.textContent = ((av && av.length <= 4) ? (av + ' ') : '') + name;
+        if (wrap) wrap.hidden = false;
+      }).catch(function(){ if (enter) enter.style.display = ''; });
+    } catch (e) { var enter = document.getElementById('enterCta'); if (enter) enter.style.display = ''; }
+  })();
+</script>
 </body>
 </html>
