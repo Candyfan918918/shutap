@@ -90,13 +90,30 @@ export const castVerdict = createServerFn({ method: "POST" })
           kind: data.verdict,
           weight,
           read_depth_percent: data.read_depth_percent,
-          ip_hash,
           quarantined,
         },
         { onConflict: "post_id,user_id" },
       );
 
     if (error) return { data: null, error: error.message };
+
+    // ip_hash now lives in a server-only side table so it can never leak
+    // through a future post_verdict_votes SELECT policy.
+    if (ip_hash) {
+      await (supabaseAdmin as unknown as {
+        from: (t: string) => {
+          upsert: (
+            row: Record<string, unknown>,
+            opts: { onConflict: string },
+          ) => Promise<unknown>;
+        };
+      })
+        .from("post_verdict_vote_ips")
+        .upsert(
+          { post_id: data.story_id, user_id: ctx.userId, ip_hash },
+          { onConflict: "post_id,user_id" },
+        );
+    }
 
     // Fire-and-forget HOF update; never await.
     void (async () => {
