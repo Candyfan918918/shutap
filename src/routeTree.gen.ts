@@ -25,7 +25,7 @@ import { Route as CourtRouteImport } from './routes/court'
 import { Route as AmIWrongRouteImport } from './routes/am-i-wrong'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
@@ -158,7 +158,7 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -245,27 +245,27 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedComposeRoute = AuthenticatedComposeRouteImport.update({
   id: '/compose',
   path: '/compose',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSpillIndexRoute = AuthenticatedSpillIndexRouteImport.update({
   id: '/spill/',
   path: '/spill/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
@@ -276,7 +276,7 @@ const AuthenticatedSettingsIndexRoute =
 const AuthenticatedScanIndexRoute = AuthenticatedScanIndexRouteImport.update({
   id: '/scan/',
   path: '/scan/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicVerdictTallyRoute = ApiPublicVerdictTallyRouteImport.update({
   id: '/api/public/verdict-tally',
@@ -286,7 +286,7 @@ const ApiPublicVerdictTallyRoute = ApiPublicVerdictTallyRouteImport.update({
 const AuthenticatedSpillStartRoute = AuthenticatedSpillStartRouteImport.update({
   id: '/spill/start',
   path: '/spill/start',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsSafetyRoute =
   AuthenticatedSettingsSafetyRouteImport.update({
@@ -333,13 +333,13 @@ const AuthenticatedSettingsAccountRoute =
 const AuthenticatedScanStartRoute = AuthenticatedScanStartRouteImport.update({
   id: '/scan/start',
   path: '/scan/start',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileScansRoute =
   AuthenticatedProfileScansRouteImport.update({
     id: '/profile/scans',
     path: '/profile/scans',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMeModerationRoute =
   AuthenticatedMeModerationRouteImport.update({
@@ -391,37 +391,37 @@ const AuthenticatedSpillDraftIdScoringRoute =
   AuthenticatedSpillDraftIdScoringRouteImport.update({
     id: '/spill/$draftId/scoring',
     path: '/spill/$draftId/scoring',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSpillDraftIdScoreRoute =
   AuthenticatedSpillDraftIdScoreRouteImport.update({
     id: '/spill/$draftId/score',
     path: '/spill/$draftId/score',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSpillDraftIdDraftRoute =
   AuthenticatedSpillDraftIdDraftRouteImport.update({
     id: '/spill/$draftId/draft',
     path: '/spill/$draftId/draft',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSpillDraftIdChatRoute =
   AuthenticatedSpillDraftIdChatRouteImport.update({
     id: '/spill/$draftId/chat',
     path: '/spill/$draftId/chat',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedScanResultScanIdRoute =
   AuthenticatedScanResultScanIdRouteImport.update({
     id: '/scan/result/$scanId',
     path: '/scan/result/$scanId',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedScanQuestionStepRoute =
   AuthenticatedScanQuestionStepRouteImport.update({
     id: '/scan/question/$step',
     path: '/scan/question/$step',
-    getParentRoute: () => AuthenticatedRoute,
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMePostsPostIdIndexRoute =
   AuthenticatedMePostsPostIdIndexRouteImport.update({
@@ -580,7 +580,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/am-i-wrong': typeof AmIWrongRoute
@@ -859,7 +859,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   AmIWrongRoute: typeof AmIWrongRoute
@@ -1008,7 +1008,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -1128,35 +1128,35 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof AuthenticatedMeRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/friends': {
       id: '/_authenticated/friends'
       path: '/friends'
       fullPath: '/friends'
       preLoaderRoute: typeof AuthenticatedFriendsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/compose': {
       id: '/_authenticated/compose'
       path: '/compose'
       fullPath: '/compose'
       preLoaderRoute: typeof AuthenticatedComposeRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spill/': {
       id: '/_authenticated/spill/'
       path: '/spill'
       fullPath: '/spill/'
       preLoaderRoute: typeof AuthenticatedSpillIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
@@ -1170,7 +1170,7 @@ declare module '@tanstack/react-router' {
       path: '/scan'
       fullPath: '/scan/'
       preLoaderRoute: typeof AuthenticatedScanIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/verdict-tally': {
       id: '/api/public/verdict-tally'
@@ -1184,7 +1184,7 @@ declare module '@tanstack/react-router' {
       path: '/spill/start'
       fullPath: '/spill/start'
       preLoaderRoute: typeof AuthenticatedSpillStartRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/safety': {
       id: '/_authenticated/settings/safety'
@@ -1240,14 +1240,14 @@ declare module '@tanstack/react-router' {
       path: '/scan/start'
       fullPath: '/scan/start'
       preLoaderRoute: typeof AuthenticatedScanStartRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile/scans': {
       id: '/_authenticated/profile/scans'
       path: '/profile/scans'
       fullPath: '/profile/scans'
       preLoaderRoute: typeof AuthenticatedProfileScansRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/me/moderation': {
       id: '/_authenticated/me/moderation'
@@ -1310,42 +1310,42 @@ declare module '@tanstack/react-router' {
       path: '/spill/$draftId/scoring'
       fullPath: '/spill/$draftId/scoring'
       preLoaderRoute: typeof AuthenticatedSpillDraftIdScoringRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spill/$draftId/score': {
       id: '/_authenticated/spill/$draftId/score'
       path: '/spill/$draftId/score'
       fullPath: '/spill/$draftId/score'
       preLoaderRoute: typeof AuthenticatedSpillDraftIdScoreRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spill/$draftId/draft': {
       id: '/_authenticated/spill/$draftId/draft'
       path: '/spill/$draftId/draft'
       fullPath: '/spill/$draftId/draft'
       preLoaderRoute: typeof AuthenticatedSpillDraftIdDraftRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/spill/$draftId/chat': {
       id: '/_authenticated/spill/$draftId/chat'
       path: '/spill/$draftId/chat'
       fullPath: '/spill/$draftId/chat'
       preLoaderRoute: typeof AuthenticatedSpillDraftIdChatRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/scan/result/$scanId': {
       id: '/_authenticated/scan/result/$scanId'
       path: '/scan/result/$scanId'
       fullPath: '/scan/result/$scanId'
       preLoaderRoute: typeof AuthenticatedScanResultScanIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/scan/question/$step': {
       id: '/_authenticated/scan/question/$step'
       path: '/scan/question/$step'
       fullPath: '/scan/question/$step'
       preLoaderRoute: typeof AuthenticatedScanQuestionStepRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/me/posts/$postId/': {
       id: '/_authenticated/me/posts/$postId/'
@@ -1417,7 +1417,7 @@ const AuthenticatedSettingsRouteWithChildren =
     AuthenticatedSettingsRouteChildren,
   )
 
-interface AuthenticatedRouteChildren {
+interface AuthenticatedRouteRouteChildren {
   AuthenticatedComposeRoute: typeof AuthenticatedComposeRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRouteWithChildren
@@ -1435,7 +1435,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSpillDraftIdScoringRoute: typeof AuthenticatedSpillDraftIdScoringRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComposeRoute: AuthenticatedComposeRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRouteWithChildren,
@@ -1453,9 +1453,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSpillDraftIdScoringRoute: AuthenticatedSpillDraftIdScoringRoute,
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -1505,7 +1504,7 @@ const EnterRouteWithChildren = EnterRoute._addFileChildren(EnterRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   AmIWrongRoute: AmIWrongRoute,
